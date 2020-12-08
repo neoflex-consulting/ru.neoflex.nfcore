@@ -224,7 +224,7 @@ interface ExpandComponentProps {
 
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
-    const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props
+    const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props;
 
     return (
         <Select
@@ -237,7 +237,9 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
             }}
             disabled={!edit}
         >
-            {eType.eContents().map((obj: Ecore.EObject) =>
+            {eType.eContents()
+                .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
+                .map((obj: Ecore.EObject) =>
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
         </Select>
     )
@@ -258,7 +260,9 @@ function TagComponent(props: TagComponentProps): JSX.Element {
             }}
             disabled={!edit}
         >
-            {eType.eContents().map((obj: Ecore.EObject) =>
+            {eType.eContents()
+                .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
+                .map((obj: Ecore.EObject) =>
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
         </Select>
     )
@@ -367,7 +371,8 @@ export default class ComponentMapper extends React.Component<Props, any> {
             return <SelectComponent
                 idx={idx}
                 ukey={ukey}
-                value={targetValue || eType.eContents()[0].get('name')}
+                value={targetValue || (eType.eContents()[0] && eType.eContents()
+                    .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")[0].get('name'))}
                 eType={eType}
                 id={props.id}
                 onChange={(newValue: any) => {
@@ -380,7 +385,8 @@ export default class ComponentMapper extends React.Component<Props, any> {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}
-                value={targetValue || (eType.eContents()[0] && eType.eContents()[0].get('name'))}
+                value={targetValue || (eType.eContents()[0] && eType.eContents()
+                    .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")[0].get('name'))}
                 eType={eType}
                 id={props.id}
                 onChange={(newValue: any) => {

@@ -342,27 +342,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
                                     map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Среднее:")
+                                    namesOfOperationsInServerAggregations.add("Average:")
                                 }
                                 if (operator == 'COUNT') {
                                     map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Счетчик:")
+                                    namesOfOperationsInServerAggregations.add("Count:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
                                     map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
+                                    namesOfOperationsInServerAggregations.add("CountDistinct:")
                                 }
                                 if (operator == 'MAX') {
                                     map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Максимум:")
+                                    namesOfOperationsInServerAggregations.add("Maximum:")
                                 }
                                 if (operator == 'MIN') {
                                     map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Минимум:")
+                                    namesOfOperationsInServerAggregations.add("Minimum:")
                                 }
                                 if (operator == 'SUM') {
                                     map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Сумма:")
+                                    namesOfOperationsInServerAggregations.add("Sum:")
                                 }
                                 if (!serverAggregations.contains(map)) {
                                     serverAggregations.add(map)
@@ -695,27 +695,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
                                     map["select"] = "AVG(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Среднее:")
+                                    namesOfOperationsInServerAggregations.add("Average:")
                                 }
                                 if (operator == 'COUNT') {
                                     map["select"] = "count(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Счетчик:")
+                                    namesOfOperationsInServerAggregations.add("Count:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
                                     map["select"] = "distinct (${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
+                                    namesOfOperationsInServerAggregations.add("CountDistinct:")
                                 }
                                 if (operator == 'MAX') {
                                     map["select"] = "MAX(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Максимум:")
+                                    namesOfOperationsInServerAggregations.add("Maximum:")
                                 }
                                 if (operator == 'MIN') {
                                     map["select"] = "MIN(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Минимум:")
+                                    namesOfOperationsInServerAggregations.add("Minimum:")
                                 }
                                 if (operator == 'SUM') {
                                     map["select"] = "SUM(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Сумма:")
+                                    namesOfOperationsInServerAggregations.add("Sum:")
                                 }
                                 if (!serverAggregations.contains(map)) {
                                     serverAggregations.add(map)

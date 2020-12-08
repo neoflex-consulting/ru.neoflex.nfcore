@@ -828,7 +828,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.aggregatedRows.length > 0
             && params.value
             && params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
-            splitted = params.value.split(":");
+            splitted = params.value.split(":", 2);
             params.value = splitted[1];
         }
 
@@ -847,28 +847,26 @@ class DatasetView extends React.Component<any, State> {
                     "warning")
             }
         }
-        if (params.value)
-            formattedParam = params.colDef.type === appTypes.Date && mask
-                ? moment(params.value, defaultDateFormat).format(mask)
-                : params.colDef.type === appTypes.Timestamp && mask
-                    ? moment(params.value, defaultTimestampFormat).format(mask)
-                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
-                        ? format(mask, params.value)
-                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)
-                            ? format(defaultDecimalFormat, params.value)
-                            : [appTypes.Integer].includes(params.colDef.type as appTypes)
-                                ? format(defaultIntegerFormat, params.value)
-                                : [appTypes.Date].includes(params.colDef.type as appTypes)
-                                    ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
-                                        ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
-                                        : params.value;
-        else
+        if (params.value && (!splitted || (splitted && !["Count","CountDistinct"].includes(splitted[0])))) {
+            formattedParam =
+                params.colDef.type === appTypes.Date && mask ? moment(params.value, defaultDateFormat).format(mask)
+                    : params.colDef.type === appTypes.Timestamp && mask ? moment(params.value, defaultTimestampFormat).format(mask)
+                    : [appTypes.Integer, appTypes.Decimal].includes(params.colDef.type as appTypes) && mask ? format(mask, params.value)
+                    : [appTypes.Decimal].includes(params.colDef.type as appTypes) ? format(defaultDecimalFormat, params.value)
+                    : [appTypes.Integer].includes(params.colDef.type as appTypes) ? format(defaultIntegerFormat, params.value)
+                    : [appTypes.Date].includes(params.colDef.type as appTypes) ? moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes) ? moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                    : params.value;
+        } else if (params.value && splitted && ["Count","CountDistinct"].includes(splitted[0])) {
+            formattedParam = format(defaultIntegerFormat, params.value);
+        } else {
             formattedParam = params.value;
+        }
         if (this.state.aggregatedRows.length > 0
             && params.value
             && params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
             splitted[1] = formattedParam;
+            splitted[0] = this.props.t(splitted[0])
             formattedParam = splitted.join(":")
         }
         return formattedParam
@@ -1168,7 +1166,7 @@ class DatasetView extends React.Component<any, State> {
 
     //Меняем фильтры, выполняем запрос и пишем в userProfilePromise
 
-    onChangeParams = (newServerParam: any[], paramName: paramType): void => {
+    onChangeParams = (newServerParam: IServerQueryParam[]|undefined, paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
         const serverAggregates = filterParam(this.state.serverAggregates);
@@ -1426,6 +1424,7 @@ class DatasetView extends React.Component<any, State> {
                     serverGroupBy={this.state.serverGroupBy}
                     groupByColumn={this.state.groupByColumn}
                     serverCalculatedExpression={this.state.serverCalculatedExpression}
+                    highlights={this.state.highlights}
                     barMode={barMode}
                     currentDatasetComponent={this.state.currentDatasetComponent}
                     allDatasetComponents={this.state.allDatasetComponents}
@@ -1657,6 +1656,10 @@ class DatasetView extends React.Component<any, State> {
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.groupByColumn}
                                     handleDrawerVisability={this.handleDrawerVisibility}
+                                    onReset={()=> {
+                                        this.setState({serverGroupBy:[], groupByColumn:[]});
+                                        this.onChangeParams(undefined, paramType.group);
+                                    }}
                                 />
                                 :
                                 <ServerGroupByColumn/>

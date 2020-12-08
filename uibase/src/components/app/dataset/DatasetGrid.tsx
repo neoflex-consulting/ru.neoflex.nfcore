@@ -896,13 +896,15 @@ class DatasetGrid extends React.Component<Props, any> {
                  style={{
                      boxSizing: 'border-box',
                      // height: '100%',
-                     backgroundColor: backgroundColor}}
+                     backgroundColor: backgroundColor,
+                     height: this.props.height ? this.props.height : 460 + (!this.props.hidePagination ? 40 : 0) /*paginator*/ ,
+                 }}
                  className={'ag-theme-material'}
             >
                 <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
                     className={this.props.className}
                     style={{
-                        height: this.props.height ? this.props.height : 460 ,
+                        height: this.props.height ? this.props.height : 460,
                         width: this.props.width ? this.props.width : "99,5%",
                         minWidth: "375px"}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
@@ -947,7 +949,6 @@ class DatasetGrid extends React.Component<Props, any> {
                             totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>!(r.isVisible__ === false)).length}
                             onPageChange={(page)=>this.grid.current.api.paginationGoToPage(page - 1)}
                             onPageSizeChange = {(size)=>{this.grid.current.api.paginationSetPageSize(size)}}
-                            grid = {this.grid}
                         />
                     </div>}
                 </div>

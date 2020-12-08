@@ -339,8 +339,8 @@
         "preview": "Предпросмотр",
         "previous page": "Предыдущая страница",
         "next page": "Следующая страница",
-        "previous 5 pages": "Предыдущии 5 страниц",
-        "next 5 pages": "Следующии 5 страниц",
+        "previous 5 pages": "Предыдущие 5 страниц",
+        "next 5 pages": "Следующие 5 страниц",
         "branch": "Ветка",
         "is current": "Текущая",
         "is default": "По умолчанию",
@@ -458,7 +458,9 @@
         "isResourcePermitted": "Проверить доступ к Resource ",
         "recreateWeekend": "Пересоздать выходные дни",
         "copyHolidays": "Копировать выходные",
-        "recreateWorkingDays": "Пересоздать рабочие дни"
+        "recreateWorkingDays": "Пересоздать рабочие дни",
+        "first page": "Первая страница",
+        "last page": "Последняя страница"
 }
 
 
