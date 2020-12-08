@@ -61,12 +61,12 @@ export enum AntdFactoryClasses {
     RadioGroup='ru.neoflex.nfcore.application#//RadioGroup'
 }
 
-function getAgGridValue(this: any, returnValueType: string, defaultValue: string) {
-    if (returnValueType === 'object') {
-        return this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get(defaultValue)}
+function getAgGridValue(this: any, returnValueType: string, defaultValue: string = "default") : string|{[key:string]:string|number|null} {
+    if ((returnValueType||"string") === 'string') {
+        return this.props.getValue ? this.props.getValue() : this.props.value ? this.props.value : this.viewObject.get(defaultValue) as string
     }
-    if (returnValueType === 'string') {
-        return this.props.getValue ? this.props.getValue() : this.props.value ? this.props.value : this.viewObject.get(defaultValue)
+    if (returnValueType === 'object') {
+        return this.props.data ? this.props.data : {[this.viewObject.get('name')] : this.viewObject.get(defaultValue)} as object
     }
     return ""
 }
@@ -119,7 +119,7 @@ function unmountComponent(this: any, isExportable = false, isCleanContext = fals
     }
 }
 
-function handleContextChange(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String", callback?: ()=>void) {
+function handleContextChange(this: any, currentValue: string|object, contextValue: string|object|undefined = undefined, dataType:string = "String", callback?: ()=>void) {
     let contextItemValues = this.props.context.contextItemValues;
     let globalValues = this.props.context.globalValues;
     const parameterObj = {
@@ -135,7 +135,7 @@ function handleContextChange(this: any, currentValue: string, contextValue: stri
         callback);
 }
 
-function handleChange(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
+function handleChange(this: any, currentValue: string|{[key:string]:string|number|null}|{[key:string]:string|number|null}[], contextValue: string|object|undefined = undefined, dataType:string = "String") {
     handleContextChange.bind(this)(currentValue, contextValue, dataType, ()=>this.props.context.notifyAllEventHandlers({
         type:eventType.change,
         itemId:this.viewObject.get('name')+this.viewObject._id,
@@ -144,7 +144,7 @@ function handleChange(this: any, currentValue: string, contextValue: string|unde
     this.setState({currentValue:currentValue});
 }
 
-function handleClick(this: any, currentValue: string, contextValue: string|undefined = undefined, dataType:string = "String") {
+function handleClick(this: any, currentValue: string|{[key:string]:string|number|null}|{[key:string]:string|number|null}[], contextValue: string|undefined = undefined, dataType:string = "String") {
     handleContextChange.bind(this)(currentValue, contextValue, dataType, ()=>    this.props.context.notifyAllEventHandlers({
         type: eventType.click,
         itemId:this.viewObject.get('name')+this.viewObject._id,
@@ -467,14 +467,16 @@ export class Select_ extends ViewContainer {
         super(props);
         let value;
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            this.urlCurrentValue = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+            const temp = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+            this.urlCurrentValue =  typeof temp === "string" ? temp : temp && temp[this.viewObject.get('value')]+"";
         }
 
         let agValue = "";
         if (this.props.isAgEdit) {
             agValue = this.props.data[this.props.colData]
         } else {
-            agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', '');
+            const temp = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || "string", '');
+            agValue = typeof temp === "string" ? temp : temp && temp[this.viewObject.get('value')]+"";
         }
         value = this.urlCurrentValue
             ? this.urlCurrentValue
@@ -754,7 +756,7 @@ export class DatePicker_ extends ViewContainer {
 
     componentDidMount(): void {
         mountComponent.bind(this)(true, [{actionType: actionType.setValue, callback: (value)=>{
-                this.onChange.bind(this)(value ? value : "", true)
+                this.onChange.bind(this)(typeof value === "string" ? value : "", true)
             }}] as IAction[]);
         const value = this.state.defaultDate.format(this.state.mask ? this.state.mask : this.state.format);
         const formattedCurrentValue = moment(value, this.state.mask).format(this.state.format);
@@ -896,7 +898,7 @@ class GroovyCommand_ extends Component {
         const command = this.viewObject.get('command');
         const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems')
             , this.props.context.contextItemValues
-            , this.props.pathFull[this.props.pathFull.length - 1].params))
+            , this.props.pathFull[this.props.pathFull.length - 1].params));
         if (commandType === "Resource") {
 
             API.instance().fetchJson('/script/resource?path='+this.viewObject.get('gitResourcePath'), {
@@ -1105,12 +1107,13 @@ export class Input_ extends ViewContainer {
 export class Checkbox_ extends ViewContainer {
     constructor(props: any) {
         super(props);
-        let value;
+        let value, agValue;
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
         }
+        const temp = getAgGridValue.bind(this)(this.viewObject.get('returnValueType'), 'label');
         value = value ? value : this.viewObject.get('value') || "default";
-        const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
+        agValue = typeof temp === "string" ? temp : JSON.stringify(temp);
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
@@ -1128,19 +1131,22 @@ export class Checkbox_ extends ViewContainer {
 
     componentDidMount(): void {
         mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value)=>{
-                this.onChange.bind(this)(value ? value : "", true)
+                this.onChange.bind(this)(typeof value === "string" ? value : "", true)
             }}] as IAction[]);
-        const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-        if (this.viewObject.get('isChecked')) {
-            if (this.props.isAgComponent) {
-                const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');
-                handleContextChange.bind(this)(this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, value));
-            } else {
-                handleContextChange.bind(this)(this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, this.state.defaultValue));
-            }
-            this.setState({checked: true});
+        if (this.props.isAgComponent) {
+            const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
+            handleContextChange.bind(this)(this.viewObject.get('isChecked')
+                ? this.changeSelection(currentContextValue ? currentContextValue.parameterValue : null, getAgGridValue.bind(this)(this.viewObject.get('returnValueType')))
+                : this.viewObject.get('returnValueType') === "object"
+                    ? []
+                    : "")
         } else {
-            handleContextChange.bind(this)(this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, ''));
+            handleContextChange.bind(this)(this.viewObject.get('isChecked')
+                ? this.changeSelection(null, this.state.defaultValue)
+                : "")
+        }
+        if (this.viewObject.get('isChecked')) {
+            this.setState({checked: true});
         }
     }
 
@@ -1152,14 +1158,22 @@ export class Checkbox_ extends ViewContainer {
         return this.state.checked ? this.state.currentValue : undefined;
     }
 
-    changeSelection = (currentValue: string, newValue: string) => {
-        let textArr = currentValue ? currentValue.split(contextStringSeparator) : [];
-        if (!textArr.includes(newValue)) {
-            textArr.push(newValue)
-        } else {
-            textArr = textArr.filter(a => a !== newValue)
+    changeSelection = (currentValue: string|{[key:string]:string|number|null}[]|null, newValue: string|{[key:string]:string|number|null}) : string|{[key:string]:string|number|null}[] => {
+        if (typeof currentValue === "string" && typeof newValue === "string") {
+            let textArr = currentValue ? currentValue.split(contextStringSeparator) : [];
+            if (!textArr.includes(newValue)) {
+                textArr.push(newValue)
+            } else {
+                textArr = textArr.filter(a => a !== newValue)
+            }
+            return textArr.join(contextStringSeparator)
+        } else if (typeof newValue !== "string" && Array.isArray(currentValue)) {
+            const found = currentValue.find(cv => JSON.stringify(cv) === JSON.stringify(newValue));
+            return !found
+                ? currentValue.concat(newValue)
+                : currentValue.filter(cv => cv !== found)
         }
-        return textArr.join(contextStringSeparator)
+        return typeof newValue === "string" ? newValue : [newValue]
     };
 
     onChecked = (isChecked: boolean) => {
@@ -1172,12 +1186,12 @@ export class Checkbox_ extends ViewContainer {
         this.setState({checked: isChecked});
     };
 
-    onChange = (currentValue: string, isSetValueCall = false) => {
+    onChange = (currentValue: string|{[key:string]:string|number|null}, isSetValueCall = false) => {
         const currentContextValue = this.props.context.contextItemValues.get(this.viewObject.get('name')+this.viewObject._id);
-        const newContextValue = this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, currentValue)
+        const newContextValue = this.changeSelection(currentContextValue ? currentContextValue.parameterValue : undefined, currentValue);
         handleChange.bind(this)(newContextValue);
         if (isSetValueCall) {
-            this.setState({checked: newContextValue.length >= currentValue.length});
+            this.setState({checked: newContextValue.length >= (typeof currentValue === "string" ? currentValue.length : 1)});
         } else {
             //Emulate click
             this.props.context.notifyAllEventHandlers({
@@ -1519,7 +1533,7 @@ export class RadioGroup_ extends ViewContainer {
 
     componentDidMount(): void {
         mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value) => {
-                this.onChange.bind(this)(value ? value : "", true)
+                this.onChange.bind(this)(typeof value === "string" ? value : "", true)
             }}] as IAction[]);
         handleContextChange.bind(this)(this.state.currentValue);
     }

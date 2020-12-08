@@ -14,7 +14,8 @@ function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) 
     let replacedCommand = valueString;
     params.forEach(param => {
         if (replacedCommand?.includes(param.parameterName)) {
-            replacedCommand = replacedCommand?.replace(new RegExp(":"+param.parameterName, 'g'), (param.parameterValue===null)?"":param.parameterValue);
+            const value = typeof param.parameterValue === "object" ? JSON.stringify(param.parameterValue ? param.parameterValue : "") : param.parameterValue
+            replacedCommand = replacedCommand?.replace(new RegExp(":"+param.parameterName, 'g'), (param.parameterValue===null)?"":value);
         }
     });
     return replacedCommand
