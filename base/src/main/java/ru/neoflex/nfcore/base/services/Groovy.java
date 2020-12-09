@@ -1,7 +1,6 @@
 package ru.neoflex.nfcore.base.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.jmx.remote.util.ClassLogger;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
@@ -9,7 +8,6 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import org.eclipse.emf.ecore.EClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.neoflex.meta.emfgit.Transaction;
 
