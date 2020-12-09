@@ -2,7 +2,7 @@ import React, {createRef} from 'react';
 import {AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import {ConfigProvider} from 'antd';
-import {withTranslation} from 'react-i18next';
+import {WithTranslation, withTranslation} from 'react-i18next';
 import Ecore from 'ecore';
 import {docxElementExportType, docxExportObject} from "../../../utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
@@ -40,7 +40,7 @@ import {TFunction} from "i18next";
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
 
-interface Props {
+interface Props extends WithTranslation {
     hidden?: boolean,
     highlights?: IServerQueryParam[];
     currentDatasetComponent?: Ecore.Resource,
@@ -59,10 +59,8 @@ interface Props {
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
     className?: string;
     hidePagination?: boolean;
-    i18n: any;
-    t: TFunction;
-    viewObject: Ecore.EObject;
-    context: any;
+    key?: string;
+    context?: any;
 }
 
 class AntdFactoryWrapper extends React.Component<any, {}> {
@@ -98,7 +96,7 @@ class DatasetGrid extends React.Component<Props, any> {
             columnDefs: this.colDefsToObject(this.props.columnDefs),
             rowData: this.props.rowData,
             highlights: [],
-            locale: switchAntdLocale(this.props.i18n, this.props.t),
+            locale: switchAntdLocale(this.props.i18n as unknown as string, this.props.t),
             gridOptions: {
                 frameworkComponents: {
                     DateEditor: DateEditor,
@@ -303,7 +301,6 @@ class DatasetGrid extends React.Component<Props, any> {
             hidden: this.props.hidden!,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
-                tableName: this.props.viewObject.get('name') || "",
                 columns: header,
                 data: data
             },
@@ -342,9 +339,9 @@ class DatasetGrid extends React.Component<Props, any> {
         if (this.props.context) {
             this.props.context.removeDocxHandler();
             this.props.context.removeExcelHandler();
+            //чистка конекста за checkbox'и
+            this.cleanCheckboxContext()
         }
-        //чистка конекста за checkbox'и
-        this.cleanCheckboxContext()
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -352,8 +349,10 @@ class DatasetGrid extends React.Component<Props, any> {
             this.changeHighlight();
         }
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
-            //При обновлении сбрасываем значения в context для checkbox'в
-            this.cleanCheckboxContext()
+            if (this.props.context) {
+                //При обновлении сбрасываем значения в context для checkbox'в
+                this.cleanCheckboxContext()
+            }
             this.setState({rowData: this.props.rowData})
         }
         if (!_.isEqual(prevProps.columnDefs, this.props.columnDefs)) {
@@ -834,8 +833,7 @@ class DatasetGrid extends React.Component<Props, any> {
     };
 
     handleResize = (event: DisplayedColumnsChangedEvent|ColumnResizedEvent|undefined) => {
-
-        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""} .ag-header-cell-text`);
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.key ? this.props.key : ""} .ag-header-cell-text`);
         let minHeight = minHeaderHeight;
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
@@ -914,7 +912,7 @@ class DatasetGrid extends React.Component<Props, any> {
                  }}
                  className={'ag-theme-material'}
             >
-                <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
+                <div id={`datasetGrid${this.props.key ? this.props.key : ""}`}
                     className={this.props.className}
                     style={{
                         height: this.props.height ? this.props.height : 460,

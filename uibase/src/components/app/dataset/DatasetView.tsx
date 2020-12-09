@@ -1533,7 +1533,8 @@ class DatasetView extends React.Component<any, State> {
                     diagramParams={this.state.currentDiagram}
                 />
                 <DatasetGrid
-                    hide={!!this.state.currentDiagram}
+                    key={this.props.viewObject.eURI().split('#')[0]}
+                    hidden={!!this.state.currentDiagram}
                     ref={this.gridRef}
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
@@ -1558,7 +1559,7 @@ class DatasetView extends React.Component<any, State> {
                     valueFormatter={this.valueFormatter}
                     excelCellMask={this.getExcelMask}
                     className={this.props.className}
-                    {...this.props}
+                    context={this.props.context}
                 />
                 <div id="filterButton">
                 <NeoDrawer
