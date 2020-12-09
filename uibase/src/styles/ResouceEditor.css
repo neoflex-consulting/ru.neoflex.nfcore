@@ -5,3 +5,13 @@
 .modal-add-resource > .ant-modal-content {
     width: 100%;
 }
+
+.modal-add-inner-ref > .ant-modal-content > .ant-modal-body {
+    display: inline-flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.modal-add-inner-ref > .ant-modal-content > .ant-modal-body > button {
+    margin: 0 0 0 16px;
+}

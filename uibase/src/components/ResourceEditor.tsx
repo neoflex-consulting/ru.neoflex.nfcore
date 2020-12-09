@@ -1209,12 +1209,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 </div>
                 {this.state.modalRefVisible && <Modal
                     key="add_ref_modal"
+                    className={"modal-add-inner-ref"}
                     width={'700px'}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={this.state.selectedRefUries.length > 0 ?
-                        <Button type="primary" onClick={this.handleAddNewRef}>OK</Button>: null}
+                    footer={null}
                 >
                     <Select
                         mode="multiple"
@@ -1274,6 +1274,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         </Select.Option>
                                 })}
                     </Select>
+                    <Button type="primary" onClick={this.handleAddNewRef} disabled={this.state.selectedRefUries.length === 0}>OK</Button>
                 </Modal>}
                 {this.state.modalResourceVisible && <Modal
                     className={"modal-add-resource"}
