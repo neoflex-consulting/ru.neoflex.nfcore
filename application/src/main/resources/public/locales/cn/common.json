@@ -289,6 +289,7 @@
         "hiddencolumns": "隱藏欄",
         "delete row": "刪除行",
         "add row": "添加行",
+        "add calculable column": "加減列",
         "run query": "應用",
         "print": "列印",
         "export to docx": "卸貨中docx",
