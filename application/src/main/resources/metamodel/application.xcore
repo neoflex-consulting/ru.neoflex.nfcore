@@ -75,6 +75,8 @@ class AppModule extends Tagged {
     contains EventHandler[] eventHandlers
         @NFCore(documentation="Исполняемый код groovy")
     contains GroovyCommand[] groovyCommands
+        @NFCore(documentation="Ссылка на style sheet")
+    refers StyleSheet[] styleSheets
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
@@ -432,6 +434,14 @@ class RadioGroup extends ViewElement, ValueItem, GridComponent  {
     boolean isVerticalGroup
         @NFCore(documentation="Значения для переключителей")
     String[] radioBoxes
+}
+
+@NFCore(documentation="Стили подключаемые на страницу")
+class StyleSheet {
+        @NFCore(documentation="Название стиля")
+    QName name
+        @NFCore(documentation="Наполнение стиля в формате .css файла", expandable="true")
+    String sheetContent
 }
 
 @NFCore(documentation="Выравнивание поля")

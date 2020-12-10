@@ -91,4 +91,8 @@ export interface IMainContext {
     notifyAllEventHandlers?: (event: IEvent)=>void;
     getFullPath?: ()=>ConfigUrlElement[];
     isDeveloper?: ()=>boolean;
+    variableList?: Ecore.EList;
+    eventHandlerList?: Ecore.EList;
+    groovyCommandList?: Ecore.EList;
+    styleSheetsList?: Ecore.EList;
 }

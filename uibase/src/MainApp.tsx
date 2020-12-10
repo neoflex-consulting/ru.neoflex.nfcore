@@ -13,6 +13,7 @@ import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/a
 import {NeoButton, NeoColor, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
+import _ from "lodash";
 
 const FooterHeight = '39px';
 const backgroundColor = "#fdfdfd";
@@ -84,6 +85,25 @@ function getOpenedPath(arr: string[]) : string[] {
         })
 }
 
+function mountStyleSheets(styleSheetsList?: Ecore.EList) {
+    styleSheetsList?.each(o=>{
+        let sheet = document.getElementById(o.get('name'));
+        if (!sheet) {
+            sheet = document.createElement('style');
+            sheet.innerHTML = o.get('sheetContent');
+            sheet.id = o.get('name');
+            document.body.appendChild(sheet);
+        }
+    });
+}
+
+function unmountStyleSheets(styleSheetsList?: Ecore.EList) {
+    styleSheetsList?.each(o=>{
+        const sheet = document.getElementById(o.get('name'));
+        sheet && document.body.removeChild(sheet);
+    });
+}
+
 export class MainApp extends React.Component<any, State> {
     private refSplitterRef: React.RefObject<any> = React.createRef();
     private toolsSplitterRef: React.RefObject<any> = React.createRef();
@@ -138,6 +158,7 @@ export class MainApp extends React.Component<any, State> {
                                                 variableList: objectApp.get('variables'),
                                                 eventHandlerList: objectApp.get('eventHandlers'),
                                                 groovyCommandList: objectApp.get('groovyCommands'),
+                                                styleSheetsList: objectApp.get('styleSheets'),
                                             })
                                         );
                                         let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
@@ -151,6 +172,7 @@ export class MainApp extends React.Component<any, State> {
                                                 variableList: objectApp.get('variables'),
                                                 eventHandlerList: objectApp.get('eventHandlers'),
                                                 groovyCommandList: objectApp.get('groovyCommands'),
+                                                styleSheetsList: objectApp.get('styleSheets'),
                                                 applicationReferenceTree: undefined}),
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
@@ -163,6 +185,7 @@ export class MainApp extends React.Component<any, State> {
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
                                             groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                             applicationReferenceTree: objectApp.get('referenceTree')
                                         })
                                     );
@@ -180,6 +203,7 @@ export class MainApp extends React.Component<any, State> {
                                             viewObject: objectApp.get('view'),
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                             groovyCommandList: objectApp.get('groovyCommands'),
                                         })
                                     );
@@ -194,6 +218,7 @@ export class MainApp extends React.Component<any, State> {
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
                                             groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                             applicationReferenceTree: undefined
                                         }),
                                         ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
@@ -223,7 +248,8 @@ export class MainApp extends React.Component<any, State> {
                                             applicationReferenceTree: objectApp.get('referenceTree'),
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
-                                            groovyCommandList: objectApp.get('groovyCommands')
+                                            groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                         })
                                     );
                                 }
@@ -234,7 +260,8 @@ export class MainApp extends React.Component<any, State> {
                                             applicationReferenceTree: objectApp.get('referenceTree'),
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
-                                            groovyCommandList: objectApp.get('groovyCommands')
+                                            groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                         })
                                     );
                                 }
@@ -276,6 +303,10 @@ export class MainApp extends React.Component<any, State> {
             //В момент инициализации даем понять адаптивным элементам что нужно пересчитать размеры
             window.dispatchEvent(new Event('appAdaptiveResize'));
         }
+        if (!_.isEqual(this.props.context?.styleSheetsList?.array(), prevProps.context?.styleSheetsList?.array())) {
+            //in case we change url outside appModule reference tree
+            unmountStyleSheets(prevProps.context.styleSheetsList)
+        }
     }
 
 
@@ -299,6 +330,8 @@ export class MainApp extends React.Component<any, State> {
     }
 
     componentWillUnmount() {
+        //in case we change url outside appModule reference tree
+        unmountStyleSheets(this.props.context.styleSheetsList);
         window.removeEventListener("appAdaptiveResize", this.handleResize);
         window.removeEventListener("resize", this.handleResize);
     }
@@ -426,10 +459,8 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderContent = () => {
-        const {context} = this.props;
-        const {viewObject} = context;
-        if (!viewObject) return null;
-        return this.viewFactory.createView(viewObject, this.props)
+        mountStyleSheets(this.props.context.styleSheetsList);
+        return this.props.context.viewObject && this.viewFactory.createView(this.props.context.viewObject, this.props)
     };
 
     renderEList = (list: Ecore.EList) => {
@@ -539,6 +570,7 @@ export class MainApp extends React.Component<any, State> {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule;
         let tree = keys;
         let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
+        unmountStyleSheets(this.props.context.styleSheetsList);
         this.props.context.changeURL!(appModuleName, useParentReferenceTree, tree)
     }
 
