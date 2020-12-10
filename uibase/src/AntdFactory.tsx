@@ -1519,7 +1519,7 @@ class Drawer_ extends ViewContainer {
     }
 }
 
-export class NeoIcon_ extends ViewContainer {
+class NeoIcon_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {
