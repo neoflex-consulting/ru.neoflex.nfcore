@@ -35,9 +35,6 @@ import Expand from "./gridComponents/Expand";
 import {ViewRegistry} from "../../../ViewRegistry";
 import {getStringValuesFromEnum} from "../../../utils/enumUtils";
 import {AntdFactoryClasses} from "../../../AntdFactory";
-import {TFunction} from "i18next";
-import {NeoTypography} from "neo-design/lib";
-import CustomHeader from "./gridComponents/CustomHeader";
 
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
