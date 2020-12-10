@@ -1111,7 +1111,9 @@ export class Checkbox_ extends ViewContainer {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
         };
-        const URLvalue = this.props.pathFull[this.props.pathFull.length - 1].params !== undefined && getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'))
+        const URLvalue = this.props.pathFull
+            && this.props.pathFull[this.props.pathFull.length - 1].params !== undefined
+            && getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'))
         //в гриде
         if (this.props.isAgComponent && !this.props.isAgEdit) {
             const returnValueType = this.viewObject.get('returnValueType') || "string";
@@ -1517,7 +1519,7 @@ class Drawer_ extends ViewContainer {
     }
 }
 
-export class NeoIcon_ extends ViewContainer {
+class NeoIcon_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         this.state = {

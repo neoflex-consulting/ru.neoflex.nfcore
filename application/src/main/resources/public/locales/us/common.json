@@ -309,6 +309,7 @@
         "hiddencolumns": "Hide columns",
         "delete row": "Delete row",
         "add row": "Add row",
+        "add calculable column": "Добавить вычилсяемый столбец",
         "run query": "Run query",
         "print": "Print",
         "export to docx": "Export in docx",

@@ -75,6 +75,8 @@ class AppModule extends Tagged {
     contains EventHandler[] eventHandlers
         @NFCore(documentation="Исполняемый код groovy")
     contains GroovyCommand[] groovyCommands
+        @NFCore(documentation="Ссылка на style sheet")
+    refers StyleSheet[] styleSheets
 }
 
 @NFCore(documentation="Глобальное приложение - отображается в верхнем меню")
@@ -203,7 +205,7 @@ class DatasetView extends ViewElement, CommandElement {
 class GroovyCommand extends DynamicActionElement, CommandElement {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
-        @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}")
+        @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}",expandable="true")
     Text command
         @NFCore(documentation="Путь к исполняемому коду. Например: 'scripts/utils/checkBranch.groovy'", renderConditions="{'commandType':'Resource'}")
     String gitResourcePath
@@ -275,13 +277,13 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     SelectMode mode = "Default"
         @NFCore(documentation="Значения для списка беруться из 'dataset'")
     boolean isDynamic
-         @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'")
+         @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'", renderConditions="{'isDynamic':false}")
     String staticValues
-        @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика")
+        @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика", renderConditions="{'isDynamic':true}")
     refers Dataset dataset
-        @NFCore(documentation="Ссылка на столбец из 'dataset' значения которых будут отображаться визуально в select")
+        @NFCore(documentation="Ссылка на столбец из 'dataset' значения которых будут отображаться визуально в select", renderConditions="{'isDynamic':true}")
     refers DatasetColumn datasetKeyColumn
-        @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для ключей datasetKeyColumn, которые будут передаваться между компонентами")
+        @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для ключей datasetKeyColumn, которые будут передаваться между компонентами", renderConditions="{'isDynamic':true}")
     refers DatasetColumn datasetValueColumn
 }
 
@@ -432,6 +434,14 @@ class RadioGroup extends ViewElement, ValueItem, GridComponent  {
     boolean isVerticalGroup
         @NFCore(documentation="Значения для переключителей")
     String[] radioBoxes
+}
+
+@NFCore(documentation="Стили подключаемые на страницу")
+class StyleSheet {
+        @NFCore(documentation="Название стиля")
+    QName name
+        @NFCore(documentation="Наполнение стиля в формате .css файла", expandable="true")
+    String sheetContent
 }
 
 @NFCore(documentation="Выравнивание поля")

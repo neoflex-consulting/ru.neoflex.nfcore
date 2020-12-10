@@ -470,7 +470,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
-        function shouldRenderProperty(targetObject: { [key: string]: any; }, featureList: Ecore.EObject[], annotationJSON: string) {
+        function shouldRenderProperty(targetObject: { [key: string]: any; }, featureList: Ecore.EObject[], feature: Ecore.EObject, annotationJSON: string) {
             if (annotationJSON === "") {
                 return true
             }
@@ -478,7 +478,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             for (const [key, value] of Object.entries(JSON.parse(annotationJSON.split("'").join("\"")))) {
                 const eType = featureList.find(f=>f.get('name') === key)!.get('eType');
                 const enumValues = eType.eContents().filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations");
-                const targetValue = targetObject[key] || (enumValues && enumValues.length > 0 && enumValues[0].get('name'));
+                const targetValue = targetObject[key] || feature.get('defaultValueLiteral') || (enumValues && enumValues.length > 0 && enumValues[0].get('name'));
                 isVisible = Array.isArray(value)
                     ? value.includes(targetValue)
                     : targetValue === value
@@ -499,7 +499,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
                 const description = getFieldAnnotationByKey(feature.get('eAnnotations'), 'documentation');
                 const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true'
-                    && shouldRenderProperty(targetObject, featureList, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
+                    && shouldRenderProperty(targetObject, featureList, feature, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
                 const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
                 const isExpandable = getFieldAnnotationByKey(feature.get('eAnnotations'), 'expandable') === 'true';
                 const props = {
@@ -1209,12 +1209,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 </div>
                 {this.state.modalRefVisible && <Modal
                     key="add_ref_modal"
+                    className={"modal-add-inner-ref"}
                     width={'700px'}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={this.state.selectedRefUries.length > 0 ?
-                        <Button type="primary" onClick={this.handleAddNewRef}>OK</Button>: null}
+                    footer={null}
                 >
                     <Select
                         mode="multiple"
@@ -1274,6 +1274,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         </Select.Option>
                                 })}
                     </Select>
+                    <Button type="primary" onClick={this.handleAddNewRef} disabled={this.state.selectedRefUries.length === 0}>OK</Button>
                 </Modal>}
                 {this.state.modalResourceVisible && <Modal
                     className={"modal-add-resource"}

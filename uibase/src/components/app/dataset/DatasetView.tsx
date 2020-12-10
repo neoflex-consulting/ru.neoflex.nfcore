@@ -364,7 +364,9 @@ class DatasetView extends React.Component<any, State> {
                 });
                 rowData.set('valueFormatter', this.valueFormatter);
                 rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
-                rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined)
+                rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
+                //передаётся в DatasetGrid для подключения typography к заголоку грида
+                /*rowData.set('customHeader',c.get('headerName'));*/
                 columnDefs.push(rowData);
             }
         });
@@ -1533,7 +1535,8 @@ class DatasetView extends React.Component<any, State> {
                     diagramParams={this.state.currentDiagram}
                 />
                 <DatasetGrid
-                    hide={!!this.state.currentDiagram}
+                    key={this.props.viewObject.eURI().split('#')[0]}
+                    hidden={!!this.state.currentDiagram}
                     ref={this.gridRef}
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
@@ -1558,7 +1561,7 @@ class DatasetView extends React.Component<any, State> {
                     valueFormatter={this.valueFormatter}
                     excelCellMask={this.getExcelMask}
                     className={this.props.className}
-                    {...this.props}
+                    context={this.props.context}
                 />
                 <div id="filterButton">
                 <NeoDrawer

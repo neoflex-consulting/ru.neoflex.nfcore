@@ -9,7 +9,7 @@ import {NeoButton, NeoHint} from "neo-design/lib";
 import '../../styles/Paginator.css';
 import {adaptiveElementSize, getAdaptiveSize} from "../../utils/adaptiveResizeUtils";
 
-interface Props extends WithTranslation{
+interface Props extends WithTranslation {
     paginationPageSize: number,
     currentPage: number,
     totalNumberOfPage: number;
