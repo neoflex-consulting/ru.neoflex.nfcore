@@ -9,7 +9,6 @@ import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
-import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
 import {NeoButton, NeoColor, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
@@ -482,7 +481,7 @@ export class MainApp extends React.Component<any, State> {
         const code = eObject.get('name');
         const key = parentKey ? parentKey + '/' + code : code;
         // eslint-disable-next-line
-        const icon = eObject.get('icon') && <NeoIcon_ {...this.props} viewObject={eObject.get('icon')}/>;
+        const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
         const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}{code}</div>;
         let children = [];
         if (eObject.get('children')) {
