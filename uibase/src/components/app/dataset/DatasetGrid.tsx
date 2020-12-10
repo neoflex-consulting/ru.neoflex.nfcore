@@ -36,6 +36,8 @@ import {ViewRegistry} from "../../../ViewRegistry";
 import {getStringValuesFromEnum} from "../../../utils/enumUtils";
 import {AntdFactoryClasses} from "../../../AntdFactory";
 import {TFunction} from "i18next";
+import {NeoTypography} from "neo-design/lib";
+import CustomHeader from "./gridComponents/CustomHeader";
 
 const minHeaderHeight = 48;
 const backgroundColor = "#fdfdfd";
@@ -103,7 +105,8 @@ class DatasetGrid extends React.Component<Props, any> {
                     deleteButton: DeleteButton,
                     menu: GridMenu,
                     expand: Expand,
-                    antdFactory: AntdFactoryWrapper
+                    antdFactory: AntdFactoryWrapper/*,
+                    agColumnHeader: CustomHeader*/
                 },
                 defaultColDef: {
                     resizable: true
@@ -893,6 +896,12 @@ class DatasetGrid extends React.Component<Props, any> {
                             : undefined,
                     valueFormatter: colDef.get('valueFormatter'),
                     tooltipField: colDef.get('tooltipField'),
+                    //headerComponentFramework - используется для подключения typography к заголоку грида
+                    /*headerComponentFramework: colDef.get('customHeader') && CustomHeader,
+                    headerComponentParams: colDef.get('customHeader') && {
+                        viewObject: colDef.get('customHeader'),
+                        appContext: this.props.context
+                    }*/
                 });
             }
         }
