@@ -19,6 +19,12 @@ import ru.neoflex.nfcore.utils.JdbcUtils
 import java.sql.Connection
 import java.sql.ResultSet
 
+enum DMLQueryType {
+    INSERT,
+    UPDATE,
+    DELETE
+}
+
 class DatasetComponentExt extends DatasetComponentImpl {
 
     @Override

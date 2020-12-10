@@ -489,10 +489,3 @@ enum CalculatorFunction {
     greaterEqual as ">="
     lesserEqual as "<="
 }
-
-@NFCore(documentation="")
-enum DMLQueryType {
-    Insert,
-    Update,
-    Delete
-}
