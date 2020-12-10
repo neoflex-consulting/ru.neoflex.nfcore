@@ -19,6 +19,7 @@
 #datasetGrid * .ag-header-cell-label {
     justify-content: center;
     font-size: 14px;
+    text-align: center;
 }
 
 #datasetGrid * .ag-header-group-cell-label {
