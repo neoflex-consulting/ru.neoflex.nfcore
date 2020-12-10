@@ -11,7 +11,7 @@ import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
-import {IAction, IEventAction} from "./MainContext";
+import {IAction, IEventAction, IServerNamedParam} from "./MainContext";
 import DOMPurify from 'dompurify'
 import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
 import {
@@ -468,7 +468,7 @@ export class Select_ extends ViewContainer {
         let value;
         if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
             const temp = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
-            this.urlCurrentValue =  typeof temp === "string" ? temp : temp && temp[this.viewObject.get('value')]+"";
+            this.urlCurrentValue =  typeof temp !== "object" ? temp : temp && temp[this.viewObject.get('value')]+"";
         }
 
         let agValue = "";
@@ -579,7 +579,9 @@ export class Select_ extends ViewContainer {
         }
         mountComponent.bind(this)(true,[{actionType: actionType.setValue, callback: (value:string)=>{
                 this.onChange.bind(this)(value.includes(',') ? value.split(',') : value, true)
-            }}] as IAction[]);
+            }},
+            {actionType: actionType.execute, callback: ()=>this.refresh()}
+        ] as IAction[]);
     }
 
 
@@ -593,34 +595,7 @@ export class Select_ extends ViewContainer {
             && this.state.dataset
             && this.viewObject.get('valueItems')) {
             this.setState({params: newParams});
-            this.props.context.runQueryDataset(this.state.dataset, newParams).then((result: string) => {
-                const resArr = JSON.parse(result).map((el: any)=>{
-                    return {
-                        key: el[this.viewObject.get('datasetKeyColumn').get('name')],
-                        value: el[this.viewObject.get('datasetValueColumn').get('name')]
-                    }
-                });
-                if (!_.isEqual(resArr, this.state.selectData)) {
-                    let currentValue: string;
-                    if (this.urlCurrentValue) {
-                        currentValue = this.urlCurrentValue;
-                        //Чтобы не восстанавливать значение при смене параметров
-                        this.urlCurrentValue = "";
-                    } else {
-                        currentValue = this.state.currentValue
-                    }
-                    const isContainsValue = resArr.find((obj:any) => {
-                        return obj.key === currentValue
-                    });
-                    this.setState({
-                        params: newParams,
-                        selectData: resArr
-                    },()=> {
-                        this.onChange(this.state.isFirstLoad && this.viewObject.get('value') ? this.viewObject.get('value') : isContainsValue ? currentValue : "")
-                        this.setState({isFirstLoad: false})
-                    });
-                }
-            });
+            this.runQuery(newParams);
         }
     }
 
@@ -656,6 +631,39 @@ export class Select_ extends ViewContainer {
             ? this.state.currentValue.join(',')
             : this.state.currentValue;
     }
+
+    runQuery = (params: IServerNamedParam[]) => {
+        this.props.context.runQueryDataset(this.state.dataset, params).then((result: string) => {
+            const resArr = JSON.parse(result).map((el: any)=>{
+                return {
+                    key: el[this.viewObject.get('datasetKeyColumn').get('name')],
+                    value: el[this.viewObject.get('datasetValueColumn').get('name')]
+                }
+            });
+            if (!_.isEqual(resArr, this.state.selectData)) {
+                let currentValue: string;
+                if (this.urlCurrentValue) {
+                    currentValue = this.urlCurrentValue;
+                    //Чтобы не восстанавливать значение при смене параметров
+                    this.urlCurrentValue = "";
+                } else {
+                    currentValue = this.state.currentValue
+                }
+                const isContainsValue = resArr.find((obj:any) => obj.value === currentValue);
+                this.setState({
+                    params: params,
+                    selectData: resArr
+                },()=> {
+                    this.onChange(this.state.isFirstLoad && this.viewObject.get('value') ? this.viewObject.get('value') : isContainsValue ? currentValue : "")
+                    this.setState({isFirstLoad: false})
+                });
+            }
+        });
+    };
+
+    refresh = () => {
+        this.runQuery(getNamedParams(this.viewObject.get('valueItems'), this.props.context.contextItemValues))
+    };
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
