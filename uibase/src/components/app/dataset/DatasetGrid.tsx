@@ -37,6 +37,7 @@ import {getStringValuesFromEnum} from "../../../utils/enumUtils";
 import {AntdFactoryClasses} from "../../../AntdFactory";
 
 const minHeaderHeight = 48;
+const minGridWidth = '375px';
 const backgroundColor = "#fdfdfd";
 
 interface Props extends WithTranslation {
@@ -58,7 +59,7 @@ interface Props extends WithTranslation {
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
     className?: string;
     hidePagination?: boolean;
-    key?: string;
+    gridKey?: string;
     context?: any;
 }
 
@@ -833,7 +834,7 @@ class DatasetGrid extends React.Component<Props, any> {
     };
 
     handleResize = (event: DisplayedColumnsChangedEvent|ColumnResizedEvent|undefined) => {
-        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.key ? this.props.key : ""} .ag-header-cell-text`);
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.gridKey ? this.props.gridKey : ""} .ag-header-cell-text`);
         let minHeight = minHeaderHeight;
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
@@ -913,17 +914,16 @@ class DatasetGrid extends React.Component<Props, any> {
                  style={{
                      boxSizing: 'border-box',
                      // height: '100%',
-                     backgroundColor: backgroundColor,
-                     height: this.props.height ? this.props.height : 460 + (!this.props.hidePagination ? 40 : 0) /*paginator*/ ,
+                     backgroundColor: backgroundColor
                  }}
-                 className={'ag-theme-material'}
+                 className={`${this.props.className} ag-theme-material ${!this.props.hidePagination && "dataset-with-paginator"}`}
             >
-                <div id={`datasetGrid${this.props.key ? this.props.key : ""}`}
+                <div id={`datasetGrid${this.props.gridKey ? this.props.gridKey : ""}`}
                     className={this.props.className}
                     style={{
                         height: this.props.height ? this.props.height : 460,
                         width: this.props.width ? this.props.width : "99,5%",
-                        minWidth: "375px"}}>
+                        minWidth: minGridWidth}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
@@ -957,7 +957,11 @@ class DatasetGrid extends React.Component<Props, any> {
                     </ConfigProvider>
                     }
                     {!this.props.hidePagination && <div id="datasetPaginator"
-                         style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", minWidth: "375px", backgroundColor: "#E6E6E6"}}>
+                                                        style={{float: "right",
+                                                            opacity: this.state.isGridReady ? 1 : 0,
+                                                            width: "100%", minWidth: minGridWidth,
+                                                            backgroundColor: "#E6E6E6",
+                                                            height: "40px"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}

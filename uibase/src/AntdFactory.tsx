@@ -832,11 +832,25 @@ class HtmlContent_ extends ViewContainer {
             }
         });
         this.state = {
-            htmlContent: replaceNamedParam(this.viewObject.get('htmlContent'),params),
             params: params,
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
         };
+        //В гриде
+        if (this.props.isAgComponent) {
+            const agValue = getAgGridValue.bind(this)("string") as string;
+            this.state = {
+                ...this.state,
+                htmlContent: replaceNamedParam(agValue, params)
+            };
+        //В AppModule
+        } else {
+            this.state = {
+                ...this.state,
+                htmlContent: replaceNamedParam(this.viewObject.get('htmlContent'),params),
+            };
+
+        }
     }
 
     onChange = (value:string) => {

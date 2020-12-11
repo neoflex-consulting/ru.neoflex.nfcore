@@ -100,3 +100,7 @@
 #datasetGrid .ag-body-horizontal-scroll {
     min-height: 20px !important;
 }
+
+#datasetGrid.dataset-with-paginator > div > div:first-child {
+    height: calc(100% - 40px) !important;
+}
