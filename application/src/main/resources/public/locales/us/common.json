@@ -260,6 +260,7 @@
         "case": "Case",
         "when": "When",
         "then": "Then",
+        "else": "Else",
         "end": "End",
         "and": "And",
         "or": "Or",
