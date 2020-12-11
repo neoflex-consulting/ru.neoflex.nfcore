@@ -1419,7 +1419,7 @@ class DatasetView extends React.Component<any, State> {
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div style={{margin:'16px'}} className={this.props.className}>
-                <DatasetBar
+                {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     serverFilters={this.state.serverFilters}
                     serverAggregates={this.state.serverAggregates}
                     serverSorts={this.state.serverSorts}
@@ -1527,7 +1527,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                     )}
                     {...this.props}
-                />
+                />}
                 <DatasetDiagram
                     {...this.props}
                     hide={!this.state.currentDiagram}
@@ -1537,6 +1537,7 @@ class DatasetView extends React.Component<any, State> {
                 <DatasetGrid
                     key={this.props.viewObject.eURI().split('#')[0]}
                     hidden={!!this.state.currentDiagram}
+                    hidePagination={this.props.viewObject.get('hidePaginator')}
                     ref={this.gridRef}
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}

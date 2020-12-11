@@ -199,6 +199,10 @@ abstract class CommandElement {
 class DatasetView extends ViewElement, CommandElement {
           @NFCore(documentation="Данные для таблицы")
     refers DatasetComponent datasetComponent
+          @NFCore(documentation="Не показывать панель действий")
+    boolean hideActionBar
+          @NFCore(documentation="Не показывать нижнюю панель переходов по страницам")
+    boolean hidePaginator
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")

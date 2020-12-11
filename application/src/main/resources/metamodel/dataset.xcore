@@ -482,10 +482,3 @@ enum CalculatorFunction {
     greaterEqual as ">="
     lesserEqual as "<="
 }
-
-@NFCore(documentation="Параметры запроса. Используется в запросе executeDML")
-enum DMLQueryType {
-    Insert,
-    Update,
-    Delete
-}
