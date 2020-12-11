@@ -13,7 +13,6 @@ import ru.neoflex.nfcore.base.types.Password
 import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.base.tag.Tagged
-import ru.neoflex.nfcore.application.Typography
 import ru.neoflex.nfcore.application.GridComponent
 
 annotation "ru.neoflex.nfcore" as NFCore
@@ -179,11 +178,12 @@ class DatasetColumn {
     DataType convertDataType
 }
 
-@NFCore(documentation="Колонки")
+@NFCore(documentation="Столбцы")
 abstract class DatasetColumnView {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
-    contains Typography headerName //название столбца
+        @NFCore(documentation="Название заголовка в таблице")
+    String columnName
         @NFCore(documentation="Скрыть/показать колонку")
     boolean hide
         @NFCore(documentation="Текст, отображаемый при наведении мыши на заголовок колонки")

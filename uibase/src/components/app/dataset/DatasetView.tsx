@@ -324,7 +324,7 @@ class DatasetView extends React.Component<any, State> {
         column.each( (c: Ecore.EObject) => {
             if (c.get('column')) {
                 let rowData = new Map();
-                rowData.set('headerName', c.get('headerName') ? c.get('headerName').get('name') : c.get('name'));
+                rowData.set('headerName', c.get('columnName'));
                 rowData.set('children', this.getChildrenColumns(c.get('column'), resource));
                 columnDefs.push(rowData);
             } else {
@@ -332,7 +332,7 @@ class DatasetView extends React.Component<any, State> {
                 const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
                 const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
                 rowData.set('field', c.get('name'));
-                rowData.set('headerName', c.get('headerName') ? c.get('headerName').get('name') : c.get('name'));
+                rowData.set('headerName', c.get('columnName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
                 rowData.set('hide', c.get('hide'));
                 rowData.set('pinned', c.get('pinned'));
