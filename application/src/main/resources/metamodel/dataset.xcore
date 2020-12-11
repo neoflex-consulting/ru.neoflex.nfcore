@@ -217,21 +217,21 @@ class RdbmsColumn extends DatasetColumnView {
     refers DatasetColumn datasetColumn
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Группа колонок. Название отображается отдельной строкой над обычными колонками")
 class ColumnGroup extends DatasetColumnView {
     contains DatasetColumnView[] column
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Маска данных")
 class FormatMask extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
-        @NFCore(documentation="")
+        @NFCore(documentation="Сама маска")
     String value
     boolean isDynamic
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры запроса")
 class QueryParameter {
     String parameterName
     String parameterValue
@@ -243,7 +243,7 @@ class QueryParameter {
     boolean isPrimaryKey
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры фильтрации")
 class QueryFilter {
     String datasetColumn
     Operations operation
@@ -251,21 +251,21 @@ class QueryFilter {
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры агрегации")
 class QueryAggregate {
     String datasetColumn
     Aggregate operation
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры сортировки")
 class QuerySort {
     String datasetColumn
     Sort operation
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры группировки столбца")
 class QueryGroupBy {
     String datasetColumn
     Aggregate operation
@@ -273,13 +273,13 @@ class QueryGroupBy {
     String value
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Столбцы, отображающиеся при группировке")
 class QueryGroupByColumn {
     String datasetColumn
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры пользовательского столбца (не из БД)")
 class QueryCalculatedExpression {
     String datasetColumn
     String operation
@@ -288,25 +288,25 @@ class QueryCalculatedExpression {
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Скрыть/Показать столбец")
 class HiddenColumn {
     String datasetColumn
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры колонки (для формирования запроса к БД)")
 class QueryConditionDTO {
     String datasetColumn
     String operation
     boolean enable
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Параметры фильтрации колонки (для формирования запроса к БД)")
 class QueryFilterDTO extends QueryConditionDTO {
     String value
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Заливка цветом")
 class Highlight {
     HighlightType highlightType
     String datasetColumn
@@ -317,13 +317,13 @@ class Highlight {
     String color
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Формат использования запроса к БД")
 enum QueryType {
     UseTableName
     UseQuery
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Типы операций")
 enum Operations {
     EqualTo
     NotEqual
@@ -341,7 +341,7 @@ enum Operations {
     NotEndOn
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Типы агрегации")
 enum Aggregate {
     Average
     Count
@@ -351,34 +351,27 @@ enum Aggregate {
     Sum
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Типы сортировки")
 enum Sort {
     FromAtoZ
     FromZtoA
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Типы доступа к ресурсу")
 enum Access {
     Public
     Private
     Default
 }
 
-@NFCore(documentation="")
-enum Filter {
-    TextColumnFilter
-    NumberColumnFilter
-    DateColumnFilter
-}
-
-@NFCore(documentation="")
+@NFCore(documentation="Закрепление столбца")
 enum Pinned {
     Undefined
     Left
     Right
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Тип выравнивания текста")
 enum TextAlign {
     Undefined
     Left
@@ -386,7 +379,7 @@ enum TextAlign {
     Center
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Тип данных")
 enum DataType {
     Undefined
     Boolean
@@ -397,14 +390,14 @@ enum DataType {
     Timestamp
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Диапозон ячеек")
 enum HighlightType {
     Cell
     Column
     Row
 }
 
-@NFCore(documentation="")
+@NFCore(documentation="Тип диаграммы")
 enum DiagramType {
     Line
     Bar
@@ -488,4 +481,11 @@ enum CalculatorFunction {
     lesser as "<"
     greaterEqual as ">="
     lesserEqual as "<="
+}
+
+@NFCore(documentation="Параметры запроса. Используется в запросе executeDML")
+enum DMLQueryType {
+    Insert,
+    Update,
+    Delete
 }
