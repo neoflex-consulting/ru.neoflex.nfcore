@@ -65,7 +65,7 @@ function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandle
                 <NeoRow>
                     <NeoButton type={'link'} className={'calc-button'} id={'('} onClick={onButtonClick}>(</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={')'} onClick={onButtonClick}>)</NeoButton>
-                    <NeoButton type={'link'} className={'calc-button'} id={'`'} onClick={onButtonClick}>`</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'\''} onClick={onButtonClick}>`</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'.'} onClick={onButtonClick}>.</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={','} onClick={onButtonClick}>,</NeoButton>
                 </NeoRow>
@@ -155,7 +155,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
 
     componentDidMount(): void {
         /*if (this.state.calculatorFunction!.length === 0) {this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")}*/
-        this.getALLFunctions(this.props.currentDatasetComponent.eResource());
+        this.getALLFunctions(this.props.currentDatasetComponent?.eResource());
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
@@ -187,23 +187,24 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 })
             })
     };
-    /*if (result.includes(o._id.substr(21, o._id.size)))*/
-    getALLFunctions(resource_: Ecore.Resource){
-        const resource: Ecore.Resource = resource_;
-        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = 'getAllFunctions';
-        API.instance().call(ref, methodName, []).then((json: string) => {
-          let  result: string = JSON.stringify(json);
-            API.instance().findEnum(    "dataset", "CalculatorFunction")
-                .then((json: EObject[]) => {
-                    const paramValue = json.filter((element : any, index) => {return result.includes(element._id.substr(21, element._id.size)) || index > 35}).map((o: any) => {
-                        return o});
-                    this.setState({
-                        calculatorFunction: paramValue
-                    })
-                })
-        })
 
+    getALLFunctions(resource_?: Ecore.Resource){
+        const resource = resource_;
+        if (resource) {
+            const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+            const methodName: string = 'getAllFunctions';
+            API.instance().call(ref, methodName, []).then((json: string) => {
+                let  result: string = JSON.stringify(json);
+                API.instance().findEnum(    "dataset", "CalculatorFunction")
+                    .then((json: EObject[]) => {
+                        const paramValue = json.filter((element : any, index) => {return result.includes(element._id.substr(21, element._id.size)) || index > 35}).map((o: any) => {
+                            return o});
+                        this.setState({
+                            calculatorFunction: paramValue
+                        })
+                    })
+            })
+        }
     }
 
     handleCalculate = (e: any) => {
@@ -513,6 +514,12 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             {this.props.t('clear')}
                         </NeoButton>
                     </div>
+                <p>
+                    {this.props.t("examples")}:<br/>
+                    1. (B+C)*100 <br/>
+                    2. {this.props.t("lower")}(B)||', '||{this.props.t("upper")}(C)<br/>
+                    3. {this.props.t("case")} {this.props.t("when")} A = 10 {this.props.t("then")} B + C {this.props.t("else")} B {this.props.t("end")}
+                </p>
             </Form>
         </div>
         )
