@@ -602,16 +602,16 @@ export class MainApp extends React.Component<any, State> {
                 >
                     <div className={'left-splitter'} style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%'}}>
                         {this.renderReferences(this.state.hideReferences)}
-                        <div className={'references-tree-footer'}>
-                            {this.props.context.applicationReferenceTree && <NeoButton
+                        {this.props.context.applicationReferenceTree && <div className={'references-tree-footer'}>
+                            <NeoButton
                                 className={"footer-item"}
                                 title={this.state.hideReferences ? this.props.t("show menu") : this.props.t("hide menu")}
                                 type={"link"}
                                 onClick={this.hideReferenceTree}>
                                 <NeoIcon color={NeoColor.grey_8} icon={this.state.hideReferences ? "table" : "arrowLong"} />
                                 {!this.state.hideReferences && <NeoParagraph type={"body_regular"}>{this.props.t("hide menu")}</NeoParagraph>}
-                            </NeoButton>}
-                        </div>
+                            </NeoButton>
+                        </div>}
                     </div>
                     <div style={{backgroundColor: backgroundColor, height: '100%'}}>
                         <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
