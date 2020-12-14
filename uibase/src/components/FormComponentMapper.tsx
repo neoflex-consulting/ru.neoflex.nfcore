@@ -55,7 +55,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 />
                 :
                 <InputComponent
-                    readOnly
+                    disabled
                     key={`textview_${ukey}${idx}`}
                     autosize={{ maxRows: expanded ? null : 10 }}
                     value={value}
