@@ -235,7 +235,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                             this.state.tags.map((tag: Ecore.EObject) =>
 
                                                                     <NeoOption key={tag.get('name')}
-                                                                            value={tag.get('name')}>
+                                                                               value={tag.get('name')}
+                                                                               title={tag.get('name')}>
                                                                         {tag.get('name')}
                                                                     </NeoOption>
                                                                 )

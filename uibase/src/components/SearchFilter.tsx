@@ -115,16 +115,17 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", marginTop: "15px", overflow:'auto', top:'95px', bottom:'145px' }}
                         columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName},
                             {
-                            dataIndex: 'action',
-                            key: 'action',
-                            render: (text:string, record:any) => {
+                            render: (text:string, record:any, i:any) => {
                                 const editButton = <NeoButton
                                     type={'link'}
-                                    title={t('edit')}
-                                    onClick={(e)=> {}}
+                                    title={'Развернуть'}
+                                    onClick={()=> {
+                                        const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
+                                        element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
+                                    }}
                                     style={{display:'inline-block', margin:'auto 14px auto 0px'}}>
-                                        <NeoIcon icon={"ellipsis"}/>
-                                    </NeoButton>
+                                    <NeoIcon icon={"ellipsis"}/>
+                                </NeoButton>
                                 return [editButton]
                             }
                         }
@@ -143,7 +144,6 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         textAlign: 'left',
                     }}>
                     <NeoButton
-                        title={t('run query')}
                         onClick={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
                         style={{marginRight:'16px'}}
                     >
@@ -158,7 +158,6 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                             }
                         }}
                         type={"secondary"}
-                        title={t('reset')}
                     >
                         {t('reset')}
                     </NeoButton>
