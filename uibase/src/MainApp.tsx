@@ -4,7 +4,7 @@ import Splitter from './components/CustomSplitter'
 import {Layout, Menu} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
-import Ecore from "ecore"
+import Ecore, {EObject} from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
@@ -140,6 +140,20 @@ export class MainApp extends React.Component<any, State> {
                 return index === 0 ? value : value.replace(tree[index-1]+"/","")
             })
         }
+        function findTreeOpenKeys(refTree: Ecore.EObject, appModuleName: string, retArr: string[] = []) {
+            if (refTree.get('children')) {
+                (refTree.get('children') as Ecore.EList).each(t => {
+                    if (retArr.length === 0 || retArr[retArr.length - 1] !== appModuleName) {
+                        retArr.push(retArr.length > 1 ? retArr[retArr.length - 1]+"/"+refTree.get('name') : refTree.get('name'));
+                        findTreeOpenKeys(t, appModuleName, retArr);
+                    }
+                })
+            } else if (refTree.get('AppModule')?.get('name') === appModuleName) {
+                retArr.push(appModuleName);
+                return retArr
+            }
+            return retArr.length > 2 ? retArr.slice(1, retArr.length - 1) : []
+        }
         let name: string;
         if (this.props.appModuleName !== undefined) {
             name = decodeURI(this.props.appModuleName);
@@ -187,7 +201,7 @@ export class MainApp extends React.Component<any, State> {
                                             groovyCommandList: objectApp.get('groovyCommands'),
                                             styleSheetsList: objectApp.get('styleSheets'),
                                             applicationReferenceTree: objectApp.get('referenceTree')
-                                        })
+                                        }), this.setState({openKeys:findTreeOpenKeys(objectApp.get('referenceTree'), currentAppModule.appModule)})
                                     );
                                     if (this.props.pathFull.length !== 1) {
                                         this.setState({hideReferences: parseInt(getVerticalStoredSize()) <= parseInt(verticalSplitterShortSize)},
