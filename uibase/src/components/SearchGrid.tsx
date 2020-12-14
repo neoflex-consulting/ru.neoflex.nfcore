@@ -239,19 +239,24 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 dataIndex: 'action',
                 key: 'action',
                 fixed: 'right',
-                width: 100,
+                width: 130,
                 render: (text:string, record:any) => {
+                    const viewButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
+                        <NeoButton type={'link'} title={t('view')}>
+                            <NeoIcon icon={"show"}/>
+                        </NeoButton>
+                    </Link>;
                     const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
-                        <NeoButton type={'link'} title={'Редактировать'}>
+                        <NeoButton type={'link'} title={t('edit')}>
                             <NeoIcon icon={"edit"}/>
                         </NeoButton>
                     </Link>;
                     const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}>
-                        <NeoButton type={'link'} title={'Удалить'}>
+                        <NeoButton type={'link'} title={t('delete')}>
                             <NeoIcon icon={"rubbish"}/>
                         </NeoButton>
                     </span>;
-                    return [editButton, deleteButton]
+                    return [viewButton, editButton, deleteButton]
                 }
             }];
             const {selectedRowKeys} = this.state;
