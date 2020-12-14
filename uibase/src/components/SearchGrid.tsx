@@ -90,6 +90,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         }];
 
         for (let column of AllFeatures){
+            if(column.get('name')==='tags') continue
             let name: string = "";
             let title: string = "";
             column.get('name') === "children" ? name = "_children" :
