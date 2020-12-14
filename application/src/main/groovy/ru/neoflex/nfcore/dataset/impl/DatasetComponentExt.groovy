@@ -53,11 +53,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 } else {
                                     def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
                                     rdbmsColumn.name = columns[i].name
+                                    rdbmsColumn.columnName = columns[i].name
                                     rdbmsColumn.datasetColumn = columns[i]
-                                    def typography = ApplicationFactory.eINSTANCE.createTypography()
-                                    typography.name = columns[i].name
-                                    rdbmsColumn.headerName = typography
-                                    rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                                     rdbmsColumn.resizable = true
                                     datasetComponent.column.add(rdbmsColumn)
                                 }
