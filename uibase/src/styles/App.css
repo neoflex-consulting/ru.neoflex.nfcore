@@ -1744,11 +1744,15 @@ padding: 3px 24px;
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 575px;
+  width: 570px;
   /*height: 49px;*/
   border-collapse: unset;
-  padding-right: 10px !important;
-  line-height: 2.6;
+  padding: 13px 10px !important;
+  line-height: 16px;
+}
+
+.datasearch__filter__drawer .ant-table-wrapper {
+  overflow-x: hidden !important;
 }
 
 .datasearch__filter__drawer tbody td:nth-child(2).open {
@@ -1780,7 +1784,7 @@ padding: 3px 24px;
 }
 .ant-table-thead > tr > th, .ant-table-tbody > tr > td, .ant-table-thead > tr, .ant-table-tbody > tr {
   padding: 0px 16px !important;
-  height: 40px !important
+  min-height: 40px !important
 }
 
 .developer_table .ant-pagination {
