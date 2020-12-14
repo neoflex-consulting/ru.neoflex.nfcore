@@ -466,5 +466,7 @@
         "recreateWorkingDays": "Recreate working days",
         "first page": "First page",
         "last page": "Last page",
-        "examples": "Examples"
+        "examples": "Examples",
+        "hide menu": "Hide menu",
+        "show menu": "Show menu"
 }
