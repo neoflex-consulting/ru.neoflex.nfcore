@@ -63,6 +63,8 @@
     border-right: 1px solid #E6E6E6;
     border-bottom: none;
     border-top: none;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 #datasetGrid .ag-row {

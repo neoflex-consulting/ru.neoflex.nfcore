@@ -378,9 +378,9 @@ class ViewNode extends TreeNode {
 
 @NFCore(documentation="Обработка слушаемого события из eventHandler")
 class EventAction {
-        @NFCore(documentation="Доступные действия: execute, show, hide, enable, disable, setValue, showMessage, redirect, backToLastPage")
+        @NFCore(documentation="Доступные действия: execute, show, hide, enable, disable, setValue, showMessage, redirect, backToLastPage. После выполнения action = 'execute', запускается auto refresh")
     Action action
-        @NFCore(documentation="Компонента, к которой будет направлено действие. Не заполняется при: action = redirect, backToLastPage", renderConditions="{'action':['execute','show','hide','enable','disable','setValue','showMessage']}")
+        @NFCore(documentation="Компонента, к которой будет направлено действие. После выполнения action = 'execute', запускается auto refresh", renderConditions="{'action':['execute','show','hide','enable','disable','setValue','showMessage']}")
     refers DynamicActionElement triggerItem
         @NFCore(documentation="Ключ объекта. Заполняется если: в качестве значения для action = setValue находится объект", renderConditions="{'action':'setValue'}")
     String valueObjectKey

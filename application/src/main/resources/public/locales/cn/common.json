@@ -430,5 +430,7 @@
         "recreateWorkingDays": "重新創建工作日",
         "first page": "第一頁",
         "last page": "最後一頁",
-        "examples": "示例"
+        "examples": "示例",
+        "hide menu": "隱藏菜單",
+        "show menu": "顯示菜單"
 }

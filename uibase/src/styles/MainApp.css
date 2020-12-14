@@ -38,17 +38,13 @@
     transform: scale(1.2);
 }
 
-.leftSplitter {
-    overflow-y: auto;
-}
-
 /*ServerFilter*/
-.leftSplitter .ant-tree-node-content-wrapper-open {
+.left-splitter .ant-tree-node-content-wrapper-open {
     color: #B38136!important;
     text-align: center!important;
 }
 
-.leftSplitter .ant-tree-node-content-wrapper-close {
+.left-splitter .ant-tree-node-content-wrapper-close {
     font-style: normal;
     font-weight: 500;
     font-size: 14px;
@@ -60,7 +56,7 @@
     text-align: center!important;
 }
 
-.leftSplitter .ant-tree-node-content-wrapper-normal{
+.left-splitter .ant-tree-node-content-wrapper-normal{
     font-style: normal;
     font-size: 14px;
     line-height: 16px;
@@ -71,83 +67,90 @@
     text-align: center!important;
 }
 
-.leftSplitter .ant-tree-iconEle {
+.left-splitter .ant-tree-iconEle {
     display: none !important;
 }
 
-.leftSplitter .ant-tree li ul {
+.left-splitter .ant-tree li ul {
     padding: unset!important;
 }
 
-.leftSplitter .ant-tree li span.ant-tree-switcher, .leftSplitter .ant-tree li span.ant-tree-iconEle {
+.left-splitter .ant-tree li span.ant-tree-switcher, .left-splitter .ant-tree li span.ant-tree-iconEle {
     left: 90%;
     top: 6px;
 }
 
-.leftSplitter .ant-tree li span.ant-tree-switcher.ant-tree-switcher_open .ant-tree-switcher-icon:hover{
+.left-splitter .ant-tree li span.ant-tree-switcher.ant-tree-switcher_open .ant-tree-switcher-icon:hover{
     font-size: 12px;
     color: #022af8;
 }
 
-.leftSplitter .ant-tree li span.ant-tree-switcher.ant-tree-switcher .ant-tree-switcher-icon:hover{
+.left-splitter .ant-tree li span.ant-tree-switcher.ant-tree-switcher .ant-tree-switcher-icon:hover{
     font-size: 12px;
     color: #022af8;
 }
 
-.leftSplitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected, .leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected{
+.left-splitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected, .left-splitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected{
     color: unset!important;
 }
 
-.leftSplitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper:hover>::before,
-.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper:hover>::before{
+.left-splitter .ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper:hover>::before,
+.left-splitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper:hover>::before{
     background: #FFF8E0 !important;
 }
-.leftSplitter :hover>::before{
+.left-splitter :hover>::before{
     background: #FFF8E0 !important;
 }
 
-.leftSplitter .ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
-.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
-.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree-open li:hover > span.ant-tree-node-content-wrapper::before,
-.leftSplitter .ant-tree-treenode-switcher-close:hover>::before,
-.leftSplitter .ant-tree-content-wrapper-normal:hover>::before,
-.leftSplitter .ant-tree-node-content-wrapper-open:hover>::before{
+.left-splitter .ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.left-splitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.left-splitter .ant-tree.ant-tree-directory .ant-tree-child-tree-open li:hover > span.ant-tree-node-content-wrapper::before,
+.left-splitter .ant-tree-treenode-switcher-close:hover>::before,
+.left-splitter .ant-tree-content-wrapper-normal:hover>::before,
+.left-splitter .ant-tree-node-content-wrapper-open:hover>::before{
     background: #FFF8E0 !important;
     border-right: 2px solid orange !important;
     height: 40px !important;
 }
 
 
-.leftSplitter.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected,
-.leftSplitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
+.left-splitter.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper.ant-tree-node-selected,
+.left-splitter .ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper.ant-tree-node-selected {
     color: rgba(0, 0, 0, 0.65);
 }
 
-.leftSplitter .ant-tree-child-tree li,
-.leftSplitter .ant-tree-treenode-switcher-close,
-.leftSplitter .ant-tree-node-content-wrapper-open::before {
+.left-splitter .ant-tree-child-tree li,
+.left-splitter .ant-tree-treenode-switcher-close,
+.left-splitter .ant-tree-node-content-wrapper-open::before {
     height: 40px !important;
 }
 
-.leftSplitter .ant-tree-treenode-switcher-close span,
-.leftSplitter .ant-tree-child-tree li span,
-.leftSplitter .ant-tree-node-content-wrapper-open span{
+.left-splitter .ant-tree-treenode-switcher-close span,
+.left-splitter .ant-tree-child-tree li span,
+.left-splitter .ant-tree-node-content-wrapper-open span{
     top: 8px;
 
 }
 
-.leftsplitter .ant-tree-child-tree > li:first-child {
+.left-splitter .ant-tree-child-tree > li:first-child {
     padding: unset;
     margin-top: 8px;
 }
 
-.leftSplitter .ant-tree-node-content-wrapper-open {
+.left-splitter .ant-tree-node-content-wrapper-open {
     margin-bottom: 10px !important;
     font-weight: 700;
 }
 
-.leftSplitter .ant-tree > li:first-child {
+.left-splitter .ant-tree > li:first-child {
     padding-top: unset;
+}
+
+#referenceTree {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: none;
 }
 
 #referenceTree .ant-menu-item,
@@ -189,9 +192,9 @@
     font-weight: 500;
 }
 
-#referenceTree.ant-menu-inline,
-#referenceTree.ant-menu-vertical, .ant-menu-vertical-left{
-    border-right: 1px solid transparent;
+#referenceTree .ant-menu-item {
+    line-height: 20px;
+    padding: 10px 0 10px 0;
 }
 
 #referenceTree li.ant-menu-submenu > div {
@@ -284,20 +287,13 @@
 }
 
 .application-footer  {
-    display: inline-flex;
+    padding: 0 0 0 12px;
     border-top: 1px #F2F2F2 solid;
     width: 100%
 }
 
 .footer-item {
     margin: 4px 0 0 16px;
-}
-
-#verticalLine {
-    border-left: 1px solid #E6E6E6;
-    height: 20px;
-    margin: 10px 16px 0 16px;
-
 }
 
 .pane.horizontal.primary {
@@ -352,7 +348,7 @@
 }
 
 .debug-item > div  {
-    margin: 0 16px 0 0
+    margin: 0 12px 0 0
 }
 
 #debugContainer {
@@ -454,8 +450,32 @@
 .application-footer-container {
     position: sticky;
     top: 0;
+    height: 40px;
 }
 
 .url-content .ant-table {
     border: none;
+}
+
+.left-splitter  {
+    height: 100%;
+}
+
+.left-splitter > section {
+    height: calc(100% - 40px);
+}
+
+.references-tree-footer {
+    display: flex;
+    height: 40px;
+    background: #E6E6E6;
+    box-shadow: 0 4px 2px rgba(0, 0, 0, 0.2);
+}
+
+.references-tree-footer > button {
+    margin: auto 0 auto 12px
+}
+
+.references-tree-footer > button > .typography {
+    margin: 0 0 0 8px;
 }
