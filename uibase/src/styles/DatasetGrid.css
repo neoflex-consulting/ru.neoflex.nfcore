@@ -19,6 +19,7 @@
 #datasetGrid * .ag-header-cell-label {
     justify-content: center;
     font-size: 14px;
+    text-align: center;
 }
 
 #datasetGrid * .ag-header-group-cell-label {
@@ -98,4 +99,8 @@
 #datasetGrid .ag-body-horizontal-scroll-viewport,
 #datasetGrid .ag-body-horizontal-scroll {
     min-height: 20px !important;
+}
+
+#datasetGrid.dataset-with-paginator > div > div:first-child {
+    height: calc(100% - 40px) !important;
 }

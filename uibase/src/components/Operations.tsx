@@ -5,6 +5,8 @@ import Ecore from 'ecore';
 import {API} from './../modules/api'
 import FormComponentMapper from './FormComponentMapper';
 import {TFunction} from 'i18next';
+import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
+import {NeoHint} from "neo-design/lib";
 
 interface Props {
     translate: TFunction,
@@ -63,7 +65,7 @@ export default function Operations(props: Props): JSX.Element {
     }
 
     function eAllOperations(eClass: Ecore.EClass): any[] {
-        var eOperations = eClass.get('eOperations').array();
+        var eOperations = eClass.get('eOperations').array().filter((o: Ecore.EObject)=>getFieldAnnotationByKey(o.get('eAnnotations'), 'invisible') !== 'true');
         var superTypes = eClass.get('eAllSuperTypes');
         return (eOperations || []).concat((superTypes || []).flatMap((c: Ecore.EClass)=>eAllOperations(c)))
     }
@@ -185,7 +187,7 @@ export default function Operations(props: Props): JSX.Element {
             return <Menu onClick={onMenuSelect}> 
                 {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
                     return <Menu.Item key={oper.get('name')}>
-                        {oper.get('name')}
+                        <NeoHint title={getFieldAnnotationByKey(oper.get('eAnnotations'), "documentation")}>{t(oper.get('name'))}</NeoHint>
                     </Menu.Item>
                 })}
             </Menu>

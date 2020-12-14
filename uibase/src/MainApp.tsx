@@ -9,11 +9,11 @@ import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
-import {NeoIcon_} from "./AntdFactory";
 import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
 import {NeoButton, NeoColor, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
+import _ from "lodash";
 
 const FooterHeight = '39px';
 const backgroundColor = "#fdfdfd";
@@ -85,6 +85,25 @@ function getOpenedPath(arr: string[]) : string[] {
         })
 }
 
+function mountStyleSheets(styleSheetsList?: Ecore.EList) {
+    styleSheetsList?.each(o=>{
+        let sheet = document.getElementById(o.get('name'));
+        if (!sheet) {
+            sheet = document.createElement('style');
+            sheet.innerHTML = o.get('sheetContent');
+            sheet.id = o.get('name');
+            document.body.appendChild(sheet);
+        }
+    });
+}
+
+function unmountStyleSheets(styleSheetsList?: Ecore.EList) {
+    styleSheetsList?.each(o=>{
+        const sheet = document.getElementById(o.get('name'));
+        sheet && document.body.removeChild(sheet);
+    });
+}
+
 export class MainApp extends React.Component<any, State> {
     private refSplitterRef: React.RefObject<any> = React.createRef();
     private toolsSplitterRef: React.RefObject<any> = React.createRef();
@@ -116,6 +135,11 @@ export class MainApp extends React.Component<any, State> {
     }
 
     loadObject = () => {
+        function parseTree(tree: string[]) {
+            return tree.map((value, index) => {
+                return index === 0 ? value : value.replace(tree[index-1]+"/","")
+            })
+        }
         let name: string;
         if (this.props.appModuleName !== undefined) {
             name = decodeURI(this.props.appModuleName);
@@ -134,6 +158,7 @@ export class MainApp extends React.Component<any, State> {
                                                 variableList: objectApp.get('variables'),
                                                 eventHandlerList: objectApp.get('eventHandlers'),
                                                 groovyCommandList: objectApp.get('groovyCommands'),
+                                                styleSheetsList: objectApp.get('styleSheets'),
                                             })
                                         );
                                         let app = this.props.pathFull.filter((p: any) => !p.useParentReferenceTree);
@@ -147,6 +172,7 @@ export class MainApp extends React.Component<any, State> {
                                                 variableList: objectApp.get('variables'),
                                                 eventHandlerList: objectApp.get('eventHandlers'),
                                                 groovyCommandList: objectApp.get('groovyCommands'),
+                                                styleSheetsList: objectApp.get('styleSheets'),
                                                 applicationReferenceTree: undefined}),
                                             ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
                                         );
@@ -159,6 +185,7 @@ export class MainApp extends React.Component<any, State> {
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
                                             groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                             applicationReferenceTree: objectApp.get('referenceTree')
                                         })
                                     );
@@ -176,6 +203,7 @@ export class MainApp extends React.Component<any, State> {
                                             viewObject: objectApp.get('view'),
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                             groovyCommandList: objectApp.get('groovyCommands'),
                                         })
                                     );
@@ -190,6 +218,7 @@ export class MainApp extends React.Component<any, State> {
                                             variableList: objectApp.get('variables'),
                                             eventHandlerList: objectApp.get('eventHandlers'),
                                             groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
                                             applicationReferenceTree: undefined
                                         }),
                                         ()=>this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth)
@@ -198,15 +227,44 @@ export class MainApp extends React.Component<any, State> {
                                 }
                             }
                             else {
-                                this.props.context.updateContext!(
-                                    ({
-                                        viewObject: objectApp.get('view'),
-                                        variableList: objectApp.get('variables'),
-                                        eventHandlerList: objectApp.get('eventHandlers'),
-                                        groovyCommandList: objectApp.get('groovyCommands'),
-                                        applicationReferenceTree: objectApp.get('referenceTree')
-                                    })
-                                );
+                                let treeChildren = objectApp.get('referenceTree').eContents();
+                                let currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+                                if (objectApp.get('name') === currentAppModule.appModule) {
+                                    let currentTree: any[] = parseTree(currentAppModule['tree']);
+                                    for (let i = 0; i <= currentTree.length - 1; i++) {
+                                        for (let t of treeChildren
+                                            .filter((t: any) => t.get('name') === currentTree[i])) {
+                                            if (t.eContents().length !== 0) {
+                                                treeChildren = t.eContents();
+                                            }
+                                            if (t.get('AppModule') !== undefined && t.get('AppModule').get('name') === currentAppModule.appModule) {
+                                                treeChildren = t.get('AppModule').get('view')
+                                            }
+                                        }
+                                    }
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: treeChildren[0] || treeChildren,
+                                            applicationReferenceTree: objectApp.get('referenceTree'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
+                                        })
+                                    );
+                                }
+                                else {
+                                    this.props.context.updateContext!(
+                                        ({
+                                            viewObject: objectApp.get('view'),
+                                            applicationReferenceTree: objectApp.get('referenceTree'),
+                                            variableList: objectApp.get('variables'),
+                                            eventHandlerList: objectApp.get('eventHandlers'),
+                                            groovyCommandList: objectApp.get('groovyCommands'),
+                                            styleSheetsList: objectApp.get('styleSheets'),
+                                        })
+                                    );
+                                }
                             }
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
@@ -245,6 +303,10 @@ export class MainApp extends React.Component<any, State> {
             //В момент инициализации даем понять адаптивным элементам что нужно пересчитать размеры
             window.dispatchEvent(new Event('appAdaptiveResize'));
         }
+        if (!_.isEqual(this.props.context?.styleSheetsList?.array(), prevProps.context?.styleSheetsList?.array())) {
+            //in case we change url outside appModule reference tree
+            unmountStyleSheets(prevProps.context.styleSheetsList)
+        }
     }
 
 
@@ -268,6 +330,8 @@ export class MainApp extends React.Component<any, State> {
     }
 
     componentWillUnmount() {
+        //in case we change url outside appModule reference tree
+        unmountStyleSheets(this.props.context.styleSheetsList);
         window.removeEventListener("appAdaptiveResize", this.handleResize);
         window.removeEventListener("resize", this.handleResize);
     }
@@ -395,10 +459,8 @@ export class MainApp extends React.Component<any, State> {
     };
 
     renderContent = () => {
-        const {context} = this.props;
-        const {viewObject} = context;
-        if (!viewObject) return null;
-        return this.viewFactory.createView(viewObject, this.props)
+        mountStyleSheets(this.props.context.styleSheetsList);
+        return this.props.context.viewObject && this.viewFactory.createView(this.props.context.viewObject, this.props)
     };
 
     renderEList = (list: Ecore.EList) => {
@@ -450,7 +512,7 @@ export class MainApp extends React.Component<any, State> {
         const code = eObject.get('name');
         const key = parentKey ? parentKey + '/' + code : code;
         // eslint-disable-next-line
-        const icon = eObject.get('icon') && <NeoIcon_ {...this.props} viewObject={eObject.get('icon')}/>;
+        const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
         const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}{code}</div>;
         let children = [];
         if (eObject.get('children')) {
@@ -508,6 +570,7 @@ export class MainApp extends React.Component<any, State> {
         const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule;
         let tree = keys;
         let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
+        unmountStyleSheets(this.props.context.styleSheetsList);
         this.props.context.changeURL!(appModuleName, useParentReferenceTree, tree)
     }
 

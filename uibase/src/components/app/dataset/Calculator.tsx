@@ -11,7 +11,8 @@ import Ecore, {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";
 import * as crypto from "crypto"
 import {appTypes} from "../../../utils/consts";
-import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoColor, NeoInput, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
+import {NeoIcon} from "neo-icon/lib";
 
 const inputOperationKey: string = "_inputOperationKey";
 const selectTypeKey: string = "_selectTypeKey";
@@ -64,7 +65,7 @@ function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandle
                 <NeoRow>
                     <NeoButton type={'link'} className={'calc-button'} id={'('} onClick={onButtonClick}>(</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={')'} onClick={onButtonClick}>)</NeoButton>
-                    <NeoButton type={'link'} className={'calc-button'} id={'`'} onClick={onButtonClick}>`</NeoButton>
+                    <NeoButton type={'link'} className={'calc-button'} id={'\''} onClick={onButtonClick}>`</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'.'} onClick={onButtonClick}>.</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={','} onClick={onButtonClick}>,</NeoButton>
                 </NeoRow>
@@ -153,7 +154,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 
     componentDidMount(): void {
-        if (this.state.calculatorFunction!.length === 0) {this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")}
+        /*if (this.state.calculatorFunction!.length === 0) {this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")}*/
+        this.getALLFunctions(this.props.currentDatasetComponent?.eResource());
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
@@ -186,14 +188,23 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
             })
     };
 
-    getALLFunctions(resource_: Ecore.Resource){
-        const resource: Ecore.Resource = resource_;
-        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = 'getAllFunctions';
-        API.instance().call(ref, methodName, []).then((json: string) => {
-            let result = JSON.parse(json);
-            alert(result)
-        })
+    getALLFunctions(resource_?: Ecore.Resource){
+        const resource = resource_;
+        if (resource) {
+            const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+            const methodName: string = 'getAllFunctions';
+            API.instance().call(ref, methodName, []).then((json: string) => {
+                let  result: string = JSON.stringify(json);
+                API.instance().findEnum(    "dataset", "CalculatorFunction")
+                    .then((json: EObject[]) => {
+                        const paramValue = json.filter((element : any, index) => {return result.includes(element._id.substr(21, element._id.size)) || index > 35}).map((o: any) => {
+                            return o});
+                        this.setState({
+                            calculatorFunction: paramValue
+                        })
+                    })
+            })
+        }
     }
 
     handleCalculate = (e: any) => {
@@ -305,7 +316,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
         this.setState({parametersArray:[{index:1}],currentIndex:0});
         this.setFieldsValue({
             [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
-            [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!
+            [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
+            [inputSelectKey]: null
         });
     };
 
@@ -319,11 +331,11 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoTypography>
                 </Form.Item>
                 <Form.Item style={{marginBottom:'15px'}}>
+                    <NeoCol span={10} style={{justifyContent:'flex-start'}}>
                         {
                             this.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
                             })(
-                                <NeoCol span={12} style={{justifyContent:'flex-start'}}>
                                 <NeoSelect
                                     width={'310px'}
                                     getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
@@ -331,7 +343,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     onChange={(e: any) => {
                                         this.setState({currentIndex:e});
                                     }}>
-                                    {this.state.parametersArray?.map((element)=> {
+                                    {this.state.parametersArray?.filter((e)=>e.datasetColumn)
+                                        .map((element)=> {
                                         return <option
                                             key={(element.datasetColumn)? element.datasetColumn : ""}
                                             value={(element.index)? element.index - 1 : 0}
@@ -341,9 +354,19 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     })}
 
                                 </NeoSelect>
-                                </NeoCol>
                             )
                         }
+                    </NeoCol>
+                    <NeoCol span={2}>
+                        <NeoButton
+                            type={'link'}
+                            title={this.props.t("add calculable column")}
+                            id={'createNewRowButton'}
+                            onClick={this.createNewRow}
+                        >
+                            <NeoIcon icon={"plus"} color={NeoColor.violete_6} style={{margin:'auto 5px auto auto'}}/>
+                        </NeoButton>
+                    </NeoCol>
                     <NeoCol span={12} style={{justifyContent:'flex-end'}}>
                         {
                             this.getFieldDecorator(inputFieldKey,{
@@ -352,7 +375,14 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     message: ' '
                                 }]
                             })(
-                                <NeoInput width={'310px'} placeholder={this.t("Enter new column name")}/>
+                                <NeoInput
+                                    width={'310px'}
+                                    placeholder={this.t("Enter new column name")}
+                                    onPressEnter={(e: { preventDefault: () => any; })=>{
+                                        e.preventDefault();
+                                        this.handleSubmit(e)
+                                    }}
+                                />
                             )
                         }
                     </NeoCol>
@@ -446,7 +476,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     {this.t("functions/operators")}
                                 </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto" }}>
-                                    <CreateFunctions
+                                        <CreateFunctions
                                         onButtonClick={this.handleCalculate}
                                         functions={this.state.calculatorFunction}
                                         t={this.t}
@@ -484,6 +514,12 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             {this.props.t('clear')}
                         </NeoButton>
                     </div>
+                <p>
+                    {this.props.t("examples")}:<br/>
+                    1. (B+C)*100 <br/>
+                    2. {this.props.t("lower")}(B)||', '||{this.props.t("upper")}(C)<br/>
+                    3. {this.props.t("case")} {this.props.t("when")} A = 10 {this.props.t("then")} B + C {this.props.t("else")} B {this.props.t("end")}
+                </p>
             </Form>
         </div>
         )

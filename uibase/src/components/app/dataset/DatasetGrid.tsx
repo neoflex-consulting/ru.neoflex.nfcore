@@ -2,7 +2,7 @@ import React, {createRef} from 'react';
 import {AgGridReact} from '@ag-grid-community/react';
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 import {ConfigProvider} from 'antd';
-import {withTranslation} from 'react-i18next';
+import {WithTranslation, withTranslation} from 'react-i18next';
 import Ecore from 'ecore';
 import {docxElementExportType, docxExportObject} from "../../../utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
@@ -37,15 +37,16 @@ import {getStringValuesFromEnum} from "../../../utils/enumUtils";
 import {AntdFactoryClasses} from "../../../AntdFactory";
 
 const minHeaderHeight = 48;
+const minGridWidth = '375px';
 const backgroundColor = "#fdfdfd";
 
-interface Props {
+interface Props extends WithTranslation {
     hidden?: boolean,
     highlights?: IServerQueryParam[];
     currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
-    columnDefs: Map<String,any>[],
-    leafColumnDefs: Map<String,any>[],
+    columnDefs: Map<String, unknown>[],
+    leafColumnDefs: Map<String, unknown>[],
     paginationPageSize?: number,
     isEditMode?: boolean;
     showEditDeleteButton?: boolean;
@@ -58,10 +59,8 @@ interface Props {
     excelCellMask?: (params: ValueFormatterParams)=>string|undefined;
     className?: string;
     hidePagination?: boolean;
-    i18n: any;
-    t: any;
-    viewObject: any;
-    context: any;
+    gridKey?: string;
+    context?: any;
 }
 
 class AntdFactoryWrapper extends React.Component<any, {}> {
@@ -97,14 +96,15 @@ class DatasetGrid extends React.Component<Props, any> {
             columnDefs: this.colDefsToObject(this.props.columnDefs),
             rowData: this.props.rowData,
             highlights: [],
-            locale: switchAntdLocale(this.props.i18n, this.props.t),
+            locale: switchAntdLocale(this.props.i18n as unknown as string, this.props.t),
             gridOptions: {
                 frameworkComponents: {
                     DateEditor: DateEditor,
                     deleteButton: DeleteButton,
                     menu: GridMenu,
                     expand: Expand,
-                    antdFactory: AntdFactoryWrapper
+                    antdFactory: AntdFactoryWrapper/*,
+                    agColumnHeader: CustomHeader*/
                 },
                 defaultColDef: {
                     resizable: true
@@ -277,15 +277,19 @@ class DatasetGrid extends React.Component<Props, any> {
                 const cellStyle = params.colDef.cellStyle(params);
                 const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
                 objectRow.push({
-                    value: params.colDef.type === appTypes.String ? params.value
-                        : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
-                            : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
-                                : params.value,
-                    mask: params.colDef.type === appTypes.Timestamp && !mask
-                        ? "dd.mm.yyyy hh:mm:ss"
-                        : params.colDef.type === appTypes.Date && !mask
-                            ? "dd.mm.yyyy"
-                            : mask || "",
+                    value: params.value
+                            ? params.colDef.type === appTypes.String ? params.value
+                                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
+                                : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                                : params.value
+                            : null,
+                    mask: mask
+                        ? mask
+                            : params.colDef.type === appTypes.Timestamp ? "dd.mm.yyyy hh:mm:ss"
+                            : params.colDef.type === appTypes.Date ? "dd.mm.yyyy"
+                            : params.colDef.type === appTypes.Decimal ? "### ### ### ##0.00;-### ### ### ##0.00;0.00"
+                            : params.colDef.type === appTypes.Integer ? "### ### ### ###;-### ### ### ###;0"
+                        : "",
                     highlight: {
                         background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                         color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
@@ -298,7 +302,6 @@ class DatasetGrid extends React.Component<Props, any> {
             hidden: this.props.hidden!,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
-                tableName: this.props.viewObject.get('name') || "",
                 columns: header,
                 data: data
             },
@@ -316,7 +319,16 @@ class DatasetGrid extends React.Component<Props, any> {
         });
         return leafColumnDefs;
     }
-    
+
+    cleanCheckboxContext = () => {
+        this.props.columnDefs.forEach(c=>{
+            const component = (c.get('component') || c.get('editComponent')) as Ecore.EObject;
+            if (component && component.eClass.eURI() === AntdFactoryClasses.Checkbox) {
+                this.props.context.contextItemValues.delete(component.get('name') + component._id)
+            }
+        })
+    };
+
     componentDidMount(): void {
         if (this.props.context) {
             this.props.context.addDocxHandler(this.getDocxData.bind(this));
@@ -328,6 +340,8 @@ class DatasetGrid extends React.Component<Props, any> {
         if (this.props.context) {
             this.props.context.removeDocxHandler();
             this.props.context.removeExcelHandler();
+            //чистка конекста за checkbox'и
+            this.cleanCheckboxContext()
         }
     }
 
@@ -336,6 +350,10 @@ class DatasetGrid extends React.Component<Props, any> {
             this.changeHighlight();
         }
         if (JSON.stringify(this.state.rowData) !== JSON.stringify(this.props.rowData)) {
+            if (this.props.context) {
+                //При обновлении сбрасываем значения в context для checkbox'в
+                this.cleanCheckboxContext()
+            }
             this.setState({rowData: this.props.rowData})
         }
         if (!_.isEqual(prevProps.columnDefs, this.props.columnDefs)) {
@@ -596,7 +614,7 @@ class DatasetGrid extends React.Component<Props, any> {
     getGridComponent = (component: Ecore.EObject|string) => {
         if (typeof component === "string") {
             return component
-        } else if (getStringValuesFromEnum(AntdFactoryClasses).includes(component.eClass.eURI()) && component.get('grantType') !== grantType.denied) {
+        } else if (component && getStringValuesFromEnum(AntdFactoryClasses).includes(component.eClass.eURI()) && component.get('grantType') !== grantType.denied) {
             return 'antdFactory'
         }
         return "";
@@ -816,8 +834,7 @@ class DatasetGrid extends React.Component<Props, any> {
     };
 
     handleResize = (event: DisplayedColumnsChangedEvent|ColumnResizedEvent|undefined) => {
-
-        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""} .ag-header-cell-text`);
+        const headerCells = document.querySelectorAll(`#datasetGrid${this.props.gridKey ? this.props.gridKey : ""} .ag-header-cell-text`);
         let minHeight = minHeaderHeight;
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
@@ -860,7 +877,7 @@ class DatasetGrid extends React.Component<Props, any> {
                         return params.valueFormatted? params.valueFormatted : params.value;
                     },
                     cellEditor: (colDef.get('editComponent'))
-                        ? this.getGridComponent(colDef.get('component'))
+                        ? this.getGridComponent(colDef.get('editComponent'))
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
                             ? 'DateEditor'
                             : undefined,
@@ -877,6 +894,12 @@ class DatasetGrid extends React.Component<Props, any> {
                             : undefined,
                     valueFormatter: colDef.get('valueFormatter'),
                     tooltipField: colDef.get('tooltipField'),
+                    //headerComponentFramework - используется для подключения typography к заголоку грида
+                    /*headerComponentFramework: colDef.get('customHeader') && CustomHeader,
+                    headerComponentParams: colDef.get('customHeader') && {
+                        viewObject: colDef.get('customHeader'),
+                        appContext: this.props.context
+                    }*/
                 });
             }
         }
@@ -891,15 +914,16 @@ class DatasetGrid extends React.Component<Props, any> {
                  style={{
                      boxSizing: 'border-box',
                      // height: '100%',
-                     backgroundColor: backgroundColor}}
-                 className={'ag-theme-material'}
+                     backgroundColor: backgroundColor
+                 }}
+                 className={`${this.props.className} ag-theme-material ${!this.props.hidePagination && "dataset-with-paginator"}`}
             >
-                <div id={`datasetGrid${this.props.viewObject ? this.props.viewObject.eURI().split('#')[0] : ""}`}
+                <div id={`datasetGrid${this.props.gridKey ? this.props.gridKey : ""}`}
                     className={this.props.className}
                     style={{
-                        height: this.props.height ? this.props.height : 460 ,
+                        height: this.props.height ? this.props.height : 460,
                         width: this.props.width ? this.props.width : "99,5%",
-                        minWidth: "375px"}}>
+                        minWidth: minGridWidth}}>
                     {this.state.columnDefs !== undefined && this.state.columnDefs.length !== 0 &&
                     <ConfigProvider locale={this.state.locale}>
                         <AgGridReact
@@ -933,7 +957,11 @@ class DatasetGrid extends React.Component<Props, any> {
                     </ConfigProvider>
                     }
                     {!this.props.hidePagination && <div id="datasetPaginator"
-                         style={{float: "right", opacity: this.state.isGridReady ? 1 : 0, width: "100%", minWidth: "375px", backgroundColor: "#E6E6E6"}}>
+                                                        style={{float: "right",
+                                                            opacity: this.state.isGridReady ? 1 : 0,
+                                                            width: "100%", minWidth: minGridWidth,
+                                                            backgroundColor: "#E6E6E6",
+                                                            height: "40px"}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}
@@ -942,7 +970,6 @@ class DatasetGrid extends React.Component<Props, any> {
                             totalNumberOfRows = {this.state.rowData.filter((r:{[key: string]: unknown})=>!(r.isVisible__ === false)).length}
                             onPageChange={(page)=>this.grid.current.api.paginationGoToPage(page - 1)}
                             onPageSizeChange = {(size)=>{this.grid.current.api.paginationSetPageSize(size)}}
-                            grid = {this.grid}
                         />
                     </div>}
                 </div>

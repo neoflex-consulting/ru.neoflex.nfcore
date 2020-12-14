@@ -19,6 +19,12 @@ import ru.neoflex.nfcore.utils.JdbcUtils
 import java.sql.Connection
 import java.sql.ResultSet
 
+enum DMLQueryType {
+    INSERT,
+    UPDATE,
+    DELETE
+}
+
 class DatasetComponentExt extends DatasetComponentImpl {
 
     @Override
@@ -47,11 +53,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 } else {
                                     def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
                                     rdbmsColumn.name = columns[i].name
+                                    rdbmsColumn.columnName = columns[i].name
                                     rdbmsColumn.datasetColumn = columns[i]
-                                    def typography = ApplicationFactory.eINSTANCE.createTypography()
-                                    typography.name = columns[i].name
-                                    rdbmsColumn.headerName = typography
-                                    rdbmsColumn.headerTooltip = "type: " + columns[i].convertDataType
                                     rdbmsColumn.resizable = true
                                     datasetComponent.column.add(rdbmsColumn)
                                 }
@@ -129,10 +132,29 @@ class DatasetComponentExt extends DatasetComponentImpl {
     }
 
     @Override
-    String getAllFunctions() {
-        CalculatorFunction.
-        return "super.getAllFunctions()"
-    }
+        String getAllFunctions() {
+        def calcFunctions = []
+        def jdbcDataset = dataset as JdbcDataset
+        def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
+                for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++){
+                    String str = calculatorAdapter.metaClass.delegate.allMethods[i].mopName
+                    str = str.substring(8,str.size())
+                    for (CalculatorFunction cf : CalculatorFunction.values()){
+                    if (str.equals(cf.name) || str.equals(cf.name + "s") || cf.name.equals("to_char") && str.equals("toString") || cf.name.equals("to_number") && str.equals("toNumber") || cf.name.equals("to_date") && str.equals("toDate")){
+                        boolean flag = false;
+                        for (int j = 0; j < calcFunctions.size(); j++){
+                            if (calcFunctions[j] == cf.name){
+                                flag = true;
+                            }
+                        }
+                        if (!flag) {
+                            calcFunctions.add(cf.name)
+                        }
+                        }
+                     }
+                }
+                return calcFunctions;
+             }
 
     List<DatasetColumnView> getLeafColumns(EList<DatasetColumnView> column, List<DatasetColumnView> leafColumns) {
         for (col in column) {
@@ -323,27 +345,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
                                     map["select"] = "AVG(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Среднее:")
+                                    namesOfOperationsInServerAggregations.add("Average:")
                                 }
                                 if (operator == 'COUNT') {
                                     map["select"] = "COUNT(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Счетчик:")
+                                    namesOfOperationsInServerAggregations.add("Count:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
                                     map["select"] = "COUNT(DISTINCT t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
+                                    namesOfOperationsInServerAggregations.add("CountDistinct:")
                                 }
                                 if (operator == 'MAX') {
                                     map["select"] = "MAX(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Максимум:")
+                                    namesOfOperationsInServerAggregations.add("Maximum:")
                                 }
                                 if (operator == 'MIN') {
                                     map["select"] = "MIN(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Минимум:")
+                                    namesOfOperationsInServerAggregations.add("Minimum:")
                                 }
                                 if (operator == 'SUM') {
                                     map["select"] = "SUM(t.\"${aggregations[j].datasetColumn}\") as \"${aggregations[j].datasetColumn}\""
-                                    namesOfOperationsInServerAggregations.add("Сумма:")
+                                    namesOfOperationsInServerAggregations.add("Sum:")
                                 }
                                 if (!serverAggregations.contains(map)) {
                                     serverAggregations.add(map)
@@ -404,7 +426,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query}) t"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName} t"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName} t"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -676,27 +698,27 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                 def operator = getConvertAggregate(aggregations[j].operation.toString().toLowerCase())
                                 if (operator == 'AVG') {
                                     map["select"] = "AVG(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Среднее:")
+                                    namesOfOperationsInServerAggregations.add("Average:")
                                 }
                                 if (operator == 'COUNT') {
                                     map["select"] = "count(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Счетчик:")
+                                    namesOfOperationsInServerAggregations.add("Count:")
                                 }
                                 if (operator == 'COUNT_DISTINCT') {
                                     map["select"] = "distinct (${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Счетчик уникальных:")
+                                    namesOfOperationsInServerAggregations.add("CountDistinct:")
                                 }
                                 if (operator == 'MAX') {
                                     map["select"] = "MAX(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Максимум:")
+                                    namesOfOperationsInServerAggregations.add("Maximum:")
                                 }
                                 if (operator == 'MIN') {
                                     map["select"] = "MIN(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Минимум:")
+                                    namesOfOperationsInServerAggregations.add("Minimum:")
                                 }
                                 if (operator == 'SUM') {
                                     map["select"] = "SUM(${aggregations[j].datasetColumn})"
-                                    namesOfOperationsInServerAggregations.add("Сумма:")
+                                    namesOfOperationsInServerAggregations.add("Sum:")
                                 }
                                 if (!serverAggregations.contains(map)) {
                                     serverAggregations.add(map)
@@ -750,12 +772,11 @@ class DatasetComponentExt extends DatasetComponentImpl {
                     }
                 }
             }
-
             String currentQuery
             if ((dataset as JdbcDatasetExt).queryType == QueryType.USE_QUERY) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM (${jdbcDataset.query})"
             } else {
-                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName}.${jdbcDataset.tableName}"
+                currentQuery = "\nSELECT ${queryColumns.join(', ')} \n  FROM ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}"
             }
             if (calculatedExpression) {
                 currentQuery = "\nSELECT ${queryColumns.join(', ')}, ${serverCalculatedExpression.select.join(', ')}" +
@@ -916,8 +937,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         String query;
         def jdbcDataset = this.dataset as JdbcDataset
         if (dmlQuery && dmlQuery.generateFromModel) {
-            if (jdbcDataset.schemaName == "" || !jdbcDataset.schemaName)
-                throw new IllegalArgumentException("jdbcDataset schema is not specified")
             if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
                 throw new IllegalArgumentException("jdbcDataset table is not specified")
 
@@ -947,14 +966,14 @@ class DatasetComponentExt extends DatasetComponentImpl {
             switch (queryType) {
                 case DMLQueryType.UPDATE:
                     query = """
-                    update ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                    update ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}
                        set ${values}
                      where ${primaryKey}
                     """; break;
                 case DMLQueryType.DELETE:
                     query = """
                     delete
-                      from ${jdbcDataset.schemaName}.${jdbcDataset.tableName}
+                      from ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName}
                      where ${primaryKey}
                     """; break;
                 case DMLQueryType.INSERT:
@@ -972,7 +991,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                                     : "''"}.join(", ")
                     String columnDef = parameters.findAll{ qp -> !qp.isPrimaryKey }.collect{qp -> return "${qp.parameterName}"}.join(", ")
                     query = """
-                    insert into ${jdbcDataset.schemaName}.${jdbcDataset.tableName} (${columnDef})
+                    insert into ${jdbcDataset.schemaName == "" ? jdbcDataset.tableName : jdbcDataset.schemaName+"."+jdbcDataset.tableName} (${columnDef})
                     values (${values})
                     """; break;
                 default:
@@ -1056,7 +1075,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
         if (result.size() > 0) {
             for (func in result) {
                 List<String> args = (func =~ /[a-zA-Z0-9._"']+/).findAll()
-                switch (args[0]) {
+                    switch (args[0]) {
                     case CalculatorFunction.SUBSTRING.getName():
                         expression = expression.replace(func, calculatorAdapter.substring(args[1], args[2], args[3]));
                         if (isOrientDB){

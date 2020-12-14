@@ -227,6 +227,9 @@ const SortableItem = SortableElement(({value}: any) => {
                                     , true)}
                                 title={value.value}
                                 id={value.index.toString()}
+                                onPressEnter={(e: { preventDefault: () => any; })=>{
+                                    e.preventDefault();
+                                }}
                             />
                         )}
                         </NeoRow>

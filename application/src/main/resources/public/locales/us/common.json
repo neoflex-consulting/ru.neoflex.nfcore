@@ -260,6 +260,7 @@
         "case": "Case",
         "when": "When",
         "then": "Then",
+        "else": "Else",
         "end": "End",
         "and": "And",
         "or": "Or",
@@ -309,6 +310,7 @@
         "hiddencolumns": "Hide columns",
         "delete row": "Delete row",
         "add row": "Add row",
+        "add calculable column": "Добавить вычилсяемый столбец",
         "run query": "Run query",
         "print": "Print",
         "export to docx": "Export in docx",
@@ -449,5 +451,21 @@
         "delete module": "Delete module",
         "delete section": "Delete section",
         "delete module with references": "Delete module with references",
-        "delete section with references": "Delete section with references"
+        "delete section with references": "Delete section with references",
+
+        "showAllTables": "Show all tables",
+        "loadAllColumns": "Load all columns",
+        "runQueryDataset": "Run query",
+        "deleteAllColumns": "Delete all columns",
+        "testConnection": "Test connection",
+        "createAllColumns": "Load all columns",
+        "runQuery": "Run query",
+        "isEObjectPermitted": "Is EObject permitted ",
+        "isResourcePermitted": "Is Resource permitted ",
+        "recreateWeekend": "Recreate weekend",
+        "copyHolidays": "Copy Holidays",
+        "recreateWorkingDays": "Recreate working days",
+        "first page": "First page",
+        "last page": "Last page",
+        "examples": "Examples"
 }

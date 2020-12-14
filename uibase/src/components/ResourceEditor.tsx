@@ -470,15 +470,18 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     prepareTableData(targetObject: { [key: string]: any; }, mainEObject: Ecore.EObject, key: String): Array<any> {
-        function shouldRenderProperty(targetObject: { [key: string]: any; }, annotationJSON: string) {
+        function shouldRenderProperty(targetObject: { [key: string]: any; }, featureList: Ecore.EObject[], feature: Ecore.EObject, annotationJSON: string) {
             if (annotationJSON === "") {
                 return true
             }
             let isVisible = true;
             for (const [key, value] of Object.entries(JSON.parse(annotationJSON.split("'").join("\"")))) {
+                const eType = featureList.find(f=>f.get('name') === key)!.get('eType');
+                const enumValues = eType.eContents().filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations");
+                const targetValue = targetObject[key] || feature.get('defaultValueLiteral') || (enumValues && enumValues.length > 0 && enumValues[0].get('name'));
                 isVisible = Array.isArray(value)
-                    ? value.includes(targetObject[key])
-                    : targetObject[key] === value
+                    ? value.includes(targetValue)
+                    : targetValue === value
             }
             return isVisible
         }
@@ -496,8 +499,25 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const isContainer = feature.get('eOpposite') && feature.get('eOpposite').get('containment') ? true : false;
                 const description = getFieldAnnotationByKey(feature.get('eAnnotations'), 'documentation');
                 const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true'
-                    && shouldRenderProperty(targetObject, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
+                    && shouldRenderProperty(targetObject, featureList, feature, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
                 const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
+                const isExpandable = getFieldAnnotationByKey(feature.get('eAnnotations'), 'expandable') === 'true';
+                const props = {
+                    value: targetObject[feature.get('name')],
+                    targetObject: targetObject,
+                    eObject: feature,
+                    eType: feature.get('eType'),
+                    upperBound: feature.get('upperBound'),
+                    idx: idx,
+                    ukey: key,
+                    onChange: this.onTablePropertyChange,
+                    handleDeleteSingleRef: this.handleDeleteSingleRef,
+                    handleDeleteRef: this.handleDeleteRef,
+                    onEClassBrowse: this.onEClassBrowse,
+                    onBrowse: this.onBrowse,
+                    mainEObject: mainEObject,
+                    edit: this.state.edit && !isDisabled
+                };
                 if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
@@ -511,22 +531,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             </NeoHint>
                         </div>
                         : feature.get('name'),
-                    value: FormComponentMapper.getComponent({
-                        value: targetObject[feature.get('name')],
-                        targetObject: targetObject,
-                        eObject: feature,
-                        eType: feature.get('eType'),
-                        upperBound: feature.get('upperBound'),
-                        idx: idx,
-                        ukey: key,
-                        onChange: this.onTablePropertyChange,
-                        handleDeleteSingleRef: this.handleDeleteSingleRef,
-                        handleDeleteRef: this.handleDeleteRef,
-                        onEClassBrowse: this.onEClassBrowse,
-                        onBrowse: this.onBrowse,
-                        mainEObject: mainEObject,
-                        edit: this.state.edit && !isDisabled
-                    }),
+                    value: isExpandable
+                        ? FormComponentMapper.getComponentWrapper({
+                            type: "expand",
+                            wrappedComponent: FormComponentMapper.getComponent(props),
+                            expandedComponent: FormComponentMapper.getComponent({...props, expanded: true})
+                        })
+                        : FormComponentMapper.getComponent(props),
                     key: feature.get('name') + idx
                 })
             });
@@ -949,7 +960,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false) => {
-        const {t} = this.props;
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
@@ -1199,12 +1209,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 </div>
                 {this.state.modalRefVisible && <Modal
                     key="add_ref_modal"
+                    className={"modal-add-inner-ref"}
                     width={'700px'}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={this.state.selectedRefUries.length > 0 ?
-                        <Button type="primary" onClick={this.handleAddNewRef}>OK</Button>: null}
+                    footer={null}
                 >
                     <Select
                         mode="multiple"
@@ -1264,8 +1274,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         </Select.Option>
                                 })}
                     </Select>
+                    <Button type="primary" onClick={this.handleAddNewRef} disabled={this.state.selectedRefUries.length === 0}>OK</Button>
                 </Modal>}
                 {this.state.modalResourceVisible && <Modal
+                    className={"modal-add-resource"}
                     key="add_resource_modal"
                     width={'1000px'}
                     title={t('addresources')}

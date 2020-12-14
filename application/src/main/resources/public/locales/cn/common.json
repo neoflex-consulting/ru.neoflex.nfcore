@@ -240,6 +240,7 @@
         "case": "条件",
         "when": "如果",
         "then": "然后",
+        "else": "其他",
         "end": "结束",
         "and": "和",
         "or": "或",
@@ -289,6 +290,7 @@
         "hiddencolumns": "隱藏欄",
         "delete row": "刪除行",
         "add row": "添加行",
+        "add calculable column": "加減列",
         "run query": "應用",
         "print": "列印",
         "export to docx": "卸貨中docx",
@@ -412,6 +414,21 @@
         "delete module": "刪除模塊",
         "delete section": "正在刪除部分",
         "delete module with references": "刪除模塊？",
-        "delete section with references": "刪除帶有相關模塊的部分？"
+        "delete section with references": "刪除帶有相關模塊的部分？",
 
+        "showAllTables": "顯示所有表",
+        "loadAllColumns": "加載所有列",
+        "runQueryDataset": "運行查詢",
+        "deleteAllColumns": "刪除所有列",
+        "testConnection": "測試連接",
+        "createAllColumns": "加載所有列",
+        "runQuery": "運行查詢",
+        "isEObjectPermitted": "檢查對EObject的訪問",
+        "isResourcePermitted": "檢查資源訪問",
+        "recreateWeekend": "重新創建週末",
+        "copyHolidays": "複製假期",
+        "recreateWorkingDays": "重新創建工作日",
+        "first page": "第一頁",
+        "last page": "最後一頁",
+        "examples": "示例"
 }

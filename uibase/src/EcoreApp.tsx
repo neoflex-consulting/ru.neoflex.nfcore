@@ -374,7 +374,7 @@ class EcoreApp extends React.Component<any, State> {
 
     changeURL = (appModuleName?: string, useParentReferenceTree?: boolean, tree?: string[], params?: IServerNamedParam[]) => {
         if (this.isDatasetComponentsBufferEmpty()) {
-            const path = this.getURL(appModuleName, useParentReferenceTree, tree, params);
+            const path = this.getURL(appModuleName, useParentReferenceTree, useParentReferenceTree ? tree : [], params);
             if (path) {
                 this.setState({pathFull: path});
                 this.props.history.push(encodeAppURL(path));

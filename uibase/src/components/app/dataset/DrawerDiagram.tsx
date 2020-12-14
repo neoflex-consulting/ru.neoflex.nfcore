@@ -164,7 +164,15 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <NeoInput width= 'none' disabled={disabled} placeholder={this.props.t(placeHolder)}/>
+                <NeoInput
+                    width= 'none'
+                    disabled={disabled}
+                    placeholder={this.props.t(placeHolder)}
+                    onPressEnter={(e: { preventDefault: () => any; })=>{
+                        e.preventDefault();
+                        this.handleSubmit()
+                    }}
+                />
             )}
         </Form.Item>
     };

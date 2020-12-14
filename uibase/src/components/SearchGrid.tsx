@@ -320,7 +320,6 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                      totalNumberOfPage = {Math.ceil(this.filteredData().length/this.state.paginationPageSize)}
                                      paginationPageSize = {this.state.paginationPageSize}
                                      totalNumberOfRows = {this.filteredData().length}
-                                     grid = {this.grid}
                                      onPageChange={this.onPageChange}
                                      onPageSizeChange = {(size)=>{this.setState({paginationPageSize: size})}}
                                  />

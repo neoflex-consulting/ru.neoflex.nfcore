@@ -1,6 +1,7 @@
 /*override*/
 #meta-browser * .ant-tabs-top-bar {
-    max-width: 48.9vw !important;
+    max-width: calc(100% - 319px);
+    width: fit-content;
     margin-bottom: 16px;
 }
 
@@ -9,7 +10,7 @@
 }
 
 #meta-browser * .ant-tabs-nav-container {
-    max-width: 48.9vw !important;
+    max-width: 100%;
 }
 
 #meta-browser *  .ant-tabs-tab {

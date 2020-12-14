@@ -20,6 +20,7 @@ interface Props {
     allAggregates?: Array<EObject>;
     componentType?: paramType;
     handleDrawerVisability?:any;
+    onReset?: ()=>void;
 }
 
 interface State {
@@ -129,7 +130,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                                    title={t("reset")}
                                    id={'resetButton'}
                                    style={{top:'-6px'}}
-                                   onClick={this.reset}>
+                                   onClick={this.props.onReset}>
                             <span style={{color: '#B38136', fontSize: '14px', fontWeight:'normal', textDecorationLine:'underline'}}>{t('is default')}</span>
                         </NeoButton>
                     </NeoCol>
