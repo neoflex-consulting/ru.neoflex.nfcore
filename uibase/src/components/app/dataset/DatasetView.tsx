@@ -66,10 +66,7 @@ export interface IDiagram {
     valueColumn: string,
     diagramName: string,
     diagramLegend: string,
-    legendAnchorPosition: string,
-    axisXPosition: string|undefined,
     axisXLegend: string,
-    axisYPosition: string|undefined,
     axisYLegend: string,
     diagramType: string,
     colorSchema: string
@@ -512,13 +509,10 @@ class DatasetView extends React.Component<any, State> {
                                 diagramType: f.diagramType,
                                 axisXLegend: f.axisXLegend,
                                 axisYLegend: f.axisYLegend,
-                                axisXPosition: f.axisXPosition,
-                                axisYPosition: f.axisYPosition,
                                 colorSchema: f.colorSchema,
                                 diagramLegend: f.diagramLegend,
                                 isSingle: f.isSingle,
                                 keyColumn: f.keyColumn,
-                                legendAnchorPosition: f.legendAnchorPosition,
                                 valueColumn: f.valueColumn
                             })
                         }
@@ -584,9 +578,6 @@ class DatasetView extends React.Component<any, State> {
                         diagramType: (f.get('diagramType') !== null ? f.get('diagramType') : "Line"),
                         axisXLegend: f.get('axisXLegend'),
                         axisYLegend: f.get('axisYLegend'),
-                        axisXPosition: (f.get('axisXPosition') !== null ? f.get('axisXPosition') : "Top"),
-                        axisYPosition: (f.get('axisYPosition') !== null ? f.get('axisYPosition') : "Left"),
-                        legendAnchorPosition: (f.get('legendAnchorPosition') !== null ? f.get('legendAnchorPosition') : "TopLeft"),
                         colorSchema: "accent",
                         diagramLegend: f.get('diagramLegend'),
                         isSingle: true,

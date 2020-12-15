@@ -108,9 +108,6 @@ class Diagram {
     String axisXLegend
         @NFCore(documentation="Подпись по вертикали")
     String axisYLegend
-    AxisXPositionType axisXPosition
-    AxisYPositionType axisYPosition
-    LegendAnchorPositionType legendAnchorPosition
     String diagramLegend
     String indexBy
     String keyColumn
