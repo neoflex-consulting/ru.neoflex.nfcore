@@ -22,6 +22,8 @@ interface Props {
     handleDrawerVisability?: any;
 }
 
+const dateOperations = ["EqualTo","NotEqual","IsEmpty","IsNotEmpty","LessThan","LessThenOrEqualTo","GreaterThan","GreaterThanOrEqualTo"];
+
 const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
@@ -114,6 +116,11 @@ const SortableItem = SortableElement(({value}: any) => {
                         >
                             {
                                 value.allOperations!
+                                    .filter((o:any)=> {
+                                        return value.columnDefs.find((c:any)=>c.get('headerName') === value.getFieldValue(`${value.idDatasetColumn}`))?.get('convertDataType') === "Date"
+                                            ? dateOperations.includes(o.get('name'))
+                                            : true
+                                    })
                                     .map((o: any) =>
                                         <option
                                             key={JSON.stringify({index: value.index, columnName: 'operation', value: o.get('name')})}
@@ -224,6 +231,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                                     translate: this.translate,
                                     parametersArray: this.state.parametersArray,
                                     handleOnSubmit: this.handleOnSubmit,
+                                    getFieldValue: this.getFieldValue,
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>
