@@ -871,7 +871,8 @@ class DatasetGrid extends React.Component<Props, any> {
                         onDelete: this.onDelete,
                         editGrid: this,
                         showMenuCopyButton: this.props.showMenuCopyButton,
-                        isAgComponent: true
+                        isAgComponent: true,
+                        gridId: `datasetGrid${this.props.gridKey ? this.props.gridKey : ""}`
                     } : undefined,
                     cellRenderer: (colDef.get('component')) ? this.getGridComponent(colDef.get('component')) : function (params: any) {
                         return params.valueFormatted? params.valueFormatted : params.value;
@@ -887,10 +888,11 @@ class DatasetGrid extends React.Component<Props, any> {
                             viewObject: colDef.get('editComponent'),
                             isAgComponent: true,
                             isAgEdit: true,
-                            colData: colDef.get('field')
+                            colData: colDef.get('field'),
+                            gridId: `datasetGrid${this.props.gridKey ? this.props.gridKey : ""}`
                         }
                         : [appTypes.Date,appTypes.Timestamp].includes(colDef.get('type'))
-                            ? {mask: colDef.get('mask'), type: colDef.get('type')}
+                            ? {mask: colDef.get('mask'), type: colDef.get('type'), gridId: `datasetGrid${this.props.gridKey ? this.props.gridKey : ""}`}
                             : undefined,
                     valueFormatter: colDef.get('valueFormatter'),
                     tooltipField: colDef.get('tooltipField'),

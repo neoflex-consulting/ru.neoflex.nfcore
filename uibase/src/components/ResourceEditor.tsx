@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Icon, Input, Layout, Menu, Modal, notification, Row, Select, Table, Tree} from 'antd';
+import {Button, Col, Icon, Input, Layout, Menu, Modal, Row, Select, Table, Tree} from 'antd';
 import Ecore, {EObject} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -24,6 +24,7 @@ import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint} from "neo-design/lib";
+import {IMainContext} from "../MainContext";
 
 interface ITargetObject {
     eClass: string,
@@ -32,7 +33,8 @@ interface ITargetObject {
 }
 
 export interface Props {
-    principal: any
+    principal: any;
+    notification: IMainContext['notification']
 }
 
 interface State {
@@ -293,16 +295,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
 
             if (!this.state.edit) {
-                this.notification(t('notification'), t('editing is not available'));
+                this.props.notification(t('notification'), t('editing is not available'), "info");
             }
             else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
-                this.notification(t('notification'), 'Опрация заблокирована');
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
             }
             else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
                 (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
                 (dropKey === 'null' && event.node.props.arrayLength !== 0)
             ) {
-                this.notification(t('notification'), 'Опрация заблокирована');
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
             }
             else {
                 let updatedJSON = this.state.resourceJSON;
@@ -320,14 +322,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     let upperBound = event.node.props.upperBound
                     if (upperBound === 1) {
                         item[nodePropertyName] = dragObj
-                        this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
 
                     } else if (upperBound === -1) {
                         if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
                             item[nodePropertyName] = []
                         }
                         item[nodePropertyName].push(dragObj)
-                        this.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен');
+                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
                     }
                 }
                 else {
@@ -410,19 +412,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
-    notification = (title: string, description: string) => {
-        const {t} = this.props;
-        let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
-            {t("closeall")}
-        </Button>);
-        let key = title + description;
-
-        return (
-            notification.info({
-                message: title, description: description, duration: 0, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
-            }))
-    };
-
     onTreeRightClick = (e: any) => {
         const {t} = this.props;
         const posX = e.event.clientX;
@@ -438,7 +427,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             this.state.edit ?
                 this.setState({rightClickMenuVisible: true}) :
-                this.notification(t('notification'), t('editing is not available'));
+                this.props.notification(t('notification'), t('editing is not available'), "info");
             this.setState({
                 rightMenuPosition: { x: posX, y: posY },
                 treeRightClickNode: nodeProps,
@@ -924,7 +913,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     resource: resource
                 });
                 this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
-                this.notification(t('notification'), t('success'))
+                this.props.notification(t('notification'), t('success'), "info")
             })
         }
     };
@@ -1108,6 +1097,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         translate={t}
                         mainEObject={this.state.mainEObject}
                         refresh={this.refresh}
+                        notification={this.props.notification}
                     />}
                     <Button className="panel-button" icon="copy" onClick={this.cloneResource} title={this.props.t("copy")} />
                     <Button className="panel-button" icon="delete" type="danger" ghost onClick={this.delete} title={this.props.t("delete")} />

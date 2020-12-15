@@ -7,19 +7,13 @@ import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 
-interface Props {
-    parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Map<String,any>[];
-    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newParam: any, paramName: string) => void;
-    isVisible?: boolean;
+interface Props extends ParameterDrawerProps {
     allAggregates?: Array<EObject>;
-    componentType?: paramType;
     handleDrawerVisability?: any;
 }
 
@@ -65,7 +59,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoSelect
                             width={'250px'}
-                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
+                            getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('operation')}
                             allowClear={true}
                             onChange={(e: any) => {
@@ -130,7 +124,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoSelect
                             width={'250px'}
-                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
+                            getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('Column')}
                             // style={{ marginRight: '30px', marginLeft: '10px' }}
                             showSearch={true}
@@ -258,6 +252,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                                     translate: this.translate,
                                     parametersArray: this.state.parametersArray,
                                     handleOnSubmit: this.handleOnSubmit,
+                                    popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

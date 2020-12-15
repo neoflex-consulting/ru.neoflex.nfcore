@@ -1,7 +1,7 @@
 import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select} from 'antd';
+import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, DatePicker} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
@@ -466,8 +466,9 @@ export class Select_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         let value;
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            const temp = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        const pathFull = this.props.context.getFullPath();
+        if (pathFull[pathFull.length - 1].params !== undefined) {
+            const temp = getUrlParam(pathFull[pathFull.length - 1].params, this.viewObject.get('name'));
             this.urlCurrentValue =  typeof temp !== "object" ? temp : temp && temp[this.viewObject.get('value')]+"";
         }
 
@@ -675,6 +676,8 @@ export class Select_ extends ViewContainer {
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{marginBottom: marginBottom}}>
                 <Select
+                    //Fullscreen ag-grid render
+                    getPopupContainer={() => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement}
                     key={this.viewObject._id}
                     className={cssClass}
                     disabled={isReadOnly}
@@ -717,8 +720,9 @@ export class DatePicker_ extends ViewContainer {
         if (this.viewObject.get('formatMask')) {
             mask = this.viewObject.get('formatMask').get('value')
         }
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        const pathFull = this.props.context.getFullPath();
+        if (pathFull[pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(pathFull[pathFull.length - 1].params, this.viewObject.get('name'));
         }
         const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', '1900-01-01');
         value = value
@@ -803,7 +807,9 @@ export class DatePicker_ extends ViewContainer {
                  style={{marginBottom: marginBottom}}
             >
                 <ConfigProvider locale={this.state.locale}>
-                    <NeoDatePicker
+                    <DatePicker
+                        //Fullscreen ag-grid render
+                        getCalendarContainer={() => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement}
                         key={this.viewObject._id}
                         className={cssClass}
                         showTime={this.viewObject.get('showTime')}
@@ -812,7 +818,6 @@ export class DatePicker_ extends ViewContainer {
                         disabled={isReadOnly}
                         allowClear={this.viewObject.get('allowClear') || false}
                         format={this.state.mask}
-                        width={'200px'}
                         onChange={(date: any, dateString: string) => {
                             this.onChange(dateString)
                         }}/>
@@ -918,9 +923,10 @@ class GroovyCommand_ extends Component {
     execute = () => {
         const commandType = this.viewObject.get('commandType')||"Eval";
         const command = this.viewObject.get('command');
+        const pathFull = this.props.context.getFullPath();
         const body = replaceNamedParam(command, getNamedParams(this.viewObject.get('valueItems')
             , this.props.context.contextItemValues
-            , this.props.pathFull[this.props.pathFull.length - 1].params));
+            , pathFull[pathFull.length - 1].params));
         if (commandType === "Resource") {
 
             API.instance().fetchJson('/script/resource?path='+this.viewObject.get('gitResourcePath'), {
@@ -982,8 +988,9 @@ class ValueHolder_ extends Component {
     constructor(props: any) {
         super(props);
         let value;
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        const pathFull = this.props.context.getFullPath();
+        if (pathFull[pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(pathFull[pathFull.length - 1].params, this.viewObject.get('name'));
         }
         value = value ? value : this.viewObject.get('value') || "";
         this.state = {
@@ -1020,8 +1027,9 @@ export class Input_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         let value;
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        const pathFull = this.props.context.getFullPath();
+        if (pathFull[pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(pathFull[pathFull.length - 1].params, this.viewObject.get('name'));
         }
         const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', '');
         value = value
@@ -1133,9 +1141,10 @@ export class Checkbox_ extends ViewContainer {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
         };
-        const URLvalue = this.props.pathFull
-            && this.props.pathFull[this.props.pathFull.length - 1].params !== undefined
-            && getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'))
+        const pathFull = this.props.context.getFullPath();
+        const URLvalue = pathFull
+            && pathFull[pathFull.length - 1].params !== undefined
+            && getUrlParam(pathFull[pathFull.length - 1].params, this.viewObject.get('name'))
         //в гриде
         if (this.props.isAgComponent && !this.props.isAgEdit) {
             const returnValueType = this.viewObject.get('returnValueType') || "string";
@@ -1369,7 +1378,8 @@ class EventHandler_ extends Component {
     handleEvent(value:any) {
         if (!this.state.isDisabled) {
             let componentCondition = true;
-            this.viewObject.get('eventActions').each((el: EObject) => {
+            const pathFull = this.props.context.getFullPath();
+            this.viewObject.get('eventActions').each((el: EObject, index:number) => {
                 let isHandled = false;
                 const eventAction: IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                     return ((el.get('triggerItem')
@@ -1382,7 +1392,7 @@ class EventHandler_ extends Component {
                     if (this.viewObject.get('conditionItems').size() > 0) {
                         params = getNamedParams(this.viewObject.get('conditionItems')
                             , this.props.context.contextItemValues
-                            , this.props.pathFull[this.props.pathFull.length - 1].params).map(obj => {
+                            , pathFull[pathFull.length - 1].params).map(obj => {
                             return {
                                 ...obj,
                                 parameterValue: obj.parameterValue !== undefined && obj.parameterValue !== null ? obj.parameterValue : ""
@@ -1393,7 +1403,7 @@ class EventHandler_ extends Component {
                         params = paramNames.map(paramName => {
                             return getNamedParamByName(paramName.replace(":","")
                                 , this.props.context.contextItemValues
-                                , this.props.pathFull[this.props.pathFull.length - 1].params)
+                                , pathFull[pathFull.length - 1].params)
                         });
                     }
                     try {
@@ -1450,23 +1460,25 @@ class EventHandler_ extends Component {
                         isHandled = true;
                     }
                     if (el.get('action') === actionType.backToLastPage) {
-                        if (this.props.pathFull.length >= 2) {
-                            const appModule = this.props.pathFull[this.props.pathFull.length - 2];
+                        if (pathFull.length >= 2) {
+                            const appModule = pathFull[pathFull.length - 2];
                             let params: Object[] = appModule.params;
                             this.props.context.changeURL!(appModule.appModule, true, undefined, params);
                         }
                         isHandled = true;
                     }
                     if (!isHandled) {
-                        if (el.get('triggerItem')) {
-                            this.props.context.notification("Event handler warning",
-                                `Action ${el.get('action') || actionType.execute} on ${el.get('triggerItem').get('name')} is not supported in EventHandler ${this.viewObject.get('name')}`,
-                                "warning")
-                        } else {
-                            this.props.context.notification("Event handler warning",
-                                `Action ${el.get('action') || actionType.execute} is not supported in EventHandler ${this.viewObject.get('name')}`,
-                                "warning")
-                        }
+                        setTimeout(() => {
+                            if (el.get('triggerItem')) {
+                                this.props.context.notification("Event handler warning",
+                                    `Action ${el.get('action') || actionType.execute} on ${el.get('triggerItem').get('name')} is not supported in EventHandler ${this.viewObject.get('name')}`,
+                                    "warning")
+                            } else {
+                                this.props.context.notification("Event handler warning",
+                                    `Action ${el.get('action') || actionType.execute} is not supported in EventHandler ${this.viewObject.get('name')}`,
+                                    "warning")
+                            }
+                        }, index * 50);
                     }
                 }
             })
@@ -1570,8 +1582,9 @@ export class RadioGroup_ extends ViewContainer {
     constructor(props: any) {
         super(props);
         let value;
-        if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
-            value = getUrlParam(this.props.pathFull[this.props.pathFull.length - 1].params, this.viewObject.get('name'));
+        const pathFull = this.props.context.getFullPath();
+        if (pathFull[pathFull.length - 1].params !== undefined) {
+            value = getUrlParam(pathFull[pathFull.length - 1].params, this.viewObject.get('name'));
         }
         value = value ? value : this.viewObject.get('value') || "";
         const agValue = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'label');

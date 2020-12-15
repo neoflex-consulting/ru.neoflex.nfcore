@@ -192,7 +192,17 @@
     font-weight: 500;
 }
 
-#referenceTree .ant-menu-item {
+#referenceTree.ant-menu-inline,
+#referenceTree.ant-menu-vertical, .ant-menu-vertical-left {
+    border-right: 1px solid transparent;
+}
+
+#referenceTree .ant-menu-inline .ant-menu-item,
+#referenceTree .ant-menu-inline .ant-menu-submenu-title {
+     width: 100%;
+}
+
+#referenceTree .ant-menu-item:not(.item-with-icon) {
     line-height: 20px;
     padding: 10px 0 10px 0;
 }

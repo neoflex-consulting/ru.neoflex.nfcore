@@ -6,19 +6,14 @@ import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoColor, NeoInput, NeoRow, NeoSwitch} from "neo-design/lib";
 import NeoIcon from "neo-icon/lib/icon";
 import arrayMove from "array-move";
 
 const { Paragraph } = Typography;
 
-interface Props {
-    parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Map<String,any>[];
-    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newParam: any, paramName: string) => void;
-    isVisible?: boolean;
+interface Props extends ParameterDrawerProps {
     componentType?: paramType;
     handleDrawerVisability?:any;
     datasetComponentVersion?: string;

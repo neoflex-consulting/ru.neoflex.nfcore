@@ -222,7 +222,6 @@ class EcoreApp extends React.Component<any, State> {
                     message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
                 }))
         }
-
     };
 
     getGlobalSettings() {
@@ -803,7 +802,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>
                     <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
                     <Route path='/developer/filesystem' component={this.isDeveloper() ? FilesystemBrowser : Prohibited}/>
