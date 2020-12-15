@@ -1,6 +1,6 @@
 import {IServerNamedParam} from "../MainContext";
 import {EList, EObject} from "ecore";
-import {getUrlParam} from "./urlUtils";
+import {getUrlParam, getUrlParamDataType} from "./urlUtils";
 
 function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) {
     const params = namedParams.sort((a, b) => {
@@ -14,7 +14,8 @@ function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) 
     let replacedCommand = valueString;
     params.forEach(param => {
         if (replacedCommand?.includes(param.parameterName)) {
-            replacedCommand = replacedCommand?.replace(new RegExp(":"+param.parameterName, 'g'), (param.parameterValue===null)?"":param.parameterValue);
+            const value = typeof param.parameterValue === "object" ? JSON.stringify(param.parameterValue ? param.parameterValue : "") : param.parameterValue
+            replacedCommand = replacedCommand?.replace(new RegExp(":"+param.parameterName, 'g'), (param.parameterValue===null)?"":value);
         }
     });
     return replacedCommand
@@ -30,7 +31,8 @@ function getNamedParams(valueItems: EList, contextItemValues: Map<String,IServer
                 namedParams.push({
                     parameterName: item.get('name'),
                     //Проверка параметров в url'ах
-                    parameterValue: item.get('value') !== undefined && item.get('value') !== null && item.get('value') !== "" ? item.get('value') : getUrlParam(params, item.get('name'))
+                    parameterValue: item.get('value') !== undefined && item.get('value') !== null && item.get('value') !== "" ? item.get('value') : getUrlParam(params, item.get('name')),
+                    parameterDataType: getUrlParamDataType(params, item.get('name')) || "String"
                 })
             }
         });

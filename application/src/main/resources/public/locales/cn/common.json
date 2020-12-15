@@ -240,6 +240,7 @@
         "case": "条件",
         "when": "如果",
         "then": "然后",
+        "else": "其他",
         "end": "结束",
         "and": "和",
         "or": "或",
@@ -289,6 +290,7 @@
         "hiddencolumns": "隱藏欄",
         "delete row": "刪除行",
         "add row": "添加行",
+        "add calculable column": "加減列",
         "run query": "應用",
         "print": "列印",
         "export to docx": "卸貨中docx",
@@ -318,6 +320,7 @@
         "data search": "資料搜尋",
         "json search": "JSON搜索",
         "search by": "搜索依據",
+        "view": "視圖",
         "preview": "預習",
         "branch": "Git分支",
         "is current": "當前",
@@ -424,5 +427,10 @@
         "isResourcePermitted": "檢查資源訪問",
         "recreateWeekend": "重新創建週末",
         "copyHolidays": "複製假期",
-        "recreateWorkingDays": "重新創建工作日"
+        "recreateWorkingDays": "重新創建工作日",
+        "first page": "第一頁",
+        "last page": "最後一頁",
+        "examples": "示例",
+        "hide menu": "隱藏菜單",
+        "show menu": "顯示菜單"
 }

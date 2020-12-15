@@ -194,6 +194,10 @@ const SortableItem = SortableElement(({value}: any) => {
                             )}
                             title={value.value}
                             id={value.index.toString()}
+                            onPressEnter={(e: { preventDefault: () => any; })=>{
+                                e.preventDefault();
+                                value.handleOnSubmit(e);
+                            }}
                         />
                     )}
                 </Form.Item>
@@ -252,7 +256,8 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
-                                    parametersArray: this.state.parametersArray
+                                    parametersArray: this.state.parametersArray,
+                                    handleOnSubmit: this.handleOnSubmit,
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

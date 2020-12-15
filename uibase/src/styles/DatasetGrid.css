@@ -19,6 +19,7 @@
 #datasetGrid * .ag-header-cell-label {
     justify-content: center;
     font-size: 14px;
+    text-align: center;
 }
 
 #datasetGrid * .ag-header-group-cell-label {
@@ -62,6 +63,8 @@
     border-right: 1px solid #E6E6E6;
     border-bottom: none;
     border-top: none;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 #datasetGrid .ag-row {
@@ -70,7 +73,7 @@
 
 #datasetGrid .ag-row:hover {
     outline: 1px solid #E6E6E6;
-    background: #FAFAFA !important;
+    /*background: #FAFAFA !important;*/
     box-sizing: border-box;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 100;
@@ -98,4 +101,8 @@
 #datasetGrid .ag-body-horizontal-scroll-viewport,
 #datasetGrid .ag-body-horizontal-scroll {
     min-height: 20px !important;
+}
+
+#datasetGrid.dataset-with-paginator > div > div:first-child {
+    height: calc(100% - 40px) !important;
 }

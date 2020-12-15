@@ -11,7 +11,7 @@ export const breakPointsSizePx = {
     diagram: [375, 400, 638, 878, 878],
     edit: [375, 375, 522, 750, 750],
     normal: [375, 510, 630, 900, 900],
-    referenceMenu: [62, 62, 62, 62, 62]
+    referenceMenu: [40, 40, 40, 40, 40]
 };
 
 export type adaptiveElementType = "edit"|"diagram"|"normal"|"paginator"|"referenceMenu";

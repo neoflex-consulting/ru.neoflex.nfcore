@@ -24,7 +24,6 @@ export interface excelExportObject {
         height: number
     },
     gridData?: {
-        tableName:string
         columns:any[],
         data:{value:string, mask:string, highlight:{color:string, background:string}}[][]
     },

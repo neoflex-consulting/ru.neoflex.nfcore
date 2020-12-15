@@ -258,6 +258,7 @@
         "case": "Условие",
         "when": "Если",
         "then": "Тогда",
+        "else": "Иначе",
         "end": "Конец",
         "and": "И",
         "or": "Или",
@@ -307,6 +308,7 @@
         "hiddencolumns": "Скрыть/показать столбцы",
         "delete row": "Удалить строку",
         "add row": "Добавить строку",
+        "add calculable column": "Добавить вычилсяемый столбец",
         "run query": "Применить",
         "print": "Печать",
         "export to docx": "Выгрузка в docx",
@@ -336,11 +338,12 @@
         "data search": "Поиск данных",
         "json search": "JSON поиск",
         "search by": "Поиск по",
+        "view": "Просмотр",
         "preview": "Предпросмотр",
         "previous page": "Предыдущая страница",
         "next page": "Следующая страница",
-        "previous 5 pages": "Предыдущии 5 страниц",
-        "next 5 pages": "Следующии 5 страниц",
+        "previous 5 pages": "Предыдущие 5 страниц",
+        "next 5 pages": "Следующие 5 страниц",
         "branch": "Ветка",
         "is current": "Текущая",
         "is default": "По умолчанию",
@@ -434,7 +437,7 @@
         "create application module": "Создать модуль",
         "universal editor": "Универсальный редактор",
 
-        "back to sections": "Вернуться к списку секций",
+        "back to sections": "Вернуться к списку разделов",
         "section name": "Название раздела",
         "module name": "Название модуля",
         "change date": "Дата последних изменений",
@@ -458,7 +461,12 @@
         "isResourcePermitted": "Проверить доступ к Resource ",
         "recreateWeekend": "Пересоздать выходные дни",
         "copyHolidays": "Копировать выходные",
-        "recreateWorkingDays": "Пересоздать рабочие дни"
+        "recreateWorkingDays": "Пересоздать рабочие дни",
+        "first page": "Первая страница",
+        "last page": "Последняя страница",
+        "examples": "Примеры",
+        "hide menu": "Скрыть меню",
+        "show menu": "Показать меню"
 }
 
 

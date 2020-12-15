@@ -21,7 +21,7 @@ export interface IServerQueryParam {
 
 export interface IServerNamedParam {
     parameterName: string,
-    parameterValue: string,
+    parameterValue: string|{[key:string]:string|number|null},
     parameterDataType?: string,
     isPrimaryKey?: boolean
 }
@@ -29,12 +29,12 @@ export interface IServerNamedParam {
 export interface IEvent {
     type: eventType,
     itemId: string,
-    value?: string
+    value?: string|{[key:string]:string|number|null}|{[key:string]:string|number|null}[]
 }
 
 export interface IAction {
     actionType: actionType,
-    callback: (value:string|undefined) => void
+    callback: (value:string|{[key:string]:string|number|null}|{[key:string]:string|number|null}[]|undefined) => void
 }
 
 export interface IEventAction {
@@ -45,7 +45,7 @@ export interface IEventAction {
 export interface IEventHandler {
     itemId: string,
     eventType: eventType,
-    callback: (value:string|undefined) => void
+    callback: (value:string|{[key:string]:string|number|null}|{[key:string]:string|number|null}[]|undefined) => void
 }
 
 export interface IMainContext {
@@ -84,11 +84,15 @@ export interface IMainContext {
     getDocxHandlers?: ()=>any[];
     getExcelHandlers?: ()=>any[];
     getEventActions?: ()=>IEventAction[];
-    contextItemValues?: Map<String, any>;
-    globalValues?: Map<String, any>;
+    contextItemValues?: Map<String, string|{[key:string]:string|number|null}|{[key:string]:string|number|null}[]>;
+    globalValues?: Map<String, IServerNamedParam>;
     addEventHandler?: (eventHandler: IEventHandler)=>void;
     removeEventHandler?: (name: string)=>void;
     notifyAllEventHandlers?: (event: IEvent)=>void;
     getFullPath?: ()=>ConfigUrlElement[];
     isDeveloper?: ()=>boolean;
+    variableList?: Ecore.EList;
+    eventHandlerList?: Ecore.EList;
+    groovyCommandList?: Ecore.EList;
+    styleSheetsList?: Ecore.EList;
 }

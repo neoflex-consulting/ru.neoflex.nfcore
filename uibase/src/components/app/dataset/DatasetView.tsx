@@ -321,7 +321,7 @@ class DatasetView extends React.Component<any, State> {
         column.each( (c: Ecore.EObject) => {
             if (c.get('column')) {
                 let rowData = new Map();
-                rowData.set('headerName', c.get('headerName') ? c.get('headerName').get('name') : c.get('name'));
+                rowData.set('headerName', c.get('columnName'));
                 rowData.set('children', this.getChildrenColumns(c.get('column'), resource));
                 columnDefs.push(rowData);
             } else {
@@ -329,7 +329,7 @@ class DatasetView extends React.Component<any, State> {
                 const isEditGridComponent = c.get('component') ? c.get('component').get('isEditGridComponent') : false;
                 const type = c.get('datasetColumn') !== null ? c.get('datasetColumn').get('convertDataType') : null;
                 rowData.set('field', c.get('name'));
-                rowData.set('headerName', c.get('headerName') ? c.get('headerName').get('name') : c.get('name'));
+                rowData.set('headerName', c.get('columnName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
                 rowData.set('hide', c.get('hide'));
                 rowData.set('pinned', c.get('pinned'));
@@ -361,7 +361,9 @@ class DatasetView extends React.Component<any, State> {
                 });
                 rowData.set('valueFormatter', this.valueFormatter);
                 rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
-                rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined)
+                rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
+                //передаётся в DatasetGrid для подключения typography к заголоку грида
+                /*rowData.set('customHeader',c.get('headerName'));*/
                 columnDefs.push(rowData);
             }
         });
@@ -819,7 +821,7 @@ class DatasetView extends React.Component<any, State> {
         if (this.state.aggregatedRows.length > 0
             && params.value
             && params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
-            splitted = params.value.split(":");
+            splitted = params.value.split(":", 2);
             params.value = splitted[1];
         }
 
@@ -838,28 +840,26 @@ class DatasetView extends React.Component<any, State> {
                     "warning")
             }
         }
-        if (params.value)
-            formattedParam = params.colDef.type === appTypes.Date && mask
-                ? moment(params.value, defaultDateFormat).format(mask)
-                : params.colDef.type === appTypes.Timestamp && mask
-                    ? moment(params.value, defaultTimestampFormat).format(mask)
-                    : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type as appTypes) && mask
-                        ? format(mask, params.value)
-                        : [appTypes.Decimal].includes(params.colDef.type as appTypes)
-                            ? format(defaultDecimalFormat, params.value)
-                            : [appTypes.Integer].includes(params.colDef.type as appTypes)
-                                ? format(defaultIntegerFormat, params.value)
-                                : [appTypes.Date].includes(params.colDef.type as appTypes)
-                                    ?  moment(params.value, defaultDateFormat).format(defaultDateFormat)
-                                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes)
-                                        ?  moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
-                                        : params.value;
-        else
+        if (params.value && (!splitted || (splitted && !["Count","CountDistinct"].includes(splitted[0])))) {
+            formattedParam =
+                params.colDef.type === appTypes.Date && mask ? moment(params.value, defaultDateFormat).format(mask)
+                    : params.colDef.type === appTypes.Timestamp && mask ? moment(params.value, defaultTimestampFormat).format(mask)
+                    : [appTypes.Integer, appTypes.Decimal].includes(params.colDef.type as appTypes) && mask ? format(mask, params.value)
+                    : [appTypes.Decimal].includes(params.colDef.type as appTypes) ? format(defaultDecimalFormat, params.value)
+                    : [appTypes.Integer].includes(params.colDef.type as appTypes) ? format(defaultIntegerFormat, params.value)
+                    : [appTypes.Date].includes(params.colDef.type as appTypes) ? moment(params.value, defaultDateFormat).format(defaultDateFormat)
+                    : [appTypes.Timestamp].includes(params.colDef.type as appTypes) ? moment(params.value, defaultTimestampFormat).format(defaultTimestampFormat)
+                    : params.value;
+        } else if (params.value && splitted && ["Count","CountDistinct"].includes(splitted[0])) {
+            formattedParam = format(defaultIntegerFormat, params.value);
+        } else {
             formattedParam = params.value;
+        }
         if (this.state.aggregatedRows.length > 0
             && params.value
             && params.node.rowIndex >= this.state.rowData.length - this.state.aggregatedRows.length) {
             splitted[1] = formattedParam;
+            splitted[0] = this.props.t(splitted[0])
             formattedParam = splitted.join(":")
         }
         return formattedParam
@@ -1159,7 +1159,7 @@ class DatasetView extends React.Component<any, State> {
 
     //Меняем фильтры, выполняем запрос и пишем в userProfilePromise
 
-    onChangeParams = (newServerParam: any[], paramName: paramType): void => {
+    onChangeParams = (newServerParam: IServerQueryParam[]|undefined, paramName: paramType): void => {
         const filterParam = (arr: any[]): any[] => {return arr.filter((f: any) => f.datasetColumn)};
         const serverFilter = filterParam(this.state.serverFilters);
         const serverAggregates = filterParam(this.state.serverAggregates);
@@ -1409,14 +1409,15 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{margin:'16px'}} className={this.props.className}>
-                <DatasetBar
+            <div style={{margin:'16px'}}>
+                {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     serverFilters={this.state.serverFilters}
                     serverAggregates={this.state.serverAggregates}
                     serverSorts={this.state.serverSorts}
                     serverGroupBy={this.state.serverGroupBy}
                     groupByColumn={this.state.groupByColumn}
                     serverCalculatedExpression={this.state.serverCalculatedExpression}
+                    highlights={this.state.highlights}
                     barMode={barMode}
                     currentDatasetComponent={this.state.currentDatasetComponent}
                     allDatasetComponents={this.state.allDatasetComponents}
@@ -1517,7 +1518,7 @@ class DatasetView extends React.Component<any, State> {
                         }
                     )}
                     {...this.props}
-                />
+                />}
                 <DatasetDiagram
                     {...this.props}
                     hide={!this.state.currentDiagram}
@@ -1525,7 +1526,9 @@ class DatasetView extends React.Component<any, State> {
                     diagramParams={this.state.currentDiagram}
                 />
                 <DatasetGrid
-                    hide={!!this.state.currentDiagram}
+                    gridKey={this.props.viewObject.eURI().split('#')[0]}
+                    hidden={!!this.state.currentDiagram}
+                    hidePagination={this.props.viewObject.get('hidePaginator')}
                     ref={this.gridRef}
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
@@ -1550,7 +1553,7 @@ class DatasetView extends React.Component<any, State> {
                     valueFormatter={this.valueFormatter}
                     excelCellMask={this.getExcelMask}
                     className={this.props.className}
-                    {...this.props}
+                    context={this.props.context}
                 />
                 <div id="filterButton">
                 <NeoDrawer
@@ -1648,6 +1651,10 @@ class DatasetView extends React.Component<any, State> {
                                     isVisible={this.state.aggregatesGroupsMenuVisible}
                                     componentType={paramType.groupByColumn}
                                     handleDrawerVisability={this.handleDrawerVisibility}
+                                    onReset={()=> {
+                                        this.setState({serverGroupBy:[], groupByColumn:[]});
+                                        this.onChangeParams(undefined, paramType.group);
+                                    }}
                                 />
                                 :
                                 <ServerGroupByColumn/>

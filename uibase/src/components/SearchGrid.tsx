@@ -10,7 +10,7 @@ import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import './../styles/Data.css'
-import {NeoButton, NeoDrawer, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
 
@@ -90,6 +90,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         }];
 
         for (let column of AllFeatures){
+            if(column.get('name')==='tags') continue
             let name: string = "";
             let title: string = "";
             column.get('name') === "children" ? name = "_children" :
@@ -101,7 +102,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 render: (text: any) => {
                 if (text !== undefined && !!column.get('eType') && column.get('eType').eClass.get('name') !== 'EDataType') {
                         const maxJsonLength = text.indexOf('#') + 1;
-                        return text.slice(0, maxJsonLength) + "..." }
+                        return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, maxJsonLength) + "..."}</NeoHint> }
                 else if (text !== undefined && text.length > 100) {return "..."}
                 else {return text}},
                 ...this.getColumnSearchProps(name, title),
@@ -239,19 +240,24 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 dataIndex: 'action',
                 key: 'action',
                 fixed: 'right',
-                width: 100,
+                width: 130,
                 render: (text:string, record:any) => {
+                    const viewButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
+                        <NeoButton type={'link'} title={t('view')}>
+                            <NeoIcon icon={"show"}/>
+                        </NeoButton>
+                    </Link>;
                     const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
-                        <NeoButton type={'link'} title={'Редактировать'}>
+                        <NeoButton type={'link'} title={t('edit')}>
                             <NeoIcon icon={"edit"}/>
                         </NeoButton>
                     </Link>;
                     const deleteButton = <span id="delete" key={`delete${record.key}`} style={{ marginLeft: 8 }} onClick={(e:any)=>this.handleDeleteResource(e, record)}>
-                        <NeoButton type={'link'} title={'Удалить'}>
+                        <NeoButton type={'link'} title={t('delete')}>
                             <NeoIcon icon={"rubbish"}/>
                         </NeoButton>
                     </span>;
-                    return [editButton, deleteButton]
+                    return [viewButton, editButton, deleteButton]
                 }
             }];
             const {selectedRowKeys} = this.state;
@@ -315,7 +321,6 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                      totalNumberOfPage = {Math.ceil(this.filteredData().length/this.state.paginationPageSize)}
                                      paginationPageSize = {this.state.paginationPageSize}
                                      totalNumberOfRows = {this.filteredData().length}
-                                     grid = {this.grid}
                                      onPageChange={this.onPageChange}
                                      onPageSizeChange = {(size)=>{this.setState({paginationPageSize: size})}}
                                  />

@@ -236,10 +236,10 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     </NeoCol>
                 </NeoRow>
                 <NeoRow style={{marginTop:'15px', justifyContent:'flex-start'}}>
-                    <NeoButton title={t('save')} style={{width:'120px', marginRight:'16px'}} onClick={() => this.onClick()}>
+                    <NeoButton style={{width:'120px', marginRight:'16px'}} onClick={() => this.onClick()}>
                         {t('save')}
                     </NeoButton>
-                    <NeoButton type={"secondary"} title={t('save')} style={{ width:'120px', color: 'fff'}} onClick={() => this.props.closeModal}>
+                    <NeoButton type={"secondary"} style={{ width:'120px', color: 'fff'}} onClick={() => this.props.closeModal()}>
                         {t('cancel')}
                     </NeoButton>
                 </NeoRow>
