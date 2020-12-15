@@ -40,7 +40,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
     }
 
     onClick(): void {
-        if (this.state.componentName !== "") {
+        if (this.state.componentName !== "" || this.state.changeCurrent) {
             this.saveDatasetComponentOptions();
         } else {
             this.props.context.notification(this.props.t("DatasetComponent"),
