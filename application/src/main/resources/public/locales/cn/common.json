@@ -432,5 +432,6 @@
         "last page": "最後一頁",
         "examples": "示例",
         "hide menu": "隱藏菜單",
-        "show menu": "顯示菜單"
+        "show menu": "顯示菜單",
+        "cant change default profile": "無法更改默認配置文件"
 }

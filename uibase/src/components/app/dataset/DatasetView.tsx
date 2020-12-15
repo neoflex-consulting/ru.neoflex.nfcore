@@ -1841,23 +1841,6 @@ class DatasetView extends React.Component<any, State> {
                         />
                     </Modal>
                 </div>
-                <div id="save_menuButton">
-                    <Modal
-                        getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
-                        key="save_menu"
-                        width={'500px'}
-                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
-                        visible={this.state.saveMenuVisible}
-                        footer={null}
-                        onCancel={this.handleSaveMenu}
-                    >
-                        <SaveDatasetComponent
-                            {...this.props}
-                            currentDatasetComponent={this.state.currentDatasetComponent}
-                            closeModal={this.handleSaveMenu}
-                        />
-                    </Modal>
-                </div>
                 <div id="edit_applyChangesButton">
                     <NeoModal  onCancel={()=>{
                         this.setState({
@@ -1906,6 +1889,9 @@ class DatasetView extends React.Component<any, State> {
                                 this.getAllDatasetComponents(false, name);
                             }}
                             currentDatasetComponent={this.state.currentDatasetComponent}
+                            defaultDatasetComponent={this.state.allDatasetComponents.find(d=>d.eContents()[0].get('access') === 'Default')}
+                            viewObject={this.props.viewObject}
+                            context={this.props.context}
                             {...this.props}
                         />
                     </Modal>
