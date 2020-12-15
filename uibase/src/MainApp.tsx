@@ -4,7 +4,7 @@ import Splitter from './components/CustomSplitter'
 import {Layout, Menu} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
-import Ecore, {EObject} from "ecore"
+import Ecore from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";

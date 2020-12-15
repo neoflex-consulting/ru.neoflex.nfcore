@@ -1458,15 +1458,17 @@ class EventHandler_ extends Component {
                         isHandled = true;
                     }
                     if (!isHandled) {
-                        if (el.get('triggerItem')) {
-                            this.props.context.notification("Event handler warning",
-                                `Action ${el.get('action') || actionType.execute} on ${el.get('triggerItem').get('name')} is not supported in EventHandler ${this.viewObject.get('name')}`,
-                                "warning")
-                        } else {
-                            this.props.context.notification("Event handler warning",
-                                `Action ${el.get('action') || actionType.execute} is not supported in EventHandler ${this.viewObject.get('name')}`,
-                                "warning")
-                        }
+                        setTimeout(() => {
+                            if (el.get('triggerItem')) {
+                                this.props.context.notification("Event handler warning",
+                                    `Action ${el.get('action') || actionType.execute} on ${el.get('triggerItem').get('name')} is not supported in EventHandler ${this.viewObject.get('name')}`,
+                                    "warning")
+                            } else {
+                                this.props.context.notification("Event handler warning",
+                                    `Action ${el.get('action') || actionType.execute} is not supported in EventHandler ${this.viewObject.get('name')}`,
+                                    "warning")
+                            }
+                        }, 300);
                     }
                 }
             })
