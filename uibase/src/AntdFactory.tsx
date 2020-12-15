@@ -1369,7 +1369,7 @@ class EventHandler_ extends Component {
     handleEvent(value:any) {
         if (!this.state.isDisabled) {
             let componentCondition = true;
-            this.viewObject.get('eventActions').each((el: EObject) => {
+            this.viewObject.get('eventActions').each((el: EObject, index:number) => {
                 let isHandled = false;
                 const eventAction: IEventAction = this.props.context.getEventActions().find((action: IEventAction) => {
                     return ((el.get('triggerItem')
@@ -1468,7 +1468,7 @@ class EventHandler_ extends Component {
                                     `Action ${el.get('action') || actionType.execute} is not supported in EventHandler ${this.viewObject.get('name')}`,
                                     "warning")
                             }
-                        }, 300);
+                        }, index * 50);
                     }
                 }
             })
