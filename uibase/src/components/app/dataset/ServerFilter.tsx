@@ -3,22 +3,14 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import { Form } from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {paramType} from "./DatasetView";
-import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
-interface Props {
-    parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Map<String,any>[];
-    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newParam: any, paramName: string) => void;
-    isVisible?: boolean;
+interface Props extends ParameterDrawerProps {
     allOperations?: Array<EObject>;
-    componentType?: paramType;
     handleDrawerVisability?: any;
 }
 
@@ -68,7 +60,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoSelect
                            width={'208px'}
-                           getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                           getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('columnname')}
                             showSearch={true}
                             allowClear={true}
@@ -105,7 +97,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoSelect
                             width={'208px'}
-                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                            getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('operation')}
                             style={{ marginLeft: '5px' }}
                             allowClear={true}
@@ -232,6 +224,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                                     parametersArray: this.state.parametersArray,
                                     handleOnSubmit: this.handleOnSubmit,
                                     getFieldValue: this.getFieldValue,
+                                    popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

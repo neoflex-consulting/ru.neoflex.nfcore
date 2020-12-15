@@ -1,7 +1,7 @@
 import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select} from 'antd';
+import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, DatePicker} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
@@ -676,6 +676,8 @@ export class Select_ extends ViewContainer {
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{marginBottom: marginBottom}}>
                 <Select
+                    //Fullscreen ag-grid render
+                    getPopupContainer={() => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement}
                     key={this.viewObject._id}
                     className={cssClass}
                     disabled={isReadOnly}
@@ -805,7 +807,9 @@ export class DatePicker_ extends ViewContainer {
                  style={{marginBottom: marginBottom}}
             >
                 <ConfigProvider locale={this.state.locale}>
-                    <NeoDatePicker
+                    <DatePicker
+                        //Fullscreen ag-grid render
+                        getCalendarContainer={() => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement}
                         key={this.viewObject._id}
                         className={cssClass}
                         showTime={this.viewObject.get('showTime')}
@@ -814,7 +818,6 @@ export class DatePicker_ extends ViewContainer {
                         disabled={isReadOnly}
                         allowClear={this.viewObject.get('allowClear') || false}
                         format={this.state.mask}
-                        width={'200px'}
                         onChange={(date: any, dateString: string) => {
                             this.onChange(dateString)
                         }}/>

@@ -3,23 +3,16 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Modal, Radio} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
 import {NeoButton, NeoCol, NeoHint, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
-interface Props {
-    parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Map<String,any>[];
-    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newParam: any, paramName: string) => void;
-    isVisible?: boolean;
+interface Props extends ParameterDrawerProps {
     allOperations?: Array<EObject>;
-    componentType?: paramType;
     allHighlightType?: Array<EObject>;
 }
 
@@ -64,7 +57,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             }]
                         })(
                         <NeoSelect
-                            getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                            getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('columnname')}
                             width={'208px'}
                             showSearch={true}
@@ -114,7 +107,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                 }]
                             })(
                             <NeoSelect
-                                getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                                getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                                 disabled={value.highlightType === 'Column'}
                                 placeholder={value.t('operation')}
                                 width={'208px'}
@@ -163,7 +156,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                 }]
                             })(
                             <NeoSelect
-                                getPopupContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                                getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                                 allowClear={true}
                                 placeholder={value.t('Range')}
                                 width={'208px'}
@@ -500,7 +493,8 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                                     changeColor: this.changeColor.bind(this),
                                     textColorVisible: this.state.textColorVisible,
                                     handleColorPicker: this.handleColorPicker.bind(this),
-                                    solidPicker: this.state.solidPicker
+                                    solidPicker: this.state.solidPicker,
+                                    popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

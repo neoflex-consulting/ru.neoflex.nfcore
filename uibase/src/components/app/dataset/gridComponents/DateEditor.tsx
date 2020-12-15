@@ -1,19 +1,20 @@
 import React from 'react';
 import moment, {Moment} from "moment";
-import {NeoDatePicker} from "neo-design/lib";
 import {defaultDateFormat, defaultTimestampFormat} from "../../../../utils/consts";
+import {NeoDatePicker} from "neo-design/lib";
 
 interface Props {
     value: string,
     mask: string,
-    type: string
+    type: string,
+    gridId: string
 }
 
 interface State {
     pickedDate: Moment,
     currentValue: string,
     format: string,
-    defaultValue: string
+    defaultValue: string,
 }
 
 export default class DateEditor extends React.Component<Props, State> {
@@ -43,7 +44,9 @@ export default class DateEditor extends React.Component<Props, State> {
 
     render() {
         return (
-                <NeoDatePicker
+            <NeoDatePicker
+                //Fullscreen ag-grid render
+                getCalendarContainer={() => (this.props.gridId && document.getElementById (this.props.gridId)) as HTMLElement}
                     defaultValue={this.state.pickedDate}
                     showTime={this.props.type === 'Timestamp'}
                     onChange={(date: any, dateString: string) => {
