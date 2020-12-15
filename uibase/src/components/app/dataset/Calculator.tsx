@@ -96,7 +96,7 @@ function CreateFunctions({onButtonClick, functions,t}:FunctionsEventHandlerProps
                     {t(func.get("literal")).split("(")[0]}
                 </NeoButton>
             </NeoRow>
-        }) : null}
+        })   : null}
     </NeoCol>)
 }
 
@@ -187,24 +187,23 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 })
             })
     };
-
-    getALLFunctions(resource_?: Ecore.Resource){
-        const resource = resource_;
-        if (resource) {
-            const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-            const methodName: string = 'getAllFunctions';
-            API.instance().call(ref, methodName, []).then((json: string) => {
-                let  result: string = JSON.stringify(json);
-                API.instance().findEnum(    "dataset", "CalculatorFunction")
-                    .then((json: EObject[]) => {
-                        const paramValue = json.filter((element : any, index) => {return result.includes(element._id.substr(21, element._id.size)) || index > 35}).map((o: any) => {
-                            return o});
-                        this.setState({
-                            calculatorFunction: paramValue
-                        })
+    /*if (result.includes(o._id.substr(21, o._id.size)))*/
+    getALLFunctions(resource_: Ecore.Resource){
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'getAllFunctions';
+        API.instance().call(ref, methodName, []).then((json: string) => {
+          let  result: string = JSON.stringify(json);
+            API.instance().findEnum(    "dataset", "CalculatorFunction")
+                .then((json: EObject[]) => {
+                    const paramValue = json.filter((element : any) => {return result.includes(element.get("name"))}).map((o: any) => {
+                        return o});
+                    this.setState({
+                        calculatorFunction: paramValue
                     })
-            })
-        }
+                })
+        })
+
     }
 
     handleCalculate = (e: any) => {

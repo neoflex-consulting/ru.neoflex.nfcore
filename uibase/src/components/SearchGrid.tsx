@@ -10,7 +10,7 @@ import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import './../styles/Data.css'
-import {NeoButton, NeoDrawer, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
 
@@ -90,6 +90,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         }];
 
         for (let column of AllFeatures){
+            if(column.get('name')==='tags') continue
             let name: string = "";
             let title: string = "";
             column.get('name') === "children" ? name = "_children" :
@@ -101,7 +102,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 render: (text: any) => {
                 if (text !== undefined && !!column.get('eType') && column.get('eType').eClass.get('name') !== 'EDataType') {
                         const maxJsonLength = text.indexOf('#') + 1;
-                        return text.slice(0, maxJsonLength) + "..." }
+                        return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, maxJsonLength) + "..."}</NeoHint> }
                 else if (text !== undefined && text.length > 100) {return "..."}
                 else {return text}},
                 ...this.getColumnSearchProps(name, title),

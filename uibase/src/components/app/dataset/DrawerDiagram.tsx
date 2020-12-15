@@ -67,10 +67,10 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     valueColumn: this.props.form.getFieldValue("axisYColumnName"),
                     diagramName: this.props.form.getFieldValue("diagramName"),
                     diagramLegend: this.props.form.getFieldValue("diagramLegend"),
-                    legendAnchorPosition: legenedPosition,
-                    axisXPosition: xPosition,
+                   /* legendAnchorPosition: legenedPosition,
+                    axisXPosition: xPosition,*/
                     axisXLegend: this.props.form.getFieldValue("axisXLabel"),
-                    axisYPosition: yPosition,
+                   /* axisYPosition: yPosition,*/
                     axisYLegend: this.props.form.getFieldValue("axisYLabel"),
                     diagramType: this.state.diagramType!,
                     colorSchema: "accent",

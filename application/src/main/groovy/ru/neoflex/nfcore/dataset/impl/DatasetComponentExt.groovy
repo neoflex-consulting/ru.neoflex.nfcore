@@ -131,30 +131,6 @@ class DatasetComponentExt extends DatasetComponentImpl {
         }
     }
 
-    @Override
-        String getAllFunctions() {
-        def calcFunctions = []
-        def jdbcDataset = dataset as JdbcDataset
-        def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
-                for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++){
-                    String str = calculatorAdapter.metaClass.delegate.allMethods[i].mopName
-                    str = str.substring(8,str.size())
-                    for (CalculatorFunction cf : CalculatorFunction.values()){
-                    if (str.equals(cf.name) || str.equals(cf.name + "s") || cf.name.equals("to_char") && str.equals("toString") || cf.name.equals("to_number") && str.equals("toNumber") || cf.name.equals("to_date") && str.equals("toDate")){
-                        boolean flag = false;
-                        for (int j = 0; j < calcFunctions.size(); j++){
-                            if (calcFunctions[j] == cf.name){
-                                flag = true;
-                            }
-                        }
-                        if (!flag) {
-                            calcFunctions.add(cf.name)
-                        }
-                        }
-                     }
-                }
-                return calcFunctions;
-             }
 
     List<DatasetColumnView> getLeafColumns(EList<DatasetColumnView> column, List<DatasetColumnView> leafColumns) {
         for (col in column) {
@@ -519,6 +495,31 @@ class DatasetComponentExt extends DatasetComponentImpl {
             (jdbcConnection) ? jdbcConnection.close() : null
         }
         return rowData
+    }
+
+    @Override
+    String getAllFunctions() {
+        def calcFunctions = []
+        def jdbcDataset = dataset as JdbcDataset
+        def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
+        for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++){
+            String str = calculatorAdapter.metaClass.delegate.allMethods[i].mopName
+            str = str.substring(8,str.size())
+            for (CalculatorFunction cf : CalculatorFunction.values()){
+                if (str.equals(cf.name) || str.equals(cf.name + "s") || cf.name.equals("to_char") && str.equals("toString") || cf.name.equals("to_number") && str.equals("toNumber") || cf.name.equals("to_date") && str.equals("toDate")){
+                    boolean flag = false;
+                    for (int j = 0; j < calcFunctions.size(); j++){
+                        if (calcFunctions[j] == cf.name){
+                            flag = true;
+                        }
+                    }
+                    if (!flag) {
+                        calcFunctions.add(cf.name)
+                    }
+                }
+            }
+        }
+        return calcFunctions;
     }
 
     List<Map> connectionToOrientDB(EList<QueryParameter> parameters, EList<QueryFilterDTO> filters, EList<QueryConditionDTO> aggregations, EList<QueryConditionDTO> sorts, EList<QueryFilterDTO> groupBy, EList<QueryConditionDTO> calculatedExpression, EList<QueryConditionDTO> groupByColumn, ResourceSet resource) {
