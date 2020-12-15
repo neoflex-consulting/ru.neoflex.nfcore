@@ -557,8 +557,8 @@ export class MainApp extends React.Component<any, State> {
         }
         return eObject.get('grantType') === grantType.denied ? undefined : (
             isLeaf
-                ? <Menu.Item key={key}>{content}</Menu.Item>
-                : <SubMenu onTitleClick={()=>{isShortSize && this.setState({hideReferences: false})}} key={key} title={content}>{children}</SubMenu>
+                ? <Menu.Item className={icon ? "item-with-icon": "item-without-icon"} key={key}>{content}</Menu.Item>
+                : <SubMenu className={icon ? "submenu-with-icon": "submenu-without-icon"} onTitleClick={()=>{isShortSize && this.setState({hideReferences: false})}} key={key} title={content}>{children}</SubMenu>
         )
     };
 
