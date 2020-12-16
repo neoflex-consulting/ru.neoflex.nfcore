@@ -26,7 +26,7 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoInput, NeoParagraph, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
@@ -677,7 +677,7 @@ export class Select_ extends ViewContainer {
                 style={{marginBottom: marginBottom}}>
                 <Select
                     //Fullscreen ag-grid render
-                    getPopupContainer={() => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement}
+                    getPopupContainer={this.props.gridId ? () => document.getElementById (this.props.gridId) as HTMLElement : undefined}
                     key={this.viewObject._id}
                     className={cssClass}
                     disabled={isReadOnly}
@@ -809,7 +809,7 @@ export class DatePicker_ extends ViewContainer {
                 <ConfigProvider locale={this.state.locale}>
                     <DatePicker
                         //Fullscreen ag-grid render
-                        getCalendarContainer={() => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement}
+                        getCalendarContainer={this.props.gridId ? () => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement : undefined}
                         key={this.viewObject._id}
                         className={cssClass}
                         showTime={this.viewObject.get('showTime')}
