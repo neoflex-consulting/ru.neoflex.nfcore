@@ -46,7 +46,7 @@ export default class DateEditor extends React.Component<Props, State> {
         return (
             <NeoDatePicker
                 //Fullscreen ag-grid render
-                getCalendarContainer={() => (this.props.gridId && document.getElementById (this.props.gridId)) as HTMLElement}
+                getCalendarContainer={this.props.gridId ? () => (document.getElementById (this.props.gridId)) as HTMLElement : undefined}
                     defaultValue={this.state.pickedDate}
                     showTime={this.props.type === 'Timestamp'}
                     onChange={(date: any, dateString: string) => {

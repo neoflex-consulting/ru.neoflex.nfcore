@@ -35,3 +35,29 @@
 .expand-modal > .ant-modal-content >.ant-modal-body {
     padding: 20px 24px 20px 24px !important;
 }
+
+.editable-syntax-area {
+    margin: 4px 0 0 0;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+}
+
+.editable-syntax-area.disabled {
+    background: #f5f5f5;
+}
+
+.select-ref-object {
+    border: 1px solid #d9d9d9 !important;
+}
+
+.select-ref-object.disabled {
+    background: #f5f5f5;
+}
+
+.select-ref-object > span{
+    color: rgba(0, 0, 0, 0.65) !important;
+}
+
+.select-ref-object.disabled > span {
+    color: rgba(0, 0, 0, 0.25) !important;
+}

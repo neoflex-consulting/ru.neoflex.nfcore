@@ -491,6 +491,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     && shouldRenderProperty(targetObject, featureList, feature, getFieldAnnotationByKey(feature.get('eAnnotations'), 'renderConditions'));
                 const isDisabled = getFieldAnnotationByKey(feature.get('eAnnotations'), 'disabled') === 'true';
                 const isExpandable = getFieldAnnotationByKey(feature.get('eAnnotations'), 'expandable') === 'true';
+                const syntax = getFieldAnnotationByKey(feature.get('eAnnotations'), 'syntax');
+                const resourceEditorName = this.props.t(getFieldAnnotationByKey(feature.get('eAnnotations'), 'resourceEditorName'));
                 const props = {
                     value: targetObject[feature.get('name')],
                     targetObject: targetObject,
@@ -505,13 +507,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     onEClassBrowse: this.onEClassBrowse,
                     onBrowse: this.onBrowse,
                     mainEObject: mainEObject,
-                    edit: this.state.edit && !isDisabled
+                    edit: this.state.edit && !isDisabled,
+                    syntax
                 };
                 if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
                             <span style={{margin: "5px 10px 0 0"}}>
-                                {feature.get('name')}
+                                {resourceEditorName || feature.get('name')}
                             </span>
                             <NeoHint title={description}>
                                 <NeoButton type={'link'}>
@@ -1201,7 +1204,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 {this.state.modalRefVisible && <Modal
                     key="add_ref_modal"
                     className={"modal-add-inner-ref"}
-                    width={'700px'}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
@@ -1209,7 +1211,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 >
                     <Select
                         mode="multiple"
-                        style={{ width: '100%' }}
+                        style={{ width: '500px' }}
                         placeholder="Please select"
                         defaultValue={[]}
                         showSearch={true}

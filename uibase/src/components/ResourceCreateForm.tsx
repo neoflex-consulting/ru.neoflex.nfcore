@@ -1,7 +1,7 @@
 import React from 'react'
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore from 'ecore';
-import { Modal, Select, Button, } from 'antd';
+import { Modal } from 'antd';
 import { Link } from 'react-router-dom';
 import {NeoButton, NeoInput, NeoSelect} from "neo-design/lib";
 

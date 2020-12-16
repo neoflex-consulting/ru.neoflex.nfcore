@@ -6,6 +6,10 @@
     width: 100%;
 }
 
+.modal-add-inner-ref > .ant-modal-content {
+    width: fit-content;
+}
+
 .modal-add-inner-ref > .ant-modal-content > .ant-modal-body {
     display: inline-flex;
     width: 100%;

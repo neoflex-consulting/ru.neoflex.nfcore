@@ -1,7 +1,7 @@
 import * as React from "react";
 import Ecore from "ecore";
 import {API} from "../modules/api";
-import {Button, Form, Tabs, Select} from "antd";
+import {Button, Form, Tabs} from "antd";
 import {FormComponentProps} from 'antd/lib/form/Form';
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';

@@ -395,111 +395,86 @@ class DatasetGrid extends React.Component<Props, any> {
                 textAlign: textAlign,
                 justifyContent: textAlign === "right" ? "flex-end" : textAlign === "left" ? "flex-start" : textAlign
             };
-            let highlights: IServerQueryParam[] = (this.props.highlights as IServerQueryParam[]).filter(value => value.enable && value.datasetColumn);
-            if (highlights.length !== 0) {
-                const cellHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Cell' || h['highlightType'] === null);
-                const temp: any = cellHighlights.find((h: any) => { // eslint-disable-line
-
-                    const type = h['type'];
-                    const columnName = h['datasetColumn'];
-                    const operation = h['operation'];
-                    const value = h['value'];
-                    const backgroundColor = h['backgroundColor'];
-                    const color = h['color'];
-
-                    let columnValue;
-                    let filterValue;
-                    if (h['datasetColumn'] === params.colDef.field) {
-
-
-                        if (type === appTypes.Integer || type === appTypes.Decimal) {
-                            columnValue = Number(params.value);
-                            filterValue = Number(value)
-                        } else if (type === appTypes.Date || type === appTypes.Timestamp) {
-                            columnValue = new Date(params.value);
-                            filterValue = new Date(value)
-                        } else if (type === appTypes.String || type === appTypes.Boolean) {
-                            columnValue = params.value;
-                            filterValue = value
-                        }
-
-                        if (operation === 'EqualTo') {
-                            if (columnValue === filterValue) {
-                                return {...returnObject, background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'NotEqual') {
-                            if (columnValue !== filterValue) {
-                                return {...returnObject, backgroundColor, color: color}
-                            }
-                        } else if (operation === 'LessThan') {
-                            if (columnValue < filterValue) {
-                                return {...returnObject, backgroundColor, color: color}
-                            }
-                        } else if (operation === 'LessThenOrEqualTo') {
-                            if (columnValue <= filterValue) {
-                                return {...returnObject, background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'GreaterThan') {
-                            if (columnValue > filterValue) {
-                                return {...returnObject, background: backgroundColor, color: color}
-                            }
-                        } else if (operation === 'GreaterThanOrEqualTo') {
-                            if (columnValue >= filterValue) {
-                                return {...returnObject, background: backgroundColor, color: color}
-                            }
-                        } else if (params.data[columnName] !== null) {
-                            if (operation === 'IsNotEmpty') {
-                                return {...returnObject, background: backgroundColor, color: color}
-                            } else if (operation === 'IncludeIn') {
-                                if (params.data[columnName].includes(value)) {
-                                    return {...returnObject, background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'NotIncludeIn') {
-                                if (!params.data[columnName].includes(value)) {
-                                    return {...returnObject, background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'StartWith') {
-                                if (params.data[columnName].split(value)[0] === "") {
-                                    return {...returnObject, background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'NotStartWith') {
-                                if (params.data[columnName].split(value)[0] !== "") {
-                                    return {...returnObject, background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'EndOn') {
-                                if (params.data[columnName].split(value)[1] === "") {
-                                    return {...returnObject, background: backgroundColor, color: color}
-                                }
-                            } else if (operation === 'NotEndOn') {
-                                if (params.data[columnName].split(value)[1] !== "") {
-                                    return {...returnObject, background: backgroundColor, color: color}
-                                }
-                            }
-                        } else if (params.data[columnName] === null) {
-                            if (operation === 'IsEmpty' ||
-                                operation === 'NotIncludeIn' ||
-                                operation === 'NotEndOn' ||
-                                operation === 'NotStartWith') {
-                                return {...returnObject, background: backgroundColor, color: color}
-                            }
-                        }
+            let highlights = this.props.highlights?.filter(h => h.enable && h.datasetColumn && h.highlightType) || [];
+            for (const h of highlights) {
+                if (h.highlightType === 'Column') {
+                    if (params.colDef.field === h.datasetColumn!) {
+                        return {...returnObject, background: h.backgroundColor, color: h.color}
                     }
-                });
-                if (temp !== undefined) {
-                    return {...returnObject, background: temp['backgroundColor'], color: temp['color']}
-                }
-                else {
-                    const columnHighlights: any = highlights.filter((h: any) => h['highlightType'] === 'Column');
-                    const temp: any = columnHighlights.find((h: any) => { // eslint-disable-line
-                        const columnName = h['datasetColumn'];
-                        const backgroundColor = h['backgroundColor'];
-                        const color = h['color'];
-                        if (params.data[columnName] === params.value) {
-                            return {...returnObject, background: backgroundColor, color: color}
+                } else if (h.highlightType === 'Cell') {
+                    let columnValue:any;
+                    let filterValue:any;
+                    if (h.datasetColumn! === params.colDef.field) {
+                        if (h.type === appTypes.Integer || h.type === appTypes.Decimal) {
+                            columnValue = Number(params.value);
+                            filterValue = Number(h.value)
+                        } else if (h.type === appTypes.Date || h.type === appTypes.Timestamp) {
+                            columnValue = new Date(params.value);
+                            filterValue = new Date(h.value as string)
+                        } else if (h.type === appTypes.String || h.type === appTypes.Boolean) {
+                            columnValue = params.value;
+                            filterValue = h.value
                         }
-                    });
-                    if (temp !== undefined) {
-                        return {...returnObject, background: temp['backgroundColor'], color: temp['color']}
+                        if (h.operation === 'EqualTo') {
+                            if (columnValue === filterValue) {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        } else if (h.operation === 'NotEqual') {
+                            if (columnValue !== filterValue) {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        } else if (h.operation === 'LessThan') {
+                            if (columnValue < filterValue) {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        } else if (h.operation === 'LessThenOrEqualTo') {
+                            if (columnValue <= filterValue) {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        } else if (h.operation === 'GreaterThan') {
+                            if (columnValue > filterValue) {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        } else if (h.operation === 'GreaterThanOrEqualTo') {
+                            if (columnValue >= filterValue) {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        } else if (params.data[h.datasetColumn!] !== null) {
+                            if (h.operation === 'IsNotEmpty') {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            } else if (h.operation === 'IncludeIn') {
+                                if (params.data[h.datasetColumn!].includes(h.value)) {
+                                    return {...returnObject, background: h.backgroundColor, color: h.color}
+                                }
+                            } else if (h.operation === 'NotIncludeIn') {
+                                if (!params.data[h.datasetColumn!].includes(h.value)) {
+                                    return {...returnObject, background: h.backgroundColor, color: h.color}
+                                }
+                            } else if (h.operation === 'StartWith') {
+                                if (params.data[h.datasetColumn!].split(h.value)[0] === "") {
+                                    return {...returnObject, background: h.backgroundColor, color: h.color}
+                                }
+                            } else if (h.operation === 'NotStartWith') {
+                                if (params.data[h.datasetColumn!].split(h.value)[0] !== "") {
+                                    return {...returnObject, background: h.backgroundColor, color: h.color}
+                                }
+                            } else if (h.operation === 'EndOn') {
+                                if (params.data[h.datasetColumn!].split(h.value)[1] === "") {
+                                    return {...returnObject, background: h.backgroundColor, color: h.color}
+                                }
+                            } else if (h.operation === 'NotEndOn') {
+                                if (params.data[h.datasetColumn!].split(h.value)[1] !== "") {
+                                    return {...returnObject, background: h.backgroundColor, color: h.color}
+                                }
+                            }
+                        } else if (params.data[h.datasetColumn!] === null) {
+                            if (h.operation === 'IsEmpty' ||
+                                h.operation === 'NotIncludeIn' ||
+                                h.operation === 'NotEndOn' ||
+                                h.operation === 'NotStartWith') {
+                                return {...returnObject, background: h.backgroundColor, color: h.color}
+                            }
+                        }
                     }
                 }
             }
