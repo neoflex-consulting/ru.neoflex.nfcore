@@ -202,3 +202,8 @@
     display: none;
 }
 
+.pagionator .ant-select-sm.ant-pagination-options-size-changer.ant-select.ant-select-enabled{
+    z-index: 99999;
+}
+
+

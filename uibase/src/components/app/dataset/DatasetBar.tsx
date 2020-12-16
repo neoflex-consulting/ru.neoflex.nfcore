@@ -595,6 +595,7 @@ class DatasetBar extends React.Component<props, State> {
             <NeoHint title={this.props.t('fullscreen')}>
                 <NeoButton
                     type={'link'} className={"full-screen-icon"}
+                    style={{position : "unset"}}
                     onClick={this.props.onFullscreenClick}>
                     {this.props.isFullScreenOn ?
                         <NeoIcon icon={'fullScreenUnDo'} color={NeoColor.violete_4} size={'m'}/>
@@ -625,13 +626,14 @@ class DatasetBar extends React.Component<props, State> {
                 {this.state.barSize <= barSize.extraSmall && this.getExportButtons()}
             </div>
             {this.state.barSize <= barSize.extraSmall && <div className={"horizontal-line"}/>}
-            <div id={"selectsInFullScreen"} className={"block flex-bar-item"}>
+            <div id={"selectsInFullScreen"} className={"block flex-bar-item"} style={{position: "unset"}}>
                 {(!this.state.isQuickSearchExpanded || this.state.barSize <= barSize.extraSmall)
-                && <span className='caption'>{this.props.t("version")}</span>}
+                && <span className='caption' style={{position: "unset"}}>{this.props.t("version")}</span>}
                 {this.props.isComponentsLoaded
                 && (!this.state.isQuickSearchExpanded || this.state.barSize <= barSize.extraSmall)
                 &&
                 <NeoSelect
+                    style={{position: "unset"}}
                     className={this.state.barSize === adaptiveElementSize.extraSmall ? "fill-space dataset-component-select" : "dataset-component-select"}
                     getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
                     width={'184px'}

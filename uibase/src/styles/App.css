@@ -302,7 +302,7 @@ height: 8px!important;
   background-color: #fff8e0 !important;
 }
 
-.ant-select-dropdown-menu {
+.ant-select-dropdown {
   /*overflow: hidden !important;*/
 }
 
@@ -1816,4 +1816,16 @@ padding: 3px 24px;
   outline: none !important;
   box-shadow: none !important;
   background-color: #FFF8E0 !important
+}
+
+.paginator .ant-select-dropdown-placement-bottomLeft {
+  top: unset!important;
+  transform: translate(0,-163px) !important;
+}
+
+
+.paginator .ant-select-dropdown-placement-bottomLeft,
+.paginator .ant-select-dropdown-placement-topLeft {
+  top: unset!important;
+  transform: translate(0,-163px) !important;
 }
