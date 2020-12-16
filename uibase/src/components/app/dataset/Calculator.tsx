@@ -116,7 +116,7 @@ function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
                 {columnDefs?.map((element, index) =>{
                     return <NeoButton
                         type={'link'}
-                        style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left", display: "block" }}
+                        style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left", display: "block", height: "auto", padding: "7px 0 7px 0" }}
                         key={"Button"+element.get("field")}
                         onClick={onClick}
                         id={encode(index)}
