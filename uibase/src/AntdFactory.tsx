@@ -257,9 +257,11 @@ class Form_ extends ViewContainer {
 class TabsViewReport_ extends ViewContainer {
     constructor(props: any) {
         super(props);
+        const children = this.viewObject.get('children').array() as Ecore.EObject[];
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
+            activeKey: children.length > 0 ? children[0]._id : undefined
         };
     }
 
@@ -282,9 +284,15 @@ class TabsViewReport_ extends ViewContainer {
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}>
                 <NeoTabs
+                    animated={false}
                     className={cssClass}
-                    defaultActiveKey={children[0] ? children[0]._id : undefined}
-                    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}>
+                    activeKey={this.state.activeKey}
+                    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}
+                    onTabClick={(newKey: string, e?: MouseEvent) => {
+                        if (!e) return false; //if keyboard pressed
+                        this.setState({activeKey: newKey})
+                    }}
+                >
                     {
                         children.map((c: Ecore.EObject) =>
                             <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} >
