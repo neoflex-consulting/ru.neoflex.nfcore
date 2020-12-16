@@ -176,7 +176,7 @@ export default function Operations(props: Props): JSX.Element {
             return <Menu onClick={onMenuSelect}> 
                 {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
                     return <Menu.Item key={oper.get('name')}>
-                        <NeoHint title={getFieldAnnotationByKey(oper.get('eAnnotations'), "documentation")}>{t(oper.get('name'))}</NeoHint>
+                        <NeoHint placement={"right"} title={getFieldAnnotationByKey(oper.get('eAnnotations'), "documentation")}>{t(oper.get('name'))}</NeoHint>
                     </Menu.Item>
                 })}
             </Menu>

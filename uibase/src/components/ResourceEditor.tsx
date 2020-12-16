@@ -1201,7 +1201,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 {this.state.modalRefVisible && <Modal
                     key="add_ref_modal"
                     className={"modal-add-inner-ref"}
-                    width={'700px'}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
@@ -1209,7 +1208,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 >
                     <Select
                         mode="multiple"
-                        style={{ width: '100%' }}
+                        style={{ width: '500px' }}
                         placeholder="Please select"
                         defaultValue={[]}
                         showSearch={true}

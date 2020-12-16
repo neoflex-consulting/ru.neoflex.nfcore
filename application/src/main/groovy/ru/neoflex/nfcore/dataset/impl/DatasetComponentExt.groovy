@@ -44,12 +44,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             //remove all non-query columns expect column groups
                             datasetComponent.column.removeAll(datasetComponent.column
                                     .stream()
-                                    .filter({ c -> (columns.find { l -> (c instanceof RdbmsColumn && (c as RdbmsColumn).datasetColumn == l) || (!(c instanceof RdbmsColumn) && l.name == c.name)} == null) && !(c instanceof ColumnGroup) })
+                                    .filter({ c -> (columns.find { l -> (c instanceof RdbmsColumn && (c as RdbmsColumn).name == l.name)} == null) && !(c instanceof ColumnGroup) })
                                     .findAll())
                             //add columns
                             for (int i = 0; i <= columns.size() - 1; ++i) {
+                                def datasetComponentColumn = datasetComponent.column.find{c-> c.name == columns[i].name.toString()}
                                 if (datasetComponent.column.find{c-> c.name == columns[i].name.toString()} != null) {
-                                    skippedColumns += "\nExisting column ${columns[i].name.toString()} skipped"
+                                    if (datasetComponentColumn instanceof RdbmsColumn) {
+                                        datasetComponentColumn.datasetColumn = columns[i]
+                                        skippedColumns += "\nExisting column ${columns[i].name.toString()} datasetColumn link updated"
+                                    } else {
+                                        skippedColumns += "\nExisting column ${columns[i].name.toString()} skipped"
+                                    }
                                 } else {
                                     def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
                                     rdbmsColumn.name = columns[i].name
