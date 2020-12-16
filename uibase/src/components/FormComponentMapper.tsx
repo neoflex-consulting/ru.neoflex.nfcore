@@ -145,6 +145,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
         upperBound === -1 ? (value.length !== 0?
             value.map((el: { [key: string]: any }, idx: number) =>
                 <NeoTag
+                    className={`${!edit ? "disabled" : undefined} select-ref-object`}
                     onClose={(e: any) => {
                         props.handleDeleteRef && props.handleDeleteRef!(el, eObject.get('name'))
                     }}
@@ -156,6 +157,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 </NeoTag>) : [])
             :
             <NeoTag
+                className={`${!edit ? "disabled" : undefined} select-ref-object`}
                 onClose={(e: any) => {
                     props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, eObject.get('name'))
                 }}

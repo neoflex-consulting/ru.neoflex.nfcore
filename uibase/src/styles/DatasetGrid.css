@@ -106,3 +106,7 @@
 #datasetGrid.dataset-with-paginator > div > div:first-child {
     height: calc(100% - 40px) !important;
 }
+
+#datasetGrid .ag-cell > span {
+    white-space: pre
+}
