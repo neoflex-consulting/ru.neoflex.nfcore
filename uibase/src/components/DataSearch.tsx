@@ -9,7 +9,7 @@ import ponyCat from '../icons/ponyCat.png';
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
-import {NeoButton, NeoInput, NeoOption, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoHint, NeoInput, NeoOption, NeoSelect} from "neo-design/lib";
 
 const FormItem = Form.Item;
 
@@ -227,17 +227,17 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                             this.setState({selectCount: event.toString().split(',').length})
                                                         }}
                                                         placeholder={t('choose from the list')}
-                                                        maxTagTextLength={7}
+                                                        // maxTagTextLength={7}
                                                         maxTagCount={this.state.selectTags}
                                                         maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
                                                     >
                                                         {
                                                             this.state.tags.map((tag: Ecore.EObject) =>
-
                                                                     <NeoOption key={tag.get('name')}
-                                                                               value={tag.get('name')}
-                                                                               title={tag.get('name')}>
-                                                                        {tag.get('name')}
+                                                                               value={tag.get('name')}>
+                                                                        <NeoHint title={tag.get('name')}>
+                                                                            {tag.get('name')}
+                                                                        </NeoHint>
                                                                     </NeoOption>
                                                                 )
                                                         }

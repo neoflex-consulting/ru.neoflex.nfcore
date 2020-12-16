@@ -1708,7 +1708,12 @@ a.linksInMoreWord:hover{
 .datasearch_region .ant-form-item {
   margin-bottom: 15px;
 }
-
+.datasearch_region .hint div {
+  max-width: 60px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 
 /*Notification message*/
