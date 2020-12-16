@@ -239,7 +239,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </NeoButton>
                 </NeoHint>
                 <Modal
-                    getContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                    getContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                     width={'320px'}
                     title={value.t("choose background color")}
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
@@ -289,7 +289,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </NeoButton>
                 </NeoHint>
                 <Modal
-                    getContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                    getContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                     width={'320px'}
                     title={value.t("choose text color")}
                     visible={value.textColorVisible && value.colorIndex === value.index}
