@@ -1150,7 +1150,12 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
   font-size: 14px!important;
   line-height: 16px!important;
   color: #B3B3B3!important;
-  margin-top: 0.5px!important;
+  margin-top: 1px!important;
+  margin-right: 10px!important;
+  text-decoration: none!important;
+}
+.lang-label:hover {
+  color: #fff !important;
 }
 
 .NameOfUser{
@@ -1231,6 +1236,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 14px!important;
     color: #B3B3B3!important;
     margin-top: 2px!important;
+    text-decoration: none!important;
+  }
+  .lang-label:hover {
+    color: #fff !important;
   }
   .NameOfUser{
     font-family: Roboto!important;
@@ -1322,6 +1331,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 14px !important;
     color: #B3B3B3 !important;
     margin-top: 1px !important;
+    text-decoration: none!important;
+  }
+  .lang-label:hover {
+    color: #fff !important;
   }
 
   .HeaderWithNamesSmallScreen {
@@ -1411,6 +1424,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 14px !important;
     color: #B3B3B3 !important;
     margin-top: 1px !important;
+    text-decoration: none!important;
+  }
+  .lang-label:hover {
+    color: #fff !important;
   }
 
   .HeaderWithNamesSmallScreen {

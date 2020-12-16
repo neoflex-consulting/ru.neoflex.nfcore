@@ -5,7 +5,6 @@ import {add} from "date-fns";
 import Ecore, {EObject} from "ecore";
 import {API} from "../../../modules/api";
 import {enUS, ru} from "date-fns/locale";
-import {zhCN} from "date-fns/esm/locale";
 import {withTranslation} from "react-i18next";
 import {MainContext} from "../../../MainContext";
 import {Dropdown, Menu} from "antd";
@@ -324,9 +323,7 @@ class Calendar extends React.Component<any, any> {
     }
 
     private getLocale(i18n: any) {
-        return i18n.language === "cn" ? zhCN
-            :
-            i18n.language === "ru" ? ru
+        return i18n.language === "ru" ? ru
                 : enUS;
     }
 

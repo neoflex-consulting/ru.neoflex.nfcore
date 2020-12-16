@@ -3,7 +3,6 @@ import {Pagination, ConfigProvider} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';
-import Ch from 'antd/es/locale/zh_TW';
 import NeoIcon from "neo-icon/lib/icon";
 import {NeoButton, NeoHint} from "neo-design/lib";
 import '../../styles/Paginator.css';
@@ -107,7 +106,7 @@ class Paginator extends React.Component<Props, any> {
 
     render() {
         return (
-            <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : this.props.i18n.language === "us" ? En : Ch}>
+            <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : En}>
                 <div ref={this.paginatorRef}
                     className={    `paginator ${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
                     style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
