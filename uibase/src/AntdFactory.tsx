@@ -295,7 +295,7 @@ class TabsViewReport_ extends ViewContainer {
                 >
                     {
                         children.map((c: Ecore.EObject) =>
-                            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} >
+                            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >
                                 {this.viewFactory.createView(c, props)}
                             </NeoTabs.NeoTabPane>
                         )
