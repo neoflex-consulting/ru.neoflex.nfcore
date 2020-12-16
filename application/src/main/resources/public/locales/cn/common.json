@@ -433,5 +433,12 @@
         "examples": "示例",
         "hide menu": "隱藏菜單",
         "show menu": "顯示菜單",
-        "cant change default profile": "無法更改默認配置文件"
+        "cant change default profile": "無法更改默認配置文件",
+
+        "resource name": "名稱",
+        "jdbc connection": "jdbc連接字符串",
+        "type of query": "查詢類型",
+        "query text": "查詢文本",
+        "schema name": "架構名稱",
+        "table name": "表名"
 }

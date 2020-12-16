@@ -7,7 +7,52 @@ import {boolSelectionOption, convertPrimitiveToString} from './../utils/resource
 import {NeoButton, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
+import AceEditor from "react-ace";
+import 'brace/mode/sql';
+import 'brace/mode/groovy';
 
+interface EditableSQLAreaProps {
+    value: string,
+    onChange?: Function,
+    ukey?: string,
+    edit?: boolean,
+    syntax: "sql"|"groovy",
+    expanded?: boolean
+}
+
+function EditableSyntaxArea(props: EditableSQLAreaProps): JSX.Element {
+
+    const { value, ukey, onChange, edit, syntax, expanded } = props;
+    const [innerValue, setInnerValue] = useState(value);
+
+    useEffect(() => {
+        setInnerValue(value)
+    },[value]);
+
+    return (
+        <AceEditor
+            readOnly={!edit}
+            key={ukey}
+            width={"100%"}
+            className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+            mode={syntax}
+            theme={"tomorrow"}
+            onChange={(text: string) => {
+                setInnerValue(text)
+            }}
+            editorProps={{$blockScrolling: true}}
+            value={innerValue}
+            onBlur={() => {
+                onChange && onChange!(innerValue)
+            }}
+            showPrintMargin={false}
+            enableBasicAutocompletion={true}
+            minLines={3}
+            maxLines={!expanded ? 10 : undefined}
+        />
+    )
+
+}
 
 interface EditableTextAreaProps {
     value: any,
@@ -300,7 +345,8 @@ interface Props {
     ukey?: string,
     id?: string,
     edit?: boolean,
-    expanded?: boolean
+    expanded?: boolean,
+    syntax?: string
 }
 
 export default class ComponentMapper extends React.Component<Props, any> {
@@ -316,8 +362,19 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
+        if (syntax) {
+            return <EditableSyntaxArea
+                ukey={ukey}
+                value={targetValue||""}
+                edit={edit}
+                syntax={syntax}
+                expanded={expanded}
+                onChange={(text: string) => props.onChange && props.onChange!(text, 'EditableTextArea', targetObject, props.eObject)}
+            />
+        }
+
         if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
             return <SelectRefObject
                 idx={idx}

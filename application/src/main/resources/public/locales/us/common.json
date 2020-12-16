@@ -470,5 +470,12 @@
         "examples": "Examples",
         "hide menu": "Hide menu",
         "show menu": "Show menu",
-        "cant change default profile": "Cant change default profile"
+        "cant change default profile": "Cant change default profile",
+
+        "resource name": "Name",
+        "jdbc connection": "Jdbc connection",
+        "type of query": "Type of query",
+        "query text": "Query text",
+        "schema name": "Schema name",
+        "table name": "Table name"
 }
