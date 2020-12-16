@@ -1411,6 +1411,7 @@ class DatasetView extends React.Component<any, State> {
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div style={{margin:'16px'}}>
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
+                    datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}
                     serverAggregates={this.state.serverAggregates}
                     serverSorts={this.state.serverSorts}

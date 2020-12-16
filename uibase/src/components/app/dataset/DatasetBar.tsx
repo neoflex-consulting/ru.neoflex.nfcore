@@ -19,6 +19,7 @@ enum barSize {
 }
 
 interface props {
+    datasetComponentId: string,
     onDocExportClick: () => void,
     onExcelExportClick: () => void,
     onFilterChange: () => void,
@@ -625,7 +626,7 @@ class DatasetBar extends React.Component<props, State> {
                 {this.state.barSize <= barSize.extraSmall && this.getExportButtons()}
             </div>
             {this.state.barSize <= barSize.extraSmall && <div className={"horizontal-line"}/>}
-            <div id={"selectsInFullScreen"} className={"block flex-bar-item"}>
+            <div id={`selectsInFullScreen${this.props.datasetComponentId}`} className={"block flex-bar-item"}>
                 {(!this.state.isQuickSearchExpanded || this.state.barSize <= barSize.extraSmall)
                 && <span className='caption'>{this.props.t("version")}</span>}
                 {this.props.isComponentsLoaded
@@ -633,7 +634,7 @@ class DatasetBar extends React.Component<props, State> {
                 &&
                 <NeoSelect
                     className={this.state.barSize === adaptiveElementSize.extraSmall ? "fill-space dataset-component-select" : "dataset-component-select"}
-                    getPopupContainer={() => document.getElementById ('selectsInFullScreen') as HTMLElement}
+                    getPopupContainer={() => document.getElementById (`selectsInFullScreen${this.props.datasetComponentId}`) as HTMLElement}
                     width={'184px'}
                     value={this.props.currentDatasetComponent.eContents()[0].get('name')}
                     onChange={this.props.onChangeDatasetComponent}
@@ -737,9 +738,9 @@ class DatasetBar extends React.Component<props, State> {
                         </Dropdown>}
                     </div>
                     <div className='flex-bar-item'>
-                        {this.state.barSize > barSize.extraSmall && <div id="selectInGetDiagramPanel">
+                        {this.state.barSize > barSize.extraSmall && <div id={`selectInGetDiagramPanel${this.props.datasetComponentId}`}>
                             <NeoSelect
-                                getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
+                                getPopupContainer={() => document.getElementById (`selectInGetDiagramPanel${this.props.datasetComponentId}`) as HTMLElement}
                                 className={"diagram-select"}
                                 showSearch={true}
                                 value={this.props.currentDiagram?.diagramName}

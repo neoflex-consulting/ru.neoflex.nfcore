@@ -44,23 +44,6 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     handleSubmit = () => {
         this.props.form.validateFields((err: any) => {
             if (!err) {
-                let xPosition, yPosition, legenedPosition: any;
-                if (this.state.diagramType! === "Bar") {
-                    xPosition = "Bottom"
-                    yPosition = "Left"
-                    legenedPosition = "BottomRight"
-                }
-
-                else if (this.state.diagramType! === "Line"){
-                    xPosition = "Bottom"
-                    yPosition = "Left"
-                    legenedPosition = "BottomRight"
-                }
-                else{
-                    xPosition = undefined
-                    yPosition = undefined
-                    legenedPosition = "Bottom"
-                }
                 const diagramParam: IDiagram = {
                     id: this.props.id,
                     keyColumn: this.props.form.getFieldValue("axisXColumnName"),

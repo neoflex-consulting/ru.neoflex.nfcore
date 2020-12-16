@@ -3,7 +3,6 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Select} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';

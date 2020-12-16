@@ -43,7 +43,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
     }
 
     onClick(): void {
-        if (this.state.componentName !== "" || this.state.changeCurrent
+        if ((this.state.componentName !== "" || this.state.changeCurrent)
             && !(this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name'))) {
             this.saveDatasetComponentOptions();
         } else if (this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')) {

@@ -1,5 +1,5 @@
 import React, {Fragment, useState} from 'react';
-import {Button, Dropdown, Menu, Modal, notification, Select} from 'antd'
+import {Button, Dropdown, Menu, Modal, Select} from 'antd'
 import Ecore from 'ecore';
 
 import {API} from './../modules/api'
