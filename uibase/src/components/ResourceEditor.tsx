@@ -508,8 +508,15 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     onBrowse: this.onBrowse,
                     mainEObject: mainEObject,
                     edit: this.state.edit && !isDisabled,
+                    showIcon: feature.get('name') === "iconCode",
                     syntax
                 };
+                let value = FormComponentMapper.getComponent(props);
+                value = isExpandable ? FormComponentMapper.getComponentWrapper({
+                    type: "expand",
+                    wrappedComponent: FormComponentMapper.getComponent(props),
+                    expandedComponent: FormComponentMapper.getComponent({...props, expanded: true})
+                })! : value;
                 if (!isContainment && !isContainer && isVisible) preparedData.push({
                     property: description !== "" ?
                         <div style={{display: "inline-flex"}}>
@@ -523,13 +530,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             </NeoHint>
                         </div>
                         : feature.get('name'),
-                    value: isExpandable
-                        ? FormComponentMapper.getComponentWrapper({
-                            type: "expand",
-                            wrappedComponent: FormComponentMapper.getComponent(props),
-                            expandedComponent: FormComponentMapper.getComponent({...props, expanded: true})
-                        })
-                        : FormComponentMapper.getComponent(props),
+                    value: value,
                     key: feature.get('name') + idx
                 })
             });

@@ -251,30 +251,17 @@ interface SelectComponentProps {
     eType: any,
     upperBound: number,
     id: string,
-    edit?: boolean
-}
-
-interface TagComponentProps {
-    value: any,
-    onChange?: Function,
-    idx?: number,
-    ukey?: string,
-    eType: any,
-    id: string,
-    edit?: boolean
-}
-
-interface ExpandComponentProps {
-    expandedComponent: JSX.Element,
-    children: JSX.Element
+    edit?: boolean,
+    showIcon?: boolean
 }
 
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
-    const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props;
+    const { eType, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
 
     return (
         <Select
+            className={"select-component"}
             mode={upperBound === -1 ? "multiple" : "default"}
             value={value}
             key={ukey + "_" + idx}
@@ -287,9 +274,22 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
                 .map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
+                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
+                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={obj.get('name')}/>}{obj.get('name')}</div>
+                </Select.Option>)}
         </Select>
     )
+}
+
+
+interface TagComponentProps {
+    value: any,
+    onChange?: Function,
+    idx?: number,
+    ukey?: string,
+    eType: any,
+    id: string,
+    edit?: boolean,
 }
 
 function TagComponent(props: TagComponentProps): JSX.Element {
@@ -313,6 +313,12 @@ function TagComponent(props: TagComponentProps): JSX.Element {
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
         </Select>
     )
+}
+
+
+interface ExpandComponentProps {
+    expandedComponent: JSX.Element,
+    children: JSX.Element
 }
 
 function ExpandComponent(props: ExpandComponentProps): JSX.Element {
@@ -348,7 +354,8 @@ interface Props {
     id?: string,
     edit?: boolean,
     expanded?: boolean,
-    syntax?: string
+    syntax?: string,
+    showIcon?: boolean,
 }
 
 export default class ComponentMapper extends React.Component<Props, any> {
@@ -364,7 +371,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
         if (syntax) {
             return <EditableSyntaxArea
@@ -439,6 +446,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 }}
                 upperBound={props.upperBound}
                 edit={edit}
+                showIcon={showIcon}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
             return <TagComponent
