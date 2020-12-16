@@ -195,31 +195,31 @@ class EcoreApp extends React.Component<any, State> {
         if (notificationType === "success") {
             return (
                 notification.success({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "error") {
             return (
                 notification.error({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "info") {
             return (
                 notification.info({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "warning") {
             return (
                 notification.warning({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "open") {
             return (
                 notification.open({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
     };
