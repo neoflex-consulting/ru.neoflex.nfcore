@@ -14,6 +14,7 @@ import ru.neoflex.nfcore.base.auth.Audit
 import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.application.GridComponent
+import ru.neoflex.nfcore.application.ValueItem
 
 annotation "ru.neoflex.nfcore" as NFCore
 
@@ -176,7 +177,7 @@ class DatasetColumn {
 }
 
 @NFCore(documentation="Столбцы")
-abstract class DatasetColumnView {
+abstract class DatasetColumnView extends ServerSideCondition {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
     String name
         @NFCore(documentation="Название заголовка в таблице")
@@ -312,6 +313,32 @@ class Highlight {
     boolean enable
     String backgroundColor
     String color
+}
+
+    @NFCore(documentation="Условные выражения для отображения компоненты")
+abstract class ServerSideCondition {
+        @NFCore(documentation="Тип вычисляемого выражения")
+    ConditionType conditionType
+        @NFCore(documentation="Ссылка на датасет", renderConditions="{'conditionType':['RowsReturned','NoRowReturned']}")
+    refers Dataset serverSideConditionDataset
+        @NFCore(documentation="Выражение JavaScript", renderConditions="{'conditionType':'JavaScriptExpression'}")
+    String expression
+        @NFCore(documentation="Значения передаваемые в выражение", renderConditions="{'conditionType':['RowsReturned','NoRowReturned','JavaScriptExpression']}")
+    refers ValueItem[] serverSideConditionValueItems
+}
+
+    @NFCore(documentation="Тип вычисляемого выражения")
+enum ConditionType {
+        @NFCore(documentation="Не вычислять выражение")
+    None
+        @NFCore(documentation="Датасет вернул одну или более строк")
+    RowsReturned
+        @NFCore(documentation="Датасет не вернул строчку")
+    NoRowReturned
+        @NFCore(documentation="Выражение вычисляется через eval JavaScript")
+    JavaScriptExpression
+        @NFCore(documentation="Не отображать компонент")
+    Never
 }
 
 @NFCore(documentation="Формат использования запроса к БД")

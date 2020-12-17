@@ -166,6 +166,31 @@ function createCssClass(viewObject: any){
     return resultCss
 }
 
+export async function checkServerSideCondition(conditionType: string, valueItems: Ecore.EList, dataset: Ecore.EObject, expression: string, context: any): Promise<boolean> {
+    if (conditionType === "Never") {
+        return false
+    } else if (conditionType === "RowsReturned" || conditionType === "NoRowReturned") {
+        const params = getNamedParams(valueItems, context.contextItemValues);
+        const json = await context.runQueryDataset(dataset.eResource(), params);
+        const resArr = JSON.parse(json);
+        return (conditionType === "RowsReturned" && resArr.length >= 1) || (conditionType === "NoRowReturned" && resArr.length === 0);
+    } else if (conditionType === "JavaScriptExpression") {
+        let condition = true;
+        const params = getNamedParams(valueItems, context.contextItemValues);
+        try {
+            // eslint-disable-next-line
+            condition = eval(replaceNamedParam(expression, params))
+        } catch (e) {
+            condition = false;
+            context.notification("EventHandler.condition",
+                "exception while evaluating",
+                "warning")
+        }
+        return condition
+    }
+    return true
+}
+
 abstract class ViewContainer extends View {
     renderChildren = (isParentDisabled:boolean = false, isParentHidden:boolean = false) => {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];
@@ -1307,7 +1332,7 @@ class Typography_ extends ViewContainer {
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
-            label: "",
+            label: ""
         };
     }
 
