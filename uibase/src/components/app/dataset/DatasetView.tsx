@@ -45,6 +45,7 @@ import './../../../styles/AggregateHighlight.css';
 import {NeoDrawer, NeoModal, NeoTypography} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
 import {checkServerSideCondition} from "../../../AntdFactory";
+import {ViewRegistry} from "../../../ViewRegistry";
 
 const textAlignMap_: any = textAlignMap;
 
@@ -145,6 +146,8 @@ const defaultComponentValues = {
 
 
 class DatasetView extends React.Component<any, State> {
+
+    private viewFactory = ViewRegistry.INSTANCE.get('antd');
 
     gridRef = React.createRef<any>();
 
@@ -1400,6 +1403,12 @@ class DatasetView extends React.Component<any, State> {
         });
     };
 
+    renderEList = (list: Ecore.EList) => {
+        return list && list.array().map(v=>{
+            return this.viewFactory.createView(v, this.props)
+        })
+    };
+
     render() {
         const { t } = this.props;
         const barMode = this.state.isEditMode
@@ -1413,6 +1422,7 @@ class DatasetView extends React.Component<any, State> {
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div style={{margin:'16px'}}>
+                {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}

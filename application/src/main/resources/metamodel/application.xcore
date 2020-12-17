@@ -384,6 +384,8 @@ class EventAction {
     refers DynamicActionElement triggerItem
         @NFCore(documentation="Ключ объекта. Заполняется если: в качестве значения для action = setValue находится объект", renderConditions="{'action':'setValue'}")
     String valueObjectKey
+        @NFCore(documentation="Статичное значение", renderConditions="{'action':'setValue'}")
+    String value
         @NFCore(documentation="Переход на внешний модуль. Заполняется при: action = redirect", renderConditions="{'action':'redirect'}")
     refers AppModule redirectTo
         @NFCore(documentation="Параметры, передаваемые вместе с модулем из 'redirectTo'. Заполняется при: action = redirect", renderConditions="{'action':'redirect'}")

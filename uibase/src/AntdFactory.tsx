@@ -1456,7 +1456,10 @@ class EventHandler_ extends Component {
                             if (action.actionType === (el.get('action') || actionType.execute)
                                 && action.actionType !== actionType.showMessage
                                 && action.actionType !== actionType.redirect) {
-                                if (el.get('valueObjectKey') && value === Object(value)) {
+                                if (el.get('value')) {
+                                    action.callback(el.get('value'));
+                                    isHandled = true;
+                                } else if (el.get('valueObjectKey') && value === Object(value)) {
                                     (value[el.get('valueObjectKey')]
                                         //Если запрос вернул null
                                         || value[el.get('valueObjectKey')] === null)

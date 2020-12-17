@@ -15,6 +15,7 @@ import ru.neoflex.nfcore.base.auth.User
 import ru.neoflex.nfcore.base.tag.Tagged
 import ru.neoflex.nfcore.application.GridComponent
 import ru.neoflex.nfcore.application.ValueItem
+import ru.neoflex.nfcore.application.ValueHolder
 
 annotation "ru.neoflex.nfcore" as NFCore
 
@@ -159,6 +160,7 @@ class DatasetComponent extends Tagged {
     op void executeUpdate(QueryParameter[] parameters)
         @NFCore(invisible="true")
     op void executeDelete(QueryParameter[] parameters)
+    contains ValueHolder[] valueHolders
 }
 
 @NFCore(documentation="")
