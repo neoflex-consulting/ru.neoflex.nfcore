@@ -2,7 +2,7 @@ import * as React from "react";
 import {Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {NeoButton, NeoInput, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoHint, NeoInput, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -121,12 +121,11 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                                 const tableChild = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
                                 const editButton = <NeoButton
                                     type={'link'}
-                                    title={'Развернуть'}
                                     suffixIcon={tableChild&&tableChild.classList.contains('open')
                                             ?
-                                            <NeoIcon icon={"close"} />
+                                        <NeoHint title={t('hide')}><NeoIcon icon={"close"} /></NeoHint>
                                             :
-                                            <NeoIcon icon={"ellipsis"} />
+                                        <NeoHint title={t('show')}><NeoIcon icon={"ellipsis"} /></NeoHint>
                                         }
                                     onClick={() => {
                                         const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
