@@ -1,6 +1,5 @@
 import ruRU from "antd/es/locale/ru_RU";
 import enUS from "antd/es/locale/en_US";
-import zhCH from "antd/es/locale/zh_CN";
 import moment from 'moment';
 
 export function switchAntdLocale(locale:string, t: any) {
@@ -12,8 +11,6 @@ export function switchAntdLocale(locale:string, t: any) {
             return ruRU;
         case "us":
             return enUS;
-        case "cn":
-            return zhCH;
         default:
             return ruRU
     }
