@@ -1411,6 +1411,7 @@ class DatasetView extends React.Component<any, State> {
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div style={{margin:'16px'}}>
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
+                    datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}
                     serverAggregates={this.state.serverAggregates}
                     serverSorts={this.state.serverSorts}
@@ -1555,9 +1556,9 @@ class DatasetView extends React.Component<any, State> {
                     className={this.props.className}
                     context={this.props.context}
                 />
-                <div id="filterButton">
+                <div id={`filterButton${this.props.viewObject.eURI()}`}>
                 <NeoDrawer
-                    getContainer={() => document.getElementById ('filterButton') as HTMLElement}
+                    getContainer={() => document.getElementById (`filterButton${this.props.viewObject.eURI()}`) as HTMLElement}
                     title={t('filters')}
                     width={'711px'}
                     visible={this.state.filtersMenuVisible}
@@ -1566,10 +1567,10 @@ class DatasetView extends React.Component<any, State> {
                 >
                     {
 
-                        this.state.serverFilters && !this.state.isGroovyDataset
-                            ?
+                        this.state.serverFilters && !this.state.isGroovyDataset &&
                             <ServerFilter
                                 {...this.props}
+                                popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
                                 parametersArray={this.state.serverFilters}
                                 columnDefs={this.state.leafColumnDefs}
                                 allOperations={this.state.allOperations}
@@ -1579,14 +1580,12 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.filter}
                                 handleDrawerVisability={this.handleDrawerVisibility}
                             />
-                            :
-                            null
                     }
                     {
-                        this.state.highlights && this.state.allHighlightType
-                            ?
+                        this.state.highlights && this.state.allHighlightType &&
                             <Highlight
                                 {...this.props}
+                                popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
                                 parametersArray={this.state.highlights}
                                 columnDefs={this.state.leafColumnDefs}
                                 allOperations={this.state.allOperations}
@@ -1596,14 +1595,12 @@ class DatasetView extends React.Component<any, State> {
                                 isVisible={this.state.filtersMenuVisible}
                                 componentType={paramType.highlights}
                             />
-                            :
-                            <Highlight/>
                     }
                 </NeoDrawer>
                 </div>
-                <div id="aggregationButton">
+                <div id={`aggregationButton${this.props.viewObject.eURI()}`}>
                 <NeoDrawer
-                    getContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
+                    getContainer={() => document.getElementById (`aggregationButton${this.props.viewObject.eURI()}`) as HTMLElement}
                     title={t('aggregations')}
                     width={'711px'}
                     visible={this.state.aggregatesMenuVisible}
@@ -1611,10 +1608,10 @@ class DatasetView extends React.Component<any, State> {
                     mask={false}
                 >
                     {
-                        this.state.serverAggregates
-                            ?
+                        this.state.serverAggregates &&
                             <ServerAggregate
                                 {...this.props}
+                                popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
                                 parametersArray={this.state.serverAggregates}
                                 columnDefs={this.state.leafColumnDefs}
                                 allAggregates={this.state.allAggregates}
@@ -1624,14 +1621,12 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.aggregate}
                                 handleDrawerVisability={this.handleDrawerVisibility}
                             />
-                            :
-                            <ServerAggregate/>
                     }
                 </NeoDrawer>
                     </div>
-                <div id="aggregationGroupsButton">
+                <div id={`aggregationGroupsButton${this.props.viewObject.eURI()}`}>
                     <NeoDrawer
-                        getContainer={() => document.getElementById ('aggregationGroupsButton') as HTMLElement}
+                        getContainer={() => document.getElementById (`aggregationGroupsButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         title={t('grouping')}
                         width={'700px'}
                         visible={this.state.aggregatesGroupsMenuVisible}
@@ -1639,10 +1634,10 @@ class DatasetView extends React.Component<any, State> {
                         mask={false}
                     >
                         {
-                            this.state.groupByColumn
-                                ?
+                            this.state.groupByColumn &&
                                 <ServerGroupByColumn
                                     {...this.props}
+                                    popUpContainerId={`aggregationGroupsButton${this.props.viewObject.eURI()}`}
                                     parametersArray={this.state.groupByColumn}
                                     columnDefs={this.state.defaultLeafColumnDefs}
                                     allAggregates={this.state.allAggregates}
@@ -1656,14 +1651,12 @@ class DatasetView extends React.Component<any, State> {
                                         this.onChangeParams(undefined, paramType.group);
                                     }}
                                 />
-                                :
-                                <ServerGroupByColumn/>
                         }
                         {
-                            this.state.serverGroupBy
-                                ?
+                            this.state.serverGroupBy &&
                                 <ServerGroupBy
                                     {...this.props}
+                                    popUpContainerId={`aggregationGroupsButton${this.props.viewObject.eURI()}`}
                                     parametersArray={this.state.serverGroupBy}
                                     columnDefs={this.state.defaultLeafColumnDefs}
                                     allAggregates={this.state.allAggregates}
@@ -1673,14 +1666,12 @@ class DatasetView extends React.Component<any, State> {
                                     componentType={paramType.group}
                                     handleDrawerVisability={this.handleDrawerVisibility}
                                 />
-                                :
-                                <ServerGroupBy/>
                         }
                     </NeoDrawer>
                 </div>
-                <div id="sortButton">
+                <div id={`sortButton${this.props.viewObject.eURI()}`}>
                 <NeoDrawer
-                    getContainer={() => document.getElementById ('sortButton') as HTMLElement}
+                    getContainer={() => document.getElementById (`sortButton${this.props.viewObject.eURI()}`) as HTMLElement}
                     title={t('sorts')}
                     width={'720px'}
                     visible={this.state.sortsMenuVisible}
@@ -1688,10 +1679,10 @@ class DatasetView extends React.Component<any, State> {
                     mask={false}
                 >
                     {
-                        this.state.serverSorts
-                            ?
+                        this.state.serverSorts &&
                             <ServerSort
                                 {...this.props}
+                                popUpContainerId={`sortButton${this.props.viewObject.eURI()}`}
                                 parametersArray={this.state.serverSorts}
                                 columnDefs={this.state.leafColumnDefs}
                                 allSorts={this.state.allSorts}
@@ -1701,14 +1692,12 @@ class DatasetView extends React.Component<any, State> {
                                 componentType={paramType.sort}
                                 handleDrawerVisability={this.handleDrawerVisibility}
                             />
-                            :
-                            <ServerSort/>
                     }
                 </NeoDrawer>
                 </div>
-                <div id="hiddenColumnsButton">
+                <div id={`hiddenColumnsButton${this.props.viewObject.eURI()}`}>
                     <NeoDrawer
-                        getContainer={() => document.getElementById ('hiddenColumnsButton') as HTMLElement}
+                        getContainer={() => document.getElementById (`hiddenColumnsButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         title={t('hiddencolumns')}
                         width={'700px'}
                         visible={this.state.hiddenColumnsMenuVisible}
@@ -1716,10 +1705,10 @@ class DatasetView extends React.Component<any, State> {
                         mask={false}
                     >
                         {
-                            this.state.hiddenColumns
-                                ?
+                            this.state.hiddenColumns &&
                                 <HiddenColumn
                                     {...this.props}
+                                    popUpContainerId={`hiddenColumnsButton${this.props.viewObject.eURI()}`}
                                     parametersArray={this.state.hiddenColumns}
                                     columnDefs={this.state.leafColumnDefs}
                                     onChangeParameters={this.onChangeParams}
@@ -1729,14 +1718,12 @@ class DatasetView extends React.Component<any, State> {
                                     handleDrawerVisability={this.handleDrawerVisibility}
                                     datasetComponentVersion={this.state.currentDatasetComponent.eContents && this.state.currentDatasetComponent.eContents()[0].get('name')}
                                 />
-                                :
-                                <HiddenColumn/>
                         }
                     </NeoDrawer>
                 </div>
-                <div id="calculatableexpressionsButton">
+                <div id={`calculatableexpressionsButton${this.props.viewObject.eURI()}`}>
                 <NeoDrawer
-                    getContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
+                    getContainer={() => document.getElementById (`calculatableexpressionsButton${this.props.viewObject.eURI()}`) as HTMLElement}
                     title={t('calculator')}
                     width={'712px'}
                     visible={this.state.calculationsMenuVisible}
@@ -1744,10 +1731,10 @@ class DatasetView extends React.Component<any, State> {
                     mask={false}
                 >
                     {
-                        this.state.serverCalculatedExpression
-                            ?
+                        this.state.serverCalculatedExpression &&
                             <Calculator
                                 {...this.props}
+                                popUpContainerId={`calculatableexpressionsButton${this.props.viewObject.eURI()}`}
                                 parametersArray={this.state.serverCalculatedExpression}
                                 //Можно в зависимости от видимости columnDef регулировать видимость стольцов
                                 //но тогда нужна доработка для трансляции выражений
@@ -1762,14 +1749,12 @@ class DatasetView extends React.Component<any, State> {
                                 handleDrawerVisability={this.handleDrawerVisibility}
                                 currentDatasetComponent={this.state.currentDatasetComponent}
                             />
-                            :
-                            <Calculator/>
                     }
                 </NeoDrawer>
                 </div>
-                <div id="diagramButton">
+                <div id={`diagramButton${this.props.viewObject.eURI()}`}>
                 <NeoDrawer
-                    getContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                    getContainer={() => document.getElementById (`diagramButton${this.props.viewObject.eURI()}`) as HTMLElement}
                     title={t('diagram')}
                     width={'700px'}
                     visible={this.state.diagramAddMenuVisible}
@@ -1780,6 +1765,7 @@ class DatasetView extends React.Component<any, State> {
                     {
                         <DrawerDiagram
                             {...this.props}
+                            popUpContainerId={`diagramButton${this.props.viewObject.eURI()}`}
                             columnDefs={this.state.leafColumnDefs}
                             allAxisXPosition={this.state.allAxisXPosition}
                             allAxisYPosition={this.state.allAxisYPosition}
@@ -1794,9 +1780,9 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </NeoDrawer>
                 </div>
-                <div id="diagram">
+                <div id={`diagram${this.props.viewObject.eURI()}`}>
                 <NeoDrawer
-                    getContainer={() => document.getElementById ('diagram') as HTMLElement}
+                    getContainer={() => document.getElementById (`diagram${this.props.viewObject.eURI()}`) as HTMLElement}
                     title={t('diagram')}
                     width={'700px'}
                     visible={this.state.diagramEditMenuVisible}
@@ -1806,6 +1792,7 @@ class DatasetView extends React.Component<any, State> {
                     {
                         <DrawerDiagram
                             {...this.props}
+                            popUpContainerId={`diagram${this.props.viewObject.eURI()}`}
                             columnDefs={this.state.leafColumnDefs}
                             allAxisXPosition={this.state.allAxisXPosition}
                             allAxisYPosition={this.state.allAxisYPosition}
@@ -1820,9 +1807,9 @@ class DatasetView extends React.Component<any, State> {
                     }
                 </NeoDrawer>
                 </div>
-                <div id="delete_menuButton">
+                <div id={`delete_menuButton${this.props.viewObject.eURI()}`}>
                     <Modal
-                        getContainer={() => document.getElementById ('delete_menuButton') as HTMLElement}
+                        getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="delete_menu"
                         width={'250px'}
                         title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('deleting')}</NeoTypography>}
@@ -1841,24 +1828,7 @@ class DatasetView extends React.Component<any, State> {
                         />
                     </Modal>
                 </div>
-                <div id="save_menuButton">
-                    <Modal
-                        getContainer={() => document.getElementById ('save_menuButton') as HTMLElement}
-                        key="save_menu"
-                        width={'500px'}
-                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('saveReport')}</NeoTypography>}
-                        visible={this.state.saveMenuVisible}
-                        footer={null}
-                        onCancel={this.handleSaveMenu}
-                    >
-                        <SaveDatasetComponent
-                            {...this.props}
-                            currentDatasetComponent={this.state.currentDatasetComponent}
-                            closeModal={this.handleSaveMenu}
-                        />
-                    </Modal>
-                </div>
-                <div id="edit_applyChangesButton">
+                <div id={`edit_applyChangesButton${this.props.viewObject.eURI()}`}>
                     <NeoModal  onCancel={()=>{
                         this.setState({
                             isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
@@ -1892,7 +1862,7 @@ class DatasetView extends React.Component<any, State> {
 
 
                     <Modal
-                        getContainer={() => document.getElementById ('edit_applyChangesButton') as HTMLElement}
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="save_menu"
                         width={'500px'}
                         title={t('saveReport')}
@@ -1906,6 +1876,9 @@ class DatasetView extends React.Component<any, State> {
                                 this.getAllDatasetComponents(false, name);
                             }}
                             currentDatasetComponent={this.state.currentDatasetComponent}
+                            defaultDatasetComponent={this.state.allDatasetComponents.find(d=>d.eContents()[0].get('access') === 'Default')}
+                            viewObject={this.props.viewObject}
+                            context={this.props.context}
                             {...this.props}
                         />
                     </Modal>

@@ -22,7 +22,7 @@ interface Props {
     allAggregates?: Array<EObject>;
     saveChanges?: (action: string, newDiagram?: IDiagram) => void;
     currentDiagram?: IDiagram;
-
+    popUpContainerId: String;
 }
 
 interface State {
@@ -44,23 +44,6 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     handleSubmit = () => {
         this.props.form.validateFields((err: any) => {
             if (!err) {
-                let xPosition, yPosition, legenedPosition: any;
-                if (this.state.diagramType! === "Bar") {
-                    xPosition = "Bottom"
-                    yPosition = "Left"
-                    legenedPosition = "BottomRight"
-                }
-
-                else if (this.state.diagramType! === "Line"){
-                    xPosition = "Bottom"
-                    yPosition = "Left"
-                    legenedPosition = "BottomRight"
-                }
-                else{
-                    xPosition = undefined
-                    yPosition = undefined
-                    legenedPosition = "Bottom"
-                }
                 const diagramParam: IDiagram = {
                     id: this.props.id,
                     keyColumn: this.props.form.getFieldValue("axisXColumnName"),
@@ -113,7 +96,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
                         <Select.Option
@@ -139,7 +122,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById ('diagramButton') as HTMLElement}
+                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {selectEnum!.map((c: any) =>
                         <Select.Option

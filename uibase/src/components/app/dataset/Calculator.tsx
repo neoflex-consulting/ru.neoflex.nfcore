@@ -2,9 +2,7 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {Form, List} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {paramType} from "./DatasetView"
-import {IServerQueryParam} from "../../../MainContext";
-import {DrawerParameterComponent, DrawerState} from './DrawerParameterComponent';
+import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {MouseEvent} from "react";
 import {API} from "../../../modules/api";
 import Ecore, {EObject} from "ecore";
@@ -20,13 +18,7 @@ const selectMaskKey: string = "_selectMaskKey";
 const inputFieldKey: string = "_inputFieldKey";
 const inputSelectKey: string = "_inputSelectKey";
 
-interface Props {
-    parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Array<any>;
-    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newParam: any, paramName: string) => void;
-    isVisible?: boolean;
-    componentType?: paramType;
+interface Props extends ParameterDrawerProps {
     onChangeColumnDefs?: (columnDefs: any, rowData: any, datasetComponentName: string) => void;
     defaultColumnDefs?: Array<any>;
     formatMasks?: {key:string,value:string}[]
@@ -124,7 +116,7 @@ function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
                 {columnDefs?.map((element, index) =>{
                     return <NeoButton
                         type={'link'}
-                        style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left", display: "block" }}
+                        style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left", display: "block", height: "auto", padding: "7px 0 7px 0" }}
                         key={"Button"+element.get("field")}
                         onClick={onClick}
                         id={encode(index)}
@@ -337,7 +329,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             })(
                                 <NeoSelect
                                     width={'310px'}
-                                    getPopupContainer={() => document.getElementById ('calculatableexpressionsButton') as HTMLElement}
+                                    getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                     placeholder={this.t("Select calculated column")}
                                     onChange={(e: any) => {
                                         this.setState({currentIndex:e});
@@ -394,7 +386,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             }]
                         })(
                             <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
-                                       getPopupContainer={() => document.getElementById ('selectsInCalculator') as HTMLElement}>
+                                       getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
                                 {Object.keys(appTypes).map(type => <option key={type} value={type}>
                                     {this.t(type)}
                                 </option>)}
@@ -409,7 +401,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             }]
                         })(
                             <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
-                                       getPopupContainer={() => document.getElementById ('selectsInCalculator') as HTMLElement}>
+                                       getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
                                 {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
                                     key={mask.key}
                                     value={mask.value}>

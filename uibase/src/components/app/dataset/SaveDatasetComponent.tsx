@@ -1,15 +1,18 @@
 import * as React from 'react';
-import {withTranslation} from 'react-i18next';
+import {WithTranslation, withTranslation} from 'react-i18next';
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../../../modules/api";
 import {paramType} from "./DatasetView";
 import {NeoButton, NeoCol, NeoInput, NeoRow, NeoTypography} from "neo-design/lib";
 import _ from "lodash"
 
-interface Props {
-    closeModal?: () => void;
+interface Props extends WithTranslation {
+    closeModal: () => void;
     onSave?: (name: string) => void;
-    currentDatasetComponent?: any;
+    viewObject: Ecore.EObject;
+    currentDatasetComponent?: Ecore.EObject;
+    defaultDatasetComponent?: Ecore.EObject;
+    context: any;
 }
 
 interface State {
@@ -28,7 +31,7 @@ interface State {
     user?: EObject;
 }
 
-class SaveDatasetComponent extends React.Component<any, State> {
+class SaveDatasetComponent extends React.Component<Props, State> {
 
     constructor(props: any) {
         super(props);
@@ -40,8 +43,13 @@ class SaveDatasetComponent extends React.Component<any, State> {
     }
 
     onClick(): void {
-        if (this.state.componentName !== "") {
+        if ((this.state.componentName !== "" || this.state.changeCurrent)
+            && !(this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name'))) {
             this.saveDatasetComponentOptions();
+        } else if (this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')) {
+            this.props.context.notification(this.props.t("DatasetComponent"),
+                this.props.t("cant change default profile"),
+                "error")
         } else {
             this.props.context.notification(this.props.t("DatasetComponent"),
                 this.props.t("component name is empty"),
@@ -119,45 +127,49 @@ class SaveDatasetComponent extends React.Component<any, State> {
         let objectId = this.props.viewObject.eURI();
         let params: any = {};
         this.props.context.changeUserProfile(objectId, params);
-        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent.eContents()[0])
-        currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
-        if (!this.state.changeCurrent) {
-            currentDatasetComponent.get('audit').get('createdBy', null);
-            currentDatasetComponent.get('audit').set('created', null);
-            currentDatasetComponent.get('audit').set('modifiedBy', null);
-            currentDatasetComponent.get('audit').set('modified', null);
-        }
-        this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
-            const userProfileValue = userProfile.eContents()[0].get('params').array()
-                .filter( (p: any) => p.get('key') === currentDatasetComponent.eURI());
-            if (userProfileValue.length !== 0) {
-                this.addComponentServerParam(currentDatasetComponent, this.state.queryFilterPattern!, userProfileValue, 'serverFilters', 'serverFilter');
-                this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
-                this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
-                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
-                this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
-                this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
-                this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
-                this.addComponentServerParam(currentDatasetComponent, this.state.hiddenColumnPattern!, userProfileValue, 'hiddenColumns', 'hiddenColumn');
-                this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
+        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent?.eContents()[0])
+        if (currentDatasetComponent !== undefined) {
+            currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
+            if (!this.state.changeCurrent) {
+                currentDatasetComponent.get('audit').get('createdBy', null);
+                currentDatasetComponent.get('audit').set('created', null);
+                currentDatasetComponent.get('audit').set('modifiedBy', null);
+                currentDatasetComponent.get('audit').set('modified', null);
             }
-            this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined);
-
             this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
-                const resource = currentDatasetComponent.eResource();
-                if (resource) {
-                    if (!this.state.changeCurrent) {
-                        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
-                        contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
-                        resource.eContents()[0].set('name', `${this.state.componentName}`);
-                        resource.set('uri', null);
-                        resource.eContents()[0].set('serverFilters', `${this.state.componentName}`);
-                        this.props.context.changeUserProfile(this.props.viewObject.eURI(), {name: this.state.componentName})
+                if (currentDatasetComponent !== undefined) {
+                    const userProfileValue = userProfile.eContents()[0].get('params').array()
+                        .filter( (p: any) => p.get('key') === currentDatasetComponent?.eURI());
+                    if (userProfileValue.length !== 0) {
+                        this.addComponentServerParam(currentDatasetComponent, this.state.queryFilterPattern!, userProfileValue, 'serverFilters', 'serverFilter');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.querySortPattern!, userProfileValue, 'serverSorts', 'serverSort');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByPattern!, userProfileValue, 'serverGroupBy', 'serverGroupBy');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.queryCalculatedExpressionPattern!, userProfileValue, 'serverCalculatedExpression', 'serverCalculatedExpression');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.highlightPattern!, userProfileValue, 'highlights', 'highlight');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.queryGroupByColumnPattern!, userProfileValue, 'groupByColumn', 'groupByColumn');
+                        this.addComponentServerParam(currentDatasetComponent, this.state.hiddenColumnPattern!, userProfileValue, 'hiddenColumns', 'hiddenColumn');
+                        this.addComponentDiagram(currentDatasetComponent, this.state.diagramPatter!, userProfileValue, 'diagrams', 'diagram');
                     }
-                    this.saveDatasetComponent(resource);
+                    this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined);
+
+                    this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+                        const resource = currentDatasetComponent?.eResource();
+                        if (resource) {
+                            if (!this.state.changeCurrent) {
+                                const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+                                contents(resource.eContents()[0]).forEach(eObject=>{(eObject as any)._id = null});
+                                resource.eContents()[0].set('name', `${this.state.componentName}`);
+                                resource.set('uri', null);
+                                resource.eContents()[0].set('serverFilters', `${this.state.componentName}`);
+                                this.props.context.changeUserProfile(this.props.viewObject.eURI(), {name: this.state.componentName})
+                            }
+                            this.saveDatasetComponent(resource);
+                        }
+                    })
                 }
-            })
-        });
+            });
+        }
     }
 
     private saveDatasetComponent(resource: Resource) {
@@ -169,7 +181,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                     .filter((r: Ecore.EObject) => r.eContainingFeature.get('name') === 'view')
                     .filter((r: Ecore.EObject) => r.eContainingFeature._id === this.props.context.viewObject.eContainingFeature._id)
                     .filter((r: Ecore.EObject) => r.eContainer.get('name') === this.props.context.viewObject.eContainer.get('name'))
-                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave(newDatasetComponent.eContents()[0].get('name')));
+                this.props.context.updateContext!(({viewObject: newViewObject[0]}), this.props.onSave && this.props.onSave(newDatasetComponent.eContents()[0].get('name')));
             });
     }
 
@@ -198,6 +210,13 @@ class SaveDatasetComponent extends React.Component<any, State> {
         if (!this.state.user) this.getUser();
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+        if (this.props.currentDatasetComponent?.eContents()[0].get('name') !== prevProps.currentDatasetComponent?.eContents()[0].get('name')) {
+            //reset checkbox on change
+            this.setState({changeCurrent: false, accessPublic: true})
+        }
+    }
+
     render() {
         const { t } = this.props;
 
@@ -220,7 +239,7 @@ class SaveDatasetComponent extends React.Component<any, State> {
                         <NeoInput
                             type={'checkbox'}
                             checked={this.state.changeCurrent}
-                            disabled={false}
+                            disabled={this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')}
                             onChange={() => this.onChangeCurrent()}
                         >
                             <NeoTypography type={'capture_regular'} style={{color : "#333333", marginTop: "5px"}}>{t('change current')}</NeoTypography>

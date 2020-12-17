@@ -466,7 +466,15 @@
         "last page": "Последняя страница",
         "examples": "Примеры",
         "hide menu": "Скрыть меню",
-        "show menu": "Показать меню"
+        "show menu": "Показать меню",
+        "cant change default profile": "Нельзя изменить профиль по умолчанию",
+
+        "resource name": "Название",
+        "jdbc connection": "Строка подключения jdbc",
+        "type of query": "Тип запроса",
+        "query text": "Текст запроса",
+        "schema name": "Название схемы",
+        "table name": "Название таблицы"
 }
 
 

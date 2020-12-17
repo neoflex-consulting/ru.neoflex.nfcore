@@ -11,7 +11,8 @@ import '../../../styles/Draggable.css';
 import arrayMove from "array-move";
 import {EObject} from "ecore";
 
-interface Props {
+export interface ParameterDrawerProps {
+    popUpContainerId: String,
     parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
     onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
@@ -31,7 +32,7 @@ export interface DrawerState {
     calculatorFunction?: EObject[];
 }
 
-export class DrawerParameterComponent<T extends Props, V extends DrawerState> extends React.Component<Props & FormComponentProps & WithTranslation & any, DrawerState> {
+export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends DrawerState> extends React.Component<ParameterDrawerProps & FormComponentProps & WithTranslation & any, DrawerState> {
     t: any;
     getFieldDecorator: any;
     setFieldsValue: any;

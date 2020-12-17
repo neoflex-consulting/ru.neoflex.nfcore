@@ -6,7 +6,6 @@ import groovy.json.JsonOutput
 import org.eclipse.emf.common.util.ECollections
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.resource.ResourceSet
-import ru.neoflex.nfcore.application.ApplicationFactory
 import ru.neoflex.nfcore.base.services.Context
 import ru.neoflex.nfcore.base.services.providers.StoreSPI
 import ru.neoflex.nfcore.base.services.providers.TransactionSPI
@@ -26,6 +25,7 @@ enum DMLQueryType {
 }
 
 class DatasetComponentExt extends DatasetComponentImpl {
+    static final defaultDateFormat = "YYYY-MM-DD"
 
     @Override
     String createAllColumns() {
@@ -44,12 +44,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
                             //remove all non-query columns expect column groups
                             datasetComponent.column.removeAll(datasetComponent.column
                                     .stream()
-                                    .filter({ c -> (columns.find { l -> (c instanceof RdbmsColumn && (c as RdbmsColumn).datasetColumn == l) || (!(c instanceof RdbmsColumn) && l.name == c.name)} == null) && !(c instanceof ColumnGroup) })
+                                    .filter({ c -> (columns.find { l -> (c instanceof RdbmsColumn && (c as RdbmsColumn).name == l.name)} == null) && !(c instanceof ColumnGroup) })
                                     .findAll())
                             //add columns
                             for (int i = 0; i <= columns.size() - 1; ++i) {
+                                def datasetComponentColumn = datasetComponent.column.find{c-> c.name == columns[i].name.toString()}
                                 if (datasetComponent.column.find{c-> c.name == columns[i].name.toString()} != null) {
-                                    skippedColumns += "\nExisting column ${columns[i].name.toString()} skipped"
+                                    if (datasetComponentColumn instanceof RdbmsColumn) {
+                                        datasetComponentColumn.datasetColumn = columns[i]
+                                        skippedColumns += "\nExisting column ${columns[i].name.toString()} datasetColumn link updated"
+                                    } else {
+                                        skippedColumns += "\nExisting column ${columns[i].name.toString()} skipped"
+                                    }
                                 } else {
                                     def rdbmsColumn = DatasetFactory.eINSTANCE.createRdbmsColumn()
                                     rdbmsColumn.name = columns[i].name
@@ -105,8 +111,9 @@ class DatasetComponentExt extends DatasetComponentImpl {
         if (column) {
             def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
                     .execute().resourceSet
+            def datasetComponent = (resource.resources[0].contents[0] as DatasetComponent)
             if (!resource.resources.empty &&
-                    resource.resources[0].contents[0].dataset.class.name == "ru.neoflex.nfcore.dataset.impl.GroovyDatasetExt"
+                    datasetComponent.dataset instanceof GroovyDataset
             ) {
                 def groovyScript = resource.resources[0].contents[0].dataset.runQueryGroovyCode
                 Object[] rowData = []
@@ -118,7 +125,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
                 return JsonOutput.toJson(rowData)
             }
             else {
-                def driverClassName = resource.resources[0].contents[0].dataset.connection.driver.driverClassName
+                def driverClassName = datasetComponent.dataset instanceof JdbcDataset
+                    ? datasetComponent.dataset.connection.driver.driverClassName : ""
                 if (driverClassName == 'com.orientechnologies.orient.jdbc.OrientJdbcDriver') {
                     return JsonOutput.toJson(connectionToOrientDB(parameters, filters, aggregations, sorts, groupBy, calculatedExpression, groupByColumn, resource))
                 } else {
@@ -206,18 +214,21 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         if (currentColumn) {
                             type = currentColumn.datasetColumn.convertDataType
                         }
-
+                        def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                         if (type == DataType.DATE || type == DataType.TIMESTAMP) {
                             def map = [:]
                             map["column"] = currentColumn.datasetColumn.name
-                            map["select"] = "(EXTRACT(DAY FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(DAY FROM CAST('${filters[i].value}' AS DATE)) AND " +
-                                    "EXTRACT(MONTH FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(MONTH FROM CAST('${filters[i].value}' AS DATE)) AND " +
-                                    "EXTRACT(YEAR FROM CAST(t.\"${currentColumn.datasetColumn.name}\" AS DATE)) = EXTRACT(YEAR FROM CAST('${filters[i].value}' AS DATE)))"
+                            if (operator == "IS NULL") {
+                                map["select"] = "t.${currentColumn.datasetColumn.name} is null"
+                            } else if (operator == "IS NOT NULL") {
+                                map["select"] = "t.${currentColumn.datasetColumn.name} is not null"
+                            } else {
+                                map["select"] = "t.${filters[i].datasetColumn} ${operator} to_date('${filters[i].value}','${defaultDateFormat}')"
+                            }
                             serverFilters.add(map)
                         } else {
                             def map = [:]
                             map["column"] = filters[i].datasetColumn
-                            def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                             if (operator == 'LIKE') {
                                 map["select"] = "(LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('${filters[i].value}') OR " +
                                         "LOWER(CAST(t.${filters[i].datasetColumn} AS VARCHAR(256))) ${operator} LOWER('%${filters[i].value}') OR " +
@@ -584,18 +595,21 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         if (currentColumn) {
                             type = currentColumn.datasetColumn.convertDataType
                         }
-
+                        def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                         if (type == DataType.DATE || type == DataType.TIMESTAMP) {
                             def map = [:]
                             map["column"] = currentColumn.datasetColumn.name
-                            map["select"] = "(EXTRACT(DAY FROM CAST(t.${currentColumn.datasetColumn.name} AS DATE)) = EXTRACT(DAY FROM CAST('${filters[i].value}' AS DATE)) AND " +
-                                    "EXTRACT(MONTH FROM CAST(t.${currentColumn.datasetColumn.name} AS DATE)) = EXTRACT(MONTH FROM CAST('${filters[i].value}' AS DATE)) AND " +
-                                    "EXTRACT(YEAR FROM CAST(t.${currentColumn.datasetColumn.name} AS DATE)) = EXTRACT(YEAR FROM CAST('${filters[i].value}' AS DATE)))"
+                            if (operator == "IS NULL") {
+                                map["select"] = "t.${currentColumn.datasetColumn.name} is null"
+                            } else if (operator == "IS NOT NULL") {
+                                map["select"] = "t.${currentColumn.datasetColumn.name} is not null"
+                            } else {
+                                map["select"] = "t.${filters[i].datasetColumn} ${operator} to_date('${filters[i].value}','${defaultDateFormat}')"
+                            }
                             serverFilters.add(map)
                         } else {
                             def map = [:]
                             map["column"] = filters[i].datasetColumn
-                            def operator = getConvertOperator(filters[i].operation.toString().toLowerCase())
                             if (operator == 'LIKE') {
                                 map["select"] = "(${filters[i].datasetColumn} ${operator} ${filters[i].value} OR " +
                                         "${filters[i].datasetColumn}.asString() ${operator} '%${filters[i].value}' OR " +

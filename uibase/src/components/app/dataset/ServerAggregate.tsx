@@ -3,23 +3,16 @@ import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
-import {DrawerParameterComponent} from './DrawerParameterComponent';
+import {DrawerParameterComponent, ParameterDrawerProps} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
-interface Props {
+interface Props extends ParameterDrawerProps {
     distance?: number;
-    parametersArray?: Array<IServerQueryParam>;
-    columnDefs?:  Map<String,any>[];
-    onChangeParameters?: (newServerParam: any[], paramName: paramType) => void;
-    saveChanges?: (newParam: any, paramName: string) => void;
-    isVisible?: boolean;
     allAggregates?: Array<EObject>;
-    componentType?: paramType;
     handleDrawerVisability?: any;
 }
 
@@ -126,7 +119,7 @@ const SortableItem = SortableElement(({value}: any) => {
                         })(
                         <NeoSelect
                             width={'259px'}
-                            getPopupContainer={() => document.getElementById ('aggregationButton') as HTMLElement}
+                            getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('columnname')}
                             showSearch={true}
                             allowClear={true}
@@ -177,7 +170,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             })(
                             <NeoSelect
                                 width={'239px'}
-                                getPopupContainer={() => document.getElementById('aggregationButton') as HTMLElement}
+                                getPopupContainer={() => document.getElementById(value.popUpContainerId) as HTMLElement}
                                 placeholder={value.t('operation')}
                                 allowClear={true}
                                 onChange={(e: any) => {
@@ -316,7 +309,8 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
-                                    parametersArray: this.state.parametersArray
+                                    parametersArray: this.state.parametersArray,
+                                    popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

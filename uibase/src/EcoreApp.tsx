@@ -195,34 +195,33 @@ class EcoreApp extends React.Component<any, State> {
         if (notificationType === "success") {
             return (
                 notification.success({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "error") {
             return (
                 notification.error({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "info") {
             return (
                 notification.info({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "warning") {
             return (
                 notification.warning({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
         else if (notificationType === "open") {
             return (
                 notification.open({
-                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", fontWeight: 350}
+                    message: title, description: description, duration: this.state.notifierDuration, key, btn: [btnCloseAll], style: {width: 450, marginLeft: -52, marginTop: 16, wordWrap: "break-word", whiteSpace: "break-spaces", fontWeight: 350}
                 }))
         }
-
     };
 
     getGlobalSettings() {
@@ -540,13 +539,6 @@ class EcoreApp extends React.Component<any, State> {
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng)
         };
-        const langMenu = () => <Menu style={{ backgroundColor: backgroundColor }}>
-            {_map(languages, (lang:any, index:number)=>
-                <Menu.Item onClick={()=>setLang(lang)} key={lang} style={{ width: '60px' }}>
-                    <span className='lang-title' style={{ fontVariantCaps: 'petite-caps' }}>{lang}</span>
-                </Menu.Item>
-            )}
-        </Menu>;
 
         const devMenu = (<Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'metadata'}>
@@ -732,11 +724,9 @@ class EcoreApp extends React.Component<any, State> {
                                     lineHeight:'1',
                                     justifyContent:'flex-end'
                                 }}>
-                            <Dropdown overlay={langMenu} placement="bottomCenter">
-                                    <div className="lang-label" style={{ fontVariantCaps: 'petite-caps', marginRight:'25px' }}>
-                                        {languages.includes(storeLangValue) ? storeLangValue.toUpperCase() : 'US'}
-                                    </div>
-                            </Dropdown>
+                                <NeoButton onClick={()=>setLang(storeLangValue==='ru' ? 'en' : 'ru')} type={"link"} className="lang-label">
+                                    {storeLangValue.toUpperCase()}
+                                </NeoButton>
                                 {
                                     this.props.history.location.pathname.includes('developer')
                                         ?
@@ -803,7 +793,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref' render={(props:any) => this.isDeveloper() ? <ResourceEditor notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>
                     <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
                     <Route path='/developer/filesystem' component={this.isDeveloper() ? FilesystemBrowser : Prohibited}/>

@@ -52,7 +52,7 @@ class JdbcConnection extends Tagged {
 /*Dataset*/
 @NFCore(documentation="Набор данных (таблица)")
 abstract class Dataset extends Tagged {
-        @NFCore(documentation="Уникальное имя объекта во всем приложении")
+        @NFCore(documentation="Уникальное имя объекта во всем приложении", resourceEditorName="resource name")
     QName name
         @NFCore(documentation="Список со всеми колонками в наборе данных")
     contains DatasetColumn[] datasetColumn
@@ -63,15 +63,15 @@ abstract class Dataset extends Tagged {
 @NFCore(documentation="Набор данных, подключаемый из Базы данных через Jdbc")
 @Ecore(constraints="IsValid")
 class JdbcDataset extends Dataset {
-        @NFCore(documentation="Подключение к Базе данных")
+        @NFCore(documentation="Подключение к Базе данных", resourceEditorName="jdbc connection")
     refers JdbcConnection connection
-        @NFCore(documentation="Формат формирования запроса. Возможные значение: UseTableName - используя только имя таблицы и схему, UseQuery - используя только сам запрос")
+        @NFCore(documentation="Формат формирования запроса. Возможные значение: UseTableName - используя только имя таблицы и схему, UseQuery - используя только сам запрос", resourceEditorName="type of query")
     QueryType queryType
-        @NFCore(documentation="Запрос к Базе данных", expandable="true")
+        @NFCore(documentation="Запрос к Базе данных", expandable="true", syntax="sql", resourceEditorName="query text")
     Text query
-        @NFCore(documentation="Схема для запроса к Базе данных")
+        @NFCore(documentation="Схема для запроса к Базе данных", resourceEditorName="schema name")
     Text schemaName
-         @NFCore(documentation="Название таблицы для запроса к Базе данных")
+         @NFCore(documentation="Название таблицы для запроса к Базе данных", resourceEditorName="table name")
     Text tableName
         @NFCore(documentation="Вывести на экран все таблицы")
     op JSON showAllTables()
@@ -83,9 +83,9 @@ class JdbcDataset extends Dataset {
 
 @NFCore(documentation="Набор данных, без подключения к Базе данных")
 class GroovyDataset extends Dataset {
-        @NFCore(documentation="Исполняемый код на Groovy для запроса данных", expandable="true")
+        @NFCore(documentation="Исполняемый код на Groovy для запроса данных", expandable="true", syntax="groovy")
     String runQueryGroovyCode
-        @NFCore(documentation="Исполняемый код на Groovy для создания колонок", expandable="true")
+        @NFCore(documentation="Исполняемый код на Groovy для создания колонок", expandable="true", syntax="groovy")
     String loadAllColumnGroovyCode
         @NFCore(documentation="Запуск кода из 'loadAllColumnGroovyCode'")
     op JSON loadAllColumns()
