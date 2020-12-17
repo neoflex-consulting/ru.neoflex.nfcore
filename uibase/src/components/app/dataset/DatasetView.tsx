@@ -44,6 +44,8 @@ import './../../../styles/AggregateHighlight.css';
 
 import {NeoDrawer, NeoModal, NeoTypography} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
+import {checkServerSideCondition} from "../../../AntdFactory";
+import {ViewRegistry} from "../../../ViewRegistry";
 
 const textAlignMap_: any = textAlignMap;
 
@@ -144,6 +146,8 @@ const defaultComponentValues = {
 
 
 class DatasetView extends React.Component<any, State> {
+
+    private viewFactory = ViewRegistry.INSTANCE.get('antd');
 
     gridRef = React.createRef<any>();
 
@@ -316,13 +320,13 @@ class DatasetView extends React.Component<any, State> {
         return mask;
     }
 
-    getChildrenColumns(column: any, resource: Ecore.Resource) {
+    async getChildrenColumns(column: Ecore.EList, resource: Ecore.Resource) {
         let columnDefs:any[] = [];
-        column.each( (c: Ecore.EObject) => {
+        for (const c of column.array()) {
             if (c.get('column')) {
                 let rowData = new Map();
                 rowData.set('headerName', c.get('columnName'));
-                rowData.set('children', this.getChildrenColumns(c.get('column'), resource));
+                rowData.set('children', await this.getChildrenColumns(c.get('column'), resource));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -331,7 +335,8 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('field', c.get('name'));
                 rowData.set('headerName', c.get('columnName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
-                rowData.set('hide', c.get('hide'));
+                const serverSideCondition = await checkServerSideCondition(c.get('conditionType'), c.get('serverSideConditionValueItems'), c.get('serverSideConditionDataset'), c.get('expression'), this.props.context)
+                rowData.set('hide', !serverSideCondition || c.get('hide'));
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
@@ -366,7 +371,7 @@ class DatasetView extends React.Component<any, State> {
                 /*rowData.set('customHeader',c.get('headerName'));*/
                 columnDefs.push(rowData);
             }
-        });
+        }
         return columnDefs;
     }
 
@@ -444,23 +449,24 @@ class DatasetView extends React.Component<any, State> {
     }
 
     findColumnDefs(resource: Ecore.Resource){
-        let columnDefs = this.getChildrenColumns(resource.eContents()[0].get('column'), resource);
-        const leafColumnDefs = this.getLeafColumns(columnDefs);
-        this.replaceComponentRenderCondition(columnDefs, leafColumnDefs);
-        this.setState({
-            columnDefs: columnDefs,
-            defaultColumnDefs: this.deepCloneColumnDefs(columnDefs),
-            leafColumnDefs: leafColumnDefs,
-            defaultLeafColumnDefs: this.deepCloneColumnDefs(leafColumnDefs),
-        },()=>{
+        this.getChildrenColumns(resource.eContents()[0].get('column'), resource).then(columnDefs=>{
+            const leafColumnDefs = this.getLeafColumns(columnDefs);
+            this.replaceComponentRenderCondition(columnDefs, leafColumnDefs);
             this.setState({
-                isUpdateAllowed: this.props.viewObject.get('datasetComponent').get('updateQuery') ? !this.validateEditOptions('updateQuery') : false,
-                isInsertAllowed: this.props.viewObject.get('datasetComponent').get('insertQuery') ? !this.validateEditOptions('insertQuery') : false,
-                isDeleteAllowed: this.props.viewObject.get('datasetComponent').get('deleteQuery') ? !this.validateEditOptions('deleteQuery') : false,
+                columnDefs: columnDefs,
+                defaultColumnDefs: this.deepCloneColumnDefs(columnDefs),
+                leafColumnDefs: leafColumnDefs,
+                defaultLeafColumnDefs: this.deepCloneColumnDefs(leafColumnDefs),
+            },()=>{
+                this.setState({
+                    isUpdateAllowed: this.props.viewObject.get('datasetComponent').get('updateQuery') ? !this.validateEditOptions('updateQuery') : false,
+                    isInsertAllowed: this.props.viewObject.get('datasetComponent').get('insertQuery') ? !this.validateEditOptions('insertQuery') : false,
+                    isDeleteAllowed: this.props.viewObject.get('datasetComponent').get('deleteQuery') ? !this.validateEditOptions('deleteQuery') : false,
+                });
             });
-        });
-        this.findParams(resource as Ecore.Resource, leafColumnDefs);
-        this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
+            this.findParams(resource as Ecore.Resource, leafColumnDefs);
+            this.updatedDatasetComponents(columnDefs, undefined, resource.eContents()[0].get('name'))
+        })
     }
 
     //Поиск сохранённых фильтров по id компоненты
@@ -1397,6 +1403,12 @@ class DatasetView extends React.Component<any, State> {
         });
     };
 
+    renderEList = (list: Ecore.EList) => {
+        return list && list.array().map(v=>{
+            return this.viewFactory.createView(v, this.props)
+        })
+    };
+
     render() {
         const { t } = this.props;
         const barMode = this.state.isEditMode
@@ -1410,6 +1422,7 @@ class DatasetView extends React.Component<any, State> {
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
             <div style={{margin:'16px'}}>
+                {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}
