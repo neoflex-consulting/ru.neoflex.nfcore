@@ -98,8 +98,8 @@ const getChildNode = (children: any[], nodeKey:string) => {
 
 class ResourceEditor extends React.Component<Props & WithTranslation & any, State> {
 
-    private splitterRef: React.RefObject<any>;
-    private treeRef: React.RefObject<any>;
+    splitterRef: React.RefObject<any>;
+    treeRef: React.RefObject<any>;
 
     constructor(props: any) {
         super(props);
@@ -113,7 +113,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         resourceJSON: {},
         currentNode: {},
         tableData: [],
-        targetObject: { eClass: "" },
+        targetObject: { eClass: "" } as ITargetObject,
         selectedKey: "",
         modalRefVisible: false,
         modalResourceVisible: false,
@@ -190,12 +190,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     mainEObject: mainEObject,
                     resourceJSON: nestedJSON,
                     resource: resource,
-                    selectedKeys: [],
+                    selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
                     //If we create a new sibling (without saving), when click on it, information appears in the property table.
                     //But if we click the refresh button, the new created sibling will disappear, but the property table still will
                     //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
-                    targetObject: { eClass: "" },
-                    tableData: []
+                    targetObject: this.state.targetObject ? this.state.targetObject : { eClass: "" },
+                    tableData: this.state.tableData?.length > 0 ? this.state.tableData : []
                 }));
             })
             :
@@ -222,7 +222,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return result
         };
-
         const generateNodes = (eClass: Ecore.EObject, json: { [key: string]: any }, parentId?: String): Array<any> => {
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, idx: Number) => {
                     const isContainment = Boolean(feature.get('containment'));
@@ -689,13 +688,26 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
-                isModified: true
+                selectedKeys: [newObject._id],
+                isModified: true,
+                expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
+            }, () => {
+                //Scroll to created
+                for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
+                    if (key === this.state.targetObject._id) {
+                        (value as any).selectHandle.scrollIntoView({
+                            behavior: "smooth",
+                            block: 'center',
+                            inline: 'center'
+                        });
+                    }
+                }
             })
         }
 
@@ -964,7 +976,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 if (this.props.match.params.id === 'new') {
                     this.setState({edit: false})
                 }
-                const updatedTargetObject = findObjectById(this.state.resourceJSON, resource.get('uri'));
+                const updatedTargetObject = findObjectById(this.state.resourceJSON, this.state.targetObject._id);
                 this.setState({
                     isSaving: false,
                     isModified: false,
