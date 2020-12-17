@@ -1236,6 +1236,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 14px!important;
     color: #B3B3B3!important;
     margin-top: 2px!important;
+    margin-right: 10px!important;
     text-decoration: none!important;
   }
   .lang-label:hover {
@@ -1331,6 +1332,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 14px !important;
     color: #B3B3B3 !important;
     margin-top: 1px !important;
+    margin-right: 10px!important;
     text-decoration: none!important;
   }
   .lang-label:hover {
@@ -1424,6 +1426,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 14px !important;
     color: #B3B3B3 !important;
     margin-top: 1px !important;
+    margin-right: 10px!important;
     text-decoration: none!important;
   }
   .lang-label:hover {
@@ -1775,6 +1778,10 @@ padding: 3px 24px;
   border-collapse: unset;
   padding: 13px 10px !important;
   line-height: 16px;
+}
+
+.datasearch__filter__drawer .ant-table-tbody > tr > td {
+  vertical-align: baseline;
 }
 
 .datasearch__filter__drawer .ant-table-wrapper {
