@@ -288,11 +288,14 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         className={"meta-browser-input"}
                         type={"search"}
                         onSearch={(str:string)=>{
+                            console.log('DATA', this.state.data)
                             this.state.data.forEach(el=>{
+                                console.log('el', el)
                                 el.isVisible__ = str === "";
                                 el.children.forEach((c1:any)=>{
+                                    console.log('c1', c1)
                                     if (str !== "") {
-                                        if (c1.name.match(new RegExp(str,'gi'))) {
+                                        if (c1.name.match(new RegExp(str,'gi')) || c1.description.match(new RegExp(str,'gi'))) {
                                             c1.isVisible__ = true;
                                             el.isVisible__ = true;
                                             if (c1.showParent)
@@ -301,6 +304,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                             c1.isVisible__ = false;
                                         }
                                     } else {
+                                        console.log('DEPTH', c1.depth)
                                         if (c1.depth === 0) {
                                             el.isVisible__ = true;
                                             c1.isVisible__ = true;
