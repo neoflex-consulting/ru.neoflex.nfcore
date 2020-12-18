@@ -676,10 +676,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         return menu
     }
 
+    scrollToCreatedNode =() => {
+        for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
+            if (key === this.state.targetObject._id) {
+                (value as any).selectHandle.scrollIntoView({
+                    behavior: "smooth",
+                    block: 'center',
+                    inline: 'center'
+                });
+            }
+        }
+    }
+
     handleRightMenuSelect = (e: any) => {
         const targetObject: { [key: string]: any } = this.state.targetObject;
         const node: { [key: string]: any } = this.state.treeRightClickNode;
-
         if (e.keyPath[e.keyPath.length - 1] === "add") {
             const subTypeName = e.item.props.children;
             const eClass = node.eClass;
@@ -709,18 +720,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 selectedKeys: [newObject._id],
                 isModified: true,
                 expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
-            }, () => {
-                //Scroll to created
-                for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
-                    if (key === this.state.targetObject._id) {
-                        (value as any).selectHandle.scrollIntoView({
-                            behavior: "smooth",
-                            block: 'center',
-                            inline: 'center'
-                        });
-                    }
-                }
-            })
+            }, this.scrollToCreatedNode)
         }
 
         if (e.key === "moveUp" || e.key === "moveDown") {
@@ -798,11 +798,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         });
                     }
                 }
-                //Change inner _id
+                //Change inner _id if its child of copy element
                 if (key === "_id") {
-                    obj[key] = (id + obj[key] as string)
+                    obj[key] = obj[key] === id ? id : (id + obj[key] as string)
                 }
-                //Change same page ref for children
+                //Change same page ref for children (deprecated?)
                 if (key === "$ref" && level !== 1) {
                     obj[key] = (obj[key] as string).replace(pattern,id)
                 }
@@ -813,14 +813,15 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const updatedTargetObject = findObjectById(nestedJSON, id)
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
-                isModified: true
-            }))
+                isModified: true,
+                selectedKeys: [id]
+            }), this.scrollToCreatedNode)
         }
         if (e.key === "expandAll") {
             const childToExpand = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
@@ -1004,15 +1005,27 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         if (resource) {
             this.setState({isSaving: true});
             API.instance().saveResource(resource, 99999).then((resource: any) => {
-                const updatedTargetObject = findObjectById(this.state.resourceJSON, this.state.targetObject._id);
-                this.setState({
-                    isSaving: false,
-                    isModified: false,
-                    modalApplyChangesVisible: false,
-                    mainEObject: resource.eResource().eContents()[0],
-                    targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
-                    resource: resource
-                }, ()=>callback && callback());
+                if (this.props.match.params.id === 'new') {
+                    resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
+                        .then(() => {
+                            this.setState({edit: true});
+                        });
+                    this.refresh(true);
+                    this.setState({
+                        isSaving: false,
+                        isModified: false
+                    })
+                } else {
+                    const updatedTargetObject = findObjectById(this.state.resourceJSON, this.state.targetObject._id);
+                    this.setState({
+                        isSaving: false,
+                        isModified: false,
+                        modalApplyChangesVisible: false,
+                        mainEObject: resource.eResource().eContents()[0],
+                        targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
+                        resource: resource
+                    }, ()=>callback && callback());
+                }
                 if (!saveAndExit) {
                     this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
                     this.refresh(true)
@@ -1097,12 +1110,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     );
                                 if (currentLockFile.length !== 0) {
                                     this.setState({edit: true});
-                                }
-                                else if (this.props.match.params.id !== 'new') {
-                                    this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'))
-                                        .then(() => {
-                                            this.setState({edit: true});
-                                        })
                                 }
                             }
                         })
