@@ -718,6 +718,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 selectedKeys: [newObject._id],
+                uniqKey: newObject._id,
                 isModified: true,
                 expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
             }, this.scrollToCreatedNode)
@@ -813,14 +814,15 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
-            const updatedTargetObject = findObjectById(nestedJSON, id)
+            const updatedTargetObject = findObjectById(nestedJSON, id);
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 isModified: true,
-                selectedKeys: [id]
+                selectedKeys: [id],
+                uniqKey: id,
             }), this.scrollToCreatedNode)
         }
         if (e.key === "expandAll") {
@@ -1000,30 +1002,74 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
+        function getNewIds( oldJSON: {[key: string]: any }, newJSON: { [key: string]: any }, ids:{[key:string]: string} = {}) {
+            for (const [key, value] of Object.entries(oldJSON)) {
+                if (typeof value === "object") {
+                    getNewIds(oldJSON[key], newJSON[key], ids)
+                } else if (key === "_id") {
+                    ids[oldJSON._id] = newJSON._id
+                }
+            }
+            return ids
+        }
+        function getNewExpandedKeys(ids:{[key:string]: string}, oldExpandedKeys:string[]):string[] {
+            return oldExpandedKeys.map(key=>{
+                let newKey;
+                for (const [id, newId] of Object.entries(ids)) {
+                    if (!newKey) {
+                        newKey = id === key
+                            ? newId
+                            : (typeof key === "string" && (key as string).search(id) >= 0)
+                                ? (key as string).split(id).join(newId)
+                                : undefined
+                    }
+                }
+                return newKey ? newKey : key
+            });
+        }
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
             this.setState({isSaving: true});
             API.instance().saveResource(resource, 99999).then((resource: any) => {
                 if (this.props.match.params.id === 'new') {
+
+                    const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
+                    const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
+                    //ids after serialization
+                    const newIds = getNewIds(oldNestedJSON, nestedJSON);
                     resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
                         .then(() => {
                             this.setState({edit: true});
                         });
-                    this.refresh(true);
                     this.setState({
                         isSaving: false,
-                        isModified: false
-                    })
+                        isModified: false,
+                        selectedKeys: this.state.selectedKeys.map((key)=>{
+                            return newIds[key]
+                        }),
+                        //add mainEObject id
+                        expandedKeys: getNewExpandedKeys(newIds, this.state.expandedKeys).concat(resource.eContents()[0]._id),
+                        uniqKey: newIds[this.state.uniqKey],
+                    }, () => this.refresh(true))
                 } else {
-                    const updatedTargetObject = findObjectById(this.state.resourceJSON, this.state.targetObject._id);
+                    const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
+                    const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
+                    //ids after serialization
+                    const newIds = getNewIds(oldNestedJSON, nestedJSON);
+                    const updatedTargetObject = findObjectById(nestedJSON, newIds[this.state.targetObject._id]);
                     this.setState({
                         isSaving: false,
                         isModified: false,
                         modalApplyChangesVisible: false,
                         mainEObject: resource.eResource().eContents()[0],
                         targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
-                        resource: resource
+                        resource: resource,
+                        selectedKeys: this.state.selectedKeys.map((key)=>{
+                            return newIds[key]
+                        }),
+                        expandedKeys: getNewExpandedKeys(newIds, this.state.expandedKeys),
+                        uniqKey: newIds[this.state.uniqKey],
                     }, ()=>callback && callback());
                 }
                 if (!saveAndExit) {
