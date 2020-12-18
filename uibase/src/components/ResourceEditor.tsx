@@ -1085,6 +1085,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
             this.setState({expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children])})
         }
+        //Component load after getEObject
         if (prevState.mainEObject._id === undefined && this.state.mainEObject._id !== undefined) {
             this.checkLock('auth','CurrentLock', 'currentLockPattern');
         }
@@ -1110,6 +1111,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     );
                                 if (currentLockFile.length !== 0) {
                                     this.setState({edit: true});
+                                } else {
+                                    if (this.props.match.params.edit) {
+                                        this.changeEdit(false)
+                                    }
+                                }
+                            } else {
+                                if (this.props.match.params.edit) {
+                                    this.changeEdit(false)
                                 }
                             }
                         })
@@ -1219,14 +1228,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                                 </span>
                                                     </a>
                                                 </div>
-                                                <div style={{margin:'auto'}}>
+                                                {/*<div style={{margin:'auto'}}>
                                                     <Button
                                                         className="item-close-button"
                                                         shape="circle"
                                                         icon="close"
                                                         onClick={(e: any) => this.handleDeleteResource(res)}
                                                     />
-                                                </div>
+                                                </div>*/}
                                             </div>
                                         )
                                         }
