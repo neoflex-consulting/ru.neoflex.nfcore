@@ -578,6 +578,16 @@ export class API implements IErrorHandler {
         }))
     }
 
+    checkLock(name: string): Promise<boolean> {
+        return this.fetchJson(`/emf/checkLock?name=${name}`, {
+            method: "GET",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+    }
+
     deleteLock(name: string): Promise<any> {
         return this.fetchJson(`/emf/deleteLock?name=${name}`, {
             method: "POST",
