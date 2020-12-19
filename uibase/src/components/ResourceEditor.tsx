@@ -229,34 +229,35 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             return result
         };
         const generateNodes = (eClass: Ecore.EObject, json: { [key: string]: any }, parentId?: String): Array<any> => {
-            return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, idx: Number) => {
+            return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, pidx: number) => {
                     const isContainment = Boolean(feature.get('containment'));
                     const upperBound = feature.get('upperBound');
                     const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true';
+                    const parentKey = `${parentId ? parentId : "root" }.${feature.get('name')}${pidx}`
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
                             :
                             json[feature.get('name')] ? [json[feature.get('name')]] : [];
                         return <Tree.TreeNode
+                            key={parentKey}
                             className={!isVisible ? "hidden-leaf" : ""}
                             parentUpdater={json.updater}
                             upperBound={upperBound}
                             isArray={true}
                             arrayLength={targetObject.length}
-                            key={`${parentId ? parentId : null}.${feature.get('name')}${idx}`}
                             eClass={feature.get('eType').eURI()}
                             propertyName={feature.get('name')}
                             targetObject={targetObject}
                             icon={upperBound === 1 ? <Icon type="line" style={{ color: "#d831ff", fontSize: 12 }} /> : <Icon type="dash" style={{ color: "#d831ff" }} />}
                             title={feature.get('name')}
                         >
-                            {targetObject.map((object: { [key: string]: any }) => {
+                            {targetObject.map((object: { [key: string]: any }, cidx: number) => {
                                 const res = Ecore.ResourceSet.create();
                                 const eClass = res.getEObject(object.eClass);
                                 const title = getTitle(object);
                                 return <Tree.TreeNode
-                                    key={object._id}
+                                    key={`${parentKey}.${cidx}`}
                                     featureUpperBound={upperBound}
                                     parentUpdater={json.updater}
                                     eClass={object.eClass ? object.eClass : feature.get('eType').eURI()}
@@ -265,7 +266,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     icon={<Icon type="block" style={{ color: "#88bc51" }} />}
                                     title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 >
-                                    {generateNodes(eClass, object, object._id ? object._id : null)}
+                                    {generateNodes(eClass, object, `${pidx}.${cidx}`)}
                                 </Tree.TreeNode>
                             })}
                         </Tree.TreeNode>
@@ -277,9 +278,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         const onDrop = (event: any) => {
             const {t} = this.props;
-            const dragKey = event.dragNode.props.eventKey;
-
-            const dropKey = event.node.props.eventKey.split('.')[0];
+            const dragKey = event.dragNode.props.targetObject._id;
+            const dropKey = event.node.props.targetObject._id;
 
             const dragPos = event.dragNode.props.pos.split('-');
             const dropPos = event.node.props.pos.split('-');
@@ -389,7 +389,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         expandedKeys: [...expanded]
                     })}}
             >
-                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<Icon type="cluster" style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={this.state.mainEObject._id}>
+                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<Icon type="cluster" style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={"/"}>
                     {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                 </Tree.TreeNode>
             </Tree>
@@ -676,15 +676,23 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         return menu
     }
 
-    scrollToCreatedNode =() => {
+    findTreeNode = (id: string) : {[key:string] : any} | undefined =>  {
         for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
-            if (key === this.state.targetObject._id) {
-                (value as any).selectHandle.scrollIntoView({
-                    behavior: "smooth",
-                    block: 'center',
-                    inline: 'center'
-                });
+            if ((value as {[key:string] : any}).props.targetObject._id === id) {
+                return (value as {[key:string] : any})
             }
+        }
+        return undefined
+    }
+
+    scrollToCreatedNode = () => {
+        const node = this.findTreeNode(this.state.targetObject._id);
+        if (node) {
+            node.selectHandle.scrollIntoView({
+                behavior: "smooth",
+                block: 'center',
+                inline: 'center'
+            });
         }
     }
 
@@ -717,8 +725,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
-                selectedKeys: [newObject._id],
-                uniqKey: newObject._id,
                 isModified: true,
                 expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
             }, this.scrollToCreatedNode)
@@ -744,9 +750,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
-                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
                 isModified: true
-            }))
+            }), () => {
+                if (this.state.selectedKeys.find(key => key === node.eventKey)) {
+                    this.setState({selectedKeys: [this.findTreeNode(updatedTargetObject._id)?.props.eventKey]})
+                }
+            })
         }
 
         if (e.key === "delete") {
@@ -821,8 +830,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 isModified: true,
-                selectedKeys: [id],
-                uniqKey: id,
             }), this.scrollToCreatedNode)
         }
         if (e.key === "expandAll") {
@@ -1012,32 +1019,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return ids
         }
-        function getNewExpandedKeys(ids:{[key:string]: string}, oldExpandedKeys:string[]):string[] {
-            return oldExpandedKeys.map(key=>{
-                let newKey;
-                for (const [id, newId] of Object.entries(ids)) {
-                    if (!newKey) {
-                        newKey = id === key
-                            ? newId
-                            : (typeof key === "string" && (key as string).search(id) >= 0)
-                                ? (key as string).split(id).join(newId)
-                                : undefined
-                    }
-                }
-                return newKey ? newKey : key
-            });
-        }
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
             this.setState({isSaving: true});
             API.instance().saveResource(resource, 99999).then((resource: any) => {
+                const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
+                const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
+                //ids after serialization
+                const newIds = getNewIds(oldNestedJSON, nestedJSON);
+                const updatedTargetObject = findObjectById(nestedJSON, newIds[this.state.targetObject._id]);
                 if (this.props.match.params.id === 'new') {
-
-                    const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
-                    const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
-                    //ids after serialization
-                    const newIds = getNewIds(oldNestedJSON, nestedJSON);
                     resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
                         .then(() => {
                             this.setState({edit: true});
@@ -1045,19 +1037,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     this.setState({
                         isSaving: false,
                         isModified: false,
-                        selectedKeys: this.state.selectedKeys.map((key)=>{
-                            return newIds[key]
-                        }),
-                        //add mainEObject id
-                        expandedKeys: getNewExpandedKeys(newIds, this.state.expandedKeys).concat(resource.eContents()[0]._id),
-                        uniqKey: newIds[this.state.uniqKey],
-                    }, () => this.refresh(true))
+                        targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
+                    })
                 } else {
-                    const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
-                    const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
-                    //ids after serialization
-                    const newIds = getNewIds(oldNestedJSON, nestedJSON);
-                    const updatedTargetObject = findObjectById(nestedJSON, newIds[this.state.targetObject._id]);
                     this.setState({
                         isSaving: false,
                         isModified: false,
@@ -1065,11 +1047,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         mainEObject: resource.eResource().eContents()[0],
                         targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
                         resource: resource,
-                        selectedKeys: this.state.selectedKeys.map((key)=>{
-                            return newIds[key]
-                        }),
-                        expandedKeys: getNewExpandedKeys(newIds, this.state.expandedKeys),
-                        uniqKey: newIds[this.state.uniqKey],
                     }, ()=>callback && callback());
                 }
                 if (!saveAndExit) {
@@ -1134,6 +1111,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         //Component load after getEObject
         if (prevState.mainEObject._id === undefined && this.state.mainEObject._id !== undefined) {
             this.checkLock('auth','CurrentLock', 'currentLockPattern');
+        }
+        //Smooth highlight positioning
+        if (prevState.targetObject?._id !== this.state.targetObject?._id) {
+            const node = this.findTreeNode(this.state.targetObject?._id);
+            if (node) {
+                this.setState({
+                    selectedKeys: [node.props.eventKey],
+                    uniqKey: node.props.eventKey,
+                })
+            }
         }
     }
 
