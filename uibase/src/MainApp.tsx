@@ -509,7 +509,7 @@ export class MainApp extends React.Component<any, State> {
         const key = parentKey ? parentKey + '/' + code : code;
         // eslint-disable-next-line
         const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
-        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}{code}</div>;
+        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{code}</span></div>;
         let children = [];
         if (eObject.get('children')) {
             children = eObject.get('children')
