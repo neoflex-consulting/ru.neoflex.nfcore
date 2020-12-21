@@ -44,7 +44,7 @@ export class Login extends React.Component<any, State> {
     };
 
     getLanguages() {
-        this.setState({languages: ['US', 'RU', 'CN']})
+        this.setState({languages: ['US', 'RU']})
     }
 
     componentDidMount(): void {
