@@ -172,33 +172,4 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
             );
         }}
 
-// export class TableIcon extends React.Component<any, any> {
-//         state = {
-//             open:false,
-//         }
-//     constructor(props:any) {
-//         super(props);
-//     }
-//
-//     changeIcon() {
-//         console.log('stateeee', this.state)
-//
-//         console.log('propppps', this.props)
-//                 const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[this.props.index]
-//                 element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
-//
-//                 this.setState({open: !this.state.open})
-//     }
-//
-//     render() {
-//         return <NeoButton
-//             type={'link'}
-//             title={'Развернуть'}
-//             onClick={this.changeIcon}
-//             style={{display:'inline-block', margin:'auto 14px auto 0px'}}>
-//             <NeoIcon icon={this.state.open===false ? "ellipsis" : "gear"}/>
-//         </NeoButton>
-//     }
-//
-// }
 export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchFilter))
