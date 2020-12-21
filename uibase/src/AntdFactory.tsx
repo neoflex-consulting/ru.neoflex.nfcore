@@ -307,7 +307,7 @@ class TabsViewReport_ extends ViewContainer {
         };
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden || this.props.isParentHidden} style={{marginLeft: "16px", marginRight: "16px"}}>
+            <div hidden={this.state.isHidden || this.props.isParentHidden} style={{margin: "16px", padding: "16px"}}>
                 <NeoTabs
                     animated={false}
                     className={cssClass}
@@ -1727,7 +1727,7 @@ class Collapse_ extends ViewContainer {
     render = () => {
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden || this.props.isParentHidden}>
+            <div hidden={this.state.isHidden || this.props.isParentHidden} style={{padding: "16px", margin: "16px"}}>
                 <Collapse
                     className={cssClass}
                     defaultActiveKey={['1']}
