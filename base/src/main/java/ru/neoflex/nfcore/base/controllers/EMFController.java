@@ -211,6 +211,30 @@ public class EMFController {
         });
     }
 
+    @GetMapping("/checkLock")
+    Boolean checkLock(@RequestParam String name) throws Exception {
+        return store.inTransaction(true, tx -> {
+            DocFinder docFinder = DocFinder.create(store);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode selector = objectMapper.createObjectNode();
+            selector
+                    .with("contents")
+                    .put("eClass", "ru.neoflex.nfcore.base.auth#//CurrentLock")
+                    .put("name", name);
+            try {
+                docFinder
+                        .executionStats(true)
+                        .selector(selector)
+                        .execute();
+                EList<Resource> resources = docFinder.getResourceSet().getResources();
+                return resources.size() > 0;
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
+                //throw new RuntimeException("The file was unlocked by another user");
+            }
+        });
+    }
+
     private JsonNode callImpl(boolean readOnly, String ref, String method, List<Object> args) throws Exception {
         return store.inTransaction(readOnly, tx -> {
             Resource resource = store.loadResource(ref);

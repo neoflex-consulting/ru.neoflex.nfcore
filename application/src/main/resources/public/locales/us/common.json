@@ -477,5 +477,8 @@
         "type of query": "Type of query",
         "query text": "Query text",
         "schema name": "Schema name",
-        "table name": "Table name"
+        "table name": "Table name",
+        "edit resource first": "Please, edit resource first",
+        "are you sure want to delete resource?": "Are you sure want to delete resource?",
+        "deleteResource": "Delete resource"
 }

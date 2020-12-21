@@ -19,3 +19,10 @@
 .modal-add-inner-ref > .ant-modal-content > .ant-modal-body > button {
     margin: 0 0 0 16px;
 }
+
+.modal-apply-changes .ant-modal-content,
+.modal-apply-changes button,
+.modal-apply-changes {
+    width: fit-content !important;
+}
+

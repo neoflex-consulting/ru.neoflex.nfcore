@@ -248,7 +248,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                             <NeoIcon icon={"show"}/>
                         </NeoButton>
                     </Link>;
-                    const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
+                    const editButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}/true`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
                         <NeoButton type={'link'} title={t('edit')}>
                             <NeoIcon icon={"edit"}/>
                         </NeoButton>

@@ -43,16 +43,16 @@ class SaveDatasetComponent extends React.Component<Props, State> {
     }
 
     onClick(): void {
-        if ((this.state.componentName !== "" || this.state.changeCurrent)
-            && !(this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name'))) {
+        if (this.state.componentName !== "" || (this.state.changeCurrent
+            && !(this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')))) {
             this.saveDatasetComponentOptions();
+        } else if (this.state.componentName === "") {
+            this.props.context.notification(this.props.t("DatasetComponent"),
+                this.props.t("component name is empty"),
+                "error")
         } else if (this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')) {
             this.props.context.notification(this.props.t("DatasetComponent"),
                 this.props.t("cant change default profile"),
-                "error")
-        } else {
-            this.props.context.notification(this.props.t("DatasetComponent"),
-                this.props.t("component name is empty"),
                 "error")
         }
     }

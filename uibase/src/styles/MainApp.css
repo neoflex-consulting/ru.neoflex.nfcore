@@ -253,7 +253,17 @@
 
 #referenceTree .menu-content {
     display: inline-flex;
+    align-items: flex-start;
+    line-height: 20px;
     min-width: 233px;
+}
+
+#referenceTree .menu-content span {
+    display: inline-flex;
+    align-items: center;
+    line-height: 20px;
+    min-width: 233px;
+    padding: 10px 0 10px;
 }
 
 #referenceTree .menu-content:hover {
