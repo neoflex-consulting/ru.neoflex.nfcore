@@ -233,7 +233,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     const isContainment = Boolean(feature.get('containment'));
                     const upperBound = feature.get('upperBound');
                     const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true';
-                    const parentKey = `${parentId ? parentId : "/" }/${feature.get('name')}${pidx}`
+                    const parentKey = `${parentId ? parentId : "root" }.${feature.get('name')}.${pidx}`
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
@@ -257,7 +257,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 const eClass = res.getEObject(object.eClass);
                                 const title = getTitle(object);
                                 return <Tree.TreeNode
-                                    key={`${parentKey}/${cidx}/${title}`}
+                                    key={`${parentKey}.${cidx}`}
                                     featureUpperBound={upperBound}
                                     parentUpdater={json.updater}
                                     eClass={object.eClass ? object.eClass : feature.get('eType').eURI()}
@@ -266,7 +266,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     icon={<Icon type="block" style={{ color: "#88bc51" }} />}
                                     title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 >
-                                    {generateNodes(eClass, object, `${pidx}/${cidx}`)}
+                                    {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                                 </Tree.TreeNode>
                             })}
                         </Tree.TreeNode>
@@ -321,8 +321,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
                 if (!event.dropToGap) {
                     let item: any;
-                     findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
-                         item = dropObj
+                    findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                        item = dropObj
                     });
                     let upperBound = event.node.props.upperBound
                     if (upperBound === 1) {
@@ -338,34 +338,34 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     }
                 }
                 else {
-                        let ar: any;
-                        findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
-                            ar = data;
-                        });
-                        if (ar !== undefined) {
-                            if (dropPosition === -1) {
-                                ar.splice(nodePos, 0, dragObj);
-                            } else if (nodePos < dragNodePos) {
-                                ar.splice(nodePos + 1, 0, dragObj);
-                            } else if (nodePos > dragNodePos) {
-                                ar.splice(nodePos, 0, dragObj);
-                            }
+                    let ar: any;
+                    findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
+                        ar = data;
+                    });
+                    if (ar !== undefined) {
+                        if (dropPosition === -1) {
+                            ar.splice(nodePos, 0, dragObj);
+                        } else if (nodePos < dragNodePos) {
+                            ar.splice(nodePos + 1, 0, dragObj);
+                        } else if (nodePos > dragNodePos) {
+                            ar.splice(nodePos, 0, dragObj);
                         }
                     }
-                    const node: { [key: string]: any } = event.node.props;
-                    const targetObject: { [key: string]: any } = this.state.targetObject;
-                    let nestedJSON = nestUpdaters(updatedJSON, null);
-                    let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-                    this.state.mainEObject.eResource().clear();
-                    let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-                    this.setState((state, props) => ({
-                        mainEObject: resource.eContents()[0],
-                        resourceJSON: nestedJSON,
-                        targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
-                        tableData: updatedTargetObject ? state.tableData : [],
-                        selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
-                        isModified: true
-                    }))
+                }
+                const node: { [key: string]: any } = event.node.props;
+                const targetObject: { [key: string]: any } = this.state.targetObject;
+                let nestedJSON = nestUpdaters(updatedJSON, null);
+                let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                this.state.mainEObject.eResource().clear();
+                let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                this.setState((state, props) => ({
+                    mainEObject: resource.eContents()[0],
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+                    tableData: updatedTargetObject ? state.tableData : [],
+                    selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                    isModified: true
+                }))
 
             }
         };
@@ -480,7 +480,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         let featureList: any = undefined;
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
             featureList = mainEObject.eContainer.getEObject(targetObject._id).eClass.get('eAllStructuralFeatures');
-                    }
+        }
         else if (targetObject._id === undefined && mainEObject.eContainer.eContents().length !== 0) {
             featureList = mainEObject.eContainer.eContents()[0].eClass.get('eAllStructuralFeatures');
         }
@@ -783,8 +783,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const json = JSON.stringify(node.targetObject);
             copyToClipboard(json)
                 .catch((err:any) => {
-                console.error('Failed to copy: ', err);
-            })
+                    console.error('Failed to copy: ', err);
+                })
         }
 
         if (e.key === "paste") {
@@ -1202,9 +1202,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     {this.state.mainEObject
                     && this.state.mainEObject.eClass
                     && ["AppModule", "Application"].includes(this.state.mainEObject.eClass.get('name'))
-                    ?
+                        ?
                         <Button className="panel-button" icon="play-circle" title={this.props.t("preview")} onClick={this.run}/>
-                    : null
+                        : null
                     }
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
@@ -1229,13 +1229,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 </Col>
                                 <Col span={5} style={{ position: 'sticky', top: '0' }}>
                                     <Button title={t('additem')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} shape="circle" size="large" onClick={() => this.setState({ modalResourceVisible: true })}/>
-                                        <Input
-                                            style={{ width: '99%'}}
-                                            onChange={(e)=>{
-                                                this.setState({searchResources: `${e.target.value}`})
-                                                }}
-                                            placeholder={this.props.t("search")}>
-                                        </Input>
+                                    <Input
+                                        style={{ width: '99%'}}
+                                        onChange={(e)=>{
+                                            this.setState({searchResources: `${e.target.value}`})
+                                        }}
+                                        placeholder={this.props.t("search")}>
+                                    </Input>
 
                                     <div className="resource-container">
                                         {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').size() > 0 &&
@@ -1243,12 +1243,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             .filter((res: { [key: string]: any }) => res.eContents()[0].get('name').toLowerCase().includes(this.state.searchResources.toLowerCase())||
                                                 res.eContents()[0].eClass.get('name').toLowerCase().includes(this.state.searchResources.toLowerCase()))
                                             .map((res: { [key: string]: any }) =>
-                                            <div
-                                                className="resource-container-item"
-                                                key={res.eURI()}
-                                            >
-                                                <div style={{width:'85%'}}>
-                                                    <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                <div
+                                                    className="resource-container-item"
+                                                    key={res.eURI()}
+                                                >
+                                                    <div style={{width:'85%'}}>
+                                                        <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
                                                             <span
                                                                 title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`}
                                                                 className="item-title"
@@ -1259,9 +1259,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                                     {`${res.eContents()[0].eClass.get('name')}`}
                                                                 </b>}
                                                                 </span>
-                                                    </a>
-                                                </div>
-                                                {/*<div style={{margin:'auto'}}>
+                                                        </a>
+                                                    </div>
+                                                    {/*<div style={{margin:'auto'}}>
                                                     <Button
                                                         className="item-close-button"
                                                         shape="circle"
@@ -1269,8 +1269,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                         onClick={(e: any) => this.handleDeleteResource(res)}
                                                     />
                                                 </div>*/}
-                                            </div>
-                                        )
+                                                </div>
+                                            )
                                         }
                                     </div>
                                 </Col>
