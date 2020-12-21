@@ -1739,7 +1739,7 @@ a.linksInMoreWord:hover{
   margin-bottom: 15px;
 }
 .datasearch_region .hint div {
-  max-width: 60px;
+  max-width: 54px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
