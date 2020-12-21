@@ -233,7 +233,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     const isContainment = Boolean(feature.get('containment'));
                     const upperBound = feature.get('upperBound');
                     const isVisible = getFieldAnnotationByKey(feature.get('eAnnotations'), 'invisible') !== 'true';
-                    const parentKey = `${parentId ? parentId : "root" }.${feature.get('name')}${pidx}`
+                    const parentKey = `${parentId ? parentId : "/" }/${feature.get('name')}${pidx}`
                     if ((upperBound === -1 || upperBound === 1) && isContainment) {
                         const targetObject: { [key: string]: any } = Array.isArray(json[feature.get('name')]) ?
                             json[feature.get('name')]
@@ -257,7 +257,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 const eClass = res.getEObject(object.eClass);
                                 const title = getTitle(object);
                                 return <Tree.TreeNode
-                                    key={`${parentKey}.${cidx}`}
+                                    key={`${parentKey}/${cidx}/${title}`}
                                     featureUpperBound={upperBound}
                                     parentUpdater={json.updater}
                                     eClass={object.eClass ? object.eClass : feature.get('eType').eURI()}
@@ -266,7 +266,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     icon={<Icon type="block" style={{ color: "#88bc51" }} />}
                                     title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 >
-                                    {generateNodes(eClass, object, `${pidx}.${cidx}`)}
+                                    {generateNodes(eClass, object, `${pidx}/${cidx}`)}
                                 </Tree.TreeNode>
                             })}
                         </Tree.TreeNode>
