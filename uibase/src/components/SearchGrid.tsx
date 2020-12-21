@@ -104,6 +104,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                         const maxJsonLength = text.indexOf('#') + 1;
                         return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, maxJsonLength) + "..."}</NeoHint> }
                 else if (text !== undefined && text.length > 100) {return "..."}
+                else if (text !== undefined && text.length > 40) {return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, 40) + "..."}</NeoHint>}
                 else {return text}},
                 ...this.getColumnSearchProps(name, title),
                 filterIcon: (filtered: any) => (
