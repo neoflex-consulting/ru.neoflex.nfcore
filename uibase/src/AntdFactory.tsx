@@ -282,7 +282,7 @@ class TabsViewReport_ extends ViewContainer {
         };
         const cssClass = createCssClass(this.viewObject);
         return (
-            <div hidden={this.state.isHidden || this.props.isParentHidden}>
+            <div hidden={this.state.isHidden || this.props.isParentHidden} style={{marginLeft: "16px", marginRight: "16px"}}>
                 <NeoTabs
                     animated={false}
                     className={cssClass}
@@ -297,6 +297,7 @@ class TabsViewReport_ extends ViewContainer {
                         children.map((c: Ecore.EObject) =>
                             <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >
                                 {this.viewFactory.createView(c, props)}
+                                test
                             </NeoTabs.NeoTabPane>
                         )
                     }
@@ -1683,6 +1684,7 @@ class Collapse_ extends ViewContainer {
         super(props);
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
+            isOpen: this.viewObject.get('isOpen')
         };
     }
 
@@ -1702,7 +1704,7 @@ class Collapse_ extends ViewContainer {
                     className={cssClass}
                     defaultActiveKey={['1']}
                     expandIconPosition={'left'}>
-                    <Collapse.Panel header={this.viewObject.get("name")} key={"1"}>
+                    <Collapse.Panel header={this.viewObject.get("name")} key={"1"} forceRender={this.state.isOpen}>
                         {this.renderChildren()}
                     </Collapse.Panel>
                 </Collapse>
