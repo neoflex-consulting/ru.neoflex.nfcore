@@ -140,6 +140,8 @@ class Calendar extends ViewElement {
 
 @NFCore(documentation="Область которую можно свернуть/развернуть")
 class Collapse extends ViewContainer {
+    @NFCore(documentation="Если true, коллапс будет открыт")
+        boolean isOpen
 }
 
 @NFCore(documentation="Перечень дней (рабочих, выходных, праздничных). Применяется в глобальных настройках приложения 'GlobalSettings'")
