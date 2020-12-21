@@ -11,6 +11,8 @@ import {IMainContext} from "../MainContext";
 
 interface Props {
     translate: TFunction,
+    save: (redirectAfterSave:boolean, saveAndExit:boolean, callback?:Function) => void,
+    edit: boolean,
     mainEObject: Ecore.EObject,
     refresh: (refresh: boolean) => void;
     notification: IMainContext['notification'];
@@ -31,25 +33,28 @@ export default function Operations(props: Props): JSX.Element {
     const [ methodName, setMethodName ] = useState<string>('');
 
     function runAction(methodName: string, eOperation: Ecore.EObject|null = null) {
-        const paramList:{[key: string]: any} = parameters;
-        const targetOperation = eOperation || targetOperationObject;
-        if(methodName){
-            const ref = `${props.mainEObject.eResource().get('uri')}?rev=${props.mainEObject.eResource().rev}`;
-            API.instance().call(ref, methodName, targetOperation!.get('eParameters').map((p: any)=>paramList[p.get('name')])).then(result => {
-                const obj = JSON.parse(result);
-                let key;
-                if (JSON.stringify(obj, null, 4).length > 1000) {
-                    key = JSON.stringify(obj, null, 4).slice(0, 1000) + "..."
-                } else {
-                    key = JSON.stringify(obj, null, 4)
-                }
-                if (notification) {
-                    notification(t('notification'), key.split('\\n').join('\n'), "info");
-                }
-                refresh(true)
-            })
-                .catch( ()=> refresh(false) );
-            setParamModalVisible(false)
+        if (!props.edit) {
+            notification!(t('notification'), t("edit resource first"), "info")
+        } else {
+            const paramList:{[key: string]: any} = parameters;
+            const targetOperation = eOperation || targetOperationObject;
+            if (methodName){
+                props.save(false, false, () => {
+                    const ref = `${props.mainEObject.eResource().get('uri')}?rev=${props.mainEObject.eResource().rev}`;
+                    API.instance().call(ref, methodName, targetOperation!.get('eParameters').map((p: any)=>paramList[p.get('name')])).then(result => {
+                        const obj = JSON.parse(result);
+                        let key;
+                        if (JSON.stringify(obj, null, 4).length > 1000) {
+                            key = JSON.stringify(obj, null, 4).slice(0, 1000) + "..."
+                        } else {
+                            key = JSON.stringify(obj, null, 4)
+                        }
+                        notification!(t('notification'), key.split('\\n').join('\n'), "info");
+                        refresh(true)
+                    }).catch(()=> refresh(false));
+                    setParamModalVisible(false)
+                })
+            }
         }
     }
 

@@ -3,7 +3,7 @@ import update from 'immutability-helper';
 /**
  * Creates updaters for all levels of an object, including for objects in arrays.
  */
-function nestUpdaters(json: any, parentObject: any = null, property ?: String): Object {
+function nestUpdaters(json: any, parentObject: any = null, property ?: String): { [key: string]: any } {
 
     const createUpdater = (data: Object, init_idx?: Number) => {
         return (newValues: Object, indexForParentUpdater?: any, updaterProperty?: any, options?: any) => {

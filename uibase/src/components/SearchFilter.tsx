@@ -2,7 +2,7 @@ import * as React from "react";
 import {Form} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {withTranslation, WithTranslation} from "react-i18next";
-import {NeoButton, NeoInput, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoHint, NeoInput, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -16,13 +16,15 @@ interface State {
     selectedRowKeys: any[];
     searchText: string;
     selectedKeys: any[];
+    open: boolean;
 }
 
 class SearchFilter extends React.Component<Props & FormComponentProps & WithTranslation, State> {
     state = {
         selectedRowKeys: [],
         searchText: '',
-        selectedKeys: []
+        selectedKeys: [],
+        open: false
     };
 
     sortColumns = (a: any, b: any, name: string, type: string): number => {
@@ -116,16 +118,20 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName},
                             {
                             render: (text:string, record:any, i:any) => {
+                                const tableChild = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
                                 const editButton = <NeoButton
                                     type={'link'}
-                                    title={'Развернуть'}
-                                    onClick={()=> {
+                                    suffixIcon={tableChild&&tableChild.classList.contains('open')
+                                            ?
+                                        <NeoHint title={t('hide')}><NeoIcon icon={"close"} /></NeoHint>
+                                            :
+                                        <NeoHint title={t('show')}><NeoIcon icon={"ellipsis"} /></NeoHint>
+                                        }
+                                    onClick={() => {
                                         const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
                                         element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
-                                    }}
-                                    style={{display:'inline-block', margin:'auto 14px auto 0px'}}>
-                                    <NeoIcon icon={"ellipsis"}/>
-                                </NeoButton>
+                                        this.setState({open: !this.state.open})
+                                    }}/>
                                 return [editButton]
                             }
                         }
@@ -166,4 +172,33 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
             );
         }}
 
+// export class TableIcon extends React.Component<any, any> {
+//         state = {
+//             open:false,
+//         }
+//     constructor(props:any) {
+//         super(props);
+//     }
+//
+//     changeIcon() {
+//         console.log('stateeee', this.state)
+//
+//         console.log('propppps', this.props)
+//                 const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[this.props.index]
+//                 element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
+//
+//                 this.setState({open: !this.state.open})
+//     }
+//
+//     render() {
+//         return <NeoButton
+//             type={'link'}
+//             title={'Развернуть'}
+//             onClick={this.changeIcon}
+//             style={{display:'inline-block', margin:'auto 14px auto 0px'}}>
+//             <NeoIcon icon={this.state.open===false ? "ellipsis" : "gear"}/>
+//         </NeoButton>
+//     }
+//
+// }
 export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchFilter))

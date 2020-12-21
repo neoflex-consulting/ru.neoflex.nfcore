@@ -292,7 +292,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                 el.isVisible__ = str === "";
                                 el.children.forEach((c1:any)=>{
                                     if (str !== "") {
-                                        if (c1.name.match(new RegExp(str,'gi'))) {
+                                        if (c1.name.match(new RegExp(str,'gi')) || c1.description.match(new RegExp(str,'gi'))) {
                                             c1.isVisible__ = true;
                                             el.isVisible__ = true;
                                             if (c1.showParent)
