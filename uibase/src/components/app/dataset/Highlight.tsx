@@ -199,9 +199,10 @@ const SortableItem = SortableElement(({value}: any) => {
                                 initialValue: value.value,
                                 rules: [{
                                     required:
-                                        (value.datasetColumn && value.highlightType !== 'Column') ||
+                                        ((value.datasetColumn && value.highlightType !== 'Column') ||
                                         (value.operation && value.highlightType !== 'Column')||
-                                        (value.highlightType && value.highlightType !== 'Column'),
+                                        (value.highlightType && value.highlightType !== 'Column')) &&
+                                        !(value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty') ,
                                     message: ' '
                                 }]
                             })(
