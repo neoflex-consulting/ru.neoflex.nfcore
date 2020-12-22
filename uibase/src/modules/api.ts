@@ -678,8 +678,8 @@ export class API implements IErrorHandler {
 
     stompDisconnect = () => {
         if (this.stompClient) {
-            this.stompClient.deactivate();
-            this.stompClient.forceDisconnect();
+            this.stompClient.active && this.stompClient.deactivate();
+            this.stompClient.connected && this.stompClient.forceDisconnect();
         }
     }
 }
