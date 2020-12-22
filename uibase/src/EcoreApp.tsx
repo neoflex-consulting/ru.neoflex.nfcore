@@ -449,7 +449,8 @@ class EcoreApp extends React.Component<any, State> {
     logOut = () => {
         API.instance().logout().then(() => {
             this.setState({principal : undefined, getUserProfile: true});
-            this.state.context.updateContext!(({userProfilePromise: undefined}))
+            this.state.context.updateContext!(({userProfilePromise: undefined}));
+            API.instance().stompDisconnect();
         });
         this.props.history.push('')
     };

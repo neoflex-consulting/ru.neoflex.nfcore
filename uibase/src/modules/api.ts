@@ -1,4 +1,4 @@
-import Ecore, {EObject, Resource} from "ecore";
+import Ecore, {EObject} from "ecore";
 import _ from 'lodash';
 import {Client} from '@stomp/stompjs';
 
@@ -46,7 +46,7 @@ export class API implements IErrorHandler {
     private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
     private processes: any[];
     private processHandlers: ((processes: any[]) => void)[];
-    private stompClient: Client;
+    private stompClient: Client | undefined;
     public onServerDown: () => void;
     public userName: String;
 
@@ -639,36 +639,47 @@ export class API implements IErrorHandler {
 
     stompConnect = (userName: String) => {
         this.userName = userName;
-        this.stompClient = new Client();
-
-        this.stompClient.configure({
-            webSocketFactory: () => {
-                // eslint-disable-next-line no-restricted-globals
-                return new WebSocket('ws://' + window.location.host + '/socket-registry')
-            },
-            onConnect: () => {
-                this.stompClient.subscribe('/topic/afterSave', message => {
-                    console.log('ON CONNECT: ', JSON.parse(message.body));
-                });
-                this.stompClient.subscribe('/topic/disconnectFlag', message => {
-                    if (message.body !== undefined && this.userName !== undefined) {
-                        if (this.userName === message.body) {
-                            this.stompClient.deactivate();
-                            this.logout()
+        if (this.stompClient) {
+            this.stompClient.activate();
+        } else {
+            this.stompClient = new Client();
+            this.stompClient.configure({
+                webSocketFactory: () => {
+                    // eslint-disable-next-line no-restricted-globals
+                    return new WebSocket('ws://' + window.location.host + '/socket-registry')
+                },
+                onConnect: () => {
+                    this.stompClient?.subscribe('/topic/afterSave', message => {
+                        console.log('ON CONNECT: ', JSON.parse(message.body));
+                    });
+                    this.stompClient?.subscribe('/topic/disconnectFlag', message => {
+                        if (message.body !== undefined && this.userName !== undefined) {
+                            if (this.userName === message.body) {
+                                this.logout().then(()=>{
+                                    this.stompDisconnect();
+                                });
+                            }
                         }
+                    });
+                },
+                debug: (str) => {
+                    console.log('DEBUG:', new Date(), str);
+                },
+                onWebSocketError: (evt: Event) => {
+                    if (this.onServerDown) {
+                        this.onServerDown();
                     }
-                });
-            },
-            debug: (str) => {
-                console.log('DEBUG:', new Date(), str);
-            },
-            onWebSocketError: (evt: Event) => {
-                if (this.onServerDown) {
-                    this.onServerDown();
-                    this.stompClient.deactivate();
+                    this.stompDisconnect();
                 }
-            }
-        });
-        this.stompClient.activate();
+            });
+            this.stompClient.activate();
+        }
     };
+
+    stompDisconnect = () => {
+        if (this.stompClient) {
+            this.stompClient.deactivate();
+            this.stompClient.forceDisconnect();
+        }
+    }
 }
