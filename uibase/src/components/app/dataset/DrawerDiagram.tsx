@@ -279,9 +279,9 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }}>
                     {/*<NeoRow className={'Bottom'}>*/}
                     {this.props.action === "edit"
-                        ?<NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('edit')}</NeoButton>
-                        :<NeoButton className={'Buttons'} onClick={this.handleSubmit}>{this.props.t('create')}</NeoButton>}
-                     <NeoButton className={'Buttons'} style={{marginLeft: '16px'}} type={'secondary'} onClick={this.resetFields}>{this.props.t('reset')}</NeoButton>
+                        ?<NeoButton className={'Buttons'} title={this.props.t('edit')} onClick={this.handleSubmit}>{this.props.t('edit')}</NeoButton>
+                        :<NeoButton className={'Buttons'} title={this.props.t('create')} onClick={this.handleSubmit}>{this.props.t('create')}</NeoButton>}
+                     <NeoButton className={'Buttons'} title={this.props.t('reset')} style={{marginLeft: '16px'}} type={'secondary'} onClick={this.resetFields}>{this.props.t('reset')}</NeoButton>
                 {/*</NeoRow>*/}
                     </div>
             </Form>
