@@ -113,12 +113,13 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                     />
                     <NeoTable
                         size={"small"}
+                        className={this.props.onName}
                         pagination={{pageSize: this.filterDataSource(this.props.onName, this.state.selectedKeys[0]).length}}
                         style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", marginTop: "15px", overflow:'auto', top:'95px', bottom:'145px' }}
                         columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName},
                             {
                             render: (text:string, record:any, i:any) => {
-                                const tableChild = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
+                                const tableChild = document.querySelectorAll(`.datasearch__filter__drawer .${this.props.onName} td:nth-child(2n)`)[i]
                                 const editButton = <NeoButton
                                     type={'link'}
                                     suffixIcon={tableChild&&tableChild.classList.contains('open')
@@ -128,7 +129,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                                         <NeoHint title={t('show')}><NeoIcon icon={"ellipsis"} /></NeoHint>
                                         }
                                     onClick={() => {
-                                        const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
+                                        const element = document.querySelectorAll(`.datasearch__filter__drawer .${this.props.onName} td:nth-child(2n)`)[i]
                                         element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
                                         this.setState({open: !this.state.open})
                                     }}/>
