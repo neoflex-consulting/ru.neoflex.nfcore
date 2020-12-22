@@ -25,6 +25,7 @@ interface State {
     createResModalVisible: boolean;
     selectTags: number;
     selectCount: number;
+    selectDropdownVisible: boolean;
 }
 
 class DataSearch extends React.Component<Props & FormComponentProps & WithTranslation, State> {
@@ -35,7 +36,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         indicatorError: false,
         createResModalVisible: false,
         selectTags: 6,
-        selectCount: 0
+        selectCount: 0,
+        selectDropdownVisible: false
     };
 
     handleSubmit = (e: any) => {
@@ -227,17 +229,22 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                             this.setState({selectCount: event.toString().split(',').length})
                                                         }}
                                                         placeholder={t('choose from the list')}
-                                                        // maxTagTextLength={7}
+                                                        maxTagTextLength={7}
                                                         maxTagCount={this.state.selectTags}
                                                         maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
+                                                        onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
                                                     >
                                                         {
                                                             this.state.tags.map((tag: Ecore.EObject) =>
                                                                     <NeoOption key={tag.get('name')}
                                                                                value={tag.get('name')}>
-                                                                        <NeoHint title={tag.get('name')}>
+                                                                        {this.state.selectDropdownVisible ?
+                                                                            tag.get('name')
+                                                                            :
+                                                                            <NeoHint title={tag.get('name')}>
                                                                             {tag.get('name')}
-                                                                        </NeoHint>
+                                                                            </NeoHint>
+                                                                        }
                                                                     </NeoOption>
                                                                 )
                                                         }
