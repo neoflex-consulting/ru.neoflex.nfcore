@@ -731,14 +731,11 @@ class EcoreApp extends React.Component<any, State> {
                                     this.props.history.location.pathname.includes('developer')
                                         ?
                                         <NeoHint  title={this.props.t('back to applications')}>
-                                        <NeoButton
-                                            style={{marginRight: '10px'}}
-                                            type={"link"}
-                                        >
-                                            <a href={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
-                                            <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
-                                            </a>
-                                        </NeoButton>
+                                            <NeoButton type={'link'} style={{marginRight:'10px'}}>
+                                                <Link to={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
+                                                    <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
+                                                </Link>
+                                            </NeoButton>
                                         </NeoHint>
                                         :
                                         this.isDeveloper() &&
