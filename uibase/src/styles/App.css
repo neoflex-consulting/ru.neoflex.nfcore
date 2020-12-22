@@ -1780,10 +1780,10 @@ padding: 3px 24px;
 }
 
 .datasearch__filter__drawer tbody td:nth-child(2){
-  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 570px;
+  max-width: 570px;
   /*height: 49px;*/
   border-collapse: unset;
   padding: 13px 10px !important;
