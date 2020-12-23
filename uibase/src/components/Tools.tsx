@@ -12,8 +12,10 @@ import {Helmet} from "react-helmet";
 import './../styles/Tools.css';
 import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import {IMainContext} from "../MainContext";
 
 interface Props {
+    notification: IMainContext['notification']
 }
 
 interface State {
@@ -42,7 +44,7 @@ interface State {
     filesUploadArray: File[],
 }
 
-class Tools extends React.Component<any, State> {
+class Tools extends React.Component<Props & WithTranslation, State> {
 
     fileSystemLookupRef = React.createRef<any>();
     deploySupplyInputRef = React.createRef<HTMLInputElement>();
@@ -107,7 +109,7 @@ class Tools extends React.Component<any, State> {
         form.append("file", file)
         this.setState({fileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
         API.instance().fetchJson("/system/importdb", {method: 'POST', body: form}).then(json => {
-            notification.success({message: JSON.stringify(json, undefined, 4)})
+            this.props.notification!(this.props.t("success"), JSON.stringify(json, undefined, 4), "success")
         })
     };
 
@@ -116,7 +118,7 @@ class Tools extends React.Component<any, State> {
         form.append("file", file)
         this.setState({mdFileName: file.name.replace(/\\/g, '/').replace(/.*\//, '')})
         API.instance().fetchJson("/masterdata/import", {method: 'POST', body: form}).then(json => {
-            notification.success({message: JSON.stringify(json, undefined, 4)})
+            this.props.notification!(this.props.t("success"), JSON.stringify(json, undefined, 4), "success")
         })
     };
 
@@ -125,7 +127,7 @@ class Tools extends React.Component<any, State> {
         form.append("file", file)
         this.setState({deployName: file.name.replace(/\\/g, '/').replace(/.*\//, '')});
         API.instance().fetchJson("/system/deploySupply", {method: 'POST', body: form}).then(json => {
-            notification.success({message: JSON.stringify(json, undefined, 4)})
+            this.props.notification!(this.props.t("success"), JSON.stringify(json, undefined, 4), "success")
         })
     };
 
@@ -258,6 +260,7 @@ class Tools extends React.Component<any, State> {
             </div>
             <div className={"tools-horizontal-center-element"}>
                 <FilesystemLookup ref={this.fileSystemLookupRef}
+                                  notification={this.props.notification}
                                   checked={this.state.checkedFiles}
                                   onCheck={paths => this.setState({checkedFiles: paths})
                                   }/>

@@ -481,5 +481,15 @@
         "edit resource first": "Please, edit resource first",
         "are you sure want to delete resource?": "Are you sure want to delete resource?",
         "deleteResource": "Delete resource",
-        "import supply archive and copy it to server": "Import supply archive and copy it to server"
+        "import supply archive and copy it to server": "Import supply archive and copy it to server",
+        "generate link": "Generate link",
+        "run script": "Run script",
+        "create folder": "Create folder",
+        "create file": "Create file",
+        "folder name": "Folder name",
+        "file name": "File name",
+        "folder name is empty": "Folder name is empty",
+        "file name is empty": "File name is empty",
+        "path generated": "Path generated",
+        "path generated into buffer": "Path generated into buffer"
 }

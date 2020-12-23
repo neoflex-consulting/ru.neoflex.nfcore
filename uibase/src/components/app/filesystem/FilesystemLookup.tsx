@@ -2,11 +2,13 @@ import * as React from 'react';
 import {withTranslation, WithTranslation} from "react-i18next";
 import FilesystemTree from "./FilesystemTree";
 import {NeoDrawer, NeoTag} from "neo-design/lib";
+import {IMainContext} from "../../../MainContext";
 
 interface Props {
     ref: any,
     checked: string[],
-    onCheck: (paths: string[]) => void
+    onCheck: (paths: string[]) => void,
+    notification: IMainContext['notification']
 }
 
 interface State {
@@ -33,7 +35,7 @@ class FilesystemLookup extends React.Component<Props & WithTranslation, State> {
                 mask={false}
                 onClose={()=>this.setState({showDrawer: false})}
             >
-                <FilesystemTree checked={checked} onCheck={onCheck}/>
+                <FilesystemTree notification={this.props.notification} checked={checked} onCheck={onCheck}/>
             </NeoDrawer>
             <div style={{display: "unset !important",alignItems:"unset !important"}}>
             {this.props.checked.filter(r => (r.split("/").pop() || "").includes(".")).map(r =>

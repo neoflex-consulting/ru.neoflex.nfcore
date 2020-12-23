@@ -1,0 +1,154 @@
+/*tree*/
+/*fonts*/
+.directory-tree {
+    font-family: Roboto, serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 20px;
+    height: calc(100% - 56px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 0  0  0 4px;
+    border-left: 1px solid #E6E6E6;
+    border-bottom: 1px solid #E6E6E6;
+}
+
+/*disable borders in Tools*/
+.directory-tree.tree-lookup {
+    border: none;
+    border-radius: 0px;
+}
+
+/*text-color*/
+.directory-tree i,
+.directory-tree span {
+    color: #333333;
+}
+
+/*disable extra padding*/
+.directory-tree.ant-tree > li:last-child {
+    padding-bottom: 0;
+}
+
+.directory-tree.ant-tree > li:first-child {
+    padding-top: 0;
+}
+
+.directory-tree.ant-tree li {
+    padding: 0;
+}
+
+.directory-tree .ant-tree-child-tree > li:first-child {
+    padding: 0;
+}
+
+/*icons&text positions */
+.directory-tree .ant-tree-checkbox {
+    margin: 8px 0 0 16px !important;
+}
+
+.directory-tree .ant-tree-switcher > svg {
+    margin: 12px 0 0 16px
+}
+
+.directory-tree .ant-tree-title {
+    vertical-align: -9px !important;
+    padding: 0 4px;
+}
+
+.directory-tree .tree-icon {
+    vertical-align: -12px !important;
+}
+
+.directory-tree.ant-tree li .ant-tree-node-content-wrapper {
+    padding: 0 12px;
+}
+
+/*active area size*/
+.directory-tree .ant-tree-node-content-wrapper,
+.directory-tree .ant-tree-switcher {
+    min-height: 40px;
+}
+
+.directory-tree.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper::before,
+.directory-tree.ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper::before {
+    min-height: 40px;
+}
+
+/*disable hover effect*/
+.directory-tree.ant-tree.ant-tree-directory > li span.ant-tree-node-content-wrapper:hover::before,
+.directory-tree.ant-tree.ant-tree-directory .ant-tree-child-tree > li span.ant-tree-node-content-wrapper:hover::before {
+    background: transparent;
+}
+
+/*enable text&icon color on hover*/
+.directory-tree span:hover * {
+    color: #B38136 !important;
+    fill: #B38136 !important;
+}
+
+/*right line*/
+.directory-tree.ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
+.directory-tree.ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before {
+    background: #FFF8E0;
+    border-right: 2px solid #FFCC66;
+}
+
+/*opened color*/
+.directory-tree .ant-tree-treenode-switcher-open > span,
+.directory-tree .ant-tree-treenode-switcher-open > span > span,
+.directory-tree .ant-tree-treenode-switcher-open > span > span > i {
+    color: #B38136 !important;
+}
+
+/*rotate switcher on close*/
+.directory-tree .ant-tree-switcher_close > svg {
+    /*TODO: add animation*/
+    transform: rotate(90deg);
+}
+
+.directory-tree .ant-tree-checkbox-checked .ant-tree-checkbox-inner {
+    background-color: #2A356C;
+    border-color: #2A356C;
+}
+
+.ant-tree-checkbox-indeterminate .ant-tree-checkbox-inner::after {
+    background-color: #2A356C;
+}
+
+/*buttons*/
+.tree-button-bar {
+    min-width: 332px;
+    min-height: 56px;
+    background: #E6E6E6;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 16px;
+    border-radius: 4px 0 0 0;
+}
+
+.tree-button {
+    margin: 0 16px 0 0 !important;
+}
+
+.tree-button.upload > label > svg {
+    margin: 5px 0 0 0;
+}
+
+.tree-button.disabled > label,
+.tree-button.disabled {
+    cursor: url("data:image/svg+xml,%3Csvg width='30' height='33' viewBox='0 0 30 33' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg filter='url(%23filter0_d)'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M15.1789 8.62486L5 4L7.40747 14.9181L10.3492 10.6057L15.1789 8.62486Z' fill='%23363B3E'/%3E%3Cpath d='M15.3687 9.08746L16.4393 8.64833L15.3858 8.16964L5.20683 3.54478L4.2964 3.13112L4.51173 4.10767L6.9192 15.0257L7.16839 16.1558L7.82052 15.1998L10.6777 11.0114L15.3687 9.08746Z' stroke='white' stroke-opacity='0.8'/%3E%3C/g%3E%3Cg filter='url(%23filter1_d)'%3E%3Cmask id='path-3-outside-1' maskUnits='userSpaceOnUse' x='8.58594' y='10.543' width='18' height='18' fill='black'%3E%3Crect fill='white' x='8.58594' y='10.543' width='18' height='18'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M21.0625 24.4337C20.0817 25.1322 18.8818 25.543 17.5859 25.543C14.2722 25.543 11.5859 22.8567 11.5859 19.543C11.5859 18.2471 11.9967 17.0473 12.6952 16.0664L21.0625 24.4337ZM22.4767 23.0195C23.1751 22.0387 23.5859 20.8388 23.5859 19.543C23.5859 16.2293 20.8996 13.543 17.5859 13.543C16.2901 13.543 15.0902 13.9538 14.1094 14.6522L22.4767 23.0195ZM17.5859 27.543C22.0042 27.543 25.5859 23.9612 25.5859 19.543C25.5859 15.1247 22.0042 11.543 17.5859 11.543C13.1677 11.543 9.58594 15.1247 9.58594 19.543C9.58594 23.9612 13.1677 27.543 17.5859 27.543Z'/%3E%3C/mask%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M21.0625 24.4337C20.0817 25.1322 18.8818 25.543 17.5859 25.543C14.2722 25.543 11.5859 22.8567 11.5859 19.543C11.5859 18.2471 11.9967 17.0473 12.6952 16.0664L21.0625 24.4337ZM22.4767 23.0195C23.1751 22.0387 23.5859 20.8388 23.5859 19.543C23.5859 16.2293 20.8996 13.543 17.5859 13.543C16.2901 13.543 15.0902 13.9538 14.1094 14.6522L22.4767 23.0195ZM17.5859 27.543C22.0042 27.543 25.5859 23.9612 25.5859 19.543C25.5859 15.1247 22.0042 11.543 17.5859 11.543C13.1677 11.543 9.58594 15.1247 9.58594 19.543C9.58594 23.9612 13.1677 27.543 17.5859 27.543Z' fill='%23363B3E'/%3E%3Cpath d='M12.6952 16.0664L13.4023 15.3593L12.5664 14.5234L11.8806 15.4864L12.6952 16.0664ZM14.1094 14.6522L13.5293 13.8377L12.5664 14.5234L13.4023 15.3593L14.1094 14.6522ZM20.4824 23.6191C19.6654 24.201 18.6671 24.543 17.5859 24.543V26.543C19.0965 26.543 20.4979 26.0634 21.6425 25.2483L20.4824 23.6191ZM17.5859 24.543C14.8245 24.543 12.5859 22.3044 12.5859 19.543H10.5859C10.5859 23.409 13.7199 26.543 17.5859 26.543V24.543ZM12.5859 19.543C12.5859 18.4618 12.9279 17.4635 13.5098 16.6465L11.8806 15.4864C11.0655 16.631 10.5859 18.0324 10.5859 19.543H12.5859ZM11.9881 16.7735L20.3554 25.1408L21.7696 23.7266L13.4023 15.3593L11.9881 16.7735ZM23.2913 23.5996C24.1063 22.455 24.5859 21.0535 24.5859 19.543H22.5859C22.5859 20.6241 22.2439 21.6224 21.6621 22.4394L23.2913 23.5996ZM24.5859 19.543C24.5859 15.677 21.4519 12.543 17.5859 12.543V14.543C20.3474 14.543 22.5859 16.7815 22.5859 19.543H24.5859ZM17.5859 12.543C16.0754 12.543 14.6739 13.0226 13.5293 13.8377L14.6895 15.4668C15.5065 14.885 16.5048 14.543 17.5859 14.543V12.543ZM13.4023 15.3593L21.7696 23.7266L23.1838 22.3124L14.8165 13.9451L13.4023 15.3593ZM17.5859 28.543C22.5565 28.543 26.5859 24.5135 26.5859 19.543H24.5859C24.5859 23.409 21.4519 26.543 17.5859 26.543V28.543ZM26.5859 19.543C26.5859 14.5724 22.5565 10.543 17.5859 10.543V12.543C21.4519 12.543 24.5859 15.677 24.5859 19.543H26.5859ZM17.5859 10.543C12.6154 10.543 8.58594 14.5724 8.58594 19.543H10.5859C10.5859 15.677 13.7199 12.543 17.5859 12.543V10.543ZM8.58594 19.543C8.58594 24.5135 12.6154 28.543 17.5859 28.543V26.543C13.7199 26.543 10.5859 23.409 10.5859 19.543H8.58594Z' fill='white' fill-opacity='0.8' mask='url(%23path-3-outside-1)'/%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_d' x='0.59375' y='0.262207' width='17.9998' height='21.1313' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='1.5'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0'/%3E%3CfeBlend mode='normal' in2='BackgroundImageFix' result='effect1_dropShadow'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='effect1_dropShadow' result='shape'/%3E%3C/filter%3E%3Cfilter id='filter1_d' x='5.58594' y='8.54297' width='24' height='24' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='1.5'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0'/%3E%3CfeBlend mode='normal' in2='BackgroundImageFix' result='effect1_dropShadow'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='effect1_dropShadow' result='shape'/%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E%0A"), not-allowed;
+}
+
+/*Modals*/
+
+.filesystem-tree-modal input {
+    width: 100% !important;
+}
+
+.filesystem-tree-modal .ant-modal-footer {
+    text-align: left;
+    padding: 10px 24px 15px;
+}

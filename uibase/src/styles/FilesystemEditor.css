@@ -1,0 +1,35 @@
+.filesystem-text-editor-bar {
+    min-width: 332px;
+    min-height: 56px;
+    background: #E6E6E6;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 0 4px 0 0;
+    border: 1px solid #E6E6E6;
+}
+
+.secondary-bar {
+    background: #FFFFFF;
+    border-radius: 0  0 4px 0;
+    border: 1px solid #E6E6E6;
+    border-left: none;
+}
+
+.secondary-bar button:first-child {
+    margin: 0 16px 0 30px;
+}
+
+.filesystem-text-editor-button {
+    margin: 0 16px 0 0 !important;
+}
+
+.filesystem-text-editor-button .typography {
+    margin-bottom: 0;
+    color: #424D78;
+    padding: 0 0 0 12px;
+}
+
+.filesystem-text-editor-button.btn-link:hover {
+    text-decoration: none;
+}
