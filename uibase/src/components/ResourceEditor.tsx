@@ -932,20 +932,26 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const clone  = (resource: Resource) => {
             if (resource && this.props.match.params.id !== 'new') {
                 API.instance().saveResource(resource).then((resource: any) => {
-                    const targetObject: { [key: string]: any } = this.state.targetObject;
-                    const nestedJSON = nestUpdaters(resource.eResource().to(), null);
-                    const updatedTargetObject = findObjectById(nestedJSON, nestedJSON._id);
-                    this.setState({
-                        mainEObject: resource.eResource().eContents()[0],
-                        resourceJSON: nestedJSON,
-                        targetObject: updatedTargetObject,
-                        selectedKeys: [nestedJSON._id],
-                        resource: resource,
-                        edit: true,
-
+                    API.instance().checkLock(this.state.mainEObject._id).then(locked=> {
+                        locked && API.instance().deleteLock(this.state.mainEObject._id);
+                        const nestedJSON = nestUpdaters(resource.eResource().to(), null);
+                        const updatedTargetObject = findObjectById(nestedJSON, nestedJSON._id);
+                        this.setState({
+                            mainEObject: resource.eResource().eContents()[0],
+                            resourceJSON: nestedJSON,
+                            targetObject: updatedTargetObject,
+                            selectedKeys: [nestedJSON._id],
+                            resource: resource,
+                            edit: true,
+                        }, () => {
+                            API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'))
+                        });
+                        this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                        this.props.notification(t('notification'), t('success'), "info");
                     });
-                    this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`)
-                    this.props.notification(t('notification'), t('success'), "info")
+                }).catch(()=>{
+                    //restore main eObject
+                    this.refresh(true)
                 })
             }
         };
@@ -958,15 +964,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         });
         resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
         resource.set('uri', "");
-        API.instance().checkLock(this.state.mainEObject._id).then((locked=>{
-            if (locked) {
-                API.instance().deleteLock(this.state.mainEObject._id).then(()=>{
-                    clone(resource);
-                });
-            } else {
-                clone(resource);
-            }
-        }));
+        clone(resource);
     };
 
     changeEdit = (redirect: boolean, removalProcess?: boolean) => {
@@ -1028,7 +1026,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
                 //ids after serialization
                 const newIds = getNewIds(oldNestedJSON, nestedJSON);
-                const updatedTargetObject = findObjectById(nestedJSON, newIds[this.state.targetObject._id]);
+                const updatedTargetObject = findObjectById(nestedJSON, this.state.targetObject && newIds[this.state.targetObject._id]);
                 if (this.props.match.params.id === 'new') {
                     resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
                         .then(() => {
