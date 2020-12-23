@@ -519,13 +519,13 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     onClickBellIcon = () => {
-        if (this.state.notifierDuration === 3){
+        if (this.state.notifierDuration === 5){
             this.setState({ notifierDuration: 0});
             localStorage.setItem('notifierDuration', '0');
         }
         else{
-            this.setState({ notifierDuration: 3});
-            localStorage.setItem('notifierDuration', '3');
+            this.setState({ notifierDuration: 5});
+            localStorage.setItem('notifierDuration', '5');
         }
     };
 
@@ -756,7 +756,7 @@ class EcoreApp extends React.Component<any, State> {
                                 type="link"
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
-                                    {localStorage.getItem('notifierDuration') === '3'  ?
+                                    {localStorage.getItem('notifierDuration') === '5'  ?
                                         <NeoIcon className={'bellButton'} icon={'notificationOff'} color={'white'} />
                                     :
                                         <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
