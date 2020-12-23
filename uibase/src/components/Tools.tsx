@@ -232,7 +232,7 @@ class Tools extends React.Component<any, State> {
             </p>
             <NeoButton
                 type={'link'}
-                title={t("back to table")}
+                title={t("export all objects")}
                 className={"tools-href tools-horizontal-center-element tools-margin-right"}
                 onClick={() => {this.downloadAll()}}
             >
@@ -384,7 +384,7 @@ class Tools extends React.Component<any, State> {
             </p>
             <NeoButton
                 type={'link'}
-                title={t("back to table")}
+                title={t("import supply archive and copy it to server")}
                 className={"tools-href tools-horizontal-center-element tools-margin-right"}
                 onClick={() => {
                     this.deploySupplyInputRef.current!.click()

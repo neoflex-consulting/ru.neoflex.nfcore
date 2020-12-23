@@ -480,5 +480,6 @@
         "table name": "Table name",
         "edit resource first": "Please, edit resource first",
         "are you sure want to delete resource?": "Are you sure want to delete resource?",
-        "deleteResource": "Delete resource"
+        "deleteResource": "Delete resource",
+        "import supply archive and copy it to server": "Import supply archive and copy it to server"
 }
