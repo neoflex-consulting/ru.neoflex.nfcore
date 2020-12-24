@@ -255,6 +255,24 @@ public class SysController {
         });
     }
 
+    @DeleteMapping(value = "/fs/many", produces = "application/json; charset=utf-8")
+    public void deleteFsMany(@RequestParam String paths) throws Exception {
+        workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
+            for (String path : Arrays.asList(paths.split(";"))) {
+                Path resolved = tx.getFileSystem().getRootPath().resolve(path);
+                if (Files.isDirectory(resolved)) {
+                    workspace.getDatabase().deleteRecursive(resolved);
+                    tx.commit("Deleting directory " + path);
+                } else if (Files.isRegularFile(resolved)) {
+                    Files.delete(resolved);
+                    tx.commit("Deleting file " + path);
+                }
+                Path parent = resolved.getParent();
+            }
+            return null;
+        });
+    }
+
     @PutMapping(value = "/fs", produces = "application/json; charset=utf-8")
     public JsonNode createFsFile(@RequestParam String path, @RequestBody(required = false) String text) throws Exception {
         return workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {

@@ -731,14 +731,11 @@ class EcoreApp extends React.Component<any, State> {
                                     this.props.history.location.pathname.includes('developer')
                                         ?
                                         <NeoHint  title={this.props.t('back to applications')}>
-                                        <NeoButton
-                                            style={{marginRight: '10px'}}
-                                            type={"link"}
-                                        >
-                                            <a href={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
-                                            <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
-                                            </a>
-                                        </NeoButton>
+                                            <NeoButton type={'link'} style={{marginRight:'10px'}}>
+                                                <Link to={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
+                                                    <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
+                                                </Link>
+                                            </NeoButton>
                                         </NeoHint>
                                         :
                                         this.isDeveloper() &&
@@ -794,9 +791,9 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
                     <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
-                    <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>
+                    <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
                     <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
-                    <Route path='/developer/filesystem' component={this.isDeveloper() ? FilesystemBrowser : Prohibited}/>
+                    <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
                 </Switch>
             </Layout>
         )
