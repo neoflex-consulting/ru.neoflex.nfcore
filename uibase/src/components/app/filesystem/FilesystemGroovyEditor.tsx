@@ -23,6 +23,8 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
         text: "",
         result: "",
         isEdited: false,
+        //skip first close animation
+        isFirstEdit: false,
     }
 
     componentDidMount() {
@@ -31,7 +33,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
 
     componentDidUpdate(prevProps: Readonly<Props & WithTranslation>, prevState: Readonly<any>, snapshot?: any) {
         if (this.state.path !== this.props.path) {
-            this.setState({path: this.props.path, isEdited: false}, this.loadContents)
+            this.setState({path: this.props.path, isEdited: false, isFirstEdit: false}, this.loadContents)
         }
     }
 
@@ -48,6 +50,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
             method: 'PUT',
             body: this.state.text
         }).then(value => {
+            this.setState({isEdited: false});
         })
     }
 
@@ -91,7 +94,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
     onTextChange = (text: string) => {
         this.resizeEditors();
         if (this.state.text !== text) {
-            this.setState({text, isEdited: true})
+            this.setState({text, isEdited: true, isFirstEdit: true})
         }
     };
 
@@ -223,7 +226,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                         </div>
                     </Splitter>
                 </div>
-                {this.state.isEdited && <div className={"filesystem-text-editor-bar secondary-bar"}>
+                {this.state.isFirstEdit && <div className={`filesystem-text-editor-bar secondary-bar ${!this.state.isEdited ? "close" : "open"}`}>
                     <NeoButton
                         onClick={this.save}>
                         {t('save')}

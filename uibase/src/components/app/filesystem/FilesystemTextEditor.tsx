@@ -42,7 +42,9 @@ class FilesystemTextEditor extends React.Component<Props & WithTranslation, any>
         path: "",
         text: "",
         mode: "text",
-        isEdited: false
+        isEdited: false,
+        //skip first close animation
+        isFirstEdit: false,
     }
 
     componentDidMount() {
@@ -51,7 +53,7 @@ class FilesystemTextEditor extends React.Component<Props & WithTranslation, any>
 
     componentDidUpdate(prevProps: Readonly<Props & WithTranslation>, prevState: Readonly<any>, snapshot?: any) {
         if (this.state.path !== this.props.path) {
-             this.setState({path: this.props.path, isEdited: false}, this.props.path !== "/" ? this.loadContents : undefined)
+             this.setState({path: this.props.path, isEdited: false, isFirstEdit: false}, this.props.path !== "/" ? this.loadContents : undefined)
         }
     }
 
@@ -68,12 +70,13 @@ class FilesystemTextEditor extends React.Component<Props & WithTranslation, any>
             method: 'PUT',
             body: this.state.text
         }).then(value => {
+            this.setState({isEdited: false});
         })
     }
 
     onTextChange = (text: string) => {
         if (this.state.text !== text) {
-            this.setState({text, isEdited: true})
+            this.setState({text, isEdited: true, isFirstEdit: true})
         }
     };
 
@@ -155,7 +158,7 @@ class FilesystemTextEditor extends React.Component<Props & WithTranslation, any>
                         ]}
                     />}
                 </div>
-                {this.state.path !== "/" && this.state.isEdited && <div className={"filesystem-text-editor-bar secondary-bar"}>
+                {this.state.path !== "/" && this.state.isFirstEdit && <div className={`filesystem-text-editor-bar secondary-bar ${!this.state.isEdited ? "close" : "open"}`}>
                     <NeoButton
                         onClick={this.save}>
                         {t('save')}
