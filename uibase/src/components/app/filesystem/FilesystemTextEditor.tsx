@@ -162,7 +162,10 @@ class FilesystemTextEditor extends React.Component<Props & WithTranslation, any>
                     </NeoButton>
                     <NeoButton
                         type={"secondary"}
-                        onClick={this.loadContents}>
+                        onClick={()=>{
+                            this.loadContents();
+                            this.setState({isEdited: false})
+                        }}>
                         {t('cancel')}
                     </NeoButton>
                 </div>}

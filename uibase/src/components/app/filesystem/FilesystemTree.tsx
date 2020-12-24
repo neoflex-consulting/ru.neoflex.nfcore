@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {Button, Dropdown, Input, Menu, Row, Tree} from 'antd';
+import {Button, Dropdown, Input, Menu, Popconfirm, Row, Tree} from 'antd';
 import {
     AntTreeNode,
     AntTreeNodeCheckedEvent,
@@ -13,6 +13,7 @@ import {NeoInput, NeoModal} from "neo-design/lib";
 import {IMainContext} from "../../../MainContext";
 
 const {DirectoryTree} = Tree;
+const pathSeparator = ";";
 const disabled = "#B3B3B3";
 const enabled = "#5E6785";
 
@@ -32,7 +33,9 @@ interface State {
     popupMenuVisible: boolean,
     folderModalVisible: boolean,
     fileModalVisible: boolean,
-    renameModalVisible: boolean
+    renameModalVisible: boolean,
+    isDeleteMode: boolean,
+    deleteKeys: string[]
 }
 
 const SwitcherIcon = (props:any) => {
@@ -106,7 +109,9 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         popupMenuVisible: false,
         folderModalVisible: false,
         fileModalVisible: false,
-        renameModalVisible: false
+        renameModalVisible: false,
+        isDeleteMode: false,
+        deleteKeys: []
     }
 
     componentDidMount() {
@@ -169,6 +174,13 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         }
     };
 
+    onDeleteCheck = (checkedKeys: string[] | {
+        checked: string[];
+        halfChecked: string[];
+    }, e: AntTreeNodeCheckedEvent) => {
+        this.setState({deleteKeys: Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked})
+    };
+
     onRefresh = () => {
         this.reloadKey(this.state.key || "")
     }
@@ -178,7 +190,8 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     }
 
     createFolder = () => {
-        let newCatalog = this.folderName;
+        //filter paths separator
+        let newCatalog = this.folderName.split(pathSeparator).join("");
         if (newCatalog) {
             console.log(newCatalog)
             const {key, treeData} = this.state
@@ -201,7 +214,8 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     }
 
     createFile = () => {
-        let newFile = this.fileName;
+        //filter paths separator
+        let newFile = this.fileName.split(pathSeparator).join("");
         if (newFile) {
             console.log(newFile)
             const {key, treeData} = this.state
@@ -223,9 +237,13 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         }
     }
 
-    delete = () => {
-        if (this.state.key) {
-            return API.instance().fetchJson(`/system/fs?path=${this.state.key}`, {
+    onDelete = () => {
+        this.setState({isDeleteMode: !this.state.isDeleteMode})
+    };
+
+    deleteKeys = () => {
+        if (this.state.deleteKeys.length === 1 && this.state.deleteKeys[0] !== "/") {
+            return API.instance().fetchJson(`/system/fs?path=${this.state.deleteKeys[0]}`, {
                 method: "DELETE",
                 headers: {
                     'Accept': 'application/json',
@@ -240,11 +258,30 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                     loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
                     selectedKeys: [parent],
                     key: parent,
-                    isLeaf: false
+                    isLeaf: false,
+                    deleteKeys: [],
+                    isDeleteMode: false
                 })
                 if (this.props.onSelect) {
                     this.props.onSelect(parent, false)
                 }
+            })
+        } else if (this.state.deleteKeys.length > 1) {
+            const paths = this.state.deleteKeys
+                .filter(path=>path !== "/")
+                .sort((a, b) => b.length - a.length)
+                .reduce((previousValue, currentValue) => previousValue + ";" + currentValue)
+            API.instance().fetchText(`/system/fs/many?paths=${paths}`, {
+                method: "DELETE",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            }).then(()=>{
+                this.setState({
+                    deleteKeys: [],
+                    isDeleteMode: false
+                }, () => this.reloadKey("/"))
             })
         }
     }
@@ -407,14 +444,14 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         width: '1px'
                     }}/>
                     <NeoButton
-                        className={`tree-button ${!this.state.key || this.state.key === "/" ? "disabled" : "link"}`}
+                        className={`tree-button`}
                         title={t('delete')}
                         type={"link"}
-                        onClick={!(!this.state.key || this.state.key === "/") ? this.delete : undefined}>
+                        onClick={this.onDelete}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 9.75C9 9.33579 9.33579 9 9.75 9C10.1642 9 10.5 9.33579 10.5 9.75V15.75C10.5 16.1642 10.1642 16.5 9.75 16.5C9.33579 16.5 9 16.1642 9 15.75V9.75Z" fill={!this.state.key || this.state.key === "/" ? disabled : enabled}/>
-                            <path d="M14.25 9C13.8358 9 13.5 9.33579 13.5 9.75V15.75C13.5 16.1642 13.8358 16.5 14.25 16.5C14.6642 16.5 15 16.1642 15 15.75V9.75C15 9.33579 14.6642 9 14.25 9Z" fill={!this.state.key || this.state.key === "/" ? disabled : enabled}/>
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 5.25V3.75C7.5 2.92157 8.17157 2.25 9 2.25H15C15.8284 2.25 16.5 2.92157 16.5 3.75V5.25H20.25C20.6642 5.25 21 5.58579 21 6C21 6.41421 20.6642 6.75 20.25 6.75H19.3636L18.248 19.0216C18.1076 20.5668 16.812 21.75 15.2604 21.75H8.73964C7.18803 21.75 5.89244 20.5668 5.75196 19.0216L4.63636 6.75H3.75C3.33579 6.75 3 6.41421 3 6C3 5.58579 3.33579 5.25 3.75 5.25H7.5ZM14.85 3.75C14.9328 3.75 15 3.81716 15 3.9V5.25H9V3.9C9 3.81716 9.06716 3.75 9.15 3.75H14.85ZM6.14255 6.75L7.2458 18.8858C7.31604 19.6584 7.96384 20.25 8.73964 20.25H15.2604C16.0362 20.25 16.684 19.6584 16.7542 18.8858L17.8575 6.75H6.14255Z" fill={!this.state.key || this.state.key === "/" ? disabled : enabled}/>
+                            <path d="M9 9.75C9 9.33579 9.33579 9 9.75 9C10.1642 9 10.5 9.33579 10.5 9.75V15.75C10.5 16.1642 10.1642 16.5 9.75 16.5C9.33579 16.5 9 16.1642 9 15.75V9.75Z" fill={enabled}/>
+                            <path d="M14.25 9C13.8358 9 13.5 9.33579 13.5 9.75V15.75C13.5 16.1642 13.8358 16.5 14.25 16.5C14.6642 16.5 15 16.1642 15 15.75V9.75C15 9.33579 14.6642 9 14.25 9Z" fill={enabled}/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 5.25V3.75C7.5 2.92157 8.17157 2.25 9 2.25H15C15.8284 2.25 16.5 2.92157 16.5 3.75V5.25H20.25C20.6642 5.25 21 5.58579 21 6C21 6.41421 20.6642 6.75 20.25 6.75H19.3636L18.248 19.0216C18.1076 20.5668 16.812 21.75 15.2604 21.75H8.73964C7.18803 21.75 5.89244 20.5668 5.75196 19.0216L4.63636 6.75H3.75C3.33579 6.75 3 6.41421 3 6C3 5.58579 3.33579 5.25 3.75 5.25H7.5ZM14.85 3.75C14.9328 3.75 15 3.81716 15 3.9V5.25H9V3.9C9 3.81716 9.06716 3.75 9.15 3.75H14.85ZM6.14255 6.75L7.2458 18.8858C7.31604 19.6584 7.96384 20.25 8.73964 20.25H15.2604C16.0362 20.25 16.684 19.6584 16.7542 18.8858L17.8575 6.75H6.14255Z" fill={enabled}/>
                         </svg>
                     </NeoButton>
                 </Row>
@@ -427,14 +464,14 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         switcherIcon={<SwitcherIcon />}
                         className={`directory-tree ${this.props.onCheck ? "tree-lookup" : ""}`}
                         expandAction={'doubleClick'}
-                        checkable={!!this.props.onCheck}
+                        checkable={!!this.props.onCheck || this.state.isDeleteMode}
                         selectable={!!this.props.onSelect}
                         loadedKeys={this.state.loadedKeys}
                         selectedKeys={this.state.selectedKeys}
-                        checkedKeys={this.props.checked}
+                        checkedKeys={!this.state.isDeleteMode ? this.props.checked : this.state.deleteKeys}
                         multiple={false}
                         defaultExpandAll={false}
-                        onCheck={this.onCheck}
+                        onCheck={!this.state.isDeleteMode ? this.onCheck : this.onDeleteCheck}
                         onSelect={this.onSelect}
                         onLoad={this.onLoad}
                         treeData={this.state.treeData}
@@ -452,6 +489,29 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         }}
                     />
                 </Dropdown>
+                {this.state.isDeleteMode && <div className={"tree-delete-footer"}>
+                    <Popconfirm
+                        className={"delete-popup"}
+                        placement="top"
+                        title={t('object will be deleted permanently are you sure you want to delete them')}
+                        icon={<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8.00065 4.69008C7.713 4.69008 7.47982 4.92326 7.47982 5.21092V8.5649C7.47982 8.85256 7.713 9.08573 8.00065 9.08573C8.28831 9.08573 8.52148 8.85256 8.52148 8.5649V5.21092C8.52148 4.92326 8.28831 4.69008 8.00065 4.69008Z" fill="#404040"/>
+                            <path d="M8.70378 10.4268C8.70378 10.8151 8.38898 11.1299 8.00065 11.1299C7.61233 11.1299 7.29753 10.8151 7.29753 10.4268C7.29753 10.0385 7.61233 9.72367 8.00065 9.72367C8.38898 9.72367 8.70378 10.0385 8.70378 10.4268Z" fill="#404040"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M8.00065 1.33398C4.31568 1.33398 1.33398 4.31594 1.33398 8.00065C1.33398 11.6856 4.31594 14.6673 8.00065 14.6673C11.6856 14.6673 14.6673 11.6854 14.6673 8.00065C14.6673 4.31568 11.6854 1.33398 8.00065 1.33398ZM8.00065 13.6257C4.89146 13.6257 2.37565 11.1096 2.37565 8.00065C2.37565 4.89146 4.89167 2.37565 8.00065 2.37565C11.1098 2.37565 13.6257 4.89167 13.6257 8.00065C13.6257 11.1098 11.1096 13.6257 8.00065 13.6257Z" fill="#404040"/>
+                        </svg>}
+                        onConfirm={this.deleteKeys}
+                        okText={t('yes')}
+                        cancelText={t('no')}>
+                        <NeoButton>
+                            {t('delete')}
+                        </NeoButton>
+                    </Popconfirm>
+                    <NeoButton
+                        type={"secondary"}
+                        onClick={this.onDelete}>
+                        {t('cancel')}
+                    </NeoButton>
+                </div>}
                 <NeoModal
                     className={"filesystem-tree-modal"}
                     closable={true}

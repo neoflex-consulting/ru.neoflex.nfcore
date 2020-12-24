@@ -230,7 +230,10 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                     </NeoButton>
                     <NeoButton
                         type={"secondary"}
-                        onClick={this.loadContents}>
+                        onClick={()=>{
+                            this.loadContents();
+                            this.setState({isEdited: false})
+                        }}>
                         {t('cancel')}
                     </NeoButton>
                 </div>}

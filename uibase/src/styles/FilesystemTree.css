@@ -127,10 +127,19 @@
 }
 
 /*checkbox*/
-
 .directory-tree .ant-tree-checkbox-checked .ant-tree-checkbox-inner {
-    background-color: #2A356C;
-    border-color: #2A356C;
+    background-color: #2A356C !important;
+    border-color: #2A356C !important;
+}
+
+.directory-tree.ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-checkbox .ant-tree-checkbox-inner,
+.directory-tree.ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-checkbox .ant-tree-checkbox-inner {
+    border-color: #d9d9d9;
+}
+
+.directory-tree.ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-checkbox.ant-tree-checkbox-checked .ant-tree-checkbox-inner::after,
+.directory-tree.ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-checkbox.ant-tree-checkbox-checked .ant-tree-checkbox-inner::after {
+    border-color: #ffffff !important;
 }
 
 .directory-tree .ant-tree-checkbox-indeterminate .ant-tree-checkbox-inner::after {
@@ -181,4 +190,91 @@
 .filesystem-tree-modal .ant-modal-footer {
     text-align: left;
     padding: 10px 24px 15px;
+}
+
+/*delete footer*/
+.tree-delete-footer {
+    position: absolute;
+    z-index: 1;
+    bottom: 16px;
+    left: 36px;
+}
+
+.tree-delete-footer > button {
+    width: 123px;
+}
+
+.tree-delete-footer > button:first-child {
+    margin: 0 16px 0 0;
+}
+
+.ant-popover {
+    font-family: Roboto, serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    width: 261px;
+    left: 92px !important;
+}
+
+.ant-popover svg {
+    position: absolute;
+}
+
+.ant-popover-buttons {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-direction: row-reverse;
+}
+
+.ant-popover button:first-child {
+    position: relative;
+    font-family: Roboto, serif;
+    font-size: 12px;
+    font-weight: normal;
+    text-align: center;
+    padding: 9px 32px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: auto;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    background-color: #fff;
+    border: 1px solid #424D78;
+    color: #2A356C;
+    outline: none;
+    margin-left: 16px;
+}
+
+.ant-popover button:last-child {
+    position: relative;
+    font-family: Roboto, serif;
+    font-size: 12px;
+    font-weight: normal;
+    text-align: center;
+    padding: 9px 32px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: auto;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    background: #424D78;
+    border: none;
+    color: #fff;
+    outline: none;
+}
+
+.ant-popover-buttons button {
+    margin-left: 0;
 }

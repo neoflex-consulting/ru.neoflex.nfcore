@@ -494,5 +494,8 @@
         "path generated into buffer": "Path generated into buffer",
         "rename": "Rename",
         "new name": "New name",
-        "new name name is empty": "New name name is empty"
+        "new name name is empty": "New name name is empty",
+        "object will be deleted permanently are you sure you want to delete them": "Object will be deleted permanently. Are you sure you want to delete them?",
+        "yes": "Yes",
+        "no": "No"
 }

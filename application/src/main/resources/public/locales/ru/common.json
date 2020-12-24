@@ -491,7 +491,10 @@
         "path generated into buffer": "Ссылка сгенерирована в буфер обмена",
         "rename": "Переименовать",
         "new name": "Новое название",
-        "new name name is empty": "Новое название не задано"
+        "new name name is empty": "Новое название не задано",
+        "object will be deleted permanently are you sure you want to delete them": "Объекты будут удалены безвозвратно. Вы действительно хотите удалить объекты?",
+        "yes": "Да",
+        "no": "Нет"
 }
 
 
