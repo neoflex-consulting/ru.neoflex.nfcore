@@ -21,7 +21,8 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
     state = {
         path: "",
         text: "",
-        result: ""
+        result: "",
+        isEdited: false,
     }
 
     componentDidMount() {
@@ -30,7 +31,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
 
     componentDidUpdate(prevProps: Readonly<Props & WithTranslation>, prevState: Readonly<any>, snapshot?: any) {
         if (this.state.path !== this.props.path) {
-            this.setState({path: this.props.path}, this.loadContents)
+            this.setState({path: this.props.path, isEdited: false}, this.loadContents)
         }
     }
 
@@ -89,7 +90,9 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
 
     onTextChange = (text: string) => {
         this.resizeEditors();
-        this.setState({text})
+        if (this.state.text !== text) {
+            this.setState({text, isEdited: true})
+        }
     };
 
     render() {
@@ -196,7 +199,13 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                                 ]}
                             />
                         </div>
-                        <div style={{height: '100%', width: '100%', overflow: 'auto', borderRight: '1px solid #E6E6E6'}}>
+                        <div style={{height: '100%',
+                            width: '100%',
+                            overflow: 'auto',
+                            borderRight: '1px solid #E6E6E6',
+                            borderBottom: !this.state.isEdited ? '1px solid #E6E6E6' : 'none',
+                            borderRadius: !this.state.isEdited ? '0 0 4px 0' : 'unset'
+                        }}>
                             <AceEditor
                                 ref={"console"}
                                 mode={'text'}
@@ -213,19 +222,18 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                             />
                         </div>
                     </Splitter>
-
                 </div>
-                <div className={"filesystem-text-editor-bar secondary-bar"}>
-                <NeoButton
-                    onClick={this.save}>
-                    {t('save')}
-                </NeoButton>
-                <NeoButton
-                    type={"secondary"}
-                    onClick={this.loadContents}>
-                    {t('cancel')}
-                </NeoButton>
-            </div>
+                {this.state.isEdited && <div className={"filesystem-text-editor-bar secondary-bar"}>
+                    <NeoButton
+                        onClick={this.save}>
+                        {t('save')}
+                    </NeoButton>
+                    <NeoButton
+                        type={"secondary"}
+                        onClick={this.loadContents}>
+                        {t('cancel')}
+                    </NeoButton>
+                </div>}
             </div>
         );
     }

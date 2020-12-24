@@ -88,11 +88,12 @@
     fill: #B38136 !important;
 }
 
-/*right line*/
+/*right border line*/
 .directory-tree.ant-tree.ant-tree-directory > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before,
 .directory-tree.ant-tree.ant-tree-directory .ant-tree-child-tree > li.ant-tree-treenode-selected > span.ant-tree-node-content-wrapper::before {
     background: #FFF8E0;
     border-right: 2px solid #FFCC66;
+    transition: none !important;
 }
 
 /*opened color*/
@@ -104,17 +105,46 @@
 
 /*rotate switcher on close*/
 .directory-tree .ant-tree-switcher_close > svg {
-    /*TODO: add animation*/
     transform: rotate(90deg);
+    animation-name: rotation;
+    animation-duration: 0.1s;
 }
+
+@keyframes rotation {
+0% {transform:rotate(0deg);}
+100% {transform:rotate(90deg);}
+}
+
+.directory-tree .ant-tree-switcher_open > svg {
+    transform: rotate(0deg);
+    animation-name: rotation-backward;
+    animation-duration: 0.1s;
+}
+
+@keyframes rotation-backward {
+    0% {transform:rotate(90deg);}
+    100% {transform:rotate(0deg);}
+}
+
+/*checkbox*/
 
 .directory-tree .ant-tree-checkbox-checked .ant-tree-checkbox-inner {
     background-color: #2A356C;
     border-color: #2A356C;
 }
 
-.ant-tree-checkbox-indeterminate .ant-tree-checkbox-inner::after {
+.directory-tree .ant-tree-checkbox-indeterminate .ant-tree-checkbox-inner::after {
     background-color: #2A356C;
+}
+
+.directory-tree .ant-tree-checkbox-wrapper:hover .ant-tree-checkbox-inner,
+.directory-tree .ant-tree-checkbox:hover .ant-tree-checkbox-inner,
+.directory-tree .ant-tree-checkbox-input:focus + .ant-tree-checkbox-inner {
+    border-color: #2A356C !important;
+}
+
+.directory-tree .ant-tree-checkbox-checked::after {
+    border: none
 }
 
 /*buttons*/

@@ -51,10 +51,10 @@ class FilesystemBrowser extends React.Component<Props & WithTranslation, any> {
                         }}/>
                     </div>
                     <div style={{backgroundColor: backgroundColor, height: '100%', overflow: 'auto'}}>
-                        {this.state.isLeaf === true && (
+                        {this.state.isLeaf ? (
                             (this.state.path.endsWith(".groovy") && <FilesystemGroovyEditor notification={this.props.notification} path={this.state.path}/>) ||
                             <FilesystemTextEditor notification={this.props.notification} path={this.state.path}/>
-                        )}
+                        ) : <FilesystemTextEditor notification={this.props.notification} path={"/"}/>}
                     </div>
                 </Splitter>
             </div>

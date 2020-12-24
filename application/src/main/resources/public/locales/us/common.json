@@ -491,5 +491,8 @@
         "folder name is empty": "Folder name is empty",
         "file name is empty": "File name is empty",
         "path generated": "Path generated",
-        "path generated into buffer": "Path generated into buffer"
+        "path generated into buffer": "Path generated into buffer",
+        "rename": "Rename",
+        "new name": "New name",
+        "new name name is empty": "New name name is empty"
 }

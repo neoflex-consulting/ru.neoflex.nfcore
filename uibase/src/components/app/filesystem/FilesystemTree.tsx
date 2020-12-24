@@ -32,6 +32,7 @@ interface State {
     popupMenuVisible: boolean,
     folderModalVisible: boolean,
     fileModalVisible: boolean,
+    renameModalVisible: boolean
 }
 
 const SwitcherIcon = (props:any) => {
@@ -64,6 +65,16 @@ const getTreeIcon = ( treeObject:any ) => {
     </svg>
 }
 
+function updateJSON (json: {[key:string]:any}[]) {
+    json.forEach(j => {
+        j.icon = getTreeIcon;
+        if (j.children) {
+            updateJSON(j.children)
+        }
+    });
+    return json
+}
+
 const prepareNodes = (json: any[]): any[] => {
     return json.map(value => {
         return {...value,
@@ -77,6 +88,7 @@ const prepareNodes = (json: any[]): any[] => {
 class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     folderName = "";
     fileName = "";
+    newName = "";
 
     state: State = {
         key: "/",
@@ -93,7 +105,8 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         ]),
         popupMenuVisible: false,
         folderModalVisible: false,
-        fileModalVisible: false
+        fileModalVisible: false,
+        renameModalVisible: false
     }
 
     componentDidMount() {
@@ -220,13 +233,8 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                 },
 
             }).then(json => {
+                json = updateJSON(json);
                 const parent = ["", ...this.state.key.split("/").filter(p=>!!p)].slice(0, -1).join("/") || "/";
-                json = json.map((e: any) => {
-                    return {
-                        ...e,
-                        icon: getTreeIcon
-                    }
-                });
                 this.setState({
                     treeData: this.updateTreeData(this.state.treeData, parent, json),
                     loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
@@ -248,6 +256,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         const key = this.state.key || ""
         API.instance().fetchJson(`/system/fs?path=${key}&name=${name}`,
             {method: 'POST', body: form}).then(json => {
+            json = updateJSON(json);
             this.setState({
                 treeData: this.updateTreeData(this.state.treeData, key, json),
                 loadedKeys: this.state.loadedKeys.filter((value: string) => value === key || !value.startsWith(key))
@@ -261,9 +270,9 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     }
 
     rename = () => {
-        const found = this.findNodes(this.state.treeData, this.state.key)
+        const found = this.findNodes(this.state.treeData, this.state.key)[0].title
         if (found.length > 0) {
-            var newName = prompt(`New name for ${found[0].title}`, `${found[0].title}`)
+            const newName = this.newName;
             if (newName) {
                 return API.instance().fetchJson(`/system/fs/rename?path=${this.state.key}&name=${newName}`, {
                     method: "PUT",
@@ -273,21 +282,25 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                     },
 
                 }).then(json => {
+                    json = updateJSON(json);
+                    this.newName = "";
                     const parent = ["", ...(this.state.key || "/").slice(1).split("/")].slice(0, -1).join("/") || "/"
-                    const renamed = parent + "/" + newName
+                    const renamed = parent + "/" + newName;
                     this.setState({
                         treeData: this.updateTreeData(this.state.treeData, parent, json),
                         loadedKeys: this.state.loadedKeys.filter((value: string) => value === parent || !value.startsWith(parent)),
                         selectedKeys: [renamed],
                         key: renamed,
-                        popupMenuVisible: false
+                        popupMenuVisible: false,
+                        renameModalVisible: false
                     })
                     if (this.props.onSelect) {
                         this.props.onSelect(renamed, this.state.isLeaf)
                     }
                 })
+            } else {
+                this.props.notification!(this.props.t('notification'), this.props.t('new name name is empty'), "error");
             }
-
         }
     }
 
@@ -299,11 +312,15 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         this.setState({fileModalVisible: !this.state.fileModalVisible})
     };
 
+    handleRenameModalVisible = () => {
+        this.setState({renameModalVisible: !this.state.renameModalVisible})
+    };
+
     render() {
         const {t} = this.props;
         const menu = (
             <Menu>
-                <Menu.Item key="rename" onClick={this.rename}>{t("rename")}</Menu.Item>
+                <Menu.Item key="rename" onClick={this.handleRenameModalVisible}>{t("rename")}</Menu.Item>
             </Menu>
         )
         return (
@@ -473,6 +490,25 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         placeholder={t('file name')}
                     />
                 </NeoModal>
+                {this.state.renameModalVisible && <NeoModal
+                    className={"filesystem-tree-modal"}
+                    closable={true}
+                    type={'edit'}
+                    title={t('rename')}
+                    visible={this.state.renameModalVisible}
+                    onCancel={this.handleRenameModalVisible}
+                    onLeftButtonClick={this.rename}
+                    onRightButtonClick={this.handleRenameModalVisible}
+                    textOfLeftButton={t("rename")}
+                    textOfRightButton={t("cancel")}
+                >
+                    <NeoInput
+                        onChange={(event: any) => {
+                            this.newName = event.currentTarget.value
+                        }}
+                        placeholder={t('new name')}
+                    />
+                </NeoModal>}
             </div>
         )
     }

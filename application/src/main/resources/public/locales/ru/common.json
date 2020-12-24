@@ -488,7 +488,10 @@
         "folder name is empty": "Название каталога не указано",
         "file name is empty": "Название файла не указано",
         "path generated": "Ссылка сгенерирована",
-        "path generated into buffer": "Ссылка сгенерирована в буфер обмена"
+        "path generated into buffer": "Ссылка сгенерирована в буфер обмена",
+        "rename": "Переименовать",
+        "new name": "Новое название",
+        "new name name is empty": "Новое название не задано"
 }
 
 
