@@ -79,7 +79,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
 
     handleSearchFilterDropdown = (selectedKeys: string[]) => {
         this.setState({ searchText: selectedKeys[0] });
-        let temp: Array<any> = this.state.selectedRowKeys.map(i=> this.props.tableData[i][this.props.onName]);
+        let temp: Array<any> = this.state.selectedRowKeys.map(i=> this.props.tableData[i] && this.props.tableData[i][this.props.onName]);
         const result: Array<any> = [];
         for (let td of this.props.tableData){
             if (temp.includes(td[this.props.onName])) {
@@ -121,6 +121,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                             render: (text:string, record:any, i:any) => {
                                 const tableChild = document.querySelectorAll(`.datasearch__filter__drawer .${this.props.onName} td:nth-child(2n)`)[i]
                                 const editButton = <NeoButton
+                                    key={`edit${i}`}
                                     type={'link'}
                                     suffixIcon={tableChild&&tableChild.classList.contains('open')
                                             ?

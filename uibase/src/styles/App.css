@@ -306,6 +306,11 @@ height: 8px!important;
   /*overflow: hidden !important;*/
 }
 
+.select.ant-select-focused .ant-select-selection {
+  border: 1px solid #2A356C !important;
+  outline: none !important;
+}
+
 /*Отключение подписи ошибки у select */
 .has-error .ant-form-explain, .has-error .ant-form-split, .show-help-leave-active {
   display: none !important;
@@ -1856,6 +1861,5 @@ padding: 3px 24px;
   box-shadow: none !important;
   background-color: #FFF8E0 !important
 }
-
 
 

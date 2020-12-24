@@ -18,7 +18,7 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoColor, NeoDrawer, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoHint} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoColor, NeoDrawer, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoHint, NeoOption} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -819,16 +819,16 @@ class Calendar extends React.Component<any, any> {
                             defaultValue={this.state.currentMonth.getFullYear()}
                             style={{width: '96px', height: "32px" , fontWeight: "normal", position: "relative"}}
                             onChange={(e: any) => {this.handleChange(e, 'year')}}
-                            value={<NeoTypography style={{marginTop: "9px", color: NeoColor.grey_9}} type={'capture_regular'}>{this.state.currentMonth.getFullYear()}</NeoTypography>}
+                            value={this.state.currentMonth.getFullYear()}
                             width={'96px'}>
                             {
                                 this.state.years!.map((y: any) =>
-                                    <option
+                                    <NeoOption
                                         key={y}
                                         value={y}
                                     >
                                         <NeoTypography style={{marginTop: "10px", color: NeoColor.grey_9}} type={'capture_regular'}>{y}</NeoTypography>
-                                    </option>
+                                    </NeoOption>
                                 )
                             }
                         </NeoSelect>
@@ -836,15 +836,15 @@ class Calendar extends React.Component<any, any> {
                         <NeoSelect
                             /*className='selectMonth'*/
                             getPopupContainer={() => document.getElementById ('selectInFullScreen') as HTMLElement}
-                            defaultValue={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture_regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
+                            defaultValue={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             style={{width: '124px', height: "32px", fontWeight: "normal"}}
                             onChange={(e: any) => {this.handleChange(e, 'month')}}
-                            value={<NeoTypography style={{marginTop: "9px", color: "#333333"}} type={'capture_regular'}>{dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}</NeoTypography>}
+                            value={dateFns.format(this.state.currentMonth, dateFormat_, {locale: this.getLocale(i18n)})}
                             width={'124px'}
                         >
                             {
                                 this.state.months!.map((m: any) =>
-                                    <option
+                                    <NeoOption
                                         className='selectMonth2'
                                         key={m}
                                         value={m}
@@ -854,7 +854,7 @@ class Calendar extends React.Component<any, any> {
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).charAt(0).toUpperCase() +
                                             dateFns.format(new Date(2020, m - 1, 1), dateFormat_, {locale: this.getLocale(i18n)}).slice(1)
                                         }</NeoTypography>
-                                    </option>
+                                    </NeoOption>
                                 )
                             }
                         </NeoSelect>
@@ -914,7 +914,7 @@ class Calendar extends React.Component<any, any> {
                                     this.handleChange(e, 'select')
                                 }}
                             >
-                                <option
+                                <NeoOption
                                     key={this.props.viewObject.get('defaultStatus').get('name')}
                                     value={this.props.viewObject.get('defaultStatus').get('name')}
                                 >
@@ -925,14 +925,14 @@ class Calendar extends React.Component<any, any> {
                                         this.props.viewObject.get('defaultStatus').get('name')
 
                                     }
-                                </option>
+                                </NeoOption>
 
-                                <option
+                                <NeoOption
                                     key={'Системные заметки'}
                                     value={'Системные заметки'}
                                 >
                                     {t('system notes')}
-                                </option>
+                                </NeoOption>
                             </NeoSelect>
                         </div>
 
