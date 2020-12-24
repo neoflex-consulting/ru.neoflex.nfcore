@@ -35,12 +35,23 @@
     text-decoration: none;
 }
 
-/*popup editor footer */
+/*popup editor footer animation */
 .filesystem-text-editor-bar.secondary-bar.open {
     animation-name: popup-bar;
     animation-duration: 0.3s;
     height: 56px;
     min-height: 0;
+}
+
+.filesystem-text-editor-bar.secondary-bar.open button{
+    animation-name: popup-bar-button;
+    animation-duration: 0.4s;
+    min-height: 0;
+}
+
+@keyframes popup-bar-button {
+    0% {height: 0px; opacity: 0}
+    100% {height: 32px; opacity: 1}
 }
 
 @keyframes popup-bar {
