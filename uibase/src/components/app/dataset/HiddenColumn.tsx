@@ -56,12 +56,12 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                 }
             </Paragraph>
         </Form.Item>
-        <NeoButton title={value.t("move top")} type={"link"} style={{ margin: value.index === value.parametersArray.length ? 'auto 24px auto auto' : 'auto 0 auto auto'}} onClick={()=>value.onToTopClick(value.index)} hidden={value.index === 1}>
-            <NeoIcon icon={"moveUp"} color={NeoColor.grey_7} size={"m"}/>
-        </NeoButton>
-        <NeoButton title={value.t("move bottom")} type={"link"} style={{ marginLeft: value.index === 1 && 'auto'}} onClick={()=>value.onToBottomClick(value.index)} hidden={value.index === value.parametersArray.length}>
-            <NeoIcon icon={"moveDown"} color={NeoColor.grey_7} size={"m"}/>
-        </NeoButton>
+            <NeoButton title={value.t("move top")} type={"link"} style={{ margin: value.index === value.parametersArray.length ? 'auto 24px auto auto' : 'auto 0 auto auto'}} onClick={()=>value.onToTopClick(value.index)} hidden={value.index === 1}>
+                <NeoIcon icon={"moveUp"} color={NeoColor.grey_7} size={"m"}/>
+            </NeoButton>
+            <NeoButton title={value.t("move bottom")} type={"link"} style={{ marginLeft: value.index === 1 && 'auto'}} onClick={()=>value.onToBottomClick(value.index)} hidden={value.index === value.parametersArray.length}>
+                <NeoIcon icon={"moveDown"} color={NeoColor.grey_7} size={"m"}/>
+            </NeoButton>
     </NeoRow>
 </div>);
 
@@ -92,13 +92,14 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
 
     render() {
         const {t} = this.props;
+        const {parametersArray} = this.state;
         return (
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
                         <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
                             this.filter = event.currentTarget.value;
-                            this.setState({parametersArray:this.state.parametersArray!
+                            this.setState({parametersArray: parametersArray!
                                     .map(p=>{
                                         return {
                                             ...p,
@@ -118,7 +119,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                 </Form.Item>
                 <Form.Item style={{ marginBottom: '0' }}>
                     {
-                        <SortableList items={this.state.parametersArray!
+                        <SortableList items={parametersArray!
                             .map(hiddenColumn => (
                                 {
                                     ...hiddenColumn,
@@ -128,27 +129,19 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,
                                     handleChange: this.handleChange,
-                                    parametersArray: this.state.parametersArray,
-                                    onToBottomClick: (index:number)=>{
-                                        if (this.state.parametersArray) {
-                                            const item = this.state.parametersArray.splice(index-1,1);
-                                            this.setState({parametersArray: this.state.parametersArray.concat(item).map((p, i)=>{
-                                                    return {
-                                                        ...p,
-                                                        index: i+1
-                                                    }
-                                                })}, ()=> this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType))
+                                    parametersArray: parametersArray,
+                                    onToBottomClick: (index: number)=>{
+                                        if (parametersArray !== undefined) {
+                                            let newState: IServerQueryParam[] = arrayMove(parametersArray, index - 1, parametersArray.length - 1);
+                                            newState.forEach( (newState, index) => newState.index = index + 1);
+                                            this.props.onChangeParameters!(newState, this.props.componentType);
                                         }
                                     },
-                                    onToTopClick: (index:number)=>{
-                                        if (this.state.parametersArray) {
-                                            const item = this.state.parametersArray.splice(index-1,1);
-                                            this.setState({parametersArray: item.concat(this.state.parametersArray).map((p, i)=>{
-                                                    return {
-                                                        ...p,
-                                                        index: i+1
-                                                    }
-                                                })}, ()=>this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType))
+                                    onToTopClick: (index: number)=> {
+                                        if (parametersArray !== undefined) {
+                                            let newState: IServerQueryParam[] = arrayMove(parametersArray, index - 1, 0);
+                                            newState.forEach( (newState, index) => newState.index = index + 1);
+                                            this.props.onChangeParameters!(newState, this.props.componentType);
                                         }
                                     }
                                 }))}
