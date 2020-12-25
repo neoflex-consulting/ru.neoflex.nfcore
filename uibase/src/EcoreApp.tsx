@@ -13,7 +13,6 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
@@ -22,7 +21,7 @@ import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
-import pony from './icons/pony.png';
+import AppLogo from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
@@ -590,8 +589,7 @@ class EcoreApp extends React.Component<any, State> {
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
-                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '53px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px'}}/>
-                                <span  className={'nameOfAppFirstWord'} style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,8)}</span><span className={'nameOfAppSecondWord'}>{t('appname').substr(8)}</span>
+                                <img src={AppLogo} alt="App Logo"/>
                             </div>
                         </NeoCol>
                         <NeoCol span={14}
