@@ -81,9 +81,8 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
 
     onSortEnd = ({oldIndex, newIndex}:any) => {
         let newState: IServerQueryParam[] = arrayMove(this.state.parametersArray!, oldIndex, newIndex);
-        newState.forEach( (serverParam, index) => serverParam.index = index+1 );
-        this.setState({parametersArray: newState});
-        this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType);
+        newState.forEach( (serverParam, index) => serverParam.index = index + 1);
+        this.props.onChangeParameters!(newState, this.props.componentType);
     };
 
     reset = () => {
