@@ -145,7 +145,7 @@ class FilesystemTextEditor extends React.Component<Props & WithTranslation, any>
                         value={this.state.text}
                         showPrintMargin={false}
                         theme={"tomorrow"}
-                        debounceChangePeriod={500}
+                        debounceChangePeriod={0}
                         height={"100%"}
                         minLines={5}
                         enableBasicAutocompletion={true}

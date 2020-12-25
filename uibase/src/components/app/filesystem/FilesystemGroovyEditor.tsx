@@ -184,7 +184,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                                 value={this.state.text}
                                 showPrintMargin={false}
                                 theme={"tomorrow"}
-                                debounceChangePeriod={500}
+                                debounceChangePeriod={0}
                                 height={"100%"}
                                 minLines={5}
                                 enableBasicAutocompletion={true}
@@ -217,6 +217,7 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                                 theme={'tomorrow'}
                                 editorProps={{$blockScrolling: Infinity}}
                                 value={this.state.result}
+                                debounceChangePeriod={0}
                                 showPrintMargin={false}
                                 focus={false}
                                 readOnly={true}
