@@ -1,14 +1,14 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import {Form, Modal, Radio} from 'antd';
+import {Form, Radio} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
-import {NeoButton, NeoCol, NeoHint, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoHint, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography, NeoModal} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props extends ParameterDrawerProps {
@@ -239,20 +239,15 @@ const SortableItem = SortableElement(({value}: any) => {
                     <NeoIcon icon={"fill"} size={"m"} color={value.backgroundColor}/>
                 </NeoButton>
                 </NeoHint>
-                <Modal
-                    getContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
-                    width={'320px'}
+                <NeoModal
+                    type={"basic"}
+                    className={'SortableItemHighlight__modal'}
                     title={value.t("choose background color")}
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('background', value.index)}
                     closable={false}
-                    mask={false}
                     footer={[<Form onSubmit={value.handleSubmit}>
-                        <NeoButton type={'secondary'} key="back" onClick={() => value.handleColorMenu('background', value.index)}>
-                            {value.t("cancel")}
-                        </NeoButton>
                         <NeoButton
-                            title="run query"
                             id={'runQueryButton'}
                             onClick={() => {
                                 return value.handleChange(JSON.stringify({
@@ -262,7 +257,11 @@ const SortableItem = SortableElement(({value}: any) => {
                                 }), true)
                             }}>
                             {value.t("apply")}
-                        </NeoButton></Form>,
+                        </NeoButton>
+                        <NeoButton type={'secondary'} key="back" onClick={() => value.handleColorMenu('background', value.index)}>
+                            {value.t("cancel")}
+                        </NeoButton>
+                    </Form>,
                     ]}>
                     <Radio.Group defaultValue="solid" buttonStyle="solid">
                         <Radio.Button
@@ -279,7 +278,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     {!value.solidPicker && (
                         <SketchColorPicker value={value} type={'background'} />
                     )}
-                </Modal>
+                </NeoModal>
                 <NeoHint title={value.t("text color")}>
                 <NeoButton
                     type={'link'}
@@ -289,20 +288,15 @@ const SortableItem = SortableElement(({value}: any) => {
                     <NeoIcon icon={"letter"} color={value.color} size={"m"}/>
                 </NeoButton>
                 </NeoHint>
-                <Modal
-                    getContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
-                    width={'320px'}
+                <NeoModal
+                    type={"edit"}
                     title={value.t("choose text color")}
+                    className={'SortableItemHighlight__modal'}
                     visible={value.textColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('text', value.index)}
                     closable={false}
-                    mask={false}
                     footer={[<Form onSubmit={value.handleSubmit}>
-                        <NeoButton type={"secondary"} key="back" onClick={() => value.handleColorMenu('text', value.index)}>
-                            {value.t("cancel")}
-                        </NeoButton>
                         <NeoButton
-                            title="run query"
                             id={'runQueryButton'}
                             onClick={() => value.handleChange(JSON.stringify({
                                 index: value.index,
@@ -310,6 +304,9 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value: value.stateColor !== undefined ? value.stateColor : value.color
                             }), true)}>
                             {value.t("apply")}
+                        </NeoButton>
+                        <NeoButton type={"secondary"} key="back" onClick={() => value.handleColorMenu('text', value.index)}>
+                            {value.t("cancel")}
                         </NeoButton></Form>,
                     ]}
                 >
@@ -328,7 +325,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     {!value.solidPicker && (
                         <SketchColorPicker value={value} type={'text'} />
                     )}
-                </Modal>
+                </NeoModal>
             </NeoCol>
             <NeoCol span={1} style={{alignItems:'flex-start'}}>
                 <Form.Item style={{display: 'inline-block', marginTop: '7px'}}>

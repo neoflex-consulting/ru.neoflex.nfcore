@@ -2,7 +2,6 @@ import * as React from 'react';
 import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
-import {Modal} from 'antd';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import ServerGroupBy from "./ServerGroupBy";
@@ -1821,11 +1820,14 @@ class DatasetView extends React.Component<any, State> {
                 </NeoDrawer>
                 </div>
                 <div id={`delete_menuButton${this.props.viewObject.eURI()}`}>
-                    <Modal
-                        getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                    <NeoModal
+                        type={"edit"}
+                        // getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="delete_menu"
+                        className={'dataset__delete_menu'}
+
                         width={'250px'}
-                        title={<NeoTypography type={'h4_medium'} style={{color : "#2A356C"}}>{t('deleting')}</NeoTypography>}
+                        title={t('deleting')}
                         visible={this.state.deleteMenuVisible}
                         footer={null}
                         onCancel={this.handleDeleteMenuForCancel}
@@ -1839,44 +1841,49 @@ class DatasetView extends React.Component<any, State> {
                             currentDatasetComponent={this.state.currentDatasetComponent}
                             isGrid = {this.state.IsGrid}
                         />
-                    </Modal>
+                    </NeoModal>
                 </div>
                 <div id={`edit_applyChangesButton${this.props.viewObject.eURI()}`}>
-                    <NeoModal  onCancel={()=>{
+                    <NeoModal
+                        onCancel={()=>{
                         this.setState({
                             isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
                         })
-                    }} closable={true} type={'edit'}
-                               title={t('saveChanges')}
-                               content={t("warningForEditMode")}
-                               visible={this.state.isCheckEditBufferVisible}
-                               onLeftButtonClick={()=>{
-                        this.gridRef.current.resetBuffer();
-                        this.setState({isEditMode:false
+                        }}
+                        closable={true}
+                        type={'edit'}
+                        title={t('saveChanges')}
+                        content={t("warningForEditMode")}
+                        visible={this.state.isCheckEditBufferVisible}
+                        onLeftButtonClick={()=>{
+                            this.gridRef.current.resetBuffer();
+                            this.setState({isEditMode:false
                             , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
                             this.gridRef.current.onEdit();
                             this.refresh()
                         })
                     }}
-                               onRightButtonClick={()=>{
-                                   this.gridRef.current.removeRowsFromGrid();
-                                   this.onApplyEditChanges(this.gridRef.current.getBuffer());
-                                   this.setState({
-                                       isEditMode:!this.state.isEditMode,
-                                       isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                                   },()=>{
-                                       this.gridRef.current.onEdit();
-                                   })
-                               }}
-                               textOfLeftButton={t("delete")}
-                               textOfRightButton={t("save")}
+                       onRightButtonClick={()=>{
+                           this.gridRef.current.removeRowsFromGrid();
+                           this.onApplyEditChanges(this.gridRef.current.getBuffer());
+                           this.setState({
+                               isEditMode:!this.state.isEditMode,
+                               isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
+                           },()=>{
+                               this.gridRef.current.onEdit();
+                           })
+                       }}
+                       textOfLeftButton={t("delete")}
+                       textOfRightButton={t("save")}
                     >
                     </NeoModal>
 
 
-                    <Modal
-                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                    <NeoModal
+                        type={'edit'}
+                        // getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="save_menu"
+                        className={'dataset__save_menu'}
                         width={'500px'}
                         title={t('saveReport')}
                         visible={this.state.saveMenuVisible}
@@ -1894,7 +1901,7 @@ class DatasetView extends React.Component<any, State> {
                             context={this.props.context}
                             {...this.props}
                         />
-                    </Modal>
+                    </NeoModal>
                 </div>
             </div>
         </Fullscreen>

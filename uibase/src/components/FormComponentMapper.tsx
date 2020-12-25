@@ -1,10 +1,10 @@
 import React, {Fragment, useEffect, useState} from 'react';
 import Ecore from 'ecore';
-import {Button, DatePicker, Input, Modal, Select} from 'antd';
+import {Button, DatePicker, Input, Select} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
-import {NeoButton, NeoTag} from "neo-design/lib";
+import {NeoButton, NeoModal, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
@@ -329,8 +329,9 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
     return <div key={"expandComponentContainer"} className={"expand-component-container"}>
         {children}
         <NeoButton type={"link"} onClick={()=>setExpanded(!expanded)}><NeoIcon icon={"search"}/></NeoButton>
-        {expanded && <Modal
-            width={1000}
+        {expanded && <NeoModal
+            type={'edit'}
+            width={'1000px'}
             className={"expand-modal"}
             key={`ExpandModal`}
             visible={expanded}
@@ -338,7 +339,7 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
             onCancel={()=>setExpanded(!expanded)}
         >
             {expandedComponent}
-        </Modal>}
+        </NeoModal>}
     </div>
 }
 

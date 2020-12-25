@@ -1,9 +1,9 @@
 import React from 'react';
 import Ecore from 'ecore';
-import { Select, Modal, Button } from 'antd';
 import { withTranslation, WithTranslation } from "react-i18next";
 
 import { API } from './../modules/api'
+import {NeoButton, NeoModal, NeoOption, NeoSelect} from "neo-design/lib";
 
 interface Props {
     translate: Function;
@@ -56,14 +56,14 @@ class EClassSelection extends React.Component<Props & WithTranslation, State>{
     render() {
         const { translate } = this.props
         return (
-            this.props.modalSelectEClassVisible && <Modal
-                width={'400px'}
+            this.props.modalSelectEClassVisible && <NeoModal
+                type={'edit'}
                 title={translate('createresource')}
                 visible={this.props.modalSelectEClassVisible}
-                footer={this.state.selectedEClassObject ? <Button type="primary" onClick={this.handleOk}>OK</Button> : null}
+                footer={this.state.selectedEClassObject ? <NeoButton type="primary" onClick={this.handleOk}>OK</NeoButton> : null}
                 onCancel={() => this.props.setSelectEClassVisible(false)}
             >
-                <Select
+                <NeoSelect
                     showSearch
                     style={{ width: '100%' }}
                     placeholder={translate('selecteclass')}
@@ -71,14 +71,14 @@ class EClassSelection extends React.Component<Props & WithTranslation, State>{
                 >
                     {this.state.classes.map((eclass: Ecore.EObject, index: number) =>
                         !eclass.get('abstract') ?
-                            <Select.Option key={`ec_${eclass.eContainer.get('name')}.${eclass.get('name')}`} value={eclass.get('name')}>
+                            <NeoOption key={`ec_${eclass.eContainer.get('name')}.${eclass.get('name')}`} value={eclass.get('name')}>
                                 {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                            </Select.Option>
+                            </NeoOption>
                             :
                             null
                     )}
-                </Select>
-            </Modal>
+                </NeoSelect>
+            </NeoModal>
         )
     }
 

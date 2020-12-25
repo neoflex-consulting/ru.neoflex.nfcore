@@ -35,7 +35,7 @@ height: 8px!important;
 }
 
 .app-logo {
-  margin: auto auto auto 30px;
+  margin: auto auto auto 40px;
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
@@ -285,6 +285,11 @@ height: 8px!important;
 
 .diagram .ant-drawer-body {
   padding: 0 0 80px 0 !important;
+}
+
+.dataset__delete_menu .ant-modal-footer,
+.dataset__save_menu .ant-modal-footer {
+  padding: 0px 0px 20px !important;
 }
 
 /*ServerFilter*/
@@ -1478,9 +1483,9 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 .ant-modal{
   top: 30% !important;
 }
-.ant-modal-body {
-  padding: 0 24px 20px !important;
-}
+/*.ant-modal-body {*/
+/*  padding: 0 24px 20px !important;*/
+/*}*/
 
 .ant-modal-content{
   height: auto !important;
@@ -1631,9 +1636,9 @@ border: unset!important;
 
 /*Button in edit modalr*/
 
-button.btn.edit-button-right{
-  margin-left: 16px!important;
-}
+/*button.btn.edit-button-right{*/
+/*  margin-left: 16px!important;*/
+/*}*/
 
 .ant-dropdown.ant-dropdown-placement-bottomCenter{
   height: 200px!important;
