@@ -20,7 +20,7 @@ import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
-import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
+import MasterdataBrowser from "./components/app/masterdata (not used)/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import pony from './icons/pony.png';
 import FetchSpinner from "./components/FetchSpinner";

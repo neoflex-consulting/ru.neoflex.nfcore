@@ -6,8 +6,9 @@
     width: 100%;
 }
 
-.modal-add-inner-ref > .ant-modal-content {
-    width: fit-content;
+.modal-add-resource .ant-modal-content,
+.expand-modal .ant-modal-content {
+    width: 1000px;
 }
 
 .modal-add-inner-ref > .ant-modal-content > .ant-modal-body {

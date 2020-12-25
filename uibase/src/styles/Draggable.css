@@ -147,6 +147,10 @@
     font-weight: 500;
 }
 
+.SortableItemHighlight__modal .ant-modal-content {
+    width: 320px;
+}
+
 .search-column {
     width: 100% !important;
 }

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Icon, Input, Layout, Menu, Modal, Row, Select, Table, Tree} from 'antd';
+import {Button, Col, Icon, Input, Layout, Menu, Row, Table, Tree} from 'antd';
 import Ecore, {EObject, Resource} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -23,7 +23,7 @@ import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
-import {NeoButton, NeoColor, NeoHint, NeoModal} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoHint, NeoModal, NeoSelect, NeoOption} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
 
 interface ITargetObject {
@@ -1294,25 +1294,27 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         </div>
                     </Splitter>
                 </div>
-                {this.state.modalRefVisible && <Modal
+                {this.state.modalRefVisible && <NeoModal
+                    type={'edit'}
                     key="add_ref_modal"
                     className={"modal-add-inner-ref"}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={null}
+                    footer={<NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>OK</NeoButton>}
                 >
-                    <Select
+                    <NeoSelect
                         mode="multiple"
                         style={{ width: '500px' }}
                         placeholder="Please select"
+                        width={'100%'}
                         defaultValue={[]}
                         showSearch={true}
                         onChange={(uriArray: string[], option: any) => {
                             const opt = option.map((o: any) => o.key);
                             this.setState({ selectedRefUries: opt })
                         }}
-                        filterOption={(input, option) => {
+                        filterOption={(input:any, option:any) => {
                             function toString(el: any): string {
                                 let result: string = "";
                                 if (typeof el === "string") result = el;
@@ -1322,8 +1324,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 return result
                             }
                             const value = toString(option.props).toLowerCase();
-                            const test = input.toLowerCase().split(/[,]+/).every(inputAnd=>
-                                inputAnd.trim().split(/[ ]+/).some(inputOr=>
+                            const test = input.toLowerCase().split(/[,]+/).every((inputAnd:any)=>
+                                inputAnd.trim().split(/[ ]+/).some((inputOr:any)=>
                                     value.indexOf(inputOr) >= 0));
                             return test;
                         }}
@@ -1341,28 +1343,28 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         }
                                     }
                                     return isEObjectType ?
-                                        <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
+                                        <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}
                                             &nbsp;
                                             {`${eObject.get('name')}`}
-                                        </Select.Option>
+                                        </NeoOption>
                                         :
                                         possibleTypes.includes(eObject.eClass.get('name')) &&
                                         !isExcluded &&
-                                        <Select.Option key={eObject.eURI()} value={eObject.eURI()}>
+                                        <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {<b>
                                                 {`${eObject.eClass.get('name')}`}
                                             </b>}
                                             &nbsp;
                                             {`${eObject.get('name')}`}
-                                        </Select.Option>
+                                        </NeoOption>
                                 })}
-                    </Select>
-                    <Button type="primary" onClick={this.handleAddNewRef} disabled={this.state.selectedRefUries.length === 0}>OK</Button>
-                </Modal>}
-                {this.state.modalResourceVisible && <Modal
+                    </NeoSelect>
+                </NeoModal>}
+                {this.state.modalResourceVisible && <NeoModal
+                    type={"edit"}
                     className={"modal-add-resource"}
                     key="add_resource_modal"
                     width={'1000px'}
@@ -1373,7 +1375,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 >
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false} specialEClass={undefined} />
 
-                </Modal>}
+                </NeoModal>}
                 <NeoModal
                     key={"delete_resource_modal"}
                     onCancel={this.handleDeleteResourceModalVisible}
