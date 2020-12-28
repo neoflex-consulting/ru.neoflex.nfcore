@@ -35,7 +35,7 @@ height: 8px!important;
 }
 
 .app-logo {
-  margin: auto auto auto 30px;
+  margin: auto auto auto 40px;
   color: #ffffff;
   font-weight: 400;
   font-size: 23px;
@@ -287,6 +287,11 @@ height: 8px!important;
   padding: 0 0 80px 0 !important;
 }
 
+.dataset__delete_menu .ant-modal-footer,
+.dataset__save_menu .ant-modal-footer {
+  padding: 0px 0px 20px !important;
+}
+
 /*ServerFilter*/
 .leftSplitter .ant-tree-node-content-wrapper-open .ant-tree-title {
   color: #B38136
@@ -304,6 +309,11 @@ height: 8px!important;
 
 .ant-select-dropdown {
   /*overflow: hidden !important;*/
+}
+
+.select.ant-select-focused .ant-select-selection {
+  border: 1px solid #2A356C !important;
+  outline: none !important;
 }
 
 /*Отключение подписи ошибки у select */
@@ -1473,9 +1483,9 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 .ant-modal{
   top: 30% !important;
 }
-.ant-modal-body {
-  padding: 0 24px 20px !important;
-}
+/*.ant-modal-body {*/
+/*  padding: 0 24px 20px !important;*/
+/*}*/
 
 .ant-modal-content{
   height: auto !important;
@@ -1626,9 +1636,9 @@ border: unset!important;
 
 /*Button in edit modalr*/
 
-button.btn.edit-button-right{
-  margin-left: 16px!important;
-}
+/*button.btn.edit-button-right{*/
+/*  margin-left: 16px!important;*/
+/*}*/
 
 .ant-dropdown.ant-dropdown-placement-bottomCenter{
   height: 200px!important;
@@ -1739,7 +1749,7 @@ a.linksInMoreWord:hover{
   margin-bottom: 15px;
 }
 .datasearch_region .hint div {
-  max-width: 60px;
+  max-width: 54px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1780,10 +1790,10 @@ padding: 3px 24px;
 }
 
 .datasearch__filter__drawer tbody td:nth-child(2){
-  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 570px;
+  max-width: 570px;
   /*height: 49px;*/
   border-collapse: unset;
   padding: 13px 10px !important;
@@ -1856,6 +1866,5 @@ padding: 3px 24px;
   box-shadow: none !important;
   background-color: #FFF8E0 !important
 }
-
 
 

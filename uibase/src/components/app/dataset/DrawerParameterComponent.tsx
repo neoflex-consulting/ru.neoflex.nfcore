@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation} from 'react-i18next';
-import {Button, Row, Col, Form} from 'antd';
+import {Button, Col, Form, Row} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
 import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

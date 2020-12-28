@@ -1,0 +1,79 @@
+.filesystem-text-editor-bar {
+    min-width: 332px;
+    min-height: 56px;
+    background: #E6E6E6;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 0 4px 0 0;
+    border: 1px solid #E6E6E6;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.03), -2px -2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.secondary-bar {
+    background: #FFFFFF;
+    border-radius: 0  0 4px 0;
+    border: 1px solid #E6E6E6;
+    border-left: none;
+}
+
+.secondary-bar button:first-child {
+    margin: 0 16px 0 30px;
+}
+
+.filesystem-text-editor-button {
+    margin: 0 16px 0 0 !important;
+}
+
+.filesystem-text-editor-button .typography {
+    margin-bottom: 0;
+    color: #424D78;
+    padding: 0 0 0 12px;
+}
+
+.filesystem-text-editor-button.btn-link:hover {
+    text-decoration: none;
+}
+
+/*popup editor footer animation */
+.filesystem-text-editor-bar.secondary-bar.open {
+    animation-name: popup-bar;
+    animation-duration: 0.3s;
+    height: 56px;
+    min-height: 0;
+}
+
+.filesystem-text-editor-bar.secondary-bar.open button{
+    animation-name: popup-bar-button;
+    animation-duration: 0.4s;
+    min-height: 0;
+}
+
+@keyframes popup-bar-button {
+    0% {height: 0px; opacity: 0}
+    100% {height: 32px; opacity: 1}
+}
+
+@keyframes popup-bar {
+    0% {height: 0px}
+    100% {height: 56px}
+}
+
+.filesystem-text-editor-bar.secondary-bar.close {
+    animation-name: popup-bar-close;
+    animation-duration: 0.3s;
+    opacity: 0;
+    height: 0;
+    min-height: 0;
+    border: none
+}
+
+.filesystem-text-editor-bar.secondary-bar.close * {
+    display: none;
+}
+
+@keyframes popup-bar-close {
+    0% {opacity: 1; height: 56px}
+    100% {opacity: 0; height: 0px}
+}
+

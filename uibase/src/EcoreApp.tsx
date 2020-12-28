@@ -13,16 +13,15 @@ import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore, {EObject} from "ecore";
 import DynamicComponent from "./components/DynamicComponent"
-import _map from "lodash/map";
 import Tools from "./components/Tools";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
-import MasterdataBrowser from "./components/app/masterdata/MasterdataBrowser";
+import MasterdataBrowser from "./components/app/masterdata (not used)/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
-import pony from './icons/pony.png';
+import AppLogo from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
@@ -449,7 +448,8 @@ class EcoreApp extends React.Component<any, State> {
     logOut = () => {
         API.instance().logout().then(() => {
             this.setState({principal : undefined, getUserProfile: true});
-            this.state.context.updateContext!(({userProfilePromise: undefined}))
+            this.state.context.updateContext!(({userProfilePromise: undefined}));
+            API.instance().stompDisconnect();
         });
         this.props.history.push('')
     };
@@ -489,12 +489,11 @@ class EcoreApp extends React.Component<any, State> {
         if (this.state.context.userProfilePromise !== undefined) {
             this.state.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
                 application = userProfile.eContents()[0].get('params').array()
-                    .filter((u: any) => u.get('key') === 'startApp')
+                    .filter((u: any) => u.get('key') === 'startApp');
                 if (this.props.history.location.pathname === "/") {
                     if (application !== undefined && application.length !== 0 && application[0].get('value') !== undefined) {
                         this.changeURL(JSON.parse(application[0].get('value')), false)
-                    }
-                    else {
+                    } else {
                         this.changeURL(applicationName, false)
                     }
                 }
@@ -519,13 +518,13 @@ class EcoreApp extends React.Component<any, State> {
     }
 
     onClickBellIcon = () => {
-        if (this.state.notifierDuration === 3){
+        if (this.state.notifierDuration === 5){
             this.setState({ notifierDuration: 0});
             localStorage.setItem('notifierDuration', '0');
         }
         else{
-            this.setState({ notifierDuration: 3});
-            localStorage.setItem('notifierDuration', '3');
+            this.setState({ notifierDuration: 5});
+            localStorage.setItem('notifierDuration', '5');
         }
     };
 
@@ -590,8 +589,7 @@ class EcoreApp extends React.Component<any, State> {
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
-                                <img alt={t('notfound')} src={pony} style={{ maxHeight: '53px', maxWidth: '55px', marginRight: '10px', marginBottom: '10px'}}/>
-                                <span  className={'nameOfAppFirstWord'} style={{ fontVariantCaps: 'normal' }}>{t('appname').substr(0,8)}</span><span className={'nameOfAppSecondWord'}>{t('appname').substr(8)}</span>
+                                <img src={AppLogo} alt="App Logo"/>
                             </div>
                         </NeoCol>
                         <NeoCol span={14}
@@ -731,14 +729,11 @@ class EcoreApp extends React.Component<any, State> {
                                     this.props.history.location.pathname.includes('developer')
                                         ?
                                         <NeoHint  title={this.props.t('back to applications')}>
-                                        <NeoButton
-                                            style={{marginRight: '10px'}}
-                                            type={"link"}
-                                        >
-                                            <a href={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
-                                            <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
-                                            </a>
-                                        </NeoButton>
+                                            <NeoButton type={'link'} style={{marginRight:'10px'}}>
+                                                <Link to={encodeAppURL(this.getURL(this.state.applicationNames[0], false))}>
+                                                    <NeoIcon className={'changeToDevelopButton'} icon={"play"} color={'white'} />
+                                                </Link>
+                                            </NeoButton>
                                         </NeoHint>
                                         :
                                         this.isDeveloper() &&
@@ -756,7 +751,7 @@ class EcoreApp extends React.Component<any, State> {
                                 type="link"
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
-                                    {localStorage.getItem('notifierDuration') === '3'  ?
+                                    {localStorage.getItem('notifierDuration') === '5'  ?
                                         <NeoIcon className={'bellButton'} icon={'notificationOff'} color={'white'} />
                                     :
                                         <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
@@ -794,9 +789,9 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
                     <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor maxHeaderOrder={this.getMaxHeaderOrder()} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
-                    <Route path='/developer/tools' component={this.isDeveloper() ? Tools : Prohibited}/>
+                    <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
                     <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
-                    <Route path='/developer/filesystem' component={this.isDeveloper() ? FilesystemBrowser : Prohibited}/>
+                    <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
                 </Switch>
             </Layout>
         )
@@ -898,38 +893,42 @@ class EcoreApp extends React.Component<any, State> {
                 API.instance().findByKind(this.state.userProfilePattern,  {contents: {eClass: this.state.userProfilePattern.eURI()}})
                     .then((result: Ecore.Resource[]) => {
                         if (result.length !== 0) {
-                            let currentUserProfile = result.filter( (r: EObject) => r.eContents()[0].get('userName') === userName)
+                            let currentUserProfile = result.filter( (r: EObject) => r.eContents()[0].get('userName') === userName);
                             if (currentUserProfile.length === 0) {
                                 this.createUserProfile(userName);
                             }
                             else {
-                                this.state.context.updateContext!(({userProfilePromise: Promise.resolve(currentUserProfile[0])}))
+                                this.state.context.updateContext!({userProfilePromise: Promise.resolve(currentUserProfile[0])}, ()=> {
+                                    if (this.props.history.location.pathname === "/" && this.state.applicationNames !== undefined && this.state.applicationNames.length !== 0) {
+                                        this.startPageSelection(this.state.applicationNames[0])
+                                    }
+                                })
                             }
                         }
                         else {
                             this.createUserProfile(userName);
-                        }
-
-                        if (this.props.history.location.pathname === "/" && this.state.applicationNames !== undefined && this.state.applicationNames.length !== 0) {
-                            this.startPageSelection(this.state.applicationNames[0])
                         }
                     })
             }
     }
 
    private createUserProfile(userName: string) {
-       let resourceSet = Ecore.ResourceSet.create()
+       let resourceSet = Ecore.ResourceSet.create();
        let resourceParameters = resourceSet.create({ uri: '/params' });
-       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName})
-       resourceParameters.add(newUserProfilePattern)
+       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName, params: [{key: "startApp", value: this.state.applicationNames.length !== 0 ? "\"" + this.state.applicationNames[0] + "\"" : undefined }]})
+       resourceParameters.add(newUserProfilePattern);
        API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {
-               this.state.context.updateContext!(({userProfilePromise: Promise.resolve(newResource)}))
+               this.state.context.updateContext!({userProfilePromise: Promise.resolve(newResource)}, ()=> {
+                   if (this.props.history.location.pathname === "/" && this.state.applicationNames !== undefined && this.state.applicationNames.length !== 0) {
+                       this.startPageSelection(this.state.applicationNames[0])
+                   }
+               })
            });
     }
 
     componentDidMount(): void {
-        const {t} = this.props
+        const {t} = this.props;
         API.instance().onServerDown = ()=> {
             this.setState({principal: undefined})
         };

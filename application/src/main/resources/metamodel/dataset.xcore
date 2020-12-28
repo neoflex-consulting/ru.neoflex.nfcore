@@ -317,7 +317,9 @@ class Highlight {
     Operations operation
     String value
     boolean enable
+        @NFCore(documentation="Примеры значений: #D9A54C, rgba(66, 77, 120, 0.15)")
     String backgroundColor
+        @NFCore(documentation="Примеры значений: #D9A54C, rgba(66, 77, 120, 0.15)")
     String color
 }
 

@@ -79,7 +79,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
 
     handleSearchFilterDropdown = (selectedKeys: string[]) => {
         this.setState({ searchText: selectedKeys[0] });
-        let temp: Array<any> = this.state.selectedRowKeys.map(i=> this.props.tableData[i][this.props.onName]);
+        let temp: Array<any> = this.state.selectedRowKeys.map(i=> this.props.tableData[i] && this.props.tableData[i][this.props.onName]);
         const result: Array<any> = [];
         for (let td of this.props.tableData){
             if (temp.includes(td[this.props.onName])) {
@@ -113,13 +113,15 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                     />
                     <NeoTable
                         size={"small"}
+                        className={this.props.onName}
                         pagination={{pageSize: this.filterDataSource(this.props.onName, this.state.selectedKeys[0]).length}}
                         style={{whiteSpace: "pre", position:'absolute', left:'0', width: "711px", marginTop: "15px", overflow:'auto', top:'95px', bottom:'145px' }}
                         columns={[{title: t('selectAll'), dataIndex: this.props.onName, key: this.props.onName},
                             {
                             render: (text:string, record:any, i:any) => {
-                                const tableChild = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
+                                const tableChild = document.querySelectorAll(`.datasearch__filter__drawer .${this.props.onName} td:nth-child(2n)`)[i]
                                 const editButton = <NeoButton
+                                    key={`edit${i}`}
                                     type={'link'}
                                     suffixIcon={tableChild&&tableChild.classList.contains('open')
                                             ?
@@ -128,7 +130,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                                         <NeoHint title={t('show')}><NeoIcon icon={"ellipsis"} /></NeoHint>
                                         }
                                     onClick={() => {
-                                        const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[i]
+                                        const element = document.querySelectorAll(`.datasearch__filter__drawer .${this.props.onName} td:nth-child(2n)`)[i]
                                         element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
                                         this.setState({open: !this.state.open})
                                     }}/>
@@ -172,33 +174,4 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
             );
         }}
 
-// export class TableIcon extends React.Component<any, any> {
-//         state = {
-//             open:false,
-//         }
-//     constructor(props:any) {
-//         super(props);
-//     }
-//
-//     changeIcon() {
-//         console.log('stateeee', this.state)
-//
-//         console.log('propppps', this.props)
-//                 const element = document.querySelectorAll('.datasearch__filter__drawer td:nth-child(2n)')[this.props.index]
-//                 element.classList.contains('open') ? element.classList.remove('open') : element.classList.add('open')
-//
-//                 this.setState({open: !this.state.open})
-//     }
-//
-//     render() {
-//         return <NeoButton
-//             type={'link'}
-//             title={'Развернуть'}
-//             onClick={this.changeIcon}
-//             style={{display:'inline-block', margin:'auto 14px auto 0px'}}>
-//             <NeoIcon icon={this.state.open===false ? "ellipsis" : "gear"}/>
-//         </NeoButton>
-//     }
-//
-// }
 export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchFilter))

@@ -4,7 +4,7 @@ import * as React from 'react';
 import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, DatePicker} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
-import MasterdataEditor from './components/app/masterdata/MasterdataEditor';
+import MasterdataEditor from './components/app/masterdata (not used)/MasterdataEditor';
 import {API} from './modules/api';
 import {WithTranslation} from 'react-i18next';
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";

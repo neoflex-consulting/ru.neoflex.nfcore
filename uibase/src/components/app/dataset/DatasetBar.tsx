@@ -354,12 +354,12 @@ class DatasetBar extends React.Component<props, State> {
     getActionButtons = () => {
         let isFilter, isSort, isCalculator, serverAggregates, isDiagramms, serverGroupBy, isHiddenColumns: boolean = false;
         this.props.serverFilters.forEach(element => {
-            if (element.datasetColumn !== undefined && element.value !== undefined && element.operation !== undefined){
+            if (element.datasetColumn !== undefined && element.enable){
                 isFilter = true;
             }
         });
         this.props.highlights.forEach(element => {
-            if (element.datasetColumn !== undefined || element.value !== undefined || element.highlightType !== undefined || element.backgroundColor !== undefined){
+            if (element.datasetColumn !== undefined && element.enable){
                 isFilter = true;
             }
         });
@@ -369,7 +369,7 @@ class DatasetBar extends React.Component<props, State> {
             }
         });
         this.props.serverSorts.forEach(element => {
-            if (element.datasetColumn !== undefined  && element.operation !== undefined){
+            if (element.datasetColumn !== undefined && element.enable){
                 isSort = true;
             }
         });
@@ -379,7 +379,7 @@ class DatasetBar extends React.Component<props, State> {
             }
         });
         this.props.serverAggregates.forEach(element => {
-            if (element.datasetColumn !== undefined  && element.operation !== undefined){
+            if (element.datasetColumn !== undefined && element.enable){
                 serverAggregates = true;
             }
         });
@@ -387,12 +387,12 @@ class DatasetBar extends React.Component<props, State> {
             isDiagramms = true
         }
         this.props.serverGroupBy.forEach(element => {
-            if (element.datasetColumn !== undefined  && element.operation !== undefined && element.value !== undefined) {
+            if (element.datasetColumn !== undefined && element.enable) {
                 serverGroupBy = true;
             }
         });
         this.props.groupByColumn.forEach(element => {
-            if (element.datasetColumn !== undefined) {
+            if (element.datasetColumn !== undefined && element.enable) {
                 serverGroupBy = true;
             }
         });

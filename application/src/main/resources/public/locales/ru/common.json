@@ -477,7 +477,24 @@
         "table name": "Название таблицы",
         "edit resource first": "Возьмите ресурс на редактирование",
         "are you sure want to delete resource?": "Вы уверены что хотите удалить ресурс?",
-        "deleteResource": "Удалить ресурс"
+        "deleteResource": "Удалить ресурс",
+        "import supply archive and copy it to server": "Импортировать архив поставки и выложить архив на сервер",
+        "generate link": "Сгенерировать ссылку",
+        "run script": "Запустить",
+        "create folder": "Создать каталог",
+        "create file": "Создать файл",
+        "folder name": "Название каталога",
+        "file name": "Название файла",
+        "folder name is empty": "Название каталога не указано",
+        "file name is empty": "Название файла не указано",
+        "path generated": "Ссылка сгенерирована",
+        "path generated into buffer": "Ссылка сгенерирована в буфер обмена",
+        "rename": "Переименовать",
+        "new name": "Новое название",
+        "new name name is empty": "Новое название не задано",
+        "object will be deleted permanently are you sure you want to delete them": "Объекты будут удалены безвозвратно. Вы действительно хотите удалить объекты?",
+        "yes": "Да",
+        "no": "Нет"
 }
 
 

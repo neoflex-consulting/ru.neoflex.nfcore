@@ -78,17 +78,23 @@ public class SysController {
     }
 
     @PostMapping(value = "/deploySupply", produces = {"application/json"})
-    public Object deploySupply(@RequestParam(value = "file") final MultipartFile file) throws Exception {
+    public Object deploySupply(@RequestParam(value = "file") final MultipartFile file) throws RuntimeException {
         Path path = Paths.get(deploySupply.getDeployBase(), file.getOriginalFilename());
         try {
+            context.inContext(()->
+                    new Exporter(store).unzip(file.getInputStream())
+            );
             Files.copy(file.getInputStream(), path);
             logger.info("File " + file.getOriginalFilename() + " successfully imported");
             ObjectMapper mapper = new ObjectMapper();
-            ObjectNode result = mapper.createObjectNode().put("Supply successfully imported", file.getOriginalFilename());
-            return result;
+            return mapper.createObjectNode().put("Supply successfully imported", file.getOriginalFilename());
         } catch (FileAlreadyExistsException e) {
             throw new RuntimeException(
                     "File " + file.getOriginalFilename() + " already exists"
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Error while import " + file.getOriginalFilename() + "\n" + e.getMessage()
             );
         }
     }
@@ -246,6 +252,24 @@ public class SysController {
             }
             Path parent = resolved.getParent();
             return listPath(tx, parent.toString());
+        });
+    }
+
+    @DeleteMapping(value = "/fs/many", produces = "application/json; charset=utf-8")
+    public void deleteFsMany(@RequestParam String paths) throws Exception {
+        workspace.getDatabase().inTransaction(workspace.getCurrentBranch(), Transaction.LockType.WRITE, tx -> {
+            for (String path : Arrays.asList(paths.split(";"))) {
+                Path resolved = tx.getFileSystem().getRootPath().resolve(path);
+                if (Files.isDirectory(resolved)) {
+                    workspace.getDatabase().deleteRecursive(resolved);
+                    tx.commit("Deleting directory " + path);
+                } else if (Files.isRegularFile(resolved)) {
+                    Files.delete(resolved);
+                    tx.commit("Deleting file " + path);
+                }
+                Path parent = resolved.getParent();
+            }
+            return null;
         });
     }
 
