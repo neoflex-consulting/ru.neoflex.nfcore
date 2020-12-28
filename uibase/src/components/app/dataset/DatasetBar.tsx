@@ -55,6 +55,7 @@ interface props {
     serverAggregates: IServerQueryParam[],
     serverSorts: IServerQueryParam[],
     serverGroupBy: IServerQueryParam[],
+    hiddenColumns: IServerQueryParam[],
     groupByColumn: IServerQueryParam[],
     serverCalculatedExpression: IServerQueryParam[],
     highlights: IServerQueryParam[],
@@ -351,7 +352,7 @@ class DatasetBar extends React.Component<props, State> {
     };
 
     getActionButtons = () => {
-        let isFilter, isSort, isCalculator, serverAggregates, isDiagramms, serverGroupBy  = false;
+        let isFilter, isSort, isCalculator, serverAggregates, isDiagramms, serverGroupBy, isHiddenColumns: boolean = false;
         this.props.serverFilters.forEach(element => {
             if (element.datasetColumn !== undefined && element.value !== undefined && element.operation !== undefined){
                 isFilter = true;
@@ -360,6 +361,11 @@ class DatasetBar extends React.Component<props, State> {
         this.props.highlights.forEach(element => {
             if (element.datasetColumn !== undefined || element.value !== undefined || element.highlightType !== undefined || element.backgroundColor !== undefined){
                 isFilter = true;
+            }
+        });
+        this.props.hiddenColumns.forEach(element => {
+            if (element.enable === false){
+                isHiddenColumns = true;
             }
         });
         this.props.serverSorts.forEach(element => {
@@ -446,7 +452,7 @@ class DatasetBar extends React.Component<props, State> {
                     <NeoButton type={'link'}
                                className={"bar-button--margin-small"}
                                onClick={this.props.onHiddenClick}>
-                        <NeoIcon icon={"hide"} color={NeoColor.violete_4} size={'m'}/>
+                        <NeoIcon icon={isHiddenColumns ? 'hideCheck' : 'hide'} color={NeoColor.violete_4} size={'m'}/>
                     </NeoButton>
                     </NeoHint>
                     <div className='vertical-line'/>

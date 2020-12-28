@@ -19,9 +19,13 @@ interface Props extends ParameterDrawerProps {
     datasetComponentVersion?: string;
 }
 
+
+
+
 function trimHeader(header: string) {
     return header.length > 60 ? header.substring(0,60) + "..." : header
 }
+
 
 const SortableList = SortableContainer(({items}:any) => {
     return (
@@ -33,7 +37,8 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
-const SortableItem = SortableElement(({value}:any) => <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
+const SortableItem = SortableElement(({value}:any) =>
+    <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
     <NeoRow style={{height:'100%'}}>
         <NeoIcon color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
         <Form.Item style={{margin: 'auto 0 auto 20px'}}>
@@ -94,7 +99,9 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
+                    <div>
             <Form style={{ marginTop: '15px' }}>
+
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
                         <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
@@ -138,10 +145,12 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                                         ...p,
                                                         index: i+1
                                                     }
-                                                })}, ()=> this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType))
+                                                })}, ()=> this.props.onChangeParameters!(this.state.parametersArray, this.props.componentType)
+                                            )
                                         }
                                     },
                                     onToTopClick: (index:number)=>{
+
                                         if (this.state.parametersArray) {
                                             const item = this.state.parametersArray.splice(index-1,1);
                                             this.setState({parametersArray: item.concat(this.state.parametersArray).map((p, i)=>{
@@ -157,8 +166,12 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                       onSortEnd={this.onSortEnd}
                                       helperClass="SortableHelper"/>
                     }
+
                 </Form.Item>
+
             </Form>
+                    </div>
+
         )
     }
 }

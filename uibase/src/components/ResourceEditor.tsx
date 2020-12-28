@@ -34,7 +34,8 @@ interface ITargetObject {
 
 export interface Props {
     principal: any;
-    notification: IMainContext['notification']
+    notification: IMainContext['notification'];
+    maxHeaderOrder: Number;
 }
 
 interface State {
@@ -957,6 +958,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             (eObject as any)._id = null
         });
         resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+        resource.eResource().eContents()[0].values.headerOrder = 1 + this.props.maxHeaderOrder
         resource.set('uri', "");
         API.instance().checkLock(this.state.mainEObject._id).then((locked=>{
             if (locked) {
@@ -1022,6 +1024,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
+            if (this.state.mainEObject.eClass._id.includes("//Application") && resource.eResource().eContents()[0].get("headerOrder") !== undefined) {
+                resource.eResource().eContents()[0].values.headerOrder = 1 + this.props.maxHeaderOrder
+            }
             this.setState({isSaving: true});
             API.instance().saveResource(resource, 99999).then((resource: any) => {
                 const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
@@ -1030,7 +1035,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const newIds = getNewIds(oldNestedJSON, nestedJSON);
                 const updatedTargetObject = findObjectById(nestedJSON, newIds[this.state.targetObject._id]);
                 if (this.props.match.params.id === 'new') {
-                    resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
+                        resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
                         .then(() => {
                             this.setState({edit: true});
                         });
