@@ -70,16 +70,16 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
     };
 
     setSelectedKeys = (selectedKeys: any) => {
-        this.setState({ selectedKeys, selectedRowKeys: [] });
+        this.setState({ selectedKeys:selectedKeys, selectedRowKeys: [] });
     };
 
     onSelectChange = (selectedRowKeys: any) => {
-        this.setState({ selectedRowKeys });
+        this.setState({ selectedRowKeys: selectedRowKeys });
     };
 
     handleSearchFilterDropdown = (selectedKeys: string[]) => {
         this.setState({ searchText: selectedKeys[0] });
-        let temp: Array<any> = this.state.selectedRowKeys.map(i=> this.props.tableData[i] && this.props.tableData[i][this.props.onName]);
+        let temp: Array<any> = this.state.selectedRowKeys.map(i=> this.props.tableData[i]&&this.props.tableData[i][this.props.onName]);
         const result: Array<any> = [];
         for (let td of this.props.tableData){
             if (temp.includes(td[this.props.onName])) {
@@ -152,7 +152,9 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
                         textAlign: 'left',
                     }}>
                     <NeoButton
-                        onClick={() => this.handleSearchFilterDropdown(this.state.selectedKeys)}
+                        onClick={() => {
+                            this.handleSearchFilterDropdown(this.state.selectedRowKeys)
+                        }}
                         style={{marginRight:'16px'}}
                     >
                         {t('run query')}
