@@ -415,7 +415,7 @@
         "notification": "Notification",
         "editing is not available": "Editing is not available. Take the class for editing",
         "success": "Успешно",
-        "the name is not unique": "The name is not unique. Try again",
+        "the name is not unique": "The name of the component is already taken - set another",
         "server is not available": "Server is not available",
         "re-authorization required": "Re-authorization required",
 
