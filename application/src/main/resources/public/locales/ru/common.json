@@ -412,7 +412,7 @@
         "notification": "Уведомление",
         "editing is not available": "Редактирование недоступно. Возьмите класс на редактирование",
         "success": "Успешно",
-        "the name is not unique": "Наименование не уникально. Попробуйте еще раз",
+        "the name is not unique": "Данное имя компонента уже занято - задайте другое",
         "server is not available": "Сервер недоступен",
         "re-authorization required": "Необходима повторная авторизация",
 

@@ -938,7 +938,7 @@ class EcoreApp extends React.Component<any, State> {
                     _this.notification(t('notification'), t('server is not available'),"info")
                 }
                 else if ((error.status === 500 && error.message !== undefined) && error.message.includes('duplicated key')) {
-                    _this.notification(t('notification'), t('the name is not unique'),"error")
+                    _this.notification(t('notification'), error.message.split("'")[1]+': '+t('the name is not unique'),"error")
                 }
                 else {
                     _this.notification("Error: " + error.status + " (" + error.error + ")", error.message!,"error")
