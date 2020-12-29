@@ -788,7 +788,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor maxHeaderOrder={this.getMaxHeaderOrder()} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
                     <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
                     <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
@@ -796,6 +796,21 @@ class EcoreApp extends React.Component<any, State> {
             </Layout>
         )
     };
+
+    getMaxHeaderOrder = () => {
+       if  (this.state.applications.length !== 0) {
+            var x = 0;
+           this.state.applications.filter((a : any) => {
+               if (a.eContents()[0].get("headerOrder") > x && a.eContents()[0].get("headerOrder") !== null){
+                   x = a.eContents()[0].get("headerOrder")
+               }
+           })
+           return x;
+
+       }
+        return null
+    }
+
 
     renderDashboard = () => {
         this.changeURL(this.state.globalSettings!.get('dashboard').get('name'))

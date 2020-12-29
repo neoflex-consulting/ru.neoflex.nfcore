@@ -1425,6 +1425,7 @@ class DatasetView extends React.Component<any, State> {
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}
+                    hiddenColumns={this.state.hiddenColumns}
                     serverAggregates={this.state.serverAggregates}
                     serverSorts={this.state.serverSorts}
                     serverGroupBy={this.state.serverGroupBy}

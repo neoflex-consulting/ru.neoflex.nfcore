@@ -109,9 +109,13 @@ class Diagram {
     String axisXLegend
         @NFCore(documentation="Подпись по вертикали")
     String axisYLegend
+        @NFCore(documentation="Подпись легенды")
     String diagramLegend
+        @NFCore(documentation="Id диаграммы")
     String indexBy
+        @NFCore(documentation="Столбец со значениями по оси Y")
     String keyColumn
+        @NFCore(documentation="Столбец со значениями по оси X")
     String valueColumn
 }
 
