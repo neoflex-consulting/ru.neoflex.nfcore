@@ -20,12 +20,12 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Neoflex Consulting Apache Maven Packages</name>
-                    <url>https://maven.pkg.github.com/neoflex-consulting/datagram</url>
+                    <url>https://maven.pkg.github.com/hedaira/ru.neoflex.nfcore</url>
                 </repository>
             </repositories>
             <properties>
-                <altSnapshotDeploymentRepository>snapshots::default::https://maven.pkg.github.com/neoflex-consulting/datagram/snapshots</altSnapshotDeploymentRepository>
-                <altReleaseDeploymentRepository>releases::default::https://maven.pkg.github.com/neoflex-consulting/datagram/releases</altReleaseDeploymentRepository>
+                <altSnapshotDeploymentRepository>snapshots::default::https://maven.pkg.github.com//hedaira/ru.neoflex.nfcore/snapshots</altSnapshotDeploymentRepository>
+                <altReleaseDeploymentRepository>releases::default::https://maven.pkg.github.com//hedaira/ru.neoflex.nfcore/releases</altReleaseDeploymentRepository>
             </properties>
         </profile>
     </profiles>
