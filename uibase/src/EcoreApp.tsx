@@ -788,7 +788,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
                     <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
                     <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
@@ -898,10 +898,10 @@ class EcoreApp extends React.Component<any, State> {
     }
 
    private createUserProfile(userName: string) {
-       let resourceSet = Ecore.ResourceSet.create();
+       let resourceSet = Ecore.ResourceSet.create()
        let resourceParameters = resourceSet.create({ uri: '/params' });
-       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName, params: [{key: "startApp", value: this.state.applicationNames.length !== 0 ? "\"" + this.state.applicationNames[0] + "\"" : undefined }]})
-       resourceParameters.add(newUserProfilePattern);
+       let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName})
+       resourceParameters.add(newUserProfilePattern)
        API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {
                this.state.context.updateContext!({userProfilePromise: Promise.resolve(newResource)}, ()=> {
@@ -938,7 +938,7 @@ class EcoreApp extends React.Component<any, State> {
                     _this.notification(t('notification'), t('server is not available'),"info")
                 }
                 else if ((error.status === 500 && error.message !== undefined) && error.message.includes('duplicated key')) {
-                    _this.notification(t('notification'), t('the name is not unique'),"error")
+                    _this.notification(t('notification'), error.message.split("'")[1]+': '+t('the name is not unique'),"error")
                 }
                 else {
                     _this.notification("Error: " + error.status + " (" + error.error + ")", error.message!,"error")

@@ -19,6 +19,9 @@ interface Props extends ParameterDrawerProps {
     datasetComponentVersion?: string;
 }
 
+
+
+
 function trimHeader(header: string) {
     return header.length > 60 ? header.substring(0,60) + "..." : header
 }
@@ -33,7 +36,8 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
-const SortableItem = SortableElement(({value}:any) => <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
+const SortableItem = SortableElement(({value}:any) =>
+    <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
     <NeoRow style={{height:'100%'}}>
         <NeoIcon color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
         <Form.Item style={{margin: 'auto 0 auto 20px'}}>
@@ -94,6 +98,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
         const {t} = this.props;
         const {parametersArray} = this.state;
         return (
+                    <div>
             <Form style={{ marginTop: '15px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>

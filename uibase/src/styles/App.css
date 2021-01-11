@@ -451,6 +451,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     color: #8C8C8C;
   }
 
+  .lang-login .lang-label:hover {
+    color: #2A356C !important;
+  }
+
   .nameOfApp {
     margin-top: 12%;
     text-align: center;
@@ -620,6 +624,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 16px;
     margin-left: 95%;
     color: #8C8C8C;
+  }
+
+  .lang-login .lang-label:hover {
+    color: #2A356C !important;
   }
 
   .nameOfApp {
@@ -794,6 +802,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     color: #8C8C8C;
   }
 
+  .lang-login .lang-label:hover {
+    color: #2A356C !important;
+  }
+
   .nameOfApp {
     margin-top: 11%;
     text-align: center;
@@ -964,6 +976,10 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     line-height: 16px;
     margin-left: 96%;
     color: #8C8C8C;
+  }
+
+  .lang-login .lang-label:hover {
+    color: #2A356C !important;
   }
 
   .nameOfApp {
