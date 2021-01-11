@@ -25,6 +25,7 @@ import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint, NeoModal, NeoSelect, NeoOption} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
+import {grantType} from "../utils/consts";
 
 interface ITargetObject {
     eClass: string,
@@ -35,7 +36,8 @@ interface ITargetObject {
 export interface Props {
     principal: any;
     notification: IMainContext['notification'];
-    maxHeaderOrder: Number;
+    applications: EObject[];
+    getAllApplications: void
 }
 
 interface State {
@@ -963,10 +965,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         contents(resource.eContents()[0]).forEach(eObject => {
             (eObject as any)._id = null
         });
-        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
-        resource.eResource().eContents()[0].values.headerOrder = 1 + this.props.maxHeaderOrder
-        resource.set('uri', "");
-        clone(resource);
+        this.getMaxHeaderOrder().then(maxHeaderOrder => {
+            let x = maxHeaderOrder + 1
+            resource.eContents()[0].set('headerOrder', x);
+            resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+            resource.set('uri', "");
+            clone(resource);
+        })
     };
 
     changeEdit = (redirect: boolean, removalProcess?: boolean) => {
@@ -1008,7 +1013,45 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
-    save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
+    async getMaxHeaderOrder(): Promise<any> {
+        let x = 0;
+            let app = await this.getApp()
+            if (app !== undefined) {
+                if (app.length !== 0) {
+                    app.filter((a: any) => {
+                        if (a.eContents()[0].get("headerOrder") > x && a.eContents()[0].get("headerOrder") !== null) {
+                            x = a.eContents()[0].get("headerOrder")
+                        }
+                    })
+                    return x;
+
+                }
+            }
+            return x
+    }
+
+   async getApp(): Promise<EObject[] | undefined> {
+        let classes = await API.instance().fetchAllClasses(false)
+        const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
+       if (temp !== undefined) {
+           let applications = await API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+           applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
+           return applications
+       }
+
+         /*API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((applications) => {
+                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
+                        return applications
+                    })
+            }
+        })*/
+    }
+
+    saveResource = (resource : any, redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
         function getNewIds( oldJSON: {[key: string]: any }, newJSON: { [key: string]: any }, ids:{[key:string]: string} = {}) {
             for (const [key, value] of Object.entries(oldJSON)) {
                 if (typeof value === "object") {
@@ -1019,50 +1062,61 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return ids
         }
+        this.setState({isSaving: true});
+        API.instance().saveResource(resource, 99999).then((resource: any) => {
+            const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
+            const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
+            //ids after serialization
+            const newIds = getNewIds(oldNestedJSON, nestedJSON);
+            const updatedTargetObject = findObjectById(nestedJSON, this.state.targetObject && newIds[this.state.targetObject._id]);
+            if (this.props.match.params.id === 'new') {
+                resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
+                    .then(() => {
+                        this.setState({edit: true});
+                    });
+                this.setState({
+                    isSaving: false,
+                    isModified: false,
+                    targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
+                })
+            } else {
+                this.setState({
+                    isSaving: false,
+                    isModified: false,
+                    modalApplyChangesVisible: false,
+                    mainEObject: resource.eResource().eContents()[0],
+                    targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
+                    resource: resource,
+                }, ()=>callback && callback());
+            }
+            if (!saveAndExit) {
+                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                this.refresh(true)
+            }
+            if (redirectAfterSave) {
+                this.redirect();
+            }
+        }).catch(() => {
+            this.setState({ isSaving: false, isModified: true });
+        })
+
+
+
+    }
+
+    save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
-            if (this.state.mainEObject.eClass._id.includes("//Application") && resource.eResource().eContents()[0].get("headerOrder") !== undefined) {
-                resource.eResource().eContents()[0].values.headerOrder = 1 + this.props.maxHeaderOrder
+            if (this.state.mainEObject.eClass._id.includes("//Application") && resource.eResource().eContents()[0].get("headerOrder") === null) {
+                this.getMaxHeaderOrder().then(maxHeaderOrder => {
+                    resource.eResource().eContents()[0].values.headerOrder = maxHeaderOrder + 1
+                    this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+                })
             }
-            this.setState({isSaving: true});
-            API.instance().saveResource(resource, 99999).then((resource: any) => {
-                const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
-                const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
-                //ids after serialization
-                const newIds = getNewIds(oldNestedJSON, nestedJSON);
-                const updatedTargetObject = findObjectById(nestedJSON, this.state.targetObject && newIds[this.state.targetObject._id]);
-                if (this.props.match.params.id === 'new') {
-                        resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
-                        .then(() => {
-                            this.setState({edit: true});
-                        });
-                    this.setState({
-                        isSaving: false,
-                        isModified: false,
-                        targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
-                    })
-                } else {
-                    this.setState({
-                        isSaving: false,
-                        isModified: false,
-                        modalApplyChangesVisible: false,
-                        mainEObject: resource.eResource().eContents()[0],
-                        targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
-                        resource: resource,
-                    }, ()=>callback && callback());
-                }
-                if (!saveAndExit) {
-                    this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
-                    this.refresh(true)
-                }
-                if (redirectAfterSave) {
-                    this.redirect();
-                }
-            }).catch(() => {
-                this.setState({ isSaving: false, isModified: true });
-            })
-        }
+            else {
+                this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+        }}
     };
 
     redirect = () => {
