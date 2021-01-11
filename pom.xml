@@ -27,8 +27,6 @@
         <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-dependency-plugin>3.1.2</maven-dependency-plugin>
-        <config.failOnWarning>false</config.failOnWarning>
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
         <groovy.version>3.0.7</groovy.version>
         <slf4j-log4j12.version>1.7.5</slf4j-log4j12.version>
@@ -374,22 +372,6 @@
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven-dependency-plugin}</version>
-                    <executions>
-                        <execution>
-                            <id>analyze</id>
-                            <goals>
-                                <goal>analyze-only</goal>
-                            </goals>
-                            <configuration>
-                                <failOnWarning>${config.failOnWarning}</failOnWarning>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <plugin>
