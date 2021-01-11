@@ -36,6 +36,7 @@ interface ITargetObject {
 export interface Props {
     principal: any;
     notification: IMainContext['notification'];
+    maxHeaderOrder: Number;
     applications: EObject[];
     getAllApplications: void
 }

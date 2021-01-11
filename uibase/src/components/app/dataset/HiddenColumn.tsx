@@ -156,6 +156,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                     }
                 </Form.Item>
             </Form>
+                    </div>
         )
     }
 }
