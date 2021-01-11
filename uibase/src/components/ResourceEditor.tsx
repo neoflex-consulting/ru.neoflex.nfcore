@@ -932,6 +932,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     };
 
+
+    // @ts-ignore
     cloneResource = () => {
         const clone  = (resource: Resource) => {
             if (resource && this.props.match.params.id !== 'new') {
@@ -975,7 +977,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
                         if (applications !== undefined) {
                             if (applications.length !== 0) {
-                                applications.filter((a: any) => {
+                                applications.forEach((a: any) => {
                                     if (a.eContents()[0].get("headerOrder") > maxHeaderOrder && a.eContents()[0].get("headerOrder") !== null) {
                                         maxHeaderOrder = a.eContents()[0].get("headerOrder")
                                     }
@@ -1097,7 +1099,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
                                 if (applications !== undefined) {
                                     if (applications.length !== 0) {
-                                        applications.filter((a: any) => {
+                                        applications.forEach((a: any) => {
                                             if (a.eContents()[0].get("headerOrder") > maxHeaderOrder && a.eContents()[0].get("headerOrder") !== null) {
                                                 maxHeaderOrder = a.eContents()[0].get("headerOrder")
                                             }

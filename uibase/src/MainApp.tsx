@@ -78,11 +78,7 @@ function getOpenedPath(arr: string[]) : string[] {
         return arr
     }
     const path = arr[arr.length - 1];
-    return arr.filter(s=>{
-            if (path && ((path.search(s + "/") >= 0) || path === s)) {
-                return s
-            }
-        })
+    return arr.filter(s=>path && ((path.search(s + "/") >= 0) || path === s))
 }
 
 function mountStyleSheets(styleSheetsList?: Ecore.EList) {

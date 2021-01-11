@@ -796,21 +796,6 @@ class EcoreApp extends React.Component<any, State> {
         )
     };
 
-    getMaxHeaderOrder = () => {
-       if  (this.state.applications.length !== 0) {
-            var x = 0;
-           this.state.applications.filter((a : any) => {
-               if (a.eContents()[0].get("headerOrder") > x && a.eContents()[0].get("headerOrder") !== null){
-                   x = a.eContents()[0].get("headerOrder")
-               }
-           })
-           return x;
-
-       }
-        return null
-    }
-
-
     renderDashboard = () => {
         this.changeURL(this.state.globalSettings!.get('dashboard').get('name'))
     };
