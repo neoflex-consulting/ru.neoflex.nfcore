@@ -36,6 +36,7 @@ interface ITargetObject {
 export interface Props {
     principal: any;
     notification: IMainContext['notification'];
+    maxHeaderOrder: Number;
     applications: EObject[];
     getAllApplications: void
 }
@@ -681,7 +682,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     findTreeNode = (id: string) : {[key:string] : any} | undefined =>  {
         for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
-            if ((value as {[key:string] : any}).props.targetObject._id === id) {
+            if ((value as {[key:string] : any}).props.targetObject._id === id && key !== undefined) {
                 return (value as {[key:string] : any})
             }
         }

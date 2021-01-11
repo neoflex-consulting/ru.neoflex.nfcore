@@ -529,7 +529,6 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     renderDev = (props: any) => {
-        const languages: { [key: string]: any } = this.state.languages;
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
@@ -796,6 +795,21 @@ class EcoreApp extends React.Component<any, State> {
             </Layout>
         )
     };
+
+    getMaxHeaderOrder = () => {
+       if  (this.state.applications.length !== 0) {
+            var x = 0;
+           this.state.applications.filter((a : any) => {
+               if (a.eContents()[0].get("headerOrder") > x && a.eContents()[0].get("headerOrder") !== null){
+                   x = a.eContents()[0].get("headerOrder")
+               }
+           })
+           return x;
+
+       }
+        return null
+    }
+
 
     renderDashboard = () => {
         this.changeURL(this.state.globalSettings!.get('dashboard').get('name'))
