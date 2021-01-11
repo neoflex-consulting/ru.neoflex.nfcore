@@ -84,11 +84,11 @@ export class Login extends React.Component<any, State> {
 
                     <Col className={"secondColumn"}>
                         {this.state.languages.length !== 0 &&
-                        <Dropdown overlay={langMenu} placement="bottomCenter">
                             <div className="lang-login">
-                                {languages.includes(storeLangValue.toUpperCase()) ? storeLangValue.toUpperCase() : 'US'}
+                                <NeoButton onClick={()=>setLang(storeLangValue==='ru' ? 'en' : 'ru')} type={"link"} className="lang-label">
+                                    {storeLangValue.toUpperCase()}
+                                </NeoButton>
                             </div>
-                        </Dropdown>
                         }
                         <Row>
                             <div className={"nameOfApp"}>Neoflex Reporting</div>
