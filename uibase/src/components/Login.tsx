@@ -1,8 +1,7 @@
 import * as React from "react";
-import {Col, Menu, Row} from 'antd'
+import {Col, Row} from 'antd'
 import {API} from "../modules/api";
 import {WithTranslation, withTranslation} from "react-i18next";
-import _map from "lodash/map"
 import {NeoButton, NeoInput} from "neo-design/lib";
 import FetchSpinner from "./FetchSpinner";
 
@@ -55,7 +54,6 @@ export class Login extends React.Component<any, State> {
     }
 
     render() {
-        const languages: { [key: string]: any } = this.state.languages
         const { t, i18n } = this.props as Props & WithTranslation;
         const setLang = (lng: any) => {
             i18n.changeLanguage(lng.toString().toLowerCase());
