@@ -529,7 +529,6 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     renderDev = (props: any) => {
-        const languages: { [key: string]: any } = this.state.languages;
         const storeLangValue = String(localStorage.getItem('i18nextLng'));
         let principal = this.state.principal as any;
         const {t, i18n} = this.props as WithTranslation;
