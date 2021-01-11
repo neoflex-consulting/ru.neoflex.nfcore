@@ -965,12 +965,27 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         contents(resource.eContents()[0]).forEach(eObject => {
             (eObject as any)._id = null
         });
-        this.getMaxHeaderOrder().then(maxHeaderOrder => {
-            let x = maxHeaderOrder + 1
-            resource.eContents()[0].set('headerOrder', x);
-            resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
-            resource.set('uri', "");
-            clone(resource);
+        let maxHeaderOrder = 0;
+        API.instance().fetchAllClasses(false).then(classes => {
+            const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
+            if (temp !== undefined) {
+                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                    .then((applications) => {
+                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
+                        if (applications !== undefined) {
+                            if (applications.length !== 0) {
+                                applications.filter((a: any) => {
+                                    if (a.eContents()[0].get("headerOrder") > maxHeaderOrder && a.eContents()[0].get("headerOrder") !== null) {
+                                        maxHeaderOrder = a.eContents()[0].get("headerOrder")
+                                    }
+                                })
+                            }
+                        }
+                        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+                        resource.set('uri', "");
+                        clone(resource);
+                    })
+            }
         })
     };
 
@@ -1013,43 +1028,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
-    async getMaxHeaderOrder(): Promise<any> {
-        let x = 0;
-            let app = await this.getApp()
-            if (app !== undefined) {
-                if (app.length !== 0) {
-                    app.filter((a: any) => {
-                        if (a.eContents()[0].get("headerOrder") > x && a.eContents()[0].get("headerOrder") !== null) {
-                            x = a.eContents()[0].get("headerOrder")
-                        }
-                    })
-                    return x;
-
-                }
-            }
-            return x
-    }
-
-   async getApp(): Promise<EObject[] | undefined> {
-        let classes = await API.instance().fetchAllClasses(false)
-        const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
-       if (temp !== undefined) {
-           let applications = await API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-           applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-           return applications
-       }
-
-         /*API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applications) => {
-                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-                        return applications
-                    })
-            }
-        })*/
-    }
 
     saveResource = (resource : any, redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
         function getNewIds( oldJSON: {[key: string]: any }, newJSON: { [key: string]: any }, ids:{[key:string]: string} = {}) {
@@ -1109,10 +1087,30 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
             if (this.state.mainEObject.eClass._id.includes("//Application") && resource.eResource().eContents()[0].get("headerOrder") === null) {
-                this.getMaxHeaderOrder().then(maxHeaderOrder => {
-                    resource.eResource().eContents()[0].values.headerOrder = maxHeaderOrder + 1
-                    this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+                let maxHeaderOrder = 0;
+                API.instance().fetchAllClasses(false).then(classes => {
+                    const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
+                    if (temp !== undefined) {
+                        API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
+                            .then((applications) => {
+                                applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
+                                if (applications !== undefined) {
+                                    if (applications.length !== 0) {
+                                        applications.filter((a: any) => {
+                                            if (a.eContents()[0].get("headerOrder") > maxHeaderOrder && a.eContents()[0].get("headerOrder") !== null) {
+                                                maxHeaderOrder = a.eContents()[0].get("headerOrder")
+                                            }
+                                        })
+
+                                    }
+                                }
+                                resource.eResource().eContents()[0].values.headerOrder = maxHeaderOrder + 1
+                                this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+                            })
+                    }
                 })
+
+
             }
             else {
                 this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
