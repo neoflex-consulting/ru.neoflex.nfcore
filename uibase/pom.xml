@@ -12,6 +12,8 @@
         <java.version>1.8</java.version>
         <node-version>v14.7.0</node-version>
         <npm-version>6.14.7</npm-version>
+        <maven-dependency-plugin>3.1.2</maven-dependency-plugin>
+        <config.failOnWarning>false</config.failOnWarning>
     </properties>
 
     <dependencies>
@@ -74,6 +76,22 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze-only</goal>
+                        </goals>
+                        <configuration>
+                            <failOnWarning>${config.failOnWarning}</failOnWarning>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
