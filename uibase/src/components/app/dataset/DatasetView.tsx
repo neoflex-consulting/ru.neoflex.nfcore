@@ -41,7 +41,7 @@ import {ValueFormatterParams} from "ag-grid-community";
 import _ from "lodash";
 import './../../../styles/AggregateHighlight.css';
 
-import {NeoDrawer, NeoModal, NeoTypography} from "neo-design/lib";
+import {NeoDrawer, NeoModal} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
 import {checkServerSideCondition} from "../../../AntdFactory";
 import {ViewRegistry} from "../../../ViewRegistry";
@@ -1178,7 +1178,6 @@ class DatasetView extends React.Component<any, State> {
             const serverParam = filterParam(newServerParam);
             const datasetComponentId = this.state.currentDatasetComponent.eContents()[0].eURI();
 
-            this.setState<never>({[paramName]: newServerParam});
             if ([paramType.filter, paramType.aggregate, paramType.sort, paramType.group, paramType.groupByColumn, paramType.calculations].includes(paramName)) {
                 this.prepParamsAndRun(this.state.currentDatasetComponent,
                     (paramName === paramType.filter)? serverParam: serverFilter,
@@ -1189,6 +1188,7 @@ class DatasetView extends React.Component<any, State> {
                     (paramName === paramType.groupByColumn)? serverParam: groupByColumn,
                 );
             }
+            this.setState<never>({[paramName]: newServerParam});
             this.datasetViewChangeUserProfile(datasetComponentId, paramName, serverParam);
         }
         else {

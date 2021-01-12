@@ -594,5 +594,13 @@
         <module>masterdata</module>
         <module>emfjson-jackson</module>
     </modules>
+    
+     <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Neoflex Hedaira Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/hedaira/ru.neoflex.nfcore</url>
+        </repository>
+    </distributionManagement>
 
 </project>

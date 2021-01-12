@@ -1103,10 +1103,8 @@ export class Input_ extends ViewContainer {
     };
 
     handleOnChange = (currentValue: string) => {
-        clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-            this.onChangeDebounced(currentValue);
-        }, 500);
+        window.clearTimeout(this.timer);
+        this.timer = window.setTimeout(() => {this.onChangeDebounced(currentValue)}, 500);
     };
 
     onChangeDebounced = (currentValue: string) => {
@@ -1505,7 +1503,7 @@ class EventHandler_ extends Component {
                         isHandled = true;
                     }
                     if (!isHandled) {
-                        setTimeout(() => {
+                        window.setTimeout(() => {
                             if (el.get('triggerItem')) {
                                 this.props.context.notification("Event handler warning",
                                     `Action ${el.get('action') || actionType.execute} on ${el.get('triggerItem').get('name')} is not supported in EventHandler ${this.viewObject.get('name')}`,

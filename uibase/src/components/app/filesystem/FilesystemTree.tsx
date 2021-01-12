@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {Button, Dropdown, Input, Menu, Popconfirm, Row, Tree} from 'antd';
+import {Dropdown, Input, Menu, Popconfirm, Row, Tree} from 'antd';
 import {
     AntTreeNode,
     AntTreeNodeCheckedEvent,

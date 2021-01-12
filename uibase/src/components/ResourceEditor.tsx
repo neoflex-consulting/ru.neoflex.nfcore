@@ -36,6 +36,7 @@ interface ITargetObject {
 export interface Props {
     principal: any;
     notification: IMainContext['notification'];
+    maxHeaderOrder: Number;
     applications: EObject[];
     getAllApplications: void
 }
@@ -681,7 +682,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     findTreeNode = (id: string) : {[key:string] : any} | undefined =>  {
         for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
-            if ((value as {[key:string] : any}).props.targetObject._id === id) {
+            if ((value as {[key:string] : any}).props.targetObject._id === id && key !== undefined) {
                 return (value as {[key:string] : any})
             }
         }
@@ -931,6 +932,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     };
 
+
     cloneResource = () => {
         const clone  = (resource: Resource) => {
             if (resource && this.props.match.params.id !== 'new') {
@@ -965,13 +967,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         contents(resource.eContents()[0]).forEach(eObject => {
             (eObject as any)._id = null
         });
-        this.getMaxHeaderOrder().then(maxHeaderOrder => {
-            let x = maxHeaderOrder + 1
-            resource.eContents()[0].set('headerOrder', x);
-            resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
-            resource.set('uri', "");
-            clone(resource);
-        })
+                        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+                        resource.eContents()[0].values.headerOrder = null
+                        resource.set('uri', "");
+                        clone(resource);
     };
 
     changeEdit = (redirect: boolean, removalProcess?: boolean) => {
@@ -1013,43 +1012,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
-    async getMaxHeaderOrder(): Promise<any> {
-        let x = 0;
-            let app = await this.getApp()
-            if (app !== undefined) {
-                if (app.length !== 0) {
-                    app.filter((a: any) => {
-                        if (a.eContents()[0].get("headerOrder") > x && a.eContents()[0].get("headerOrder") !== null) {
-                            x = a.eContents()[0].get("headerOrder")
-                        }
-                    })
-                    return x;
-
-                }
-            }
-            return x
-    }
-
-   async getApp(): Promise<EObject[] | undefined> {
-        let classes = await API.instance().fetchAllClasses(false)
-        const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
-       if (temp !== undefined) {
-           let applications = await API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-           applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-           return applications
-       }
-
-         /*API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applications) => {
-                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-                        return applications
-                    })
-            }
-        })*/
-    }
 
     saveResource = (resource : any, redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
         function getNewIds( oldJSON: {[key: string]: any }, newJSON: { [key: string]: any }, ids:{[key:string]: string} = {}) {
@@ -1108,15 +1070,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
-            if (this.state.mainEObject.eClass._id.includes("//Application") && resource.eResource().eContents()[0].get("headerOrder") === null) {
-                this.getMaxHeaderOrder().then(maxHeaderOrder => {
-                    resource.eResource().eContents()[0].values.headerOrder = maxHeaderOrder + 1
-                    this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
-                })
-            }
-            else {
-                this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
-        }}
+                                this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+        }
     };
 
     redirect = () => {
