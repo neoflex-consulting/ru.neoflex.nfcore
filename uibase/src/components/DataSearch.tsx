@@ -187,12 +187,11 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                                     && */eclass.get('eAllStructuralFeatures')
                                                                         .find((feature: Ecore.EStructuralFeature) =>
                                                                             feature.get('eType').get('name') === 'QName'))
-                                                                .sort((a:any,b:any) => b.get('name').toLowerCase()-a.get('name').toLowerCase())
                                                                 .map((eclass: Ecore.EObject) =>
-                                                                    <option key={eclass.get('name')}
-                                                                                   value={`${eclass.eContainer.get('name').toLowerCase()}.${eclass.get('name').toLowerCase()}`}>
+                                                                    <NeoOption key={eclass.get('name')}
+                                                                                   value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
                                                                         {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                                                                    </option>)
+                                                                    </NeoOption>)
                                                         }
                                                     </NeoSelect>
                                                 )}
