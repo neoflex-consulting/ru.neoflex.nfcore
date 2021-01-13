@@ -25,7 +25,6 @@ import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint, NeoModal, NeoSelect, NeoOption} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
-import {grantType} from "../utils/consts";
 
 interface ITargetObject {
     eClass: string,
