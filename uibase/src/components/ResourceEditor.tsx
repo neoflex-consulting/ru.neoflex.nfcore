@@ -23,7 +23,7 @@ import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
-import {NeoButton, NeoColor, NeoHint, NeoModal, NeoSelect, NeoOption} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoHint, NeoModal, NeoOption, NeoSelect} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
 import {grantType} from "../utils/consts";
 
@@ -932,14 +932,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     };
 
-
-    // @ts-ignore
     cloneResource = () => {
         const clone  = (resource: Resource) => {
             if (resource && this.props.match.params.id !== 'new') {
                 API.instance().saveResource(resource).then((resource: any) => {
                     API.instance().checkLock(this.state.mainEObject._id).then(locked=> {
-                        locked && API.instance().deleteLock(this.state.mainEObject._id);
+                        locked && API.instance().deleteLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eResource().rev);
                         const nestedJSON = nestUpdaters(resource.eResource().to(), null);
                         const updatedTargetObject = findObjectById(nestedJSON, nestedJSON._id);
                         this.setState({
@@ -950,7 +948,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             resource: resource,
                             edit: true,
                         }, () => {
-                            API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'))
+                            API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
                         });
                         this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
                         this.props.notification(t('notification'), t('success'), "info");
@@ -997,7 +995,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             if (this.state.edit) {
                 API.instance().checkLock(this.state.mainEObject._id).then(locked =>{
                     if (locked) {
-                        API.instance().deleteLock(this.state.mainEObject._id)
+                        API.instance().deleteLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eResource().rev)
                             .then(() => {
                                 this.setState({edit: false})
                             })
@@ -1010,7 +1008,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         } else if (this.state.edit) {
             API.instance().checkLock(this.state.mainEObject._id).then(locked =>{
                 if (locked) {
-                    API.instance().deleteLock(this.state.mainEObject._id)
+                    API.instance().deleteLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eResource().rev)
                         .then(() => {
                             this.save(false, redirect);
                             this.setState({edit: false});
@@ -1023,7 +1021,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             });
         }
         else {
-            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'))
+            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
                 .then(() => {
                     this.setState({edit: true});
                     this.refresh(true)
@@ -1051,7 +1049,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const newIds = getNewIds(oldNestedJSON, nestedJSON);
             const updatedTargetObject = findObjectById(nestedJSON, this.state.targetObject && newIds[this.state.targetObject._id]);
             if (this.props.match.params.id === 'new') {
-                resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'))
+                resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
                     .then(() => {
                         this.setState({edit: true});
                     });
