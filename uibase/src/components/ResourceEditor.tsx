@@ -25,7 +25,6 @@ import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint, NeoModal, NeoOption, NeoSelect} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
-import {grantType} from "../utils/consts";
 
 interface ITargetObject {
     eClass: string,
@@ -966,28 +965,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         contents(resource.eContents()[0]).forEach(eObject => {
             (eObject as any)._id = null
         });
-        let maxHeaderOrder = 0;
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applications) => {
-                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-                        if (applications !== undefined) {
-                            if (applications.length !== 0) {
-                                applications.forEach((a: any) => {
-                                    if (a.eContents()[0].get("headerOrder") > maxHeaderOrder && a.eContents()[0].get("headerOrder") !== null) {
-                                        maxHeaderOrder = a.eContents()[0].get("headerOrder")
-                                    }
-                                })
-                            }
-                        }
-                        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
-                        resource.set('uri', "");
-                        clone(resource);
-                    })
-            }
-        })
+        resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
+        resource.eContents()[0].values.headerOrder = null
+        resource.set('uri', "");
+        clone(resource);
     };
 
     changeEdit = (redirect: boolean, removalProcess?: boolean) => {
@@ -1087,35 +1068,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
-            if (this.state.mainEObject.eClass._id.includes("//Application") && resource.eResource().eContents()[0].get("headerOrder") === null) {
-                let maxHeaderOrder = 0;
-                API.instance().fetchAllClasses(false).then(classes => {
-                    const temp = classes.find((c: Ecore.EObject) => c._id === "//Application");
-                    if (temp !== undefined) {
-                        API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                            .then((applications) => {
-                                applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-                                if (applications !== undefined) {
-                                    if (applications.length !== 0) {
-                                        applications.forEach((a: any) => {
-                                            if (a.eContents()[0].get("headerOrder") > maxHeaderOrder && a.eContents()[0].get("headerOrder") !== null) {
-                                                maxHeaderOrder = a.eContents()[0].get("headerOrder")
-                                            }
-                                        })
-
-                                    }
-                                }
-                                resource.eResource().eContents()[0].values.headerOrder = maxHeaderOrder + 1
-                                this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
-                            })
-                    }
-                })
-
-
-            }
-            else {
-                this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
-        }}
+            this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+        }
     };
 
     redirect = () => {
