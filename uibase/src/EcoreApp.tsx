@@ -913,8 +913,14 @@ class EcoreApp extends React.Component<any, State> {
 
     componentDidMount(): void {
         const {t} = this.props;
-        API.instance().onServerDown = ()=> {
+        API.instance().onServerDown = () => {
             this.setState({principal: undefined})
+        };
+        API.instance().updateObject = (object: any) => {
+            console.log("yres" + new Date().getMinutes() + ":min, sec: " + new Date().getSeconds());
+            if (object.contents[0].eClass.includes("ru.neoflex.nfcore.base.auth#//UserProfile")) {
+
+            }
         };
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
         if (!this.state.queryConditionDTOPattern) this.getEobjectByClass("dataset","QueryConditionDTO", "queryConditionDTOPattern");

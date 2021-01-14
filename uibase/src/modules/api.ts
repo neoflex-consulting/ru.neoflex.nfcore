@@ -48,6 +48,7 @@ export class API implements IErrorHandler {
     private processHandlers: ((processes: any[]) => void)[];
     private stompClient: Client | undefined;
     public onServerDown: () => void;
+    public updateObject: (object: Object) => void;
     public userName: String;
 
     private constructor() {
@@ -670,6 +671,9 @@ export class API implements IErrorHandler {
                 },
                 onConnect: () => {
                     this.stompClient?.subscribe('/topic/afterSave', message => {
+                        if (this.updateObject) {
+                            this.updateObject(JSON.parse(message.body));
+                        }
                         console.log('ON CONNECT: ', JSON.parse(message.body));
                     });
                     this.stompClient?.subscribe('/topic/disconnectFlag', message => {
