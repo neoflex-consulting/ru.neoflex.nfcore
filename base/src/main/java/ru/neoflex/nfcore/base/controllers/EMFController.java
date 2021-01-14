@@ -293,8 +293,9 @@ public class EMFController {
                         .execute();
                 EList<Resource> resources = docFinder.getResourceSet().getResources();
 
+                Integer revision = Integer.valueOf(rev) + 1;
                 EditHistory editHistory = (EditHistory)resources.get(0).getContents().get(0);
-                editHistory.setNewRev(rev + 1);
+                editHistory.setNewRev(revision.toString());
 
                 String ref = resources.get(0).getURI().segment(0) + "?" + resources.get(0).getURI().query();
                 store.updateEObject(ref, editHistory);
