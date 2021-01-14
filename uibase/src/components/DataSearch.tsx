@@ -103,8 +103,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
     }
 
     sortEClasses = (a: any, b: any): number => {
-        if (a.eContainer.get('name') + a._id < b.eContainer.get('name') + b._id) return -1;
-        if (a.eContainer.get('name') + a._id > b.eContainer.get('name') + b._id) return 0;
+        if (a.eContainer.get('name').toLowerCase() + a._id.toLowerCase() < b.eContainer.get('name').toLowerCase() + b._id.toLowerCase()) return -1;
+        if (a.eContainer.get('name').toLowerCase() + a._id.toLowerCase() > b.eContainer.get('name').toLowerCase() + b._id.toLowerCase()) return 0;
         else return 0;
     };
 
@@ -188,10 +188,10 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                                         .find((feature: Ecore.EStructuralFeature) =>
                                                                             feature.get('eType').get('name') === 'QName'))
                                                                 .map((eclass: Ecore.EObject) =>
-                                                                    <option key={eclass.get('name')}
+                                                                    <NeoOption key={eclass.get('name')}
                                                                                    value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
                                                                         {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                                                                    </option>)
+                                                                    </NeoOption>)
                                                         }
                                                     </NeoSelect>
                                                 )}

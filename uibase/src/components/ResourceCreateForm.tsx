@@ -42,14 +42,18 @@ class ResourceCreateForm extends React.Component<Props & WithTranslation, State>
                 key="create_resource"
                 title={t('createitem')}
                 visible={this.props.createResModalVisible}
-                footer={<><NeoButton type={this.state.selectedEClass && this.state.name ? "primary" : "disabled"}>
+                footer={<>
+                    <NeoButton type={this.state.selectedEClass && this.state.name ? "primary" : "disabled"}>
                         <Link to={{ pathname: `/developer/data/editor/new/resource`, state: { selectedEClass: this.state.selectedEClass, name: this.state.name } }}>
-                            <span style={{color:'white'}}>{t('create')}</span>
+                            <span style={{color:'white'}}>
+                                {t('create')}
+                            </span>
                         </Link>
                     </NeoButton>
                     <NeoButton type="secondary" onClick={()=>this.props.setModalVisible(false)}>
                             {t('cancel')}
-                    </NeoButton></>}
+                    </NeoButton>
+                </>}
                 onCancel={()=>this.props.setModalVisible(false)}
             >
                 <NeoSelect

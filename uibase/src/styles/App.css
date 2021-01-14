@@ -1843,6 +1843,14 @@ padding: 3px 24px;
   margin-right: 8px;
 }
 
+.datasearch__create__modal .btn-primary {
+  padding: 0;
+}
+
+.datasearch__create__modal .btn-primary span {
+  padding: 9px 32px;
+}
+
 .ant-table-tbody > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td {
   background: #FFF8E0 !important;
 }

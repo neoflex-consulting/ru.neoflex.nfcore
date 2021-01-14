@@ -186,10 +186,16 @@ class CurrentLock {
 class EditHistory {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
-        @NFCore(documentation="Ссылка на пользователя")
-    refers User user
-        @NFCore(documentation="Дата и время блокировки объекта")
-    Timestamp lockDate
-        @NFCore(documentation="Дата и время снятия блокировки с объекта")
-    Timestamp unlockDate
+        @NFCore(documentation="Класс объекта")
+    String EClass
+        @NFCore(documentation="Название заблокированного объекта")
+    String objectName
+        @NFCore(documentation="id объекта")
+    String objectId
+        @NFCore(documentation="Старая ревизия объекта")
+    String oldRev
+        @NFCore(documentation="Новая ревизия объекта")
+    String newRev
+        @NFCore(documentation="Данные о создании и изменении объекта")
+    contains Audit audit
 }
