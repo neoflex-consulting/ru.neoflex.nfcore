@@ -25,7 +25,6 @@ import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoColor, NeoHint, NeoModal, NeoOption, NeoSelect} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
-import {grantType} from "../utils/consts";
 
 interface ITargetObject {
     eClass: string,
@@ -969,30 +968,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         resource.eContents()[0].set('name', `${resource.eContents()[0].get('name')}.clone`);
         resource.eContents()[0].values.headerOrder = null
         resource.set('uri', "");
-        let eClassName = resource.eContents()[0].eClass._id
-        let cloneCount = 0;
-        API.instance().fetchAllClasses(false).then(classes => {
-            const temp = classes.find((c: Ecore.EObject) => c._id === eClassName);
-            if (temp !== undefined) {
-                API.instance().findByClass(temp, {contents: {eClass: temp.eURI()}})
-                    .then((applications) => {
-                        applications = applications.filter(eObj => eObj.eContents()[0].get('grantType') !== grantType.denied);
-                        if (applications !== undefined) {
-                            if (applications.length !== 0) {
-                                applications.forEach((a: any) => {
-                                    if (a.eContents()[0].values.name.includes("clone")){
-                                        cloneCount++;
-                                    }
-                                })
-                            }
-                        }
-                        cloneCount++;
-                        resource.eContents()[0].values.name = resource.eContents()[0].values.name + cloneCount.toString()
-                        clone(resource);
-                    })
-            }
-        })
-
+        const date = new Date().toDateString();
+        const time = new Date().toLocaleTimeString();
+        resource.eContents()[0].values.name = resource.eContents()[0].values.name + "(" + date + " " + time + ")"
+        clone(resource);
     };
 
     changeEdit = (redirect: boolean, removalProcess?: boolean) => {
