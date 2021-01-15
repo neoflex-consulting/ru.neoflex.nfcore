@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.neoflex.nfcore.base.auth.AuthFactory;
 import ru.neoflex.nfcore.base.auth.CurrentLock;
+import ru.neoflex.nfcore.base.auth.EditHistory;
 import ru.neoflex.nfcore.base.auth.impl.AuditImpl;
 import ru.neoflex.nfcore.base.components.PackageRegistry;
 import ru.neoflex.nfcore.base.services.Context;
@@ -230,7 +231,78 @@ public class EMFController {
                 return resources.size() > 0;
             } catch (RuntimeException e) {
                 throw new RuntimeException(e.getMessage());
-                //throw new RuntimeException("The file was unlocked by another user");
+            }
+        });
+    }
+
+    @PostMapping("/editHistory")
+    JsonNode createEditHistory(@RequestParam String name, String objectName, String eClass, String rev) throws Exception {
+        return store.inTransaction(true, tx -> {
+            DocFinder docFinder = DocFinder.create(store);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode selector = objectMapper.createObjectNode();
+            selector
+                    .with("contents")
+                    .put("eClass", "ru.neoflex.nfcore.base.auth#//EditHistory")
+                    .put("name", name + "_" + rev + "_" + objectName);
+            try {
+                docFinder
+                        .executionStats(true)
+                        .selector(selector)
+                        .execute();
+                EList<Resource> resources = docFinder.getResourceSet().getResources();
+                if (resources.size() == 0) {
+                    EditHistory editHistory = AuthFactory.eINSTANCE.createEditHistory();
+                    editHistory.setName(name + "_" + rev);
+                    editHistory.setObjectName(objectName);
+                    editHistory.setObjectId(name);
+                    editHistory.setEClass(eClass);
+                    editHistory.setOldRev(rev);
+                    store.createEObject(editHistory);
+                    store.commit("Create EditHistory " + name + "_" + rev);
+                    return mapper.createObjectNode().put("result", "ok");
+                } else {
+                    throw new RuntimeException(
+                            "Еhe object is already being edited by the user: " +
+                                    ((AuditImpl)resources.get(0).getContents().get(0).eContents().get(0)).getCreatedBy() +
+                                    " " +
+                                    ((AuditImpl)resources.get(0).getContents().get(0).eContents().get(0)).getCreated()
+                    );
+                }
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        });
+    }
+
+    @PostMapping("/finishEditHistory")
+    JsonNode finishEditHistory(@RequestParam String name, String rev) throws Exception {
+        return store.inTransaction(true, tx -> {
+            DocFinder docFinder = DocFinder.create(store);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode selector = objectMapper.createObjectNode();
+            selector
+                    .with("contents")
+                    .put("eClass", "ru.neoflex.nfcore.base.auth#//EditHistory")
+                    .put("newRev", (byte[]) null)
+                    .put("objectId", name);
+            try {
+                docFinder
+                        .executionStats(true)
+                        .selector(selector)
+                        .execute();
+                EList<Resource> resources = docFinder.getResourceSet().getResources();
+
+                Integer revision = Integer.valueOf(rev) + 1;
+                EditHistory editHistory = (EditHistory)resources.get(0).getContents().get(0);
+                editHistory.setNewRev(revision.toString());
+
+                String ref = resources.get(0).getURI().segment(0) + "?" + resources.get(0).getURI().query();
+                store.updateEObject(ref, editHistory);
+                store.commit("finish Edit History " + ref);
+                return mapper.createObjectNode().put("result", "ok");
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
             }
         });
     }

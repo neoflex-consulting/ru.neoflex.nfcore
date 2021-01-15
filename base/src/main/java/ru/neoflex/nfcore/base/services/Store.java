@@ -30,7 +30,6 @@ import ru.neoflex.nfcore.base.util.EmfJson;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;

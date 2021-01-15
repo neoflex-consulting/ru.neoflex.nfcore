@@ -48,6 +48,7 @@ export class API implements IErrorHandler {
     private processHandlers: ((processes: any[]) => void)[];
     private stompClient: Client | undefined;
     public onServerDown: () => void;
+    public updateObject: (object: Object) => void;
     public userName: String;
 
     private constructor() {
@@ -588,8 +589,18 @@ export class API implements IErrorHandler {
         })
     }
 
-    deleteLock(name: string): Promise<any> {
-        return this.fetchJson(`/emf/deleteLock?name=${name}`, {
+    deleteLock(name: string, objectName: string, rev: string): Promise<any> {
+        return this.fetchJson(`/emf/deleteLock?name=${name}&objectName=${objectName}&rev=${rev}`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(() => this.finishEditHistory(name, objectName, rev))
+    }
+
+    finishEditHistory(name: string, objectName: string, rev: string): Promise<any> {
+        return this.fetchJson(`/emf/finishEditHistory?name=${name}&objectName=${objectName}&rev=${rev}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -598,8 +609,18 @@ export class API implements IErrorHandler {
         })
     }
 
-    createLock(name: string, objectName: string): Promise<any> {
+    createLock(name: string, objectName: string, eClass: string, rev: string): Promise<any> {
         return this.fetchJson(`/emf/currentLock?name=${name}&objectName=${objectName}`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(() => this.createEditHistory(name, objectName, eClass, rev))
+    }
+
+    createEditHistory(name: string, objectName: string, eClass: string, rev: string): Promise<any> {
+        return this.fetchJson(`/emf/editHistory?name=${name}&objectName=${objectName}&eClass=${eClass}&rev=${rev}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -650,6 +671,9 @@ export class API implements IErrorHandler {
                 },
                 onConnect: () => {
                     this.stompClient?.subscribe('/topic/afterSave', message => {
+                        if (this.updateObject) {
+                            this.updateObject(JSON.parse(message.body));
+                        }
                         console.log('ON CONNECT: ', JSON.parse(message.body));
                     });
                     this.stompClient?.subscribe('/topic/disconnectFlag', message => {
