@@ -281,7 +281,7 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     String placeholder
         @NFCore(documentation="Режим отображения опций внутри выпадающего списка: Default, Multiple, Tags")
     SelectMode mode = "Default"
-        @NFCore(documentation="Значения для списка беруться из 'dataset'")
+        @NFCore(documentation="Значения для списка берутся из 'dataset'")
     boolean isDynamic
          @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'", renderConditions="{'isDynamic':false}")
     String staticValues
@@ -291,6 +291,12 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     refers DatasetColumn datasetKeyColumn
         @NFCore(documentation="Ссылка на столбец из 'dataset' со значениями для ключей datasetKeyColumn, которые будут передаваться между компонентами", renderConditions="{'isDynamic':true}")
     refers DatasetColumn datasetValueColumn
+        @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
+    boolean required
+        @NFCore(documentation="Текст, отображающийся рядом с полем")
+    String title
+        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
+    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Компонента для выбора дат")
@@ -301,6 +307,12 @@ class DatePicker extends ViewElement, ValueItem, GridComponent {
     refers FormatMask formatMask
         @NFCore(documentation="Формат отображения поля. Имеет второй приоритет. Если true, то = 'YYYY-MM-DD HH:mm:ss', если false, то = 'YYYY-MM-DD'")
     boolean showTime
+        @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
+    boolean required
+        @NFCore(documentation="Текст, отображающийся рядом с полем")
+    String title
+        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
+    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Любой Html контент")
@@ -321,6 +333,12 @@ class Input extends ViewElement, ValueItem, GridComponent {
     String step = "1"
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
+        @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
+    boolean required
+        @NFCore(documentation="Текст, отображающийся рядом с полем")
+    String title
+        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
+    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Компонента с флагом")
@@ -479,6 +497,14 @@ enum SelectMode {
 enum InputType {
     InputNumber
     InputString
+}
+
+@NFCore(documentation="Положение текста")
+enum TitleOrientation {
+    Left
+    Right
+    Top
+    Bottom
 }
 
 @NFCore(documentation="Eval - запуск кода из command; Resource - запуск кода из gitResourcePath с параметрами из command; Static - запуск модуля с параметрами из command")
