@@ -125,7 +125,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
 
     saveDatasetComponentOptions(): void {
         let objectId = this.props.viewObject.eURI();
-        let params: any = {};
+        let params: any = {name: this.state.componentName};
         this.props.context.changeUserProfile(objectId, params);
         let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent?.eContents()[0])
         if (currentDatasetComponent !== undefined) {

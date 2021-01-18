@@ -148,40 +148,43 @@ class EcoreApp extends React.Component<any, State> {
     changeUserProfile = (viewObjectId: string, userProfileParams: any) => {
         this.state.context.userProfilePromise !== undefined && this.state.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
             let updatedUserProfile: EObject = userProfile.eContents()[0];
-            if (userProfile.eContents()[0].get('params').size() === 0) {
-                let newParams: EObject = this.state.parameterPattern!.create({
-                    key: viewObjectId,
-                    value: JSON.stringify(userProfileParams)
-                });
-                updatedUserProfile.get('params').addAll(newParams)
-            }
-            else if (userProfile.eContents()[0].get('params').size() !== 0) {
-                let otherObjects;
-                let updatedObject;
-                otherObjects = userProfile.eContents()[0].get('params').array()
-                    .filter( (p:any) => p.get('key') !== viewObjectId);
-                updatedObject = userProfile.eContents()[0].get('params').array()
-                    .filter( (p:any) => p.get('key') === viewObjectId);
+            let updatedObject = userProfile.eContents()[0].get('params').array()
+                .filter( (p:any) => p.get('key') === viewObjectId);
 
-                if (updatedObject === undefined || updatedObject.length === 0) {
-                    updatedObject = this.state.parameterPattern!.create({
+            if (updatedObject === undefined || updatedObject.length === 0 || updatedObject[0].get("value") !== JSON.stringify(userProfileParams)
+            ) {
+                if (userProfile.eContents()[0].get('params').size() === 0) {
+                    let newParams: EObject = this.state.parameterPattern!.create({
                         key: viewObjectId,
                         value: JSON.stringify(userProfileParams)
                     });
+                    updatedUserProfile.get('params').addAll(newParams)
                 }
-                else if (userProfileParams !== undefined) {
-                    updatedObject[0].set('value', JSON.stringify(userProfileParams))
+                else if (userProfile.eContents()[0].get('params').size() !== 0) {
+                    let otherObjects;
+                    otherObjects = userProfile.eContents()[0].get('params').array()
+                        .filter( (p:any) => p.get('key') !== viewObjectId);
+
+                    if (updatedObject === undefined || updatedObject.length === 0) {
+                        updatedObject = this.state.parameterPattern!.create({
+                            key: viewObjectId,
+                            value: JSON.stringify(userProfileParams)
+                        });
+                    }
+                    else if (userProfileParams !== undefined) {
+                        updatedObject[0].set('value', JSON.stringify(userProfileParams))
+                    }
+                    updatedUserProfile.get('params').clear();
+                    if (otherObjects !== undefined && otherObjects.length !== 0 ) {
+                        updatedUserProfile.get('params').addAll(otherObjects)
+                    }
+                    if (userProfileParams !== undefined) {
+                        updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
+                    }
                 }
-                updatedUserProfile.get('params').clear();
-                if (otherObjects !== undefined && otherObjects.length !== 0 ) {
-                    updatedUserProfile.get('params').addAll(otherObjects)
-                }
-                if (userProfileParams !== undefined) {
-                    updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
-                }
+                const prom =  API.instance().saveResource(updatedUserProfile.eResource(), 99999);
+                this.state.context.updateContext!(({userProfilePromise: prom}))
             }
-            const prom =  API.instance().saveResource(updatedUserProfile.eResource(), 99999);
-            this.state.context.updateContext!(({userProfilePromise: prom}))
         })
     };
 
@@ -897,10 +900,10 @@ class EcoreApp extends React.Component<any, State> {
     }
 
    private createUserProfile(userName: string) {
-       let resourceSet = Ecore.ResourceSet.create()
+       let resourceSet = Ecore.ResourceSet.create();
        let resourceParameters = resourceSet.create({ uri: '/params' });
        let newUserProfilePattern: EObject = this.state.userProfilePattern!.create({name: userName, userName: userName})
-       resourceParameters.add(newUserProfilePattern)
+       resourceParameters.add(newUserProfilePattern);
        API.instance().saveResource(resourceParameters, 99999)
            .then((newResource: Ecore.Resource) => {
                this.state.context.updateContext!({userProfilePromise: Promise.resolve(newResource)}, ()=> {
@@ -919,7 +922,11 @@ class EcoreApp extends React.Component<any, State> {
         API.instance().updateObject = (object: any) => {
             console.log("yres" + new Date().getMinutes() + ":min, sec: " + new Date().getSeconds());
             if (object.contents[0].eClass.includes("ru.neoflex.nfcore.base.auth#//UserProfile")) {
-
+                this.state.context.userProfilePromise !== undefined && this.state.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
+                    if (object.uri.split("?rev=")[1] > userProfile.rev) {
+                        this.getUserProfile(this.state.principal);
+                    }
+                })
             }
         };
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
