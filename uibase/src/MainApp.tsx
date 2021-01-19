@@ -148,7 +148,9 @@ export class MainApp extends React.Component<any, State> {
                 retArr.push(appModuleName);
                 return retArr
             }
-            return retArr.length > 2 ? retArr.slice(1, retArr.length - 1) : []
+            return retArr.length > 2 && retArr[retArr.length - 1] === appModuleName
+                ? retArr.slice(1, retArr.length - 1)
+                : []
         }
         let name: string;
         if (this.props.appModuleName !== undefined) {
