@@ -3,7 +3,7 @@ import {withTranslation} from 'react-i18next';
 import {Dropdown, Menu, Select} from 'antd';
 import './../../../styles/DatasetBar.css';
 
-import {NeoButton, NeoColor, NeoHint, NeoInput, NeoSelect, NeoTypography} from "neo-design/lib";
+import {NeoButton, NeoColor, NeoHint, NeoInput, NeoOption, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {IDiagram, paramType} from "./DatasetView";
 import {IServerQueryParam} from "../../../MainContext";
@@ -615,6 +615,7 @@ class DatasetBar extends React.Component<props, State> {
     };
 
     getGridPanel = () => {
+        const {t} = this.props
         return <div
             ref={this.barRef}
             className={this.state.barSize <= barSize.extraSmall ? "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
@@ -647,29 +648,26 @@ class DatasetBar extends React.Component<props, State> {
                     value={this.props.currentDatasetComponent.eContents()[0].get('name')}
                     onChange={this.props.onChangeDatasetComponent}
                 >
-                    <OptGroup
-                        label='Default'>
                         {
                             this.props.allDatasetComponents
                                 .filter((c: any) => c.eContents()[0].get('access') === 'Default')
                                 .map((c: any) =>
-                                    <Option
+                                    <NeoOption
                                         key={c.eContents()[0].get('name')}
                                         value={c.eContents()[0].get('name')}>
-                                        {c.eContents()[0].get('name')}
-                                    </Option>)
+                                        {t('is default')}
+                                    </NeoOption>)
                         }
-                    </OptGroup>
                     <OptGroup label='Private'>
                         {
                             this.props.allDatasetComponents
                                 .filter((c: any) => c.eContents()[0].get('access') === 'Private')
                                 .map((c: any) =>
-                                    <Option
+                                    <NeoOption
                                         key={c.eContents()[0].get('name')}
                                         value={c.eContents()[0].get('name')}>
                                         {c.eContents()[0].get('name')}
-                                    </Option>)
+                                    </NeoOption>)
                         }
                     </OptGroup>
                     <OptGroup label='Public'>
@@ -677,11 +675,11 @@ class DatasetBar extends React.Component<props, State> {
                             this.props.allDatasetComponents
                                 .filter((c: any) => c.eContents()[0].get('access') !== 'Private' && c.eContents()[0].get('access') !== 'Default')
                                 .map((c: any) =>
-                                    <Option
+                                    <NeoOption
                                         key={c.eContents()[0].get('name')}
                                         value={c.eContents()[0].get('name')}>
                                         {c.eContents()[0].get('name')}
-                                    </Option>)
+                                    </NeoOption>)
                         }
                     </OptGroup>
                 </NeoSelect>
