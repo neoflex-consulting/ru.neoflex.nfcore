@@ -185,7 +185,6 @@ const SortableItem = SortableElement(({value}: any) => {
                             onChange={(e: any) => value.handleChange(
                                 JSON.stringify({index: value.index, columnName: 'value', value: e.target.value === "" ? undefined : e.target.value})
                             )}
-                            title={value.value}
                             id={value.index.toString()}
                             onPressEnter={(e: { preventDefault: () => any; })=>{
                                 e.preventDefault();
