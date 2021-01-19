@@ -1,7 +1,7 @@
 import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, DatePicker} from 'antd';
+import {Col, Collapse, ConfigProvider, Drawer, Form, InputNumber, Row, Select} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata (not used)/MasterdataEditor';
