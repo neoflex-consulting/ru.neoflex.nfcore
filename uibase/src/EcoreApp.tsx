@@ -920,13 +920,23 @@ class EcoreApp extends React.Component<any, State> {
             this.setState({principal: undefined})
         };
         API.instance().updateObject = (object: any) => {
-            console.log("yres" + new Date().getMinutes() + ":min, sec: " + new Date().getSeconds());
+            /*Обновить UserProfile, если объект обновлялся не на текущей странице*/
             if (object.contents[0].eClass.includes("ru.neoflex.nfcore.base.auth#//UserProfile")) {
                 this.state.context.userProfilePromise !== undefined && this.state.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
                     if (object.uri.split("?rev=")[1] > userProfile.rev) {
                         this.getUserProfile(this.state.principal);
                     }
                 })
+            }
+            /*Обновить объект в ResourceEditor, если объект обновлялся не на текущей странице*/
+            else if (this.props.location.pathname.includes("developer/data/editor")) {
+                const locationId = this.props.location.pathname.split("/")[this.props.location.pathname.split("/").length - 2];
+                const locationRev = this.props.location.pathname.split("/")[this.props.location.pathname.split("/").length - 1];
+                const updatedId = object.uri.split("?rev=")[0];
+                const updatedRev = Number(object.uri.split("?rev=")[1]) + 1;
+                if (updatedId === locationId && updatedRev > locationRev) {
+                    this.props.history.push(`/developer/data/editor/${updatedId}/${updatedRev}`);
+                }
             }
         };
         if (!this.state.queryFilterDTOPattern) this.getEobjectByClass("dataset","QueryFilterDTO", "queryFilterDTOPattern");
