@@ -1053,8 +1053,8 @@ class ValueHolder_ extends Component {
         if (this.viewObject.get('valueType') === 'dataset' && this.viewObject.get('dataset')) {
             this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
                 if (this.viewObject.get('dataset').get('datasetColumn').array().length === 0) {
-                    this.props.context.notification("ValueHolder" + ` ${this.viewObject.get('name')}`,
-                        this.props.t("exception while loading dataset. There is no columns in dataset" + ` ${this.viewObject.get('dataset').get('name')}`),
+                    this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
+                        this.props.t("exception while loading dataset. There is no columns in dataset") + ` ${this.viewObject.get('dataset').get('name')}`,
                         "error")
                 } else {
                     const columnName = this.viewObject.get('dataset').get('datasetColumn').array()[0].get('name');
@@ -1065,7 +1065,7 @@ class ValueHolder_ extends Component {
                 }
             });
         } else if (this.viewObject.get('valueType') === 'dataset' && !this.viewObject.get('dataset')) {
-            this.props.context.notification("ValueHolder" + ` ${this.viewObject.get('name')}`,
+            this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
                 this.props.t("Dataset link is not specified"),
                 "error")
         } else {
