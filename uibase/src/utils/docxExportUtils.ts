@@ -1,6 +1,5 @@
 import {Document, Media, Packer, Paragraph, Table, TableCell, TableRow, TextRun, } from "docx";
 
-
 export enum docxElementExportType {
     diagram,
     grid,
@@ -9,6 +8,7 @@ export enum docxElementExportType {
 
 export interface docxExportObject {
     hidden: boolean;
+    skipExport?: boolean;
     docxComponentType: docxElementExportType;
     diagramData?: {
         blob: Promise<Blob>,
@@ -21,9 +21,12 @@ export interface docxExportObject {
         columnSpan: number
         rowSpan: number
     }[][],
-    textData?: string
+    textData?: string,
+    font?: {
+        bold?: boolean
+    }
 }
-async function handleExportDocx(this: any, handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: boolean) {
+async function handleExportDocx(this: any, handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: boolean, ignoreSkipped = true) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
 
@@ -32,7 +35,7 @@ async function handleExportDocx(this: any, handlers: any[], withTable: boolean, 
 
         const docxData: docxExportObject = handlers[i]();
 
-        if (!docxData.hidden) {
+        if (!docxData.hidden && (!docxData.skipExport || ignoreSkipped)) {
             if (docxData.docxComponentType === docxElementExportType.diagram
                 && docxData.diagramData !== undefined
                 && withTable
@@ -93,7 +96,10 @@ async function handleExportDocx(this: any, handlers: any[], withTable: boolean, 
                     //Добавление текста
                     paragraphs.push(new Paragraph({
                         children: [
-                            new TextRun(docxData.textData)
+                            new TextRun({
+                                text: docxData.textData,
+                                bold: docxData.font?.bold
+                            })
                         ]
                     }))
                 }

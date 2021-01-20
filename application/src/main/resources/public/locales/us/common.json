@@ -499,5 +499,9 @@
         "yes": "Yes",
         "no": "No",
 
-        "updated user class": "The user card has been updated. Re-authorization required."
+        "updated user class": "The user card has been updated. Re-authorization required.",
+        "export all tabs": "Export all tabs",
+        "export all tabs or current tab": "Export all tabs or current tab?",
+        "all": "All",
+        "current": "Current"
 }
