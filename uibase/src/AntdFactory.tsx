@@ -1043,7 +1043,27 @@ class ValueHolder_ extends Component {
     };
 
     componentDidMount(): void {
-        this.onChange(this.viewObject.get('value'));
+        if (this.viewObject.get('valueType') === 'dataset' && this.viewObject.get('dataset')) {
+            this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
+                if (this.viewObject.get('dataset').get('datasetColumn').array().length === 0) {
+                    this.props.context.notification("ValueHolder" + ` ${this.viewObject.get('name')}`,
+                        this.props.t("exception while loading dataset. There is no columns in dataset" + ` ${this.viewObject.get('dataset').get('name')}`),
+                        "error")
+                } else {
+                    const columnName = this.viewObject.get('dataset').get('datasetColumn').array()[0].get('name');
+                    this.setState({
+                            currentValue: JSON.parse(result).reduce((c: { [x: string]: string; }, n: { [x: string]: string; }) => c[columnName] + ";" + n[columnName])
+                        },()=> this.onChange(this.state.currentValue)
+                    );
+                }
+            });
+        } else if (this.viewObject.get('valueType') === 'dataset' && !this.viewObject.get('dataset')) {
+            this.props.context.notification("ValueHolder" + ` ${this.viewObject.get('name')}`,
+                this.props.t("Dataset link is not specified"),
+                "error")
+        } else {
+            this.onChange(this.viewObject.get('value'));
+        }
         mountComponent.bind(this)(false, [{actionType: actionType.setValue,callback: this.onChange.bind(this)}] as IAction[]);
     }
 
