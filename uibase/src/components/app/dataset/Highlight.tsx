@@ -219,7 +219,6 @@ const SortableItem = SortableElement(({value}: any) => {
                                         value: e.target.value === "" ? undefined : e.target.value
                                     })
                                     , true)}
-                                title={value.value}
                                 id={value.index.toString()}
                                 onPressEnter={(e: { preventDefault: () => any; })=>{
                                     e.preventDefault();

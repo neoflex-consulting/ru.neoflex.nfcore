@@ -1130,8 +1130,10 @@ class DatasetView extends React.Component<any, State> {
         this.props.context.changeUserProfile(this.props.viewObject.eURI(), params);
         let currentDatasetComponent: Ecore.Resource[] = this.state.allDatasetComponents
             .filter((c: any) => c.eContents()[0].get('name') === datasetComponentName);
-        this.setState({currentDatasetComponent: currentDatasetComponent[0]},()=>this.saveDatasetComponentToUrl(datasetComponentName));
-        this.findColumnDefs(currentDatasetComponent[0]);
+
+        this.setState({currentDatasetComponent: currentDatasetComponent[0]}, () => this.saveDatasetComponentToUrl(datasetComponentName));
+        this.state.rowData.length !== 0 && this.findColumnDefs(currentDatasetComponent[0]);
+
     }
 
 

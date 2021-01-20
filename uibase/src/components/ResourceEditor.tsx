@@ -1135,6 +1135,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 })
             }
         }
+        if (this.state.mainEObject._id !== undefined && this.state.mainEObject.eResource().rev < this.props.location.pathname.split("/")[this.props.location.pathname.split("/").length - 1]) {
+            this.refresh(true);
+        }
     }
 
     componentDidMount(): void {
