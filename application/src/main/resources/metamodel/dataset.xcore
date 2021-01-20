@@ -127,7 +127,7 @@ class DatasetComponent extends Tagged {
     QName name
         @NFCore(documentation="Владелец обработанного (агрегированного) набора данных")
     refers User owner
-        @NFCore(documentation="Данные о создании и изменении объекта")
+        @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
         @NFCore(documentation="Права доступа. Варианты: Public, Private, Default")
     Access access

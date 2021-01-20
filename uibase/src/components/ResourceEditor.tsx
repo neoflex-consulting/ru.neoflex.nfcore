@@ -1052,10 +1052,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     resource: resource,
                 }, ()=>callback && callback());
             }
-            if (!saveAndExit) {
-                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
-                this.refresh(true)
-            }
             if (redirectAfterSave) {
                 this.redirect();
             }
@@ -1068,9 +1064,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
+        const {t} = this.props;
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
+            if (resource.eContents()[0].eClass._id === "//User" &&
+                resource.eContents()[0].get("name") === this.props.principal.name) {
+                this.props.notification(t('notification'), t('updated user class'), "info");
+            }
             this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
         }
     };
@@ -1134,6 +1135,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     uniqKey: node.props.eventKey,
                 })
             }
+        }
+        /*Проверка, обновилась ли версия объекта в других источниках*/
+        if (this.state.mainEObject._id !== undefined &&
+            !this.props.location.pathname.includes("/new/") &&
+            this.state.mainEObject._id === this.props.location.pathname.split("/")[4] &&
+            this.state.mainEObject.eResource().rev < this.props.location.pathname.split("/")[5]) {
+            this.refresh(true);
         }
     }
 

@@ -348,7 +348,7 @@
         "next 5 pages": "Next 5 pages",
         "branch": "Git branch",
         "is current": "Is current",
-        "is default": "Is default",
+        "is default": "Default",
         "export all objects": "Export all objects",
         "export selected files objects": "Export selected files&objects",
         "import objects": "Import objects",
@@ -497,5 +497,7 @@
         "new name name is empty": "New name name is empty",
         "object will be deleted permanently are you sure you want to delete them": "Object will be deleted permanently. Are you sure you want to delete them?",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+
+        "updated user class": "The user card has been updated. Re-authorization required."
 }
