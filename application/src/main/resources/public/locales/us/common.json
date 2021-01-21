@@ -497,5 +497,11 @@
         "new name name is empty": "New name name is empty",
         "object will be deleted permanently are you sure you want to delete them": "Object will be deleted permanently. Are you sure you want to delete them?",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+
+        "updated user class": "The user card has been updated. Re-authorization required.",
+        "export all tabs": "Export all tabs",
+        "export all tabs or current tab": "Export all tabs or current tab?",
+        "all": "All",
+        "current": "Current"
 }

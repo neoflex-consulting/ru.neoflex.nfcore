@@ -205,6 +205,8 @@ class DatasetView extends ViewElement, CommandElement {
     boolean hideActionBar
           @NFCore(documentation="Не показывать нижнюю панель переходов по страницам")
     boolean hidePaginator
+          @NFCore(documentation="Название экспортируемого файла docx/excel")
+    String exportFileName
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")
@@ -231,6 +233,10 @@ class GroovyCommand extends DynamicActionElement, CommandElement {
 class ValueHolder extends DynamicActionElement, ValueItem {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
 	String name
+        @NFCore(documentation="Тип значения")
+	ValueType valueType
+        @NFCore(documentation="Ссылка на датасет. В качестве значения выбирается выражение первого столбца. В случае если в столбце больше одного значения, проихсодить конкатенация через ;", renderConditions="{'valueType':'dataset'}")
+    refers Dataset dataset
 }
 
 @NFCore(documentation="Вкладки - контейнер")
@@ -661,4 +667,9 @@ enum NeoIconCodes {
     cloudDownload,
     directory,
     team
+}
+
+enum ValueType {
+    staticValue,
+    dataset
 }

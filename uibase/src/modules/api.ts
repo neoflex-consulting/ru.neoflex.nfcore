@@ -667,7 +667,7 @@ export class API implements IErrorHandler {
             this.stompClient.configure({
                 webSocketFactory: () => {
                     // eslint-disable-next-line no-restricted-globals
-                    return new WebSocket('ws://' + window.location.host + '/socket-registry')
+                    return new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/socket-registry')
                 },
                 onConnect: () => {
                     this.stompClient?.subscribe('/topic/afterSave', message => {

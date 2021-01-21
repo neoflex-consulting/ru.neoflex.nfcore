@@ -85,8 +85,8 @@
     <distributionManagement>
         <repository>
             <id>github</id>
-            <name>GitHub Neoflex Hedaira Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/hedaira/ru.neoflex.nfcore</url>
+            <name>GitHub Neoflex Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/neoflex-consulting/ru.neoflex.nfcore</url>
         </repository>
     </distributionManagement>
 

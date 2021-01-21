@@ -494,7 +494,13 @@
         "new name name is empty": "Новое название не задано",
         "object will be deleted permanently are you sure you want to delete them": "Объекты будут удалены безвозвратно. Вы действительно хотите удалить объекты?",
         "yes": "Да",
-        "no": "Нет"
+        "no": "Нет",
+
+        "updated user class": "Карточка пользователя обновлена. Необходима повторная авторизация.",
+        "export all tabs": "Выгрузить все вкладки",
+        "export all tabs or current tab": "Выгрузить все вкладки или открытую вкладку?",
+        "all": "Все",
+        "current": "Открытую"
 }
 
 
