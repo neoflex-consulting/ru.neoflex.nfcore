@@ -205,6 +205,8 @@ class DatasetView extends ViewElement, CommandElement {
     boolean hideActionBar
           @NFCore(documentation="Не показывать нижнюю панель переходов по страницам")
     boolean hidePaginator
+          @NFCore(documentation="Название экспортируемого файла docx/excel")
+    String exportFileName
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")

@@ -892,7 +892,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     [addRefPropertyName]: {
                         $ref: firstEObject.eURI(),
                         eClass: firstEObject.eClass.eURI()
-                    }
+                    },
+                    column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent'
+                        && firstEObject.eURI() !== targetObject.dataset.$ref ? [] : targetObject.column
                 })
             }
         }
@@ -918,14 +920,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const targetObject: { [key: string]: any } = this.state.targetObject;
         const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : [];
         const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"]);
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray });
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     };
 
     handleDeleteSingleRef = (deletedObject: any, addRefPropertyName: string) => {
         const targetObject: { [key: string]: any } = this.state.targetObject;
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null });
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null, column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent' && addRefPropertyName === 'dataset' ? [] : targetObject.column});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         delete updatedTargetObject[addRefPropertyName];
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })

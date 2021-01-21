@@ -42,6 +42,7 @@ const backgroundColor = "#fdfdfd";
 
 interface Props extends WithTranslation {
     hidden?: boolean,
+    skipExport?: boolean,
     highlights?: IServerQueryParam[];
     currentDatasetComponent?: Ecore.Resource,
     rowData: {[key: string]: unknown}[],
@@ -240,6 +241,7 @@ class DatasetGrid extends React.Component<Props, any> {
         }
         return  {
             hidden: this.props.hidden!,
+            skipExport: this.props.skipExport,
             docxComponentType : docxElementExportType.grid,
             gridHeader:(gridHeader.length === 0) ? [] : gridHeader,
             gridData: data
@@ -300,6 +302,7 @@ class DatasetGrid extends React.Component<Props, any> {
         }
         return  {
             hidden: this.props.hidden!,
+            skipExport: this.props.skipExport,
             excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
             gridData: {
                 columns: header,

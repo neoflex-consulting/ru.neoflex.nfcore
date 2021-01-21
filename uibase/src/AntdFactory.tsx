@@ -321,8 +321,7 @@ class TabsViewReport_ extends ViewContainer {
                     {
                         children.map((c: Ecore.EObject) =>
                             <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >
-                                {this.viewFactory.createView(c, props)}
-                                test
+                                {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}
                             </NeoTabs.NeoTabPane>
                         )
                     }
@@ -540,7 +539,8 @@ export class Select_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -548,7 +548,8 @@ export class Select_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -791,7 +792,8 @@ export class DatePicker_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -799,7 +801,8 @@ export class DatePicker_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -1361,7 +1364,7 @@ class Typography_ extends ViewContainer {
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
-            label: ""
+            label: this.viewObject.get('name')
         };
     }
 
@@ -1376,16 +1379,20 @@ class Typography_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.viewObject.get('name'),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            textData: this.state.label,
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem,
+            font: {bold: this.viewObject.get('strongStyle')}
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.viewObject.get('name'),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            textData: this.state.label,
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem,
+            font: {bold: this.viewObject.get('strongStyle')}
         };
     }
 

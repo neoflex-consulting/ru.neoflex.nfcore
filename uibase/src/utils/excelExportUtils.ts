@@ -17,6 +17,7 @@ export enum excelElementExportType {
 
 export interface excelExportObject {
     hidden: boolean;
+    skipExport?: boolean;
     excelComponentType: excelElementExportType;
     diagramData?: {
         blob: Promise<Blob>,
@@ -32,7 +33,10 @@ export interface excelExportObject {
         headerName: string,
         columnSpan: number
         rowSpan: number
-    }[][]
+    }[][],
+    font?: {
+        bold?: boolean
+    }
 }
 
 function addTableData(excelData: excelExportObject, worksheet: ExcelJS.Worksheet, offset: number) {
@@ -65,7 +69,7 @@ function addTableData(excelData: excelExportObject, worksheet: ExcelJS.Worksheet
     }
 }
 
-async function handleExportExcel(handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: any) {
+async function handleExportExcel(handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: any, ignoreSkipped = true) {
     //Смещение отностиельно 0 ячейки
     let offset = 1;
     const workbook = new ExcelJS.Workbook();
@@ -74,7 +78,7 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
     for (let i = 0; i < handlers.length; i++) {
 
         const excelData: excelExportObject = handlers[i]();
-        if (!excelData.hidden) {
+        if (!excelData.hidden && (!excelData.skipExport || ignoreSkipped)) {
             if (excelData.excelComponentType === excelElementExportType.diagram
                 && excelData.diagramData !== undefined
                 && withTable
@@ -113,6 +117,9 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
             let cell = worksheet.getCell('A' + offset);
             // Modify/Add individual cell
             cell.value = excelData.textData;
+            if (excelData.font) {
+                cell.font = excelData.font
+            }
         }
         if (excelData.excelComponentType === excelElementExportType.complexGrid
             && excelData.gridHeader !== undefined

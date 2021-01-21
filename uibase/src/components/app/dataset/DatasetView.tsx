@@ -130,6 +130,8 @@ interface State {
     isDropdownVisibleForDiagramm: boolean
     aggregatedRows: {[key: string]: unknown}[];
     isGroovyDataset: boolean;
+    isExportAllTabsVisible: boolean;
+    isExcelExport: boolean;
 }
 
 const defaultComponentValues = {
@@ -207,7 +209,9 @@ class DatasetView extends React.Component<any, State> {
             isDropdownVisible: false,
             isDropdownVisibleForDiagramm: false,
             aggregatedRows: [],
-            isGroovyDataset: false
+            isGroovyDataset: false,
+            isExportAllTabsVisible: false,
+            isExcelExport: false
         };
     }
 
@@ -1524,15 +1528,32 @@ class DatasetView extends React.Component<any, State> {
                     isInsertRowHidden={!this.state.isEditMode || !this.state.isInsertAllowed}
                     isDeleteRowsHidden={!this.state.isEditMode || !this.state.isDeleteAllowed}
                     isCopySelectedHidden={!this.state.isEditMode || !this.state.isInsertAllowed}
-                    onDocExportClick={()=>handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
-                        saveAs(new Blob([blob]), "example.docx");
-                        console.log("Document created successfully");
-                    })}
-                    onExcelExportClick={()=>handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
-                            saveAs(new Blob([blob]), 'example.xlsx');
-                            console.log("Document created successfully");
+                    onDocExportClick={
+                        ()=>{
+                            if (this.props.isTabActive) {
+                                this.setState({isExportAllTabsVisible: true, isExcelExport:false})
+                            } else {
+                                handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
+                                        saveAs(new Blob([blob]), `${this.props.viewObject.get('exportFileName') || "example"}.docx`);
+                                        console.log("Document created successfully");
+                                    }
+                                )
+                            }
                         }
-                    )}
+                    }
+                    onExcelExportClick={
+                        ()=>{
+                            if (this.props.isTabActive) {
+                                this.setState({isExportAllTabsVisible: true, isExcelExport:true})
+                            } else {
+                                handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
+                                        saveAs(new Blob([blob]), `${this.props.viewObject.get('exportFileName') || "example"}.xlsx`);
+                                        console.log("Document created successfully");
+                                    }
+                                )
+                            }
+                        }
+                    }
                     {...this.props}
                 />}
                 <DatasetDiagram
@@ -1544,6 +1565,7 @@ class DatasetView extends React.Component<any, State> {
                 <DatasetGrid
                     gridKey={this.props.viewObject.eURI().split('#')[0]}
                     hidden={!!this.state.currentDiagram}
+                    skipExport={!this.props.isTabActive}
                     hidePagination={this.props.viewObject.get('hidePaginator')}
                     ref={this.gridRef}
                     highlights = {this.state.highlights}
@@ -1880,8 +1902,6 @@ class DatasetView extends React.Component<any, State> {
                        textOfRightButton={t("save")}
                     >
                     </NeoModal>
-
-
                     <NeoModal
                         type={'edit'}
                         // getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
@@ -1905,6 +1925,52 @@ class DatasetView extends React.Component<any, State> {
                             {...this.props}
                         />
                     </NeoModal>
+                    <NeoModal
+                        onCancel={()=>{
+                            this.setState({
+                                isExportAllTabsVisible:!this.state.isExportAllTabsVisible
+                            })
+                        }}
+                        closable={true}
+                        type={'edit'}
+                        title={t('export all tabs')}
+                        content={t("export all tabs or current tab")}
+                        visible={this.state.isExportAllTabsVisible}
+                        onLeftButtonClick={()=>{
+                            this.setState({isExportAllTabsVisible: !this.state.isExportAllTabsVisible});
+                            if (this.state.isExcelExport) {
+                                handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then((blob) => {
+                                        saveAs(new Blob([blob]), `${this.props.viewObject.get('exportFileName') || "example"}.xlsx`);
+                                        console.log("Document created successfully");
+                                    }
+                                )
+                            } else {
+                                handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel).then(blob => {
+                                        saveAs(new Blob([blob]), `${this.props.viewObject.get('exportFileName') || "example"}.docx`);
+                                        console.log("Document created successfully");
+                                    }
+                                )
+                            }
+                        }}
+                        onRightButtonClick={()=>{
+                            this.setState({isExportAllTabsVisible: !this.state.isExportAllTabsVisible});
+                            if (this.state.isExcelExport) {
+                                handleExportExcel(this.props.context.getExcelHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel, false).then((blob) => {
+                                        saveAs(new Blob([blob]), `${this.props.viewObject.get('exportFileName') || "example"}.xlsx`);
+                                        console.log("Document created successfully");
+                                    }
+                                )
+                            } else {
+                                handleExportDocx(this.props.context.getDocxHandlers(), this.state.isWithTable, this.state.isDownloadFromDiagramPanel, false).then(blob => {
+                                    saveAs(new Blob([blob]), `${this.props.viewObject.get('exportFileName') || "example"}.docx`);
+                                    console.log("Document created successfully");
+                                    }
+                                )
+                            }
+                        }}
+                        textOfLeftButton={t("all")}
+                        textOfRightButton={t("current")}
+                    />
                 </div>
             </div>
         </Fullscreen>
