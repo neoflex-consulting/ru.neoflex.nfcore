@@ -71,7 +71,10 @@ interface State {
     expandedKeys: string[],
     saveMenuVisible: boolean,
     removalProcess: boolean,
-    modalDeleteResourceVisible: boolean
+    modalDeleteResourceVisible: boolean,
+    selectDropdownVisible: boolean,
+    selectTags: number,
+    selectCount: number,
 }
 
 
@@ -141,7 +144,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         expandedKeys: [],
         saveMenuVisible: false,
         removalProcess: false,
-        modalDeleteResourceVisible: false
+        modalDeleteResourceVisible: false,
+        selectDropdownVisible: false,
+        selectTags: 3,
+        selectCount: 0,
     };
 
     refresh = (refresh: boolean): void => {
@@ -1322,12 +1328,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     footer={<NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>OK</NeoButton>}
                 >
                     <NeoSelect
+                        className={'select_option_tag'}
                         mode="multiple"
                         style={{ width: '500px' }}
                         placeholder="Please select"
                         width={'100%'}
                         defaultValue={[]}
                         showSearch={true}
+                        maxTagCount={this.state.selectTags}
+                        maxTagTextLength={7}
+                        maxTagPlaceholder={`Еще...`}
                         onChange={(uriArray: string[], option: any) => {
                             const opt = option.map((o: any) => o.key);
                             this.setState({ selectedRefUries: opt })
@@ -1347,6 +1357,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     value.indexOf(inputOr) >= 0));
                             return test;
                         }}
+                        onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
                     >
                         {
                             this.state.mainEObject.eClass &&
@@ -1362,21 +1373,25 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     }
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {<b>
-                                                {`${eObject.eClass.get('name')}`}
-                                            </b>}
-                                            &nbsp;
-                                            {`${eObject.get('name')}`}
+                                            {this.state.selectDropdownVisible ?
+                                                eObject.eClass.get('name') + eObject.get('name')
+                                                :
+                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
+                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                </NeoHint>
+                                            }
                                         </NeoOption>
                                         :
                                         possibleTypes.includes(eObject.eClass.get('name')) &&
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {<b>
-                                                {`${eObject.eClass.get('name')}`}
-                                            </b>}
-                                            &nbsp;
-                                            {`${eObject.get('name')}`}
+                                            {this.state.selectDropdownVisible ?
+                                                eObject.eClass.get('name') + eObject.get('name')
+                                                :
+                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
+                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                </NeoHint>
+                                            }
                                         </NeoOption>
                                 })}
                     </NeoSelect>
