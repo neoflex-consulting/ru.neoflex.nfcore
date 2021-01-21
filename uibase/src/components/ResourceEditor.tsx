@@ -1036,6 +1036,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
                     .then(() => {
                         this.setState({edit: true});
+                        if (!saveAndExit) {
+                            this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                            this.refresh(true)
+                        }
                     });
                 this.setState({
                     isSaving: false,
@@ -1058,7 +1062,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }).catch(() => {
             this.setState({ isSaving: false, isModified: true });
         })
-
 
 
     }
