@@ -70,7 +70,7 @@ export interface IMainContext {
         operation: dmlOperation,
         queryParams: IServerNamedParam[],
     ) => Promise<string>;
-    runQueryDataset? : (resource: Ecore.Resource, queryParams: IServerNamedParam[]) => Promise<string>;
+    runQueryDataset? : (resource: Ecore.Resource, queryParams?: IServerNamedParam[]) => Promise<string>;
     datasetComponents?: any;
     notification?: (title: string, description: string, notificationType: "success" | "error" | "info" | "warning" | "open") => void;
     userProfilePromise?: Promise<Ecore.Resource>;

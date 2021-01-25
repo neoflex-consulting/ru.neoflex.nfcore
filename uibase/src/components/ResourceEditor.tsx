@@ -71,7 +71,10 @@ interface State {
     expandedKeys: string[],
     saveMenuVisible: boolean,
     removalProcess: boolean,
-    modalDeleteResourceVisible: boolean
+    modalDeleteResourceVisible: boolean,
+    selectDropdownVisible: boolean,
+    selectTags: number,
+    selectCount: number,
 }
 
 
@@ -141,7 +144,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         expandedKeys: [],
         saveMenuVisible: false,
         removalProcess: false,
-        modalDeleteResourceVisible: false
+        modalDeleteResourceVisible: false,
+        selectDropdownVisible: false,
+        selectTags: 3,
+        selectCount: 0,
     };
 
     refresh = (refresh: boolean): void => {
@@ -892,7 +898,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     [addRefPropertyName]: {
                         $ref: firstEObject.eURI(),
                         eClass: firstEObject.eClass.eURI()
-                    }
+                    },
+                    column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent'
+                        && firstEObject.eURI() !== targetObject.dataset.$ref ? [] : targetObject.column
                 })
             }
         }
@@ -918,14 +926,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const targetObject: { [key: string]: any } = this.state.targetObject;
         const oldRefsArray = targetObject[addRefPropertyName] ? targetObject[addRefPropertyName] : [];
         const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"]);
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray });
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
     };
 
     handleDeleteSingleRef = (deletedObject: any, addRefPropertyName: string) => {
         const targetObject: { [key: string]: any } = this.state.targetObject;
-        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null });
+        const updatedJSON = targetObject.updater({ [addRefPropertyName]: null, column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent' && addRefPropertyName === 'dataset' ? [] : targetObject.column});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         delete updatedTargetObject[addRefPropertyName];
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
@@ -1036,6 +1044,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
                     .then(() => {
                         this.setState({edit: true});
+                        if (!saveAndExit) {
+                            this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                            this.refresh(true)
+                        }
                     });
                 this.setState({
                     isSaving: false,
@@ -1052,10 +1064,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     resource: resource,
                 }, ()=>callback && callback());
             }
-            if (!saveAndExit) {
-                this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
-                this.refresh(true)
-            }
             if (redirectAfterSave) {
                 this.redirect();
             }
@@ -1064,13 +1072,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         })
 
 
-
     }
 
     save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
+        const {t} = this.props;
         this.state.mainEObject.eResource().clear();
         const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
         if (resource) {
+            if (resource.eContents()[0].eClass._id === "//User" &&
+                resource.eContents()[0].get("name") === this.props.principal.name) {
+                this.props.notification(t('notification'), t('updated user class'), "info");
+            }
             this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
         }
     };
@@ -1134,6 +1146,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     uniqKey: node.props.eventKey,
                 })
             }
+        }
+        /*Проверка, обновилась ли версия объекта в других источниках*/
+        if (this.state.mainEObject._id !== undefined &&
+            !this.props.location.pathname.includes("/new/") &&
+            this.state.mainEObject._id === this.props.location.pathname.split("/")[4] &&
+            this.state.mainEObject.eResource().rev < this.props.location.pathname.split("/")[5]) {
+            this.refresh(true);
         }
     }
 
@@ -1319,12 +1338,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     footer={<NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>OK</NeoButton>}
                 >
                     <NeoSelect
+                        className={'select_option_tag'}
                         mode="multiple"
                         style={{ width: '500px' }}
                         placeholder="Please select"
                         width={'100%'}
                         defaultValue={[]}
                         showSearch={true}
+                        maxTagCount={this.state.selectTags}
+                        maxTagTextLength={7}
+                        maxTagPlaceholder={`Еще...`}
                         onChange={(uriArray: string[], option: any) => {
                             const opt = option.map((o: any) => o.key);
                             this.setState({ selectedRefUries: opt })
@@ -1344,6 +1367,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     value.indexOf(inputOr) >= 0));
                             return test;
                         }}
+                        onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
                     >
                         {
                             this.state.mainEObject.eClass &&
@@ -1359,21 +1383,25 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     }
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {<b>
-                                                {`${eObject.eClass.get('name')}`}
-                                            </b>}
-                                            &nbsp;
-                                            {`${eObject.get('name')}`}
+                                            {this.state.selectDropdownVisible ?
+                                                eObject.eClass.get('name') + eObject.get('name')
+                                                :
+                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
+                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                </NeoHint>
+                                            }
                                         </NeoOption>
                                         :
                                         possibleTypes.includes(eObject.eClass.get('name')) &&
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {<b>
-                                                {`${eObject.eClass.get('name')}`}
-                                            </b>}
-                                            &nbsp;
-                                            {`${eObject.get('name')}`}
+                                            {this.state.selectDropdownVisible ?
+                                                eObject.eClass.get('name') + eObject.get('name')
+                                                :
+                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
+                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                </NeoHint>
+                                            }
                                         </NeoOption>
                                 })}
                     </NeoSelect>

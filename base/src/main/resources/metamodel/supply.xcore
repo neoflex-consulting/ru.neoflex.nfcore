@@ -20,6 +20,6 @@ class Supply {
     Timestamp date
         @NFCore(documentation="Описание поставки")
     String description
-        @NFCore(documentation="Данные о создании и изменении объекта")
+        @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
 }

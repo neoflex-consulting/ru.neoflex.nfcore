@@ -48,6 +48,7 @@ export class API implements IErrorHandler {
     private processHandlers: ((processes: any[]) => void)[];
     private stompClient: Client | undefined;
     public onServerDown: () => void;
+    public updateObject: (object: Object) => void;
     public userName: String;
 
     private constructor() {
@@ -666,10 +667,13 @@ export class API implements IErrorHandler {
             this.stompClient.configure({
                 webSocketFactory: () => {
                     // eslint-disable-next-line no-restricted-globals
-                    return new WebSocket('ws://' + window.location.host + '/socket-registry')
+                    return new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/socket-registry')
                 },
                 onConnect: () => {
                     this.stompClient?.subscribe('/topic/afterSave', message => {
+                        if (this.updateObject) {
+                            this.updateObject(JSON.parse(message.body));
+                        }
                         console.log('ON CONNECT: ', JSON.parse(message.body));
                     });
                     this.stompClient?.subscribe('/topic/disconnectFlag', message => {

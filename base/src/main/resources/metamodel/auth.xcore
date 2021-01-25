@@ -36,7 +36,7 @@ class Role extends Tagged {
     Text description
         @NFCore(documentation="Права доступа роли")
     contains Permission[] grants opposite role
-        @NFCore(documentation="Данные о создании и изменении объекта")
+        @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
 
         @NFCore(documentation="Функция проверки прав доступа пользователя к объекту. 0 - не установлено, 1 - чтение, 2 - чтение и запись, 4 - нет прав")
@@ -123,7 +123,7 @@ abstract class Authority {
     Text description
         @NFCore(documentation="Группа ролей")
     refers Role[] roles
-        @NFCore(documentation="Данные о создании и изменении объекта")
+        @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
 }
 
@@ -178,7 +178,7 @@ class CurrentLock {
     QName name
         @NFCore(documentation="Название заблокированного объекта")
     String objectName
-        @NFCore(documentation="Данные о создании и изменении объекта")
+        @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
 }
 
@@ -196,6 +196,6 @@ class EditHistory {
     String oldRev
         @NFCore(documentation="Новая ревизия объекта")
     String newRev
-        @NFCore(documentation="Данные о создании и изменении объекта")
+        @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
 }

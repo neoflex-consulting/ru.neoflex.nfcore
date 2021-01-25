@@ -1764,8 +1764,9 @@ a.linksInMoreWord:hover{
 .datasearch_region .ant-form-item {
   margin-bottom: 15px;
 }
-.datasearch_region .hint div {
-  max-width: 54px;
+.datasearch_region .hint div,
+.select_option_tag .hint div {
+  max-width: 53px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

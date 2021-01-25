@@ -1,7 +1,7 @@
 import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, Input, InputNumber, Row, Select, DatePicker} from 'antd';
+import {Col, Collapse, ConfigProvider, Drawer, Form, InputNumber, Row, Select} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
 import MasterdataEditor from './components/app/masterdata (not used)/MasterdataEditor';
@@ -26,7 +26,7 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoInput, NeoParagraph, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoSelect, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
@@ -321,8 +321,7 @@ class TabsViewReport_ extends ViewContainer {
                     {
                         children.map((c: Ecore.EObject) =>
                             <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >
-                                {this.viewFactory.createView(c, props)}
-                                test
+                                {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}
                             </NeoTabs.NeoTabPane>
                         )
                     }
@@ -540,7 +539,8 @@ export class Select_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -548,7 +548,8 @@ export class Select_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -709,7 +710,7 @@ export class Select_ extends ViewContainer {
             componentRenderCondition ? <div
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{marginBottom: marginBottom}}>
-                <Select
+                <NeoSelect
                     //Fullscreen ag-grid render
                     getPopupContainer={this.props.gridId ? () => document.getElementById (this.props.gridId) as HTMLElement : undefined}
                     key={this.viewObject._id}
@@ -724,6 +725,9 @@ export class Select_ extends ViewContainer {
                     onChange={(currentValue: string|string[]) => {
                         this.onChange(currentValue);
                     }}
+                    title={this.viewObject.get('title')}
+                    required={this.viewObject.get('required')}
+                    titleOrientation={this.viewObject.get('titleOrientation')}
                 >
                     {
                         (this.state.selectData.length > 0)
@@ -740,7 +744,7 @@ export class Select_ extends ViewContainer {
 
                             </Select.Option>
                     }
-                </Select>
+                </NeoSelect>
             </div> : <div>{this.props.getValue()}</div>
         )
     }
@@ -788,7 +792,8 @@ export class DatePicker_ extends ViewContainer {
         return {
             docxComponentType : docxElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -796,7 +801,8 @@ export class DatePicker_ extends ViewContainer {
         return {
             excelComponentType : excelElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem
         };
     }
 
@@ -841,7 +847,7 @@ export class DatePicker_ extends ViewContainer {
                  style={{marginBottom: marginBottom}}
             >
                 <ConfigProvider locale={this.state.locale}>
-                    <DatePicker
+                    <NeoDatePicker
                         //Fullscreen ag-grid render
                         getCalendarContainer={this.props.gridId ? () => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement : undefined}
                         key={this.viewObject._id}
@@ -854,7 +860,11 @@ export class DatePicker_ extends ViewContainer {
                         format={this.state.mask}
                         onChange={(date: any, dateString: string) => {
                             this.onChange(dateString)
-                        }}/>
+                        }}
+                        required={this.viewObject.get('required')}
+                        title={this.viewObject.get('title')}
+                        titleOrientation={this.viewObject.get('titleOrientation')}
+                    />
                 </ConfigProvider>
             </div>
         )
@@ -1043,7 +1053,27 @@ class ValueHolder_ extends Component {
     };
 
     componentDidMount(): void {
-        this.onChange(this.viewObject.get('value'));
+        if (this.viewObject.get('valueType') === 'dataset' && this.viewObject.get('dataset')) {
+            this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
+                if (this.viewObject.get('dataset').get('datasetColumn').array().length === 0) {
+                    this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
+                        this.props.t("exception while loading dataset. There is no columns in dataset") + ` ${this.viewObject.get('dataset').get('name')}`,
+                        "error")
+                } else {
+                    const columnName = this.viewObject.get('dataset').get('datasetColumn').array()[0].get('name');
+                    this.setState({
+                            currentValue: JSON.parse(result).reduce((c: { [x: string]: string; }, n: { [x: string]: string; }) => c[columnName] + ";" + n[columnName])
+                        },()=> this.onChange(this.state.currentValue)
+                    );
+                }
+            });
+        } else if (this.viewObject.get('valueType') === 'dataset' && !this.viewObject.get('dataset')) {
+            this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
+                this.props.t("Dataset link is not specified"),
+                "error")
+        } else {
+            this.onChange(this.viewObject.get('value'));
+        }
         mountComponent.bind(this)(false, [{actionType: actionType.setValue,callback: this.onChange.bind(this)}] as IAction[]);
     }
 
@@ -1148,7 +1178,7 @@ export class Input_ extends ViewContainer {
             return(
                 <div key={this.viewObject._id}
                      style={{marginBottom: marginBottom}}>
-                    <Input
+                    <NeoInput
                         hidden={this.state.isHidden}
                         className={cssClass}
                         style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
@@ -1159,6 +1189,9 @@ export class Input_ extends ViewContainer {
                             this.onChange(currentValue.target.value)
                         }}
                         value={this.state.currentValue}
+                        required={this.viewObject.get('required')}
+                        titleOrientation={this.viewObject.get('titleOrientation')}
+                        title={this.viewObject.get('title')}
                     />
                 </div>
             )
@@ -1331,7 +1364,7 @@ class Typography_ extends ViewContainer {
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
-            label: ""
+            label: this.viewObject.get('name')
         };
     }
 
@@ -1346,16 +1379,20 @@ class Typography_ extends ViewContainer {
     private getDocxData(): docxExportObject {
         return {
             docxComponentType : docxElementExportType.text,
-            textData: this.viewObject.get('name'),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            textData: this.state.label,
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem,
+            font: {bold: this.viewObject.get('strongStyle')}
         };
     }
 
     private getExcelData(): excelExportObject {
         return {
             excelComponentType : excelElementExportType.text,
-            textData: this.viewObject.get('name'),
-            hidden: this.state.isHidden || this.props.isParentHidden
+            textData: this.state.label,
+            hidden: this.state.isHidden || this.props.isParentHidden,
+            skipExport: !this.props.isTabActive && this.props.isTabItem,
+            font: {bold: this.viewObject.get('strongStyle')}
         };
     }
 
