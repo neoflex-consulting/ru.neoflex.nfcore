@@ -508,26 +508,26 @@ class DatasetComponentExt extends DatasetComponentImpl {
         return rowData
     }
 
+
+
     @Override
     String getAllFunctions() {
         def calcFunctions = []
         def jdbcDataset = dataset as JdbcDataset
+        String adapter = "DefaultCalculatorAdapter"
+        if (jdbcDataset.connection.driver.driverClassName == "com.orientechnologies.orient.jdbc.OrientJdbcDriver"){
+            adapter = "OrientDBCalculatorAdapter"
+        }
+        if (jdbcDataset.connection.driver.driverClassName == "org.postgresql.Driver"){
+            adapter = "PostgreCalculatorAdapter"
+        }
+        if (jdbcDataset.connection.driver.driverClassName == "oracle.jdbc.driver.OracleDriver"){
+            adapter = "OracleCalculatorAdapter"
+        }
         def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
         for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++){
-            String str = calculatorAdapter.metaClass.delegate.allMethods[i].mopName
-            str = str.substring(8,str.size())
-            for (CalculatorFunction cf : CalculatorFunction.values()){
-                if (str.equals(cf.name) || str.equals(cf.name + "s") || cf.name.equals("to_char") && str.equals("toString") || cf.name.equals("to_number") && str.equals("toNumber") || cf.name.equals("to_date") && str.equals("toDate")){
-                    boolean flag = false;
-                    for (int j = 0; j < calcFunctions.size(); j++){
-                        if (calcFunctions[j] == cf.name){
-                            flag = true;
-                        }
-                    }
-                    if (!flag) {
-                        calcFunctions.add(cf.name)
-                    }
-                }
+            if (calculatorAdapter.metaClass.delegate.allMethods[i].cachedClass.cachedClass.name.contains(adapter)){
+                calcFunctions.add(calculatorAdapter.metaClass.delegate.allMethods[i].cachedMethod.name)
             }
         }
         return calcFunctions;
@@ -1098,9 +1098,17 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                         break;
                     case CalculatorFunction.UPPER.getName():
-                        expression = expression.replace(func, calculatorAdapter.upper(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.upper(args[1]));
+                            if (isOrientDB){
+                                expression = deleteQuotes(expression);
+                            }
+                            break;
                     case CalculatorFunction.LOWER.getName():
-                        expression = expression.replace(func, calculatorAdapter.lower(args[1])); break;
+                        expression = expression.replace(func, calculatorAdapter.lower(args[1]));
+                            if (isOrientDB){
+                                expression = deleteQuotes(expression);
+                            }
+                            break;
                     case CalculatorFunction.LENGTH.getName():
                         expression = expression.replace(func, calculatorAdapter.length(args[1]));
                         if (isOrientDB){
