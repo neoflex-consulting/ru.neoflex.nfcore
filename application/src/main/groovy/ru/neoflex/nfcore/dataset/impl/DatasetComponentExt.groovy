@@ -1158,7 +1158,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                         break;
                     case CalculatorFunction.NULLIF.getName():
-                        expression = expression.replace(func, calculatorAdapter.nullIf(args[1], args[2]));
+                        expression = expression.replace(func, calculatorAdapter.nullif(args[1], args[2]));
                         if (isOrientDB){
                             expression = deleteQuotes(expression);
                         }
