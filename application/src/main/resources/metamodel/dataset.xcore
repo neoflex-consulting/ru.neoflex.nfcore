@@ -198,6 +198,8 @@ abstract class DatasetColumnView extends ServerSideCondition {
     Pinned pinned
         @NFCore(documentation="Возможность изменения ширины колонки пользователем")
     boolean resizable
+        @NFCore(documentation="Ширина колонки")
+    String width
 }
 
 @NFCore(documentation="Подробное описание колонки")
