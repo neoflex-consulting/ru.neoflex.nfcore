@@ -18,12 +18,12 @@ abstract class CalculatorAdapter {
         return "${arg1}.format('${arg2}')"
     }
 
-    String toNumber(String arg1, String arg2){
+    String to_number(String arg1, String arg2){
         return "${arg1}.asDecimal()"
     }
 
 
-    String toString(String arg1, String arg2){
+    String to_char(String arg1, String arg2){
         return "${arg1}.toString('${arg2}')"
     }
 
@@ -83,7 +83,7 @@ abstract class CalculatorAdapter {
         return "second(${arg1})"
     }
 
-    String nullIf(String arg1, String arg2) {
+    String nullif(String arg1, String arg2) {
         return "nullif(${arg1},${arg2})"
     }
 
@@ -317,11 +317,6 @@ class   OrientDBCalculatorAdapter extends CalculatorAdapter {
     }
 
     @Override
-    String nullIf(String arg1, String arg2) {
-        return "ifnull(${arg1},${arg2})"
-    }
-
-    @Override
     String length(String arg1) {
         return "${arg1}.length()"
     }
@@ -332,12 +327,17 @@ class   OrientDBCalculatorAdapter extends CalculatorAdapter {
     }
 
     @Override
-    String toString(String arg1, String arg2){
-        return "${arg1}.format('${arg2}').asString()"
+    String to_char(String arg1, String arg2){
+        if (arg2 == null){
+            return "${arg1}.asString()"
+        }
+        else{
+            return "${arg1}.format('${arg2}').asString()"
+        }
     }
 
     @Override
-    String toNumber(String arg1, String arg2){
+    String to_number(String arg1, String arg2){
         return "${arg1}.asDecimal()"
     }
 }

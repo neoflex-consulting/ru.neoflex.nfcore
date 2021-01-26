@@ -514,20 +514,21 @@ class DatasetComponentExt extends DatasetComponentImpl {
     String getAllFunctions() {
         def calcFunctions = []
         def jdbcDataset = dataset as JdbcDataset
-        String adapter = "DefaultCalculatorAdapter"
+        String adapter = "CalculatorAdapter"
         if (jdbcDataset.connection.driver.driverClassName == "com.orientechnologies.orient.jdbc.OrientJdbcDriver"){
             adapter = "OrientDBCalculatorAdapter"
         }
-        if (jdbcDataset.connection.driver.driverClassName == "org.postgresql.Driver"){
-            adapter = "PostgreCalculatorAdapter"
-        }
-        if (jdbcDataset.connection.driver.driverClassName == "oracle.jdbc.driver.OracleDriver"){
-            adapter = "OracleCalculatorAdapter"
-        }
         def calculatorAdapter = CalculatorAdapter.getDBAdapter(jdbcDataset.connection.driver.driverClassName)
-        for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++){
-            if (calculatorAdapter.metaClass.delegate.allMethods[i].cachedClass.cachedClass.name.contains(adapter)){
-                calcFunctions.add(calculatorAdapter.metaClass.delegate.allMethods[i].cachedMethod.name)
+        if (adapter == "OrientDBCalculatorAdapter") {
+            for (int i = 0; i < calculatorAdapter.metaClass.delegate.allMethods.size(); i++) {
+                if (calculatorAdapter.metaClass.delegate.allMethods[i].cachedClass.cachedClass.name.contains(adapter)) {
+                    calcFunctions.add(calculatorAdapter.metaClass.delegate.allMethods[i].cachedMethod.name)
+                }
+            }
+        }
+        else{
+            for (CalculatorFunction func : CalculatorFunction.values()) {
+                calcFunctions.add(func.name);
             }
         }
         return calcFunctions;
@@ -874,11 +875,18 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         String key
                         String value
                         def object
+                        String seconds
                         for (int i = 1; i <= columnCount; ++i) {
                             object = rs.getObject(i)
 
                            if (object instanceof Date && object.toLocalDate() != null && object.toLocalDateTime() != null) {
-                              value = object.toLocalDate().toString() + " " + object.toGMTString().substring(11, 19) ;
+                               if (object.seconds < 10){
+                                   seconds = "0" + object.seconds
+                               }
+                               else{
+                                   seconds = object.seconds
+                               }
+                              value = object.toLocalDate().toString() + " " + object.hours + ":" + object.minutes + ":" + seconds ;
                            }
                            else {
                                 value = (object == null ? null : object.toString());
@@ -1116,7 +1124,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                         break;
                     case CalculatorFunction.TO_NUMBER.getName():
-                        expression = expression.replace(func, calculatorAdapter.toNumber(args[1], args[2]));
+                        expression = expression.replace(func, calculatorAdapter.to_number(args[1], args[2]));
                         if (isOrientDB){
                             expression = deleteQuotes(expression);
                         }
@@ -1144,7 +1152,7 @@ class DatasetComponentExt extends DatasetComponentImpl {
                         }
                         break;
                     case CalculatorFunction.TO_CHAR.getName():
-                        expression = expression.replace(func, calculatorAdapter.toString(args[1], args[2]));
+                        expression = expression.replace(func, calculatorAdapter.to_char(args[1], args[2]));
                         if (isOrientDB){
                             expression = deleteQuotes(expression);
                         }
