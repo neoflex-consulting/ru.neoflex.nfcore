@@ -210,6 +210,8 @@ class OAuthLog {
     String objectClass
         @NFCore(documentation="Название объекта")
     String objectName
+        @NFCore(documentation="Id объекта")
+    String objectId
         @NFCore(documentation="Пользователь системы")
     String nrUser
         @NFCore(documentation="Ip адресс устройства пользователя")

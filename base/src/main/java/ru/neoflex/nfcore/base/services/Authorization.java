@@ -124,20 +124,25 @@ public class Authorization {
     }
 
     public void log(String action) {
-        log(action, null, null, null);
+        log(action, null, null, null, null);
     }
 
-    public void log(String action, String objectClass, String objectName) {
-        log(action, objectClass, objectName, null);
+    public void log(String action, String nrUser) {
+        log(action, null, null, null, nrUser);
     }
 
-    public void log(String action, String objectClass, String objectName, String nrUser) throws RuntimeException {
+    public void log(String action, String objectClass, String objectName, String objectId) {
+        log(action, objectClass, objectName, objectId, null);
+    }
+
+    public void log(String action, String objectClass, String objectName, String objectId, String nrUser) throws RuntimeException {
         try {
             store.inTransaction(false, (tx) -> {
                 OAuthLog log = AuthFactory.eINSTANCE.createOAuthLog();
                 log.setAction(action);
                 log.setObjectClass(objectClass);
                 log.setObjectName(objectName);
+                log.setObjectId(objectId);
                 log.setDateTime(new Date());
                 //Authorized user
                 if (SecurityContextHolder.getContext().getAuthentication() != null) {

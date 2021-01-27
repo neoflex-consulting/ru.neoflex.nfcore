@@ -40,7 +40,7 @@ public class UserDetail implements UserDetailsService {
                         AuthPackage.Literals.USER, new HashMap<String, String>() {{put("name", userName);}});
                 List<Resource> resources = docFinder.execute().getResources();
                 if (resources.isEmpty()) {
-                    context.getAuthorization().log("invalid login attempt", null, null, userName);
+                    context.getAuthorization().log("invalid login attempt", userName);
                     return null;
                 }
                 ru.neoflex.nfcore.base.auth.User user = (ru.neoflex.nfcore.base.auth.User) resources.get(0)
@@ -73,7 +73,7 @@ public class UserDetail implements UserDetailsService {
                 UserDetails userDetails = new CurrentUser(userName, password, true, true, true, true,
                         au,
                         developerGrant == GrantType.WRITE);
-                context.getAuthorization().log("login", null, null, userName);
+                context.getAuthorization().log("login", userName);
                 return userDetails;
             });
         } catch (Exception e) {

@@ -101,6 +101,7 @@ public class Session implements Closeable {
             oClass.createProperty("action", OType.STRING);
             oClass.createProperty("objectClass", OType.STRING);
             oClass.createProperty("objectName", OType.STRING);
+            oClass.createProperty("objectId", OType.STRING);
             oClass.createProperty("nrUser", OType.STRING);
             oClass.createProperty("ipAddress", OType.STRING);
             oClass.createProperty("dateTime", OType.DATETIME);

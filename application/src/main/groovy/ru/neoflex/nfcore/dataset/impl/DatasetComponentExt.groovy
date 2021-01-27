@@ -930,19 +930,16 @@ class DatasetComponentExt extends DatasetComponentImpl {
     @Override
     void executeInsert(EList<QueryParameter> parameters) {
         executeDML(parameters, DMLQueryType.INSERT, this.insertQuery)
-        Context.getCurrent().getAuthorization().log("insert", this.eClass().getName(), this.getName())
     }
 
     @Override
     void executeUpdate(EList<QueryParameter> parameters) {
         executeDML(parameters, DMLQueryType.UPDATE, this.updateQuery)
-        Context.getCurrent().getAuthorization().log("update", this.eClass().getName(), this.getName())
     }
 
     @Override
     void executeDelete(EList<QueryParameter> parameters) {
         executeDML(parameters, DMLQueryType.DELETE, this.deleteQuery)
-        Context.getCurrent().getAuthorization().log("delete", this.eClass().getName(), this.getName())
     }
 
     String deleteQuotes(String name){
@@ -959,6 +956,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
         def currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
 
+        def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
+                .execute().resourceSet
+
+        Context.getCurrent().getAuthorization().log(queryType.toString().toLowerCase(), this.eClass().getName(), this.getName(), resource.resources[0].URI.segments().toString())
         logger.info("execute${queryType}", "execute${queryType} parameters = " + parameters)
         String query;
         def jdbcDataset = this.dataset as JdbcDataset

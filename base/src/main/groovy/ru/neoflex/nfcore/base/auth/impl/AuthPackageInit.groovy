@@ -36,9 +36,9 @@ class AuthPackageInit {
                 }
                 if (resource.contents.count {eObject-> !(eObject instanceof OAuthLog)} > 0) {
                     if (resource.contents[0].hasProperty("name")) {
-                        Context.current.authorization.log("create eObject", resource.contents[0].eClass().getName(), resource.contents[0].getName())
+                        Context.current.authorization.log(oldResource.URI == resource.URI ? "modify eObject" : "create eObject", resource.contents[0].eClass().getName(), resource.contents[0].getName(), resource.URI.segments().toString())
                     } else {
-                        Context.current.authorization.log("create eObject", resource.contents[0].eClass().getName(), "")
+                        Context.current.authorization.log(oldResource.URI == resource.URI ? "modify eObject" : "create eObject", resource.contents[0].eClass().getName(), "", resource.URI.segments().toString())
                     }
                 }
             }
@@ -51,9 +51,9 @@ class AuthPackageInit {
                 }
                 if (resource.contents.count {eObject-> !(eObject instanceof OAuthLog)} > 0) {
                     if (resource.contents[0].hasProperty("name")) {
-                        Context.current.authorization.log("delete eObject", resource.contents[0].eClass().getName(), resource.contents[0].getName())
+                        Context.current.authorization.log("delete eObject", resource.contents[0].eClass().getName(), resource.contents[0].getName(), resource.URI.segments().toString())
                     } else {
-                        Context.current.authorization.log("delete eObject", resource.contents[0].eClass().getName(), null)
+                        Context.current.authorization.log("delete eObject", resource.contents[0].eClass().getName(), null, resource.URI.segments().toString())
                     }
                 }
             }
