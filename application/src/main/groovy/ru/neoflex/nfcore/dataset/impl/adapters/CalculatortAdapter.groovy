@@ -1,6 +1,11 @@
 package ru.neoflex.nfcore.dataset.impl.adapters
 
+import java.lang.reflect.Array
+import java.lang.reflect.Method
+
 abstract class CalculatorAdapter {
+
+
     String substring(String arg1, String arg2, String arg3) {
         return "substring(${arg1},${arg2},${arg3})"
     }
@@ -9,16 +14,16 @@ abstract class CalculatorAdapter {
         return "replace(${arg1},${arg2},${arg3})"
     }
 
-    String toDate(String arg1, String arg2){
+    String to_date(String arg1, String arg2){
         return "${arg1}.format('${arg2}')"
     }
 
-    String toNumber(String arg1, String arg2){
+    String to_number(String arg1, String arg2){
         return "${arg1}.asDecimal()"
     }
 
 
-    String toString(String arg1, String arg2){
+    String to_char(String arg1, String arg2){
         return "${arg1}.toString('${arg2}')"
     }
 
@@ -78,10 +83,9 @@ abstract class CalculatorAdapter {
         return "second(${arg1})"
     }
 
-    String nullIf(String arg1, String arg2) {
+    String nullif(String arg1, String arg2) {
         return "nullif(${arg1},${arg2})"
     }
-
 
     static CalculatorAdapter getDBAdapter(String driver) {
         switch (driver) {
@@ -232,7 +236,7 @@ class OracleCalculatorAdapter extends CalculatorAdapter {
 
 }
 
-class OrientDBCalculatorAdapter extends CalculatorAdapter {
+class   OrientDBCalculatorAdapter extends CalculatorAdapter {
     private static final INSTANCE = new OrientDBCalculatorAdapter()
     static getInstance() { return INSTANCE }
 
@@ -308,13 +312,8 @@ class OrientDBCalculatorAdapter extends CalculatorAdapter {
     }
 
     @Override
-    String toDate(String arg1, String arg2){
+    String to_date(String arg1, String arg2){
         return "${arg1}.asDate().format('${arg2}')"
-    }
-
-    @Override
-    String nullIf(String arg1, String arg2) {
-        return "ifnull(${arg1},${arg2})"
     }
 
     @Override
@@ -328,12 +327,17 @@ class OrientDBCalculatorAdapter extends CalculatorAdapter {
     }
 
     @Override
-    String toString(String arg1, String arg2){
-        return "${arg1}.format('${arg2}').asString()"
+    String to_char(String arg1, String arg2){
+        if (arg2 == null){
+            return "${arg1}.asString()"
+        }
+        else{
+            return "${arg1}.format('${arg2}').asString()"
+        }
     }
 
     @Override
-    String toNumber(String arg1, String arg2){
+    String to_number(String arg1, String arg2){
         return "${arg1}.asDecimal()"
     }
 }
@@ -341,4 +345,5 @@ class OrientDBCalculatorAdapter extends CalculatorAdapter {
 class DefaultCalculatorAdapter extends CalculatorAdapter {
     private static final INSTANCE = new OracleCalculatorAdapter()
     static getInstance() { return INSTANCE }
+
 }
