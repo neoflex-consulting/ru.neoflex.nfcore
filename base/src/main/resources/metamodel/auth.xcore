@@ -202,7 +202,8 @@ class EditHistory {
 }
 
 @NFCore(internal="true", documentation="Лог событий системы")
-class AuthLog {
+@orientdb(oClassName="OAuthLog")
+class OAuthLog {
         @NFCore(documentation="Действие в систем")
     String action
         @NFCore(documentation="Класс объекта")
@@ -214,6 +215,6 @@ class AuthLog {
         @NFCore(documentation="Ip адресс устройства пользователя")
     String ipAddress
         @NFCore(documentation="Дата и время события")
-        //@orientdb(indexType="BTREE")
+        @orientdb(indexType="NOTUNIQUE")
     Date dateTime
 }

@@ -35,6 +35,7 @@ public class Session implements Closeable {
     public static final String ECONTAINS = "EContains";
     public static final String EOBJECT = "EObject";
     public static final String EPROXY = "EProxy";
+    public static final String AUTHLOG = "OAuthLog";
     public static final String ORIENTDB_SOURCE = "http://orientdb.com/meta";
     public static final String ANN_O_CLASS_NAME = "oClassName";
     final Map<Resource, List<OVertex>> savedResourcesMap = new HashMap<>();
@@ -89,6 +90,20 @@ public class Session implements Closeable {
         if (oClass == null) {
             oClass = db.createEdgeClass(ECONTAINS);
             oClass.addSuperClass(getOrCreateEReferenceEdge());
+        }
+        return oClass;
+    }
+
+    private OClass getOrCreateOAuthLog() {
+        OClass oClass = db.getClass(AUTHLOG);
+        if (oClass == null) {
+            oClass = db.createVertexClass(AUTHLOG);
+            oClass.createProperty("action", OType.STRING);
+            oClass.createProperty("objectClass", OType.STRING);
+            oClass.createProperty("objectName", OType.STRING);
+            oClass.createProperty("nrUser", OType.STRING);
+            oClass.createProperty("ipAddress", OType.STRING);
+            oClass.createProperty("dateTime", OType.DATETIME);
         }
         return oClass;
     }
@@ -225,6 +240,7 @@ public class Session implements Closeable {
         getOrCreateEReferenceEdge();
         getOrCreateEContainsEdge();
         getOrCreateERefersEdge();
+        getOrCreateOAuthLog();
         for (EClass eClass : factory.getEClasses()) {
             OClass oClass = getOrCreateOClass(eClass);
             EAttribute id = null;

@@ -148,27 +148,30 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     };
 
     getLogEntries = () => {
-        API.instance().findClass("auth", "AuthLog").then(eClass=>{
-            API.instance().findByClass(eClass,{contents: {eClass: eClass.eURI(), action: "create eObject"}}).then(result=>{
-                let logEntries = result.map(r => {
-                    return {
-                        logDateTime:moment(r.eContents()[0].get('dateTime')),
-                        author: r.eContents()[0].get('nrUser'),
-                        change: r.eContents()[0].get('action')+': '+r.eContents()[0].get('objectClass') + '.' + r.eContents()[0].get('objectName')
+        API.instance().findClass("auth", "EditHistory").then(eClass=>{
+            API.instance().findByClass(eClass,{contents: {eClass: eClass.eURI()}}).then(result=>{
+                let logEntries: {
+                    logDateTime: Moment,
+                    author: string,
+                    change: string
+                }[] = [];
+                result.forEach(r => {
+                    logEntries.push({
+                        logDateTime:moment(r.eContents()[0].get('audit').get('created')),
+                        author: r.eContents()[0].get('audit').get('createdBy'),
+                        change: 'created: '+ r.eContents()[0].get('EClass') + '.' + r.eContents()[0].get('objectName')
+                    });
+                    if (r.eContents()[0].get('audit').get('modified')) {
+                        logEntries.push({
+                            logDateTime:moment(r.eContents()[0].get('audit').get('modified')),
+                            author: r.eContents()[0].get('audit').get('modifiedBy'),
+                            change: 'modified: '+ r.eContents()[0].get('EClass') + '.' + r.eContents()[0].get('objectName')
+                        });
                     }
                 });
-                API.instance().findByClass(eClass,{contents: {eClass: eClass.eURI(), action: "delete eObject"}}).then(result=>{
-                    logEntries = logEntries.concat(result.map(r => {
-                        return {
-                            logDateTime:moment(r.eContents()[0].get('dateTime')),
-                            author: r.eContents()[0].get('nrUser'),
-                            change: r.eContents()[0].get('action')+': '+r.eContents()[0].get('objectClass') + '.' + r.eContents()[0].get('objectName')
-                        }
-                    }));
-                    this.setState({logEntries: _.sortBy(logEntries, function (item) {
-                            return item.logDateTime;
-                        }).reverse()});
-                })
+                this.setState({logEntries: _.sortBy(logEntries, function (item) {
+                        return item.logDateTime;
+                    }).reverse()});
             })
         })
     };

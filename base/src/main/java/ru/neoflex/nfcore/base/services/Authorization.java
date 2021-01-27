@@ -134,18 +134,22 @@ public class Authorization {
     public void log(String action, String objectClass, String objectName, String nrUser) throws RuntimeException {
         try {
             store.inTransaction(false, (tx) -> {
-                AuthLog log = AuthFactory.eINSTANCE.createAuthLog();
+                OAuthLog log = AuthFactory.eINSTANCE.createOAuthLog();
                 log.setAction(action);
                 log.setObjectClass(objectClass);
                 log.setObjectName(objectName);
-                //((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
                 log.setDateTime(new Date());
+                //Authorized user
                 if (SecurityContextHolder.getContext().getAuthentication() != null) {
                     log.setNrUser(nrUser != null ? nrUser : ((CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
                     log.setIpAddress(((WebAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails()).getRemoteAddress());
+                //Before login,
                 } else if (RequestContextHolder.getRequestAttributes() != null) {
-                    log.setNrUser(nrUser != null ? nrUser : "system");
+                    log.setNrUser(nrUser);
                     log.setIpAddress(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr());
+                //system actions
+                } else {
+                    log.setNrUser("system");
                 }
                 store.createEObject(log);
                 store.commit("log entry created");
