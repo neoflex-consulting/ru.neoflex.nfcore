@@ -900,7 +900,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         eClass: firstEObject.eClass.eURI()
                     },
                     column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent'
-                        && firstEObject.eURI() !== targetObject.dataset.$ref ? [] : targetObject.column
+                        && firstEObject.eURI() !== targetObject.dataset?.$ref ? [] : targetObject.column
                 })
             }
         }
