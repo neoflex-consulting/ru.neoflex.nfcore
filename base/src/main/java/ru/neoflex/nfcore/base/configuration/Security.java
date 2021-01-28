@@ -83,6 +83,9 @@ public class Security extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .addLogoutHandler((request, response, auth) -> {
+                    Context.getCurrent().getAuthorization().log("logout");
+                })
                 .deleteCookies("JSESSIONID")
                 .clearAuthentication(true).invalidateHttpSession(true)
                 .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
