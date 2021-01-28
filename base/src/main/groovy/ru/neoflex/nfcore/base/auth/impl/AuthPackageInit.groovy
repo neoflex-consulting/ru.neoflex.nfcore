@@ -4,6 +4,7 @@ package ru.neoflex.nfcore.base.auth.impl
 import org.eclipse.emf.ecore.resource.Resource
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
+import ru.neoflex.nfcore.base.auth.OAuthLog
 import ru.neoflex.nfcore.base.auth.AuthPackage
 import ru.neoflex.nfcore.base.auth.Role
 import ru.neoflex.nfcore.base.auth.User
@@ -33,6 +34,13 @@ class AuthPackageInit {
                 if (resource.contents.count {eObject->eObject instanceof Role || eObject instanceof User} > 0) {
                     Context.current.authorization.clearRolesCache()
                 }
+                if (resource.contents.count {eObject-> !(eObject instanceof OAuthLog)} > 0) {
+                    if (resource.contents[0].hasProperty("name")) {
+                        Context.current.authorization.log(oldResource.URI == resource.URI ? "modify eObject" : "create eObject", resource.contents[0].eClass().getName(), resource.contents[0].getName(), resource.URI.segments().toString())
+                    } else {
+                        Context.current.authorization.log(oldResource.URI == resource.URI ? "modify eObject" : "create eObject", resource.contents[0].eClass().getName(), "", resource.URI.segments().toString())
+                    }
+                }
             }
         })
         Context.current.store.registerBeforeDelete(new Consumer<Resource>() {
@@ -40,6 +48,13 @@ class AuthPackageInit {
             void accept(Resource resource) {
                 if (resource.contents.count {eObject->eObject instanceof Role} > 0) {
                     Context.current.authorization.clearRolesCache()
+                }
+                if (resource.contents.count {eObject-> !(eObject instanceof OAuthLog)} > 0) {
+                    if (resource.contents[0].hasProperty("name")) {
+                        Context.current.authorization.log("delete eObject", resource.contents[0].eClass().getName(), resource.contents[0].getName(), resource.URI.segments().toString())
+                    } else {
+                        Context.current.authorization.log("delete eObject", resource.contents[0].eClass().getName(), null, resource.URI.segments().toString())
+                    }
                 }
             }
         })

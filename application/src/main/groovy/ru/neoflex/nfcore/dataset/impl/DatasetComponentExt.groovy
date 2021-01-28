@@ -956,6 +956,10 @@ class DatasetComponentExt extends DatasetComponentImpl {
         def currentDb = ODatabaseRecordThreadLocal.instance().getIfDefined();
         def currentDbNew = ODatabaseRecordThreadLocal.instance().getIfDefined();
 
+        def resource = DocFinder.create(Context.current.store, DatasetPackage.Literals.DATASET_COMPONENT, [name: this.name])
+                .execute().resourceSet
+
+        Context.getCurrent().getAuthorization().log(queryType.toString().toLowerCase(), this.eClass().getName(), this.getName(), resource.resources[0].URI.segments().toString())
         logger.info("execute${queryType}", "execute${queryType} parameters = " + parameters)
         String query;
         def jdbcDataset = this.dataset as JdbcDataset

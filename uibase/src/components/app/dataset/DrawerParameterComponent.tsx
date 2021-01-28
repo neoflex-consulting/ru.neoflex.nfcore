@@ -12,6 +12,7 @@ import arrayMove from "array-move";
 import {EObject} from "ecore";
 
 export interface ParameterDrawerProps {
+    rowData?: {[key: string]: unknown}[];
     popUpContainerId: String,
     parametersArray?: Array<IServerQueryParam>;
     columnDefs?:  Array<any>;
@@ -22,6 +23,7 @@ export interface ParameterDrawerProps {
 }
 
 export interface DrawerState {
+    rowData?: {[key: string]: unknown}[];
     parametersArray: IServerQueryParam[] | undefined;
     backgroundColorVisible?: boolean;
     textColorVisible?: boolean;

@@ -15,6 +15,7 @@ import ru.neoflex.nfcore.base.types.Password
 import org.eclipse.emf.ecore.util.EcoreUtil
 
 annotation "ru.neoflex.nfcore" as NFCore
+annotation "http://orientdb.com/meta" as orientdb
 
 @NFCore(documentation="Данные о создании и изменении объекта")
 class Audit {
@@ -198,4 +199,26 @@ class EditHistory {
     String newRev
         @NFCore(documentation="Данные о создании и изменении объекта", disabled="true")
     contains Audit audit
+}
+
+@NFCore(internal="true", documentation="Лог событий системы")
+@orientdb(oClassName="OAuthLog")
+class OAuthLog {
+        @NFCore(documentation="Действие в систем")
+    String action
+        @NFCore(documentation="Класс объекта")
+    String objectClass
+        @NFCore(documentation="Название объекта")
+    String objectName
+        @NFCore(documentation="Id объекта")
+    String objectId
+        @NFCore(documentation="Пользователь системы")
+    String nrUser
+        @NFCore(documentation="Ip адресс устройства пользователя")
+    String ipAddress
+        @NFCore(documentation="Детальное сообщение")
+    String message
+        @NFCore(documentation="Дата и время события")
+        @orientdb(indexType="NOTUNIQUE")
+    Date dateTime
 }
