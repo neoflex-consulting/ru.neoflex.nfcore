@@ -504,6 +504,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const isExpandable = getFieldAnnotationByKey(feature.get('eAnnotations'), 'expandable') === 'true';
                 const syntax = getFieldAnnotationByKey(feature.get('eAnnotations'), 'syntax');
                 const resourceEditorName = this.props.t(getFieldAnnotationByKey(feature.get('eAnnotations'), 'resourceEditorName'));
+                const isNeoIconSelect = getFieldAnnotationByKey(feature.get('eAnnotations'), 'neoIconSelect') === 'true';
                 const props = {
                     value: targetObject[feature.get('name')],
                     targetObject: targetObject,
@@ -519,7 +520,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     onBrowse: this.onBrowse,
                     mainEObject: mainEObject,
                     edit: this.state.edit && !isDisabled,
-                    showIcon: feature.get('name') === "iconCode",
+                    showIcon: isNeoIconSelect,
                     syntax
                 };
                 let value = FormComponentMapper.getComponent(props);

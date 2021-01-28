@@ -168,7 +168,7 @@ class Column extends ViewContainer {
 
 @NFCore(documentation="Иконка из пакета neo-icon")
 class NeoIcon extends Icon {
-        @NFCore(documentation="Код иконки из пакета neo-icon")
+        @NFCore(documentation="Код иконки из пакета neo-icon", neoIconSelect="true")
 	NeoIconCodes iconCode
 }
 
@@ -351,8 +351,14 @@ class Checkbox extends ViewElement, GridComponent, ValueItem {
 
 @NFCore(documentation="Кнопка")
 class Button extends ViewElement, GridComponent {
-        @NFCore(documentation="Ярлык. Отображается внутри компоненты")
+        @NFCore(documentation="Текст отображаемый на кнопке")
     String label
+        @NFCore(documentation="Тип кнопки")
+    ButtonType buttonType
+        @NFCore(documentation="Размер кнопки")
+    ButtonSize buttonSize
+        @NFCore(documentation="Код иконки из пакета neo-icon. Иконка отображается до текста", neoIconSelect="true")
+	NeoIconCodes iconCode
 }
 
 @NFCore(documentation="Стили")
@@ -573,6 +579,7 @@ enum TypographyType {
 
 @NFCore(documentation="Код иконки из пакета neo-icon")
 enum NeoIconCodes {
+    none,
     notification,
     notificationOff,
     question,
@@ -666,4 +673,18 @@ enum NeoIconCodes {
 enum ValueType {
     staticValue,
     dataset
+}
+
+enum ButtonType {
+    primary
+    disabled
+    secondary
+    link
+    ghost
+}
+
+enum ButtonSize {
+    normal
+    medium
+    large
 }
