@@ -273,6 +273,11 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
+                .sort(function(a : Ecore.EObject, b : Ecore.EObject) {
+                    if(a.get('name').toLowerCase() < b.get('name').toLowerCase()) return -1;
+                    if(a.get('name').toLowerCase() > b.get('name').toLowerCase()) return 1;
+                    return 0;
+                })
                 .map((obj: Ecore.EObject) =>
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
                     <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={obj.get('name')}/>}{obj.get('name')}</div>
