@@ -146,8 +146,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 
     componentDidMount(): void {
-        this.getAllEnumValues("dataset","CalculatorFunction", "calculatorFunction")
-        /*this.getALLFunctions(this.props.currentDatasetComponent?.eResource());*/
+        this.getALLFunctions(this.props.currentDatasetComponent?.eResource());
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
@@ -170,16 +169,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
         }
     }
 
-    getAllEnumValues(ePackageName:string, enumName:string, paramName:string) {
-        API.instance().findEnum(    ePackageName, enumName)
-            .then((result: EObject[]) => {
-                const paramValue = result.map( (o: any) => {return o});
-                this.setState<never>({
-                    [paramName]: paramValue
-                })
-            })
-    };
-    /*if (result.includes(o._id.substr(21, o._id.size)))*/
+
     getALLFunctions(resource_: Ecore.Resource){
         const resource: Ecore.Resource = resource_;
         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;

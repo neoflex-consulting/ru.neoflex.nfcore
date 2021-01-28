@@ -1,7 +1,6 @@
 package ru.neoflex.nfcore.base.services;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +8,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
-import ru.neoflex.nfcore.base.auth.AuthPackage;
-import ru.neoflex.nfcore.base.auth.GrantType;
-import ru.neoflex.nfcore.base.auth.Role;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import ru.neoflex.nfcore.base.auth.*;
+import ru.neoflex.nfcore.base.components.CurrentUser;
 import ru.neoflex.nfcore.base.util.DocFinder;
 
 import java.util.*;
@@ -120,5 +121,47 @@ public class Authorization {
             return GrantType.READ;
         }
         return GrantType.DENIED;
+    }
+
+    public void log(String action) {
+        log(action, null, null, null, null, null);
+    }
+
+    public void log(String action, String nrUser) {
+        log(action, null, null, null, nrUser, null);
+    }
+
+    public void log(String action, String objectClass, String objectName, String objectId) {
+        log(action, objectClass, objectName, objectId, null, null);
+    }
+
+    public void log(String action, String objectClass, String objectName, String objectId, String nrUser, String message) throws RuntimeException {
+        try {
+            store.inTransaction(false, (tx) -> {
+                OAuthLog log = AuthFactory.eINSTANCE.createOAuthLog();
+                log.setAction(action);
+                log.setObjectClass(objectClass);
+                log.setObjectName(objectName);
+                log.setObjectId(objectId);
+                log.setMessage(message);
+                log.setDateTime(new Date());
+                //Authorized user
+                if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                    log.setNrUser(nrUser != null ? nrUser : ((CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
+                    log.setIpAddress(((WebAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails()).getRemoteAddress());
+                //Before login,
+                } else if (RequestContextHolder.getRequestAttributes() != null) {
+                    log.setNrUser(nrUser);
+                    log.setIpAddress(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr());
+                //system actions
+                } else {
+                    log.setNrUser("system");
+                }
+                store.createEObject(log);
+                store.commit("log entry created");
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

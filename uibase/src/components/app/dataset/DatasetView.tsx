@@ -346,6 +346,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('editable', this.state.isReadOnly ? false : c.get('editable'));
                 rowData.set('checkboxSelection', c.get('checkboxSelection'));
                 rowData.set('resizable', c.get('resizable'));
+                rowData.set('width', c.get('width')||200);
                 rowData.set('isPrimaryKey', c.get('isPrimaryKey'));
                 rowData.set('type', type);
                 rowData.set('component', !isEditGridComponent ? c.get('component') : undefined);
@@ -1631,6 +1632,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
                                 componentType={paramType.highlights}
+                                rowData={this.state.rowData}
                             />
                     }
                 </NeoDrawer>

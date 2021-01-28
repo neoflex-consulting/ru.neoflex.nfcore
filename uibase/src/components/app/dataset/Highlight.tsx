@@ -8,13 +8,25 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {ColorPicker, SketchColorPicker} from "./ColorPicker";
-import {NeoButton, NeoCol, NeoHint, NeoInput, NeoRow, NeoSelect, NeoSwitch, NeoTypography, NeoModal} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoCol,
+    NeoHint,
+    NeoInput,
+    NeoRow,
+    NeoSelect,
+    NeoSwitch,
+    NeoTypography,
+    NeoModal,
+    NeoOption
+} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props extends ParameterDrawerProps {
     allOperations?: Array<EObject>;
     allHighlightType?: Array<EObject>;
 }
+
 
 const SortableList = SortableContainer(({items}:any) => {
     return (
@@ -27,6 +39,7 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
+    let arrFilter : any[] = []
     return <div className="SortableItemHighlight">
         <NeoRow style={{height:'100%'}}>
             <NeoCol span={1} style={{alignItems:'flex-start'}}>
@@ -206,6 +219,51 @@ const SortableItem = SortableElement(({value}: any) => {
                                     message: ' '
                                 }]
                             })(
+                            ((value.operation === "EqualTo" || value.operation === "NotEqual") && value.datasetColumn !== undefined && value.rowData !== undefined) ?
+                                <NeoSelect
+                                    className={"selectWithSearch"}
+                                    getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
+                                    allowClear={true}
+                                    placeholder={   value.t('value')}
+                                    showSearch={true}
+                                    width={'208px'}
+                                    style={{ marginLeft: '5px' }}
+                                    disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty' || value.highlightType === 'Column'}
+                                    onChange={(e: any) => {
+                                        const event = e ? e : JSON.stringify({
+                                            index: value.index,
+                                            columnName: 'value',
+                                            value: undefined
+                                        })
+                                        value.handleChange(event, true)
+                                    }}
+                                >
+                                    {
+                                        value.rowData!.filter((item : any) => {
+                                            if (!arrFilter.includes(item[value.datasetColumn].valueOf())){
+                                                arrFilter.push(item[value.datasetColumn].valueOf())
+                                                return item;
+                                            }
+                                            return null
+                                        })
+                                            .map((o: any) =>
+                                                <NeoOption
+                                                    key={JSON.stringify({
+                                                        index: value.index,
+                                                        columnName: 'value',
+                                                        value: o[value.datasetColumn].valueOf()
+                                                    })}
+                                                    value={JSON.stringify({
+                                                        index: value.index,
+                                                        columnName: 'value',
+                                                        value: o[value.datasetColumn].valueOf()
+                                                    })}
+                                                >
+                                                    {o[value.datasetColumn].valueOf()}
+                                                </NeoOption>)
+                                    }
+                                </NeoSelect>
+                            :
                             <NeoInput
                                 placeholder={value.t('value')}
                                 disabled={value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty' || value.highlightType === 'Column'}
@@ -351,12 +409,13 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     constructor(props: any) {
         super(props);
         this.state = {
+            rowData: this.props.rowData,
             parametersArray: this.props.parametersArray,
             backgroundColorVisible: false,
             textColorVisible: false,
             colorIndex: undefined,
             color: undefined,
-            solidPicker: true
+            solidPicker: true,
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
@@ -491,7 +550,8 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                                     textColorVisible: this.state.textColorVisible,
                                     handleColorPicker: this.handleColorPicker.bind(this),
                                     solidPicker: this.state.solidPicker,
-                                    popUpContainerId: this.props.popUpContainerId
+                                    popUpContainerId: this.props.popUpContainerId,
+                                    rowData: this.state.rowData
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
                 </Form.Item>

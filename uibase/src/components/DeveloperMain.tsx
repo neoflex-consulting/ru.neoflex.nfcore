@@ -8,6 +8,7 @@ import {API} from "../modules/api";
 import Ecore from "ecore";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
+import _ from "lodash";
 
 interface Props {
     history: any
@@ -147,26 +148,32 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     };
 
     getLogEntries = () => {
-        this.setState({logEntries:[
-                {logDateTime:moment('2020-04-01 10:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:40'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:50'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-02 12:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-02 14:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-03 23:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:40'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:50'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-02 12:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-02 14:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-03 23:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:40'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-01 10:20:50'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-02 12:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-02 14:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-                {logDateTime:moment('2020-04-03 23:20:30'), author:"Иванов И.И.", change:"Обязательная отчётность"},
-            ]})
+        API.instance().findClass("auth", "EditHistory").then(eClass=>{
+            API.instance().findByClass(eClass,{contents: {eClass: eClass.eURI()}}).then(result=>{
+                let logEntries: {
+                    logDateTime: Moment,
+                    author: string,
+                    change: string
+                }[] = [];
+                result.forEach(r => {
+                    logEntries.push({
+                        logDateTime:moment(r.eContents()[0].get('audit').get('created')),
+                        author: r.eContents()[0].get('audit').get('createdBy'),
+                        change: 'created: '+ r.eContents()[0].get('EClass') + '.' + r.eContents()[0].get('objectName')
+                    });
+                    if (r.eContents()[0].get('audit').get('modified')) {
+                        logEntries.push({
+                            logDateTime:moment(r.eContents()[0].get('audit').get('modified')),
+                            author: r.eContents()[0].get('audit').get('modifiedBy'),
+                            change: 'modified: '+ r.eContents()[0].get('EClass') + '.' + r.eContents()[0].get('objectName')
+                        });
+                    }
+                });
+                this.setState({logEntries: _.sortBy(logEntries, function (item) {
+                        return item.logDateTime;
+                    }).reverse()});
+            })
+        })
     };
 
     componentDidMount(): void {
