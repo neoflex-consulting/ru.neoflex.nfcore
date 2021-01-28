@@ -1,6 +1,9 @@
 version: "3.7"
-# docker-compose up -d --build
-# docker-compose down
+# docker-compose -f runtime/nrstudio/docker-compose.yml up -d --build
+# docker-compose -f runtime/nrstudio/docker-compose.yml stop
+# docker-compose -f runtime/nrstudio/docker-compose.yml start
+# !!!do not down without stop, this may lead to db crash!!!
+# docker-compose -f runtime/nrstudio/docker-compose.yml down
 # to delete all databases
 # docker run -it --privileged --pid=host debian nsenter -t 1 -m -u -i sh
 #  >rm -r /var/lib/docker/volumes/nrstudio_orientdb_data/_data/databases/
