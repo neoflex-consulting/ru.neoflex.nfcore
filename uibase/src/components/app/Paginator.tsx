@@ -55,8 +55,8 @@ class Paginator extends React.Component<Props, any> {
 
     paginationSetPageSize = (p:any, pageSize : any) =>{
         if(isNaN(pageSize)){
-            this.props.onPageSizeChange(this.props.totalNumberOfPage*10);
-            this.setState({ paginationPageSize: this.props.totalNumberOfPage*10});
+            this.props.onPageSizeChange(this.props.totalNumberOfRows);
+            this.setState({ paginationPageSize: this.props.totalNumberOfRows});
         }
         else {
             this.props.onPageSizeChange(pageSize);
