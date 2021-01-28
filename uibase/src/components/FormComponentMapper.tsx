@@ -10,6 +10,8 @@ import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
+import {neoIconMap} from "../utils/consts";
+import {SvgName} from "neo-icon/lib/icon/icon";
 
 interface EditableSQLAreaProps {
     value: string,
@@ -275,7 +277,7 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
                 .map((obj: Ecore.EObject) =>
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
-                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={obj.get('name')}/>}{obj.get('name')}</div>
+                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
                 </Select.Option>)}
         </Select>
     )
