@@ -4,7 +4,6 @@ import * as React from 'react';
 import {Col, Collapse, ConfigProvider, Drawer, Form, InputNumber, Row, Select} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
-import MasterdataEditor from './components/app/masterdata (not used)/MasterdataEditor';
 import {API} from './modules/api';
 import {WithTranslation} from 'react-i18next';
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
@@ -50,7 +49,6 @@ export enum AntdFactoryClasses {
     Calendar='ru.neoflex.nfcore.application#//Calendar',
     GroovyCommand='ru.neoflex.nfcore.application#//GroovyCommand',
     ValueHolder='ru.neoflex.nfcore.application#//ValueHolder',
-    MasterdataView='ru.neoflex.nfcore.application#//MasterdataView',
     EventHandler='ru.neoflex.nfcore.application#//EventHandler',
     Drawer='ru.neoflex.nfcore.application#//Drawer',
     Href='ru.neoflex.nfcore.application#//Href',
@@ -1812,21 +1810,6 @@ class Calendar_ extends ViewContainer {
     }
 }
 
-class MasterdataView_ extends ViewContainer {
-    render = () => {
-        const hidden = this.viewObject.get('hidden') || false;
-        const disabled = this.viewObject.get('disabled') || false;
-        const grantType = this.viewObject.get('grantType');
-        const props = {
-            ...this.props,
-            disabled: disabled,
-            hidden: hidden || this.props.isParentHidden,
-            grantType: grantType,
-        };
-        return <MasterdataEditor {...props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
-    }
-}
-
 class AntdFactory implements ViewFactory {
     name = 'antd';
     components = new Map<string, typeof Component>();
@@ -1846,7 +1829,6 @@ class AntdFactory implements ViewFactory {
         this.components.set(AntdFactoryClasses.Calendar, Calendar_);
         this.components.set(AntdFactoryClasses.GroovyCommand, GroovyCommand_);
         this.components.set(AntdFactoryClasses.ValueHolder, ValueHolder_);
-        this.components.set(AntdFactoryClasses.MasterdataView, MasterdataView_);
         this.components.set(AntdFactoryClasses.EventHandler, EventHandler_);
         this.components.set(AntdFactoryClasses.Drawer, Drawer_);
         this.components.set(AntdFactoryClasses.Href, Href_);
