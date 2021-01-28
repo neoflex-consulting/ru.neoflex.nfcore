@@ -15,3 +15,5 @@ parent.iml
 uireport/package-lock.json
 /emf-git/src/test/java-gen/
 /emf-orientdb/src/test/java-gen/
+/runtime/nrstudio/gitdb/
+/runtime/nrstudio/logs/
