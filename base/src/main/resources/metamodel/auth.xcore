@@ -216,6 +216,8 @@ class OAuthLog {
     String nrUser
         @NFCore(documentation="Ip адресс устройства пользователя")
     String ipAddress
+        @NFCore(documentation="Детальное сообщение")
+    String message
         @NFCore(documentation="Дата и время события")
         @orientdb(indexType="NOTUNIQUE")
     Date dateTime
