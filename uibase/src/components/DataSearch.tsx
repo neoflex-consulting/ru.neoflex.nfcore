@@ -59,23 +59,13 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                     API.instance().find(JSON.parse(values.json_field)).then(results => {
                         this.props.onSearch(results.resources)
                     })
-                } else if (selectedClassObject && values.regular_expression) {
+                } else if (selectedClassObject) {
                     (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
                         .then((resources) => {
                             this.props.onSearch(resources)
                         }))
-                } else if (selectedClassObject) {
-                    (API.instance().findByKindAndName(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
-                        .then((resources) => {
-                            this.props.onSearch(resources)
-                        }))
-                } else if (values.regular_expression) {
-                    (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
-                        .then((resources) => {
-                            this.props.onSearch(resources)
-                        }))
                 } else {
-                    (API.instance().findByTagsAndName( values.tags ? values.tags.join(",") : undefined, values.name,1)
+                    (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
                         .then((resources) => {
                             this.props.onSearch(resources)
                         }))
@@ -204,14 +194,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                                         message: 'Please enter name'
                                                     }]
                                                 })(
-                                                    <NeoInput width={'421px'} />
-                                                )}
-                                            </FormItem>
-                                            <FormItem style={{display:'inline-block', marginTop:'10px'}}>
-                                                {getFieldDecorator('regular_expression', {
-                                                    valuePropName: 'checked'
-                                                })(
-                                                    <NeoInput type={'checkbox'} style={{ marginLeft: '10px', marginTop:'25px' }}>{t("regularexpression")}</NeoInput>
+                                                    <NeoInput width={'670px'} />
                                                 )}
                                             </FormItem>
                                             <FormItem>
