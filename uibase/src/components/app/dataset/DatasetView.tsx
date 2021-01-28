@@ -1631,6 +1631,7 @@ class DatasetView extends React.Component<any, State> {
                                 saveChanges={this.changeDatasetViewState}
                                 isVisible={this.state.filtersMenuVisible}
                                 componentType={paramType.highlights}
+                                rowData={this.state.rowData}
                             />
                     }
                 </NeoDrawer>

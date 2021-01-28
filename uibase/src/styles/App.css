@@ -1892,4 +1892,8 @@ padding: 3px 24px;
   background-color: #FFF8E0 !important
 }
 
+.selectWithSearch .has-error .ant-calendar-picker-icon::after, .has-error .ant-time-picker-icon::after, .has-error .ant-picker-icon::after, .has-error .ant-select-arrow, .has-error .ant-cascader-picker-arrow {
+  opacity: 0;
+}
+
 
