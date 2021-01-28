@@ -116,12 +116,6 @@ abstract class ViewContainer extends ViewElement {
 abstract class Icon extends ViewElement {	
 }
 
-@NFCore(documentation="Таблица справочников")
-class MasterdataView extends ViewElement {
-        @NFCore(documentation="Тип сущности из мастерданных")
-    refers EntityType entityType
-}
-
 @NFCore(documentation="Календарь, как элемент визуального интерфейса")
 class Calendar extends ViewElement {
         @NFCore(documentation="Массив уведомлений, который отображаются в календаре")
