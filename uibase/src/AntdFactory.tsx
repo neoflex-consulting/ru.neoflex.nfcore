@@ -1527,8 +1527,9 @@ class EventHandler_ extends Component {
                     }
                     if (el.get('action') === actionType.redirect) {
                         const redirectTo = el.get('redirectTo') ? el.get('redirectTo').get('name') : null;
+                        const useParentReferenceTree = el.get('redirectTo') ? el.get('redirectTo').get('useParentReferenceTree') : false;
                         const params = getNamedParams(el.get('redirectParams'), this.props.context.contextItemValues);
-                        this.props.context.changeURL(redirectTo, true, undefined, params);
+                        this.props.context.changeURL(redirectTo, useParentReferenceTree, undefined, params);
                         isHandled = true;
                     }
                     if (el.get('action') === actionType.backToLastPage) {
