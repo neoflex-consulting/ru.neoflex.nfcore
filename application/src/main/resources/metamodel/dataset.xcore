@@ -327,7 +327,7 @@ class Highlight {
 
     @NFCore(documentation="Условные выражения для отображения компоненты")
 abstract class ServerSideCondition {
-        @NFCore(documentation="Тип вычисляемого выражения")
+        @NFCore(documentation="Тип вычисляемого выражения, для отображения столбца")
     ConditionType conditionType
         @NFCore(documentation="Ссылка на датасет", renderConditions="{'conditionType':['RowsReturned','NoRowReturned']}")
     refers Dataset serverSideConditionDataset
