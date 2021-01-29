@@ -13,6 +13,8 @@ import {NeoButton, NeoHint, NeoInput, NeoOption, NeoSelect} from "neo-design/lib
 
 const FormItem = Form.Item;
 
+const [form] = Form.useForm();
+
 interface Props {
     onSearch: (resources: Ecore.Resource[]) => void;
     specialEClass?: Ecore.EClass | undefined;
@@ -141,7 +143,12 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                     translate={ t }
                     setModalVisible={this.setModalVisible}
                 />}
-                        <Form onSubmit={this.handleSubmit} className={'datasearch'} style={{width:'100%', padding:'10px 36px'}}>
+                        <Form
+                            form={form}
+                            onSubmit={this.handleSubmit}
+                            className={'datasearch'}
+                            style={{width:'100%', padding:'10px 36px'}}
+                        >
                             <Button
                                 title={t("createitem")}
                                 icon="plus"
@@ -291,13 +298,11 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                     </TabPane>
                                 </Tabs>
                             )}
-
                         </Form>
-
             </React.Fragment>
         );
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(DataSearch))
+export default withTranslation()(DataSearch);
 

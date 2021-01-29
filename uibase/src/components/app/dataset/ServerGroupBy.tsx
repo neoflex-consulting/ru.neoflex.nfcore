@@ -2,7 +2,6 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Select} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
@@ -16,6 +15,8 @@ interface Props extends ParameterDrawerProps {
     handleDrawerVisability?: any;
 }
 
+const [form] = Form.useForm();
+
 const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
@@ -25,8 +26,6 @@ const SortableList = SortableContainer(({items}:any) => {
         </ul>
     );
 });
-
-
 
 const SortableItem = SortableElement(({value}: any) => {
     return <div>
@@ -193,14 +192,6 @@ const SortableItem = SortableElement(({value}: any) => {
                         />
                     )}
                 </Form.Item>
-
-
-                {/*<Input placeholder={value.t('label')}*/}
-                {/*       onChange={(e: any) => {*/}
-                {/*           const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});*/}
-                {/*           value.handleChange(event)*/}
-                {/*       }}*/}
-                {/*/>*/}
             </NeoCol>
             <NeoCol span={1}>
             </NeoCol>
@@ -226,7 +217,10 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '40px' }}>
+            <Form
+                form={form}
+                style={{ marginTop: '40px' }}
+            >
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{marginBottom:'10px', marginTop:'20px', color:'#333333'}}>{t('select operation')}</NeoTypography>
@@ -268,4 +262,4 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerGroupBy))
+export default withTranslation()(ServerGroupBy);

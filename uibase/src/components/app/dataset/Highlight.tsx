@@ -2,7 +2,6 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Radio} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
@@ -27,6 +26,7 @@ interface Props extends ParameterDrawerProps {
     allHighlightType?: Array<EObject>;
 }
 
+const [form] = Form.useForm();
 
 const SortableList = SortableContainer(({items}:any) => {
     return (
@@ -303,7 +303,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     visible={value.backgroundColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('background', value.index)}
                     closable={false}
-                    footer={[<Form onSubmit={value.handleSubmit}>
+                    footer={[<Form form={form} onSubmit={value.handleSubmit}>
                         <NeoButton
                             id={'runQueryButton'}
                             onClick={() => {
@@ -352,7 +352,7 @@ const SortableItem = SortableElement(({value}: any) => {
                     visible={value.textColorVisible && value.colorIndex === value.index}
                     onCancel={() => value.handleColorMenu('text', value.index)}
                     closable={false}
-                    footer={[<Form onSubmit={value.handleSubmit}>
+                    footer={[<Form form={form} onSubmit={value.handleSubmit}>
                         <NeoButton
                             id={'runQueryButton'}
                             onClick={() => value.handleChange(JSON.stringify({
@@ -508,7 +508,10 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }}>
+            <Form
+                form={form}
+                style={{ marginTop: '25px' }}
+            >
                 <Form.Item style={{ marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('highlight')}</NeoTypography>
@@ -572,4 +575,4 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(Highlight))
+export default withTranslation()(Highlight);

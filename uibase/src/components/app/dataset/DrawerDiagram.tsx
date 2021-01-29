@@ -1,7 +1,6 @@
 import * as React from "react";
 import {Form, Select} from "antd";
 import {withTranslation, WithTranslation} from 'react-i18next';
-import {FormComponentProps} from "antd/lib/form";
 import {EObject} from "ecore";
 import {IDiagram} from "./DatasetView";
 import {diagramAnchorMap} from "../../../utils/consts";
@@ -10,6 +9,8 @@ import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
 const diagramAnchorMap_: any = diagramAnchorMap;
+
+const [form] = Form.useForm();
 
 interface Props {
     id?: number,
@@ -33,7 +34,7 @@ interface State {
     LegenedPosition?: string,
 }
 
-class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
+class DrawerDiagram extends React.Component<Props & WithTranslation & any, State> {
     constructor(props: any) {
         super(props);
         this.state = {
@@ -200,7 +201,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
 
     render() {
         return (
-            <Form>
+            <Form form={form}>
                 <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px'}}>
                 <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: 500, fontSize: "16px", lineHeight: "19px", color: "#333333", marginTop: "10px"}}>{this.props.t('choose diagram type')}</span>
                 </div>
@@ -289,4 +290,4 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(DrawerDiagram))
+export default withTranslation()(DrawerDiagram);

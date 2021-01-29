@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {Form, Typography} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
@@ -13,14 +12,13 @@ import arrayMove from "array-move";
 
 const { Paragraph } = Typography;
 
+const [form] = Form.useForm();
+
 interface Props extends ParameterDrawerProps {
     componentType?: paramType;
     handleDrawerVisability?:any;
     datasetComponentVersion?: string;
 }
-
-
-
 
 function trimHeader(header: string) {
     return header.length > 60 ? header.substring(0,60) + "..." : header
@@ -99,7 +97,10 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
         const {parametersArray} = this.state;
         return (
                     <div>
-            <Form style={{ marginTop: '15px' }}>
+            <Form
+                form={form}
+                style={{ marginTop: '15px' }}
+            >
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
                         <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
@@ -161,4 +162,4 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(HiddenColumn))
+export default withTranslation()(HiddenColumn);

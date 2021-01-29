@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {Form, List} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {MouseEvent} from "react";
 import {API} from "../../../modules/api";
@@ -17,6 +16,8 @@ const selectTypeKey: string = "_selectTypeKey";
 const selectMaskKey: string = "_selectMaskKey";
 const inputFieldKey: string = "_inputFieldKey";
 const inputSelectKey: string = "_inputSelectKey";
+
+const [form] = Form.useForm();
 
 interface Props extends ParameterDrawerProps {
     onChangeColumnDefs?: (columnDefs: any, rowData: any, datasetComponentName: string) => void;
@@ -305,7 +306,10 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     render() {
     return (
         <div id={"selectsInCalculator"}>
-            <Form style={{ marginTop: '24px' }}>
+            <Form
+                form={form}
+                style={{ marginTop: '24px' }}
+            >
                 <Form.Item style={{marginTop: '-28px', marginBottom:'15px', lineHeight:'19px'}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>
                             {this.t('calculatableExpressions')}
@@ -507,4 +511,4 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(Calculator))
+export default withTranslation()(Calculator);

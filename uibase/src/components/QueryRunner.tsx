@@ -10,18 +10,17 @@ import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import {NeoIcon} from "neo-icon/lib";
 
-export interface Props {
-}
-
 interface State {
     json: string;
     result: string;
     splitterPosition: number;
 }
 
+const [form] = Form.useForm();
+
 class QueryRunner extends React.Component<any, State> {
 
-    private splitterRef: React.RefObject<any>
+    private splitterRef: React.RefObject<any>;
     
     constructor(props: any) {
         super(props);
@@ -40,7 +39,7 @@ class QueryRunner extends React.Component<any, State> {
             const objects = resources.map(r=>
                 Object.assign(r.to(), {$ref: `${r.get('uri')}?rev=${r.rev}`})
             );
-            this.resizeEditors()
+            this.resizeEditors();
             this.setState({result: JSON.stringify({objects, executionStats, bookmark, warning}, null, 4)});
         })
     };
@@ -63,14 +62,14 @@ class QueryRunner extends React.Component<any, State> {
     };
 
     render() {
-        const {t} = this.props as Props & WithTranslation;
+        const {t} = this.props as any & WithTranslation;
         return (
             <div style={{display: 'flex', flexFlow: 'column', height: '100%'}}>
                 <Helmet>
                     <title>{this.props.t('query')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
-                <Form layout={"inline"}>
+                <Form layout={"inline"} form={form}>
                     <Form.Item wrapperCol={{span: 2, push: 14}}>
                         <Tooltip placement="top" title={t('run')}>
                             <Button id="run" shape="circle" style={{border: 0}} onClick={this.run}>

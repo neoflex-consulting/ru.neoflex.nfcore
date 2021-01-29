@@ -2,7 +2,6 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import { Form } from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
@@ -13,6 +12,8 @@ interface Props extends ParameterDrawerProps{
     allSorts?: Array<EObject>;
     handleDrawerVisability?:any;
 }
+
+const [form] = Form.useForm();
 
 const SortableList = SortableContainer(({items}:any) => {
     return (
@@ -175,7 +176,10 @@ class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }}>
+            <Form
+                form={form}
+                style={{ marginTop: '25px' }}
+            >
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('sorting')}</NeoTypography>
@@ -248,4 +252,4 @@ class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerSort))
+export default withTranslation()(ServerSort);

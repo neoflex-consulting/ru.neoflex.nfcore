@@ -4,7 +4,6 @@ import Ecore from "ecore";
 import {API} from "../modules/api";
 import {Link} from "react-router-dom";
 import forEach from "lodash/forEach"
-import {FormComponentProps} from "antd/lib/form";
 import DataSearch from "./DataSearch";
 import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
@@ -13,7 +12,6 @@ import './../styles/Data.css'
 import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
-
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
@@ -32,10 +30,9 @@ interface State {
     filterMenuVisible:any;
     paginationPageSize?: number;
     currentPage?: number;
-
 }
 
-class SearchGrid extends React.Component<Props & FormComponentProps & WithTranslation, State> {
+class SearchGrid extends React.Component<Props & WithTranslation, State> {
     private refDataSearchRef: any = React.createRef();
     private grid: React.RefObject<any>;
 
@@ -333,4 +330,4 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             );
         }}
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchGrid))
+export default withTranslation()(SearchGrid);

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {WithTranslation} from 'react-i18next';
 import {Button, Col, Form, Row} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
@@ -9,6 +8,8 @@ import '../../../styles/Draggable.css';
 import arrayMove from "array-move";
 import {EObject} from "ecore";
 import {NeoIcon} from "neo-icon/lib";
+
+const [form] = Form.useForm();
 
 export interface ParameterDrawerProps {
     rowData?: {[key: string]: unknown}[];
@@ -33,7 +34,7 @@ export interface DrawerState {
     calculatorFunction?: EObject[];
 }
 
-export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends DrawerState> extends React.Component<ParameterDrawerProps & FormComponentProps & WithTranslation & any, DrawerState> {
+export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends DrawerState> extends React.Component<ParameterDrawerProps & WithTranslation & any, DrawerState> {
     t: any;
     getFieldDecorator: any;
     setFieldsValue: any;
@@ -288,7 +289,11 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
 
     render() {
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+            <Form
+                form={form}
+                style={{ marginTop: '30px' }}
+                onSubmit={this.handleSubmit}
+            >
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
                         <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Сортировка</div>

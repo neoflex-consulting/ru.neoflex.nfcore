@@ -1,6 +1,5 @@
 import * as React from "react";
 import {Form} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {NeoButton, NeoHint, NeoInput, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
@@ -19,7 +18,9 @@ interface State {
     open: boolean;
 }
 
-class SearchFilter extends React.Component<Props & FormComponentProps & WithTranslation, State> {
+const [form] = Form.useForm();
+
+class SearchFilter extends React.Component<Props & WithTranslation, State> {
     state = {
         selectedRowKeys: [],
         searchText: '',
@@ -99,7 +100,7 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
             };
 
             return (
-                <Form style={{ padding: '9px 16px' }} >
+                <Form style={{ padding: '9px 16px' }} form={form}>
                     <NeoInput
                         type={'search'}
                         placeholder={`${t('search')} ${columnsT}`}
@@ -176,4 +177,4 @@ class SearchFilter extends React.Component<Props & FormComponentProps & WithTran
             );
         }}
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchFilter))
+export default withTranslation()(SearchFilter);
