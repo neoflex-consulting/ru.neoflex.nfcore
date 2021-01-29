@@ -201,6 +201,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
                 const mainEObject = resource.eResource().eContents()[0];
                 const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
+                const updatedJSON = findObjectById(nestedJSON, this.state.targetObject?._id);
                 this.setState((state, props) => ({
                     mainEObject: mainEObject,
                     resourceJSON: nestedJSON,
@@ -209,7 +210,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     //If we create a new sibling (without saving), when click on it, information appears in the property table.
                     //But if we click the refresh button, the new created sibling will disappear, but the property table still will
                     //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
-                    targetObject: this.state.targetObject ? this.state.targetObject : { eClass: "" },
+                    targetObject: this.state.targetObject ? updatedJSON : { eClass: "" },
                     tableData: this.state.tableData?.length > 0 ? this.state.tableData : []
                 }));
             })
