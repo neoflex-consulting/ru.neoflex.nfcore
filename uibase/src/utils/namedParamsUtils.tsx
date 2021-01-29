@@ -26,7 +26,11 @@ function getNamedParams(valueItems: EList, contextItemValues: Map<String,IServer
     if (valueItems) {
         valueItems.each((item: EObject) => {
             if (contextItemValues.get(item.get('name')+item._id)) {
-                namedParams.push(contextItemValues.get(item.get('name')+item._id)!)
+                const param = contextItemValues.get(item.get('name')+item._id)
+                namedParams.push({
+                    ...param!,
+                    parameterValue: param?.parameterValue !== undefined && param?.parameterValue !== null && param?.parameterValue !== "" ? param.parameterValue : getUrlParam(params, item.get('name'))!,
+                })
             } else {
                 namedParams.push({
                     parameterName: item.get('name'),
