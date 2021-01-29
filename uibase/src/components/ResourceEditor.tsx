@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Icon, Input, Layout, Menu, Row, Table, Tree} from 'antd';
+import {Button, Col, Input, Layout, Menu, Row, Table, Tree} from 'antd';
 import Ecore, {EObject, Resource} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -258,7 +258,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             eClass={feature.get('eType').eURI()}
                             propertyName={feature.get('name')}
                             targetObject={targetObject}
-                            icon={upperBound === 1 ? <Icon type="line" style={{ color: "#d831ff", fontSize: 12 }} /> : <Icon type="dash" style={{ color: "#d831ff" }} />}
+                            icon={upperBound === 1 ? <NeoIcon icon={"link"} style={{ color: "#d831ff", fontSize: 12 }} /> : <NeoIcon icon={"data-line"} style={{ color: "#d831ff" }} />}
                             title={feature.get('name')}
                         >
                             {targetObject.map((object: { [key: string]: any }, cidx: number) => {
@@ -272,7 +272,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     eClass={object.eClass ? object.eClass : feature.get('eType').eURI()}
                                     propertyName={feature.get('name')}
                                     targetObject={object}
-                                    icon={<Icon type="block" style={{ color: "#88bc51" }} />}
+                                    icon={<NeoIcon icon={"lock"} style={{ color: "#88bc51" }} />}
                                     title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 >
                                     {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
@@ -388,7 +388,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 blockNode
                 showIcon
                 key="mainTree"
-                switcherIcon={<Icon type="down" />}
+                switcherIcon={<NeoIcon icon={"download"} />}
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
                 selectedKeys={this.state.selectedKeys}
@@ -398,7 +398,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         expandedKeys: [...expanded]
                     })}}
             >
-                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<Icon type="cluster" style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={"/"}>
+                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<NeoIcon icon={"clipboard"} style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={"/"}>
                     {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                 </Tree.TreeNode>
             </Tree>
@@ -1217,7 +1217,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     }
                     {
                         (this.state.edit || this.state.mainEObject._id === undefined) && (this.state.isSaving
-                            ? <Icon className="panel-icon" type="loading"/>
+                            ? <NeoIcon icon={"upload"} className="panel-icon"/>
                             : <Button className="panel-button" icon="save" onClick={()=>this.save(false, false)} title={this.props.t("save")}/>)
                     }
                     <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
