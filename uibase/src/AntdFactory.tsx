@@ -4,9 +4,7 @@ import * as React from 'react';
 import {Col, Collapse, ConfigProvider, Drawer, Form, InputNumber, Row, Select} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
-import MasterdataEditor from './components/app/masterdata (not used)/MasterdataEditor';
 import {API} from './modules/api';
-import {WithTranslation} from 'react-i18next';
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
 import Calendar from "./components/app/calendar/Calendar";
@@ -20,7 +18,7 @@ import {
     defaultDateFormat,
     defaultTimestampFormat,
     eventType,
-    grantType,
+    grantType, neoIconMap,
     positionEnum
 } from "./utils/consts";
 import {getUrlParam} from "./utils/urlUtils";
@@ -50,7 +48,6 @@ export enum AntdFactoryClasses {
     Calendar='ru.neoflex.nfcore.application#//Calendar',
     GroovyCommand='ru.neoflex.nfcore.application#//GroovyCommand',
     ValueHolder='ru.neoflex.nfcore.application#//ValueHolder',
-    MasterdataView='ru.neoflex.nfcore.application#//MasterdataView',
     EventHandler='ru.neoflex.nfcore.application#//EventHandler',
     Drawer='ru.neoflex.nfcore.application#//Drawer',
     Href='ru.neoflex.nfcore.application#//Href',
@@ -175,15 +172,15 @@ export async function checkServerSideCondition(conditionType: string, valueItems
         const resArr = JSON.parse(json);
         return (conditionType === "RowsReturned" && resArr.length >= 1) || (conditionType === "NoRowReturned" && resArr.length === 0);
     } else if (conditionType === "JavaScriptExpression") {
-        let condition = true;
+        let condition: boolean;
         const params = getNamedParams(valueItems, context.contextItemValues);
         try {
             // eslint-disable-next-line
             condition = eval(replaceNamedParam(expression, params))
         } catch (e) {
             condition = false;
-            context.notification("EventHandler.condition",
-                "exception while evaluating",
+            context.notification("RdbmsColumn.JavaScriptCondition",
+                "exception while evaluating: " + replaceNamedParam(expression, params),
                 "warning")
         }
         return condition
@@ -471,14 +468,15 @@ export class Button_ extends ViewContainer {
     render = () => {
         const cssClass = createCssClass(this.viewObject);
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const { t } = this.props as WithTranslation;
-        const label = t(this.viewObject.get('label'));
         const componentRenderCondition = getRenderConditionResult.bind(this)("Button.componentRenderCondition");
         return componentRenderCondition ? <div
             hidden={this.state.isHidden || this.props.isParentHidden}
             key={this.viewObject._id}>
             <NeoButton
                 className={cssClass}
+                size={this.viewObject.get('buttonSize')}
+                type={this.viewObject.get('buttonType')}
+                suffixIcon={this.viewObject.get('iconCode') && <NeoIcon icon={neoIconMap[this.viewObject.get('iconCode') || 'none'] as SvgName}/>}
                 onClick={isReadOnly ? ()=>{} : (e) => {
                         if (!this.state.isEnter) {
                             const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
@@ -486,7 +484,7 @@ export class Button_ extends ViewContainer {
                         }
                     this.setState({isEnter: false})
                 }}>
-                {(label)? label: t('submit')}
+                {this.props.t(this.viewObject.get('label') ? this.viewObject.get('label') : 'submit')}
             </NeoButton>
         </div> : <div> {this.props.getValue()} </div>
     }
@@ -1643,11 +1641,7 @@ class NeoIcon_ extends ViewContainer {
     }
 
     render = () => {
-        const cssClass = createCssClass(this.viewObject);
-        const icon = ((this.viewObject.get('iconCode') || 'notification') as string).replace('updateClock','update-clock');
-        return (
-             <NeoIcon style={{display: this.state.isHidden && 'none'}} className={cssClass} icon={icon as SvgName}/>
-        )
+        return <NeoIcon style={{display: this.state.isHidden && 'none'}} className={createCssClass(this.viewObject)} icon={neoIconMap[this.viewObject.get('iconCode') || 'none'] as SvgName}/>
     }
 }
 
@@ -1812,21 +1806,6 @@ class Calendar_ extends ViewContainer {
     }
 }
 
-class MasterdataView_ extends ViewContainer {
-    render = () => {
-        const hidden = this.viewObject.get('hidden') || false;
-        const disabled = this.viewObject.get('disabled') || false;
-        const grantType = this.viewObject.get('grantType');
-        const props = {
-            ...this.props,
-            disabled: disabled,
-            hidden: hidden || this.props.isParentHidden,
-            grantType: grantType,
-        };
-        return <MasterdataEditor {...props} key={this.viewObject._id} entityType={this.viewObject.get('entityType')}/>
-    }
-}
-
 class AntdFactory implements ViewFactory {
     name = 'antd';
     components = new Map<string, typeof Component>();
@@ -1846,7 +1825,6 @@ class AntdFactory implements ViewFactory {
         this.components.set(AntdFactoryClasses.Calendar, Calendar_);
         this.components.set(AntdFactoryClasses.GroovyCommand, GroovyCommand_);
         this.components.set(AntdFactoryClasses.ValueHolder, ValueHolder_);
-        this.components.set(AntdFactoryClasses.MasterdataView, MasterdataView_);
         this.components.set(AntdFactoryClasses.EventHandler, EventHandler_);
         this.components.set(AntdFactoryClasses.Drawer, Drawer_);
         this.components.set(AntdFactoryClasses.Href, Href_);

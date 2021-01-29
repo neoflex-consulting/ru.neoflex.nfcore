@@ -2,7 +2,6 @@ import * as React from "react";
 import {withTranslation} from "react-i18next";
 import {Dropdown, Menu} from "antd";
 import {NeoButton, NeoCol, NeoRow, NeoTypography} from "neo-design/lib";
-import './../styles/BreadcrumbApp.css';
 import Ecore from "ecore"
 import {NeoIcon} from "neo-icon/lib";
 import {Link} from "react-router-dom";

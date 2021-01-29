@@ -2,14 +2,13 @@ import * as React from 'react';
 import {WithTranslation} from 'react-i18next';
 import {Button, Col, Form, Row} from 'antd';
 import {FormComponentProps} from "antd/lib/form";
-import {faPlay, faPlus, faRedo} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import arrayMove from "array-move";
 import {EObject} from "ecore";
+import {NeoIcon} from "neo-icon/lib";
 
 export interface ParameterDrawerProps {
     rowData?: {[key: string]: unknown}[];
@@ -302,7 +301,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
                             value={'resetButton'}
                             onClick={this.reset}
                         >
-                            <FontAwesomeIcon icon={faRedo} size='xs' color="#7b7979"/>
+                            <NeoIcon icon={"undo"} color="#7b7979"/>
                         </Button>
                         <Button
                             title="add row"
@@ -311,7 +310,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
                             value={'createNewRowButton'}
                             onClick={this.createNewRow}
                         >
-                            <FontAwesomeIcon icon={faPlus} size='xs' color="#7b7979"/>
+                            <NeoIcon icon={"plus2"} color="#7b7979"/>
                         </Button>
                         <Button
                             title="run query"
@@ -320,7 +319,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
                             value={'runQueryButton'}
                             htmlType="submit"
                         >
-                            <FontAwesomeIcon icon={faPlay} size='xs' color="#7b7979"/>
+                            <NeoIcon icon={"play-arrow"} color="#7b7979"/>
                         </Button>
                     </Col>
                 </Form.Item>
