@@ -1497,7 +1497,9 @@ class DatasetView extends React.Component<any, State> {
                     diagrams={this.state.diagrams}
                     currentDiagram={this.state.currentDiagram}
                     onBackFromEditClick={() => {
-                        if (this.state.isEditMode && this.gridRef.current.getBuffer().length > 0) {
+                        if (this.gridRef.current.whichEdited().length !== 0) {
+                            this.gridRef.current.stopEditing()
+                        } else if (this.state.isEditMode && this.gridRef.current.getBuffer().length > 0) {
                             this.setState({isCheckEditBufferVisible: true})
                         } else if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
                             || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
@@ -1508,8 +1510,6 @@ class DatasetView extends React.Component<any, State> {
                             this.setState({isEditMode:!this.state.isEditMode},()=>{
                                 this.gridRef.current.onEdit()
                             });
-                        } else {
-                            this.gridRef.current.stopEditing()
                         }
                     }}
                     onInsertRowClick={() => this.gridRef.current.onInsert()}

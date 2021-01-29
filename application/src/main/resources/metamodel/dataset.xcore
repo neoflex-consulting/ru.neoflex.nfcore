@@ -169,7 +169,7 @@ class DatasetComponent extends Tagged {
 
 @NFCore(documentation="")
 class DMLQuery {
-        @NFCore(expandable="true")
+        @NFCore(expandable="true", syntax="sql")
     String queryText
     boolean generateFromModel
 }
