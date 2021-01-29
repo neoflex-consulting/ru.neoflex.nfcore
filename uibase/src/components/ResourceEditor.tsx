@@ -75,6 +75,7 @@ interface State {
     selectDropdownVisible: boolean,
     selectTags: number,
     selectCount: number,
+    selectedTree: any,
 }
 
 
@@ -148,6 +149,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectDropdownVisible: false,
         selectTags: 3,
         selectCount: 0,
+        selectedTree:{},
     };
 
     refresh = (refresh: boolean): void => {
@@ -415,7 +417,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: targetObject,
                 currentNode: e.node.props,
                 uniqKey: uniqKey,
-                selectedKeys: selectedKeys
+                selectedKeys: selectedKeys,
+                treeRightClickNode: e.node.props,
+                selectedTree: {
+                    key: 'delete',
+                    keyPath: ['delete']
+                }
             })
         } else {
             this.setState({
@@ -769,7 +776,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             })
         }
 
-        if (e.key === "delete") {
+        if (e.key === "delete"||e.key === "Delete") {
             let updatedJSON;
             if (node.featureUpperBound === -1) {
                 const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
@@ -1120,6 +1127,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
         window.removeEventListener("click", this.hideRightClickMenu);
         window.removeEventListener("keydown", this.saveOnCtrlS)
+        window.removeEventListener("keydown", this.deleteOnDel)
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
@@ -1162,6 +1170,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS);
+        window.addEventListener("keydown", this.deleteOnDel);
     }
 
     checkLock(ePackageName: string, className: string, paramName: string) {
@@ -1196,6 +1205,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     private saveOnCtrlS = (event: any) => {
         if (event.ctrlKey && event.code === 'KeyS') {
             this.save(false, false);
+            event.preventDefault();
+        }
+    };
+
+    private deleteOnDel = (event: any) => {
+        if (Object.keys(this.state.selectedTree).length !== 0 && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree)
             event.preventDefault();
         }
     };
