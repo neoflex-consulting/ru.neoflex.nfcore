@@ -174,15 +174,15 @@ export async function checkServerSideCondition(conditionType: string, valueItems
         const resArr = JSON.parse(json);
         return (conditionType === "RowsReturned" && resArr.length >= 1) || (conditionType === "NoRowReturned" && resArr.length === 0);
     } else if (conditionType === "JavaScriptExpression") {
-        let condition = true;
+        let condition: boolean;
         const params = getNamedParams(valueItems, context.contextItemValues);
         try {
             // eslint-disable-next-line
             condition = eval(replaceNamedParam(expression, params))
         } catch (e) {
             condition = false;
-            context.notification("EventHandler.condition",
-                "exception while evaluating",
+            context.notification("RdbmsColumn.JavaScriptCondition",
+                "exception while evaluating: " + replaceNamedParam(expression, params),
                 "warning")
         }
         return condition

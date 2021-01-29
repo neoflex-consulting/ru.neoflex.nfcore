@@ -1138,7 +1138,6 @@ class DatasetView extends React.Component<any, State> {
 
         this.setState({currentDatasetComponent: currentDatasetComponent[0]}, () => this.saveDatasetComponentToUrl(datasetComponentName));
         this.state.rowData.length !== 0 && this.findColumnDefs(currentDatasetComponent[0]);
-
     }
 
 
