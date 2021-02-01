@@ -5,11 +5,11 @@ import {getUrlParam, getUrlParamDataType} from "./urlUtils";
 function replaceNamedParam(valueString:string, namedParams:IServerNamedParam[]) {
     const params = namedParams.sort((a, b) => {
         if (a.parameterName > b.parameterName) {
-            return 1
+            return -1
         } else if (a.parameterName === b.parameterName){
             return 0
         }
-        return -1
+        return 1
     });
     let replacedCommand = valueString;
     params.forEach(param => {
