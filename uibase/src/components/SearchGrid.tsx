@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Form, Icon} from 'antd';
+import {Button, Form} from 'antd';
 import Ecore from "ecore";
 import {API} from "../modules/api";
 import {Link} from "react-router-dom";
@@ -80,7 +80,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
             sorter: (a: any, b: any) => this.sortColumns(a, b, name, type),
             ...this.getColumnSearchProps(name, title),
             filterIcon: (filtered: any) => (
-                <Icon type="search" style={{ color: filtered ? "#1890ff" : undefined }} />
+                <NeoIcon icon={"search"} style={{ color: filtered ? "#1890ff" : undefined }} />
             ),
             onFilter: (value: any, record: any) => record.eClass.toLowerCase() === value.toLowerCase(),
             onFilterDropdownVisibleChange: () => {
@@ -108,7 +108,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 else {return text}},
                 ...this.getColumnSearchProps(name, title),
                 filterIcon: (filtered: any) => (
-                    <Icon type="search" style={{ color: filtered ? "#1890ff" : undefined }} />
+                    <NeoIcon icon={"search"} style={{ color: filtered ? "#1890ff" : undefined }} />
                 ),
                 onFilter: (value: any, record: any) => record.name !== undefined ?
                     record.name.toString().toLowerCase() === value.toString().toLowerCase() : undefined,
@@ -292,7 +292,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                              <div>
                                  <div>
                                      <Button title={t("select")} type="primary" onClick={this.handleSelect} disabled={!hasSelected} style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}>
-                                         <Icon type="select" />
+                                         <NeoIcon icon={"big-grid"}/>
                                     </Button>
                                  </div>
                                  <NeoTable

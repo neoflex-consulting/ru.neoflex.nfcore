@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Icon, Input, Layout, Menu, Row, Table, Tree} from 'antd';
+import {Button, Col, Input, Layout, Menu, Row, Table, Tree} from 'antd';
 import Ecore, {EObject, Resource} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -75,6 +75,7 @@ interface State {
     selectDropdownVisible: boolean,
     selectTags: number,
     selectCount: number,
+    selectedTree: any,
 }
 
 
@@ -148,6 +149,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectDropdownVisible: false,
         selectTags: 3,
         selectCount: 0,
+        selectedTree:{},
     };
 
     refresh = (refresh: boolean): void => {
@@ -201,6 +203,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
                 const mainEObject = resource.eResource().eContents()[0];
                 const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
+                const updatedJSON = findObjectById(nestedJSON, this.state.targetObject?._id);
                 this.setState((state, props) => ({
                     mainEObject: mainEObject,
                     resourceJSON: nestedJSON,
@@ -209,7 +212,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     //If we create a new sibling (without saving), when click on it, information appears in the property table.
                     //But if we click the refresh button, the new created sibling will disappear, but the property table still will
                     //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
-                    targetObject: this.state.targetObject ? this.state.targetObject : { eClass: "" },
+                    targetObject: this.state.targetObject ? updatedJSON : { eClass: "" },
                     tableData: this.state.tableData?.length > 0 ? this.state.tableData : []
                 }));
             })
@@ -258,7 +261,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             eClass={feature.get('eType').eURI()}
                             propertyName={feature.get('name')}
                             targetObject={targetObject}
-                            icon={upperBound === 1 ? <Icon type="line" style={{ color: "#d831ff", fontSize: 12 }} /> : <Icon type="dash" style={{ color: "#d831ff" }} />}
+                            icon={upperBound === 1 ? <NeoIcon icon={"link"} style={{ color: "#d831ff", fontSize: 12 }} /> : <NeoIcon icon={"data-line"} style={{ color: "#d831ff" }} />}
                             title={feature.get('name')}
                         >
                             {targetObject.map((object: { [key: string]: any }, cidx: number) => {
@@ -272,7 +275,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     eClass={object.eClass ? object.eClass : feature.get('eType').eURI()}
                                     propertyName={feature.get('name')}
                                     targetObject={object}
-                                    icon={<Icon type="block" style={{ color: "#88bc51" }} />}
+                                    icon={<NeoIcon icon={"lock"} style={{ color: "#88bc51" }} />}
                                     title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 >
                                     {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
@@ -388,7 +391,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 blockNode
                 showIcon
                 key="mainTree"
-                switcherIcon={<Icon type="down" />}
+                switcherIcon={<NeoIcon icon={"download"} />}
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
                 selectedKeys={this.state.selectedKeys}
@@ -398,7 +401,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         expandedKeys: [...expanded]
                     })}}
             >
-                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<Icon type="cluster" style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={"/"}>
+                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<NeoIcon icon={"clipboard"} style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={"/"}>
                     {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                 </Tree.TreeNode>
             </Tree>
@@ -414,7 +417,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: targetObject,
                 currentNode: e.node.props,
                 uniqKey: uniqKey,
-                selectedKeys: selectedKeys
+                selectedKeys: selectedKeys,
+                treeRightClickNode: e.node.props,
+                selectedTree: {
+                    key: 'delete',
+                    keyPath: ['delete']
+                }
             })
         } else {
             this.setState({
@@ -768,7 +776,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             })
         }
 
-        if (e.key === "delete") {
+        if (e.key === "delete"||e.key === "Delete") {
             let updatedJSON;
             if (node.featureUpperBound === -1) {
                 const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
@@ -1119,6 +1127,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
         window.removeEventListener("click", this.hideRightClickMenu);
         window.removeEventListener("keydown", this.saveOnCtrlS)
+        window.removeEventListener("keydown", this.deleteOnDel)
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
@@ -1161,6 +1170,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS);
+        window.addEventListener("keydown", this.deleteOnDel);
     }
 
     checkLock(ePackageName: string, className: string, paramName: string) {
@@ -1199,6 +1209,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
+    private deleteOnDel = (event: any) => {
+        if (Object.keys(this.state.selectedTree).length !== 0 && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree)
+            event.preventDefault();
+        }
+    };
+
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
@@ -1217,7 +1234,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     }
                     {
                         (this.state.edit || this.state.mainEObject._id === undefined) && (this.state.isSaving
-                            ? <Icon className="panel-icon" type="loading"/>
+                            ? <NeoIcon icon={"upload"} className="panel-icon"/>
                             : <Button className="panel-button" icon="save" onClick={()=>this.save(false, false)} title={this.props.t("save")}/>)
                     }
                     <Button className="panel-button" icon="reload" onClick={ ()=> this.refresh(true)} title={this.props.t("refresh")} />
@@ -1382,13 +1399,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
+                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>
@@ -1397,10 +1415,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>

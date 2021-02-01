@@ -2,13 +2,13 @@ import * as React from "react";
 import {Form, Button, Tooltip} from 'antd';
 //import { Ecore } from "ecore";
 import { API } from "../modules/api";
-import {Icon as IconFA} from 'react-fa';
 import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
 import Splitter from './CustomSplitter'
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
+import {NeoIcon} from "neo-icon/lib";
 
 export interface Props {
 }
@@ -74,7 +74,7 @@ class QueryRunner extends React.Component<any, State> {
                     <Form.Item wrapperCol={{span: 2, push: 14}}>
                         <Tooltip placement="top" title={t('run')}>
                             <Button id="run" shape="circle" style={{border: 0}} onClick={this.run}>
-                                <IconFA name="eye"/>
+                                <NeoIcon icon={"play-arrow"}/>
                             </Button>
                         </Tooltip>
                     </Form.Item>
