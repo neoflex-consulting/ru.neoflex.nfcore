@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Button, Col, Input, Layout, Menu, Row, Table, Tree} from 'antd';
-import Ecore, {EObject, Resource} from "ecore";
+import Ecore, {EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
@@ -89,6 +89,23 @@ const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
     return expandedKeys
 };
 
+const findChildrenKey = (children: any[], key: string):string => {
+    const childrenNodes = children.filter((ch:any) => ch !== null);
+    for (const c of childrenNodes) {
+        if (c !== undefined && c.props.targetObject?._id === key) {
+            return c.key;
+        } else if (c !== undefined && c.props.isArray !== true && Array.isArray(c.props.targetObject) && c.props.targetObject.find((t: { _id: string; })=>t._id === key)) {
+            return c.key;
+        } if (c !== undefined && c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
+            const retKey = findChildrenKey(c.props.children, key);
+            if (retKey !== "") {
+                return retKey
+            }
+        }
+    }
+    return ""
+};
+
 const getChildNode = (children: any[], nodeKey:string) => {
     let retVal:any;
     for (const c of children.filter((ch: any) => ch !== null)) {
@@ -167,9 +184,30 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 this.props.history.push('/developer/data')
             })
         } else {
-            this.props.history.push('/developer/data')
+            this.props.history.push('/developer/data');
         }
     };
+
+    fetchEObject(id: string, rev: string, resourceSet: ResourceSet, targetObjectId?: string ): void {
+        API.instance().fetchResource(`${id}?ref=${rev}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
+            const targetId = targetObjectId
+                ? targetObjectId : this.state.targetObject?._id
+                ? this.state.targetObject._id : id;
+            const mainEObject = resource.eResource().eContents()[0];
+            const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
+            const targetObject = findObjectById(nestedJSON, targetId);
+            const tableData = targetObject ? this.prepareTableData(targetObject, mainEObject, targetId) : undefined;
+            this.setState((state, props) => ({
+                mainEObject: mainEObject,
+                resourceJSON: nestedJSON,
+                resource: resource,
+                selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
+                targetObject: targetObject ? targetObject : { eClass: "" },
+                tableData: tableData ? tableData : [],
+                edit: !!this.props.match.params.edit
+            }));
+        })
+    }
 
     generateEObject(): void {
         const { selectedEClass, name } = this.props.location.state;
@@ -186,7 +224,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         const mainEObject = resource.eResource().eContents()[0];
         const json = mainEObject.eResource().to();
-        const nestedJSON = nestUpdaters(json, null);
+        const nestedJSON = {
+            ...nestUpdaters(json, null),
+            _id: '/'
+        };
 
         this.setState({
             mainEObject: mainEObject,
@@ -198,26 +239,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     getEObject(): void {
-        const resourceSet = Ecore.ResourceSet.create();
-        this.props.match.params.id !== 'new' ?
-            API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
-                const mainEObject = resource.eResource().eContents()[0];
-                const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
-                const updatedJSON = findObjectById(nestedJSON, this.state.targetObject?._id);
-                this.setState((state, props) => ({
-                    mainEObject: mainEObject,
-                    resourceJSON: nestedJSON,
-                    resource: resource,
-                    selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
-                    //If we create a new sibling (without saving), when click on it, information appears in the property table.
-                    //But if we click the refresh button, the new created sibling will disappear, but the property table still will
-                    //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
-                    targetObject: this.state.targetObject ? updatedJSON : { eClass: "" },
-                    tableData: this.state.tableData?.length > 0 ? this.state.tableData : []
-                }));
-            })
-            :
-            this.generateEObject()
+        this.props.match.params.id !== 'new'
+            ? this.fetchEObject(this.props.match.params.id, this.props.match.params.ref, Ecore.ResourceSet.create(), this.props.match.params.targetId)
+            : this.generateEObject()
     }
 
     getEClasses(): void {
@@ -529,7 +553,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     mainEObject: mainEObject,
                     edit: this.state.edit && !isDisabled,
                     showIcon: isNeoIconSelect,
-                    syntax
+                    syntax,
+                    goToObject: this.goToObject
                 };
                 let value = FormComponentMapper.getComponent(props);
                 value = isExpandable ? FormComponentMapper.getComponentWrapper({
@@ -703,8 +728,25 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         return undefined
     }
 
-    scrollToCreatedNode = () => {
-        const node = this.findTreeNode(this.state.targetObject._id);
+    goToObject = (id:string, obj:EObject|null) => {
+        const json = this.state.mainEObject.eResource().to();
+        const nestedJSON = nestUpdaters(json, null);
+        const targetObject = findObjectById(nestedJSON, id);
+        if (targetObject) {
+            this.setState({
+                targetObject: targetObject,
+                tableData: this.prepareTableData(targetObject, this.state.mainEObject, id),
+                expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children]),
+            }, ()=> {this.scrollToElementWithId(id)})
+        } else if (obj) {
+            API.instance().checkLock(obj.eResource().get('uri')).then(locked=>{
+                window.open(`/developer/data/editor/${obj.eResource().get('uri')}/${obj.eResource().rev}/${locked}/${obj._id}`);
+            })
+        }
+    }
+
+    scrollToElementWithId = (id?:string) => {
+        const node = this.findTreeNode(id ? id : this.state.targetObject?._id);
         if (node) {
             node.selectHandle.scrollIntoView({
                 behavior: "smooth",
@@ -745,7 +787,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 mainEObject: resource.eContents()[0],
                 isModified: true,
                 expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
-            }, this.scrollToCreatedNode)
+            }, this.scrollToElementWithId)
         }
 
         if (e.key === "moveUp" || e.key === "moveDown") {
@@ -848,7 +890,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 isModified: true,
-            }), this.scrollToCreatedNode)
+            }), this.scrollToElementWithId)
         }
         if (e.key === "expandAll") {
             const childToExpand = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
@@ -1139,9 +1181,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
             this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
         }
-        //Initial expand all elements
+        //Initial expand all elements && highlight selected
         if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
-            this.setState({expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children])})
+            const selectedKeys = [findChildrenKey([this.treeRef.current.tree.props.children], this.state.targetObject?._id)]
+            this.setState({
+                expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children]),
+                selectedKeys: selectedKeys
+            }, this.scrollToElementWithId)
         }
         //Component load after getEObject
         if (prevState.mainEObject._id === undefined && this.state.mainEObject._id !== undefined) {
