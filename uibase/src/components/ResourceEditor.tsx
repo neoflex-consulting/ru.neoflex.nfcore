@@ -1399,13 +1399,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
+                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>
@@ -1414,10 +1415,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>
