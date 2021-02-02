@@ -390,7 +390,10 @@ class Region_ extends ViewContainer {
                     boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
                     borderRadius: '4px',
                     padding: '16px',
-                    margin: '16px'}}
+                    marginTop: '16px',
+                    marginLeft: '16px',
+                    marginRight: '16px',
+                    marginBottom: '16px'}}
                 className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden)}
