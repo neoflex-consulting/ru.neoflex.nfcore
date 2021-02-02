@@ -500,7 +500,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}
             />
-        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && eObject.values.name == "datasetColumn") {
+        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && eObject.values.name === "datasetColumn") {
             return <SelectComponentForhightLight
                 idx={idx}
                 ukey={ukey}

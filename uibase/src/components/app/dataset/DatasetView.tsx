@@ -1426,7 +1426,7 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{margin:'16px'}}>
+            <div style={{padding: "16px"}}>
                 {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
