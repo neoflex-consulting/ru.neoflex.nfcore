@@ -19,7 +19,6 @@ import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
-import MasterdataBrowser from "./components/app/masterdata (not used)/MasterdataBrowser";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import AppLogo from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
@@ -790,9 +789,8 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref/:edit?/:targetId?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
-                    <Route path='/developer/masterdata' component={this.isDeveloper() ? MasterdataBrowser : Prohibited}/>
                     <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
                 </Switch>
             </Layout>

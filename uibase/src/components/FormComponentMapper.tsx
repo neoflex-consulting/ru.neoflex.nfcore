@@ -10,6 +10,8 @@ import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
+import {neoIconMap} from "../utils/consts";
+import {SvgName} from "neo-icon/lib/icon/icon";
 
 interface EditableSQLAreaProps {
     value: string,
@@ -128,10 +130,11 @@ interface SelectRefObjectProps {
     onBrowse?: Function,
     upperBound: number,
     edit?: boolean
+    goToObject?:(id:string, obj: Ecore.EObject| null)=>void
 }
 
 function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
-    const { eObject, upperBound, value, mainEObject, idx, ukey, edit } = props
+    const { eObject, upperBound, value, mainEObject, idx, ukey, edit, goToObject } = props
 
     const getRelatedResourceByRef = (reference: string) => {
         const refObject = (mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
@@ -151,6 +154,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                     }}
                     closable={edit}
                     key={el["$ref"]}
+                    onClick={()=>{
+                        goToObject && goToObject(el.$ref, getRelatedResourceByRef(el.$ref));
+                    }}
                 >
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.get('name')}&nbsp;
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp;
@@ -163,6 +169,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 }}
                 closable={edit}
                 key={value["$ref"]}
+                onClick={()=>{
+                    goToObject && goToObject(value.$ref, relatedResource);
+                }}
             >
                 {(relatedResource && relatedResource.get('name')) || (value.$ref && value.$ref.split('//')[1])}&nbsp;
                 {(relatedResource && relatedResource.eClass.get('name')) || (value.eClass && value.eClass.split('//')[2])}&nbsp;
@@ -273,10 +282,59 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
+                .sort(function(a : Ecore.EObject, b : Ecore.EObject) {
+                    if(a.get('name').toLowerCase() < b.get('name').toLowerCase()) return -1;
+                    if(a.get('name').toLowerCase() > b.get('name').toLowerCase()) return 1;
+                    return 0;
+                })
                 .map((obj: Ecore.EObject) =>
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
-                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={obj.get('name')}/>}{obj.get('name')}</div>
+                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
                 </Select.Option>)}
+        </Select>
+    )
+}
+
+
+interface SelectComponentPropsForhightLight {
+    value: any,
+    onChange?: Function,
+    idx?: number,
+    ukey?: string,
+    mainObject: any,
+    upperBound: number,
+    id: string,
+    edit?: boolean,
+    showIcon?: boolean
+}
+
+function SelectComponentForhightLight(props: SelectComponentPropsForhightLight): JSX.Element {
+
+    const { mainObject, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
+
+    return (
+        <Select
+            className={"select-component"}
+            mode={upperBound === -1 ? "multiple" : "default"}
+            value={value}
+            key={ukey + "_" + idx}
+            style={{ width: "300px" }}
+            onChange={(newValue: any) => {
+                onChange && onChange!(newValue)
+            }}
+            disabled={!edit}
+        >
+            {mainObject.values.column._internal
+                .filter((obj: any) => obj.values.hide !== true)
+                .sort(function(a : any, b : any) {
+                    if(a.values.name.toLowerCase() < b.values.name.toLowerCase()) return -1;
+                    if(a.values.name.toLowerCase() > b.values.name.toLowerCase()) return 1;
+                    return 0;
+                })
+                .map((obj: any) =>
+                    <Select.Option key={ukey + "_opt_" + obj.values.name + "_" + id} value={obj.values.name}>
+                        <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.values.name] as SvgName}/>}{obj.values.name}</div>
+                    </Select.Option>)}
         </Select>
     )
 }
@@ -357,6 +415,7 @@ interface Props {
     expanded?: boolean,
     syntax?: string,
     showIcon?: boolean,
+    goToObject?: (id?:string)=>void,
 }
 
 export default class ComponentMapper extends React.Component<Props, any> {
@@ -372,7 +431,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
         if (syntax) {
             return <EditableSyntaxArea
@@ -398,6 +457,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 onBrowse={props.onBrowse}
                 upperBound={props.upperBound}
                 edit={edit}
+                goToObject={goToObject}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
             return <BooleanSelect
@@ -449,7 +509,22 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
+        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) {
+            return <SelectComponentForhightLight
+                idx={idx}
+                ukey={ukey}
+                value={targetValue || (eType.eContents()[0] && eType.eContents()
+                    .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")[0].get('name'))}
+                mainObject={props.mainEObject}
+                id={props.id}
+                onChange={(newValue: any) => {
+                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
+                }}
+                upperBound={props.upperBound}
+                edit={edit}
+                showIcon={showIcon}/>
+        }
+        else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}

@@ -3,7 +3,7 @@ import Ecore from "ecore";
 const searchSource = "ru.neoflex.nfcore";
 
 type classAnnotationKey = "documentation";
-type fieldAnnotationKey = "invisible"|"disabled"|"documentation"|"renderConditions"|"expandable"|"syntax"|"resourceEditorName";
+type fieldAnnotationKey = "invisible"|"disabled"|"documentation"|"renderConditions"|"expandable"|"syntax"|"resourceEditorName"|"neoIconSelect";
 
 function getAnnotationByKey(annotations: Ecore.EList, key: classAnnotationKey|fieldAnnotationKey) {
     let retVal = "";

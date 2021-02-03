@@ -7,6 +7,7 @@
         "aggregations": "Рассчитать итоги",
         "apply": "Применить",
         "appname": "Neoflex Reporting",
+        "column for pie": "Столбец для Кругового графика",
         "axis X column name": "Ось x",
         "axis Y column name": "Ось y",
         "axis X label": "Подпись оси x",
@@ -500,7 +501,8 @@
         "export all tabs": "Выгрузить все вкладки",
         "export all tabs or current tab": "Выгрузить все вкладки или открытую вкладку?",
         "all": "Все",
-        "current": "Открытую"
+        "current": "Открытую",
+        "create event handler": "Добавить обработчик"
 }
 
 

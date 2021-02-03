@@ -369,7 +369,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
                 rowData.set('valueFormatter', this.valueFormatter);
-                rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
+                rowData.set('tooltipField', (c.get('showTooltipField')&&c.get('datasetColumnTooltip')) ? c.get('datasetColumnTooltip') : undefined);
                 rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
                 //передаётся в DatasetGrid для подключения typography к заголоку грида
                 /*rowData.set('customHeader',c.get('headerName'));*/
@@ -1138,7 +1138,6 @@ class DatasetView extends React.Component<any, State> {
 
         this.setState({currentDatasetComponent: currentDatasetComponent[0]}, () => this.saveDatasetComponentToUrl(datasetComponentName));
         this.state.rowData.length !== 0 && this.findColumnDefs(currentDatasetComponent[0]);
-
     }
 
 
@@ -1427,7 +1426,7 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{margin:'16px'}}>
+            <div style={{padding: "16px"}}>
                 {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
@@ -1498,7 +1497,9 @@ class DatasetView extends React.Component<any, State> {
                     diagrams={this.state.diagrams}
                     currentDiagram={this.state.currentDiagram}
                     onBackFromEditClick={() => {
-                        if (this.state.isEditMode && this.gridRef.current.getBuffer().length > 0) {
+                        if (this.gridRef.current.whichEdited().length !== 0) {
+                            this.gridRef.current.stopEditing()
+                        } else if (this.state.isEditMode && this.gridRef.current.getBuffer().length > 0) {
                             this.setState({isCheckEditBufferVisible: true})
                         } else if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
                             || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
@@ -1509,8 +1510,6 @@ class DatasetView extends React.Component<any, State> {
                             this.setState({isEditMode:!this.state.isEditMode},()=>{
                                 this.gridRef.current.onEdit()
                             });
-                        } else {
-                            this.gridRef.current.stopEditing()
                         }
                     }}
                     onInsertRowClick={() => this.gridRef.current.onInsert()}

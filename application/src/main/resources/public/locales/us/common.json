@@ -7,6 +7,7 @@
         "aggregations": "Groupings",
         "apply": "Apply",
         "appname": "Neoflex Reporting",
+        "column for pie": "Column for Pie graph",
         "axis X column name": "Axis X column name",
         "axis Y column name": "Axis Y column name",
         "axis X label": "Axis X label",
@@ -503,5 +504,6 @@
         "export all tabs": "Export all tabs",
         "export all tabs or current tab": "Export all tabs or current tab?",
         "all": "All",
-        "current": "Current"
+        "current": "Current",
+        "create event handler": "Create event handler"
 }

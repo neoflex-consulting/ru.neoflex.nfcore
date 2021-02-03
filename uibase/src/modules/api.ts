@@ -486,7 +486,7 @@ export class API implements IErrorHandler {
 
     findByKindAndRegexp(eClass: Ecore.EClass, objectName?: string, level: number = 1, tags?: string) {
         if (objectName) {
-            return this.findByKind(eClass, {contents: {name: {"$regex": objectName}}}, level, tags)
+            return this.findByKind(eClass, {contents: {name: {"$regex": `.*${objectName}.*`}}}, level, tags)
         }
         return this.findByKind(eClass, {contents: {eClass: eClass.eURI()}}, level)
     }
@@ -508,7 +508,7 @@ export class API implements IErrorHandler {
     findByTagsAndRegex(tags: string, objectName?: string, level: number = 1): Promise<Ecore.Resource[]> {
         let selection: any = {contents: {eClass: undefined}};
         if (objectName) {
-            selection = {contents: {name: {"$regex": objectName}}}
+            selection = {contents: {name: {"$regex": `.*${objectName}.*`}}}
         }
         return this.find(selection, level, tags).then(r => r.resources);
     }
