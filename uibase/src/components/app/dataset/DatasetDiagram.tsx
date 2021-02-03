@@ -328,16 +328,26 @@ class DatasetDiagram extends React.Component<Props & any, State> {
     }
 
     private drawPie() {
-        function prepareData(keyColumn: string, valueColumn: string, rowData: any[]) : any[] {
+        function prepareData(valueColumn: string, rowData: any[]) : any[] {
+            let newRowData : any[] = []
+            let arrFilter : any[] = []
+            let count = 0
             let dataForChart: any[] = [];
-            const groups = _.groupBy(rowData);
-            for (const group of Object.keys(groups)) {
-                let xyData = groups[group].map(r => {
-                    return {[keyColumn]: r[keyColumn], [valueColumn]: r[valueColumn]}
-                });
-                dataForChart = xyData.map((val) => {
-                    return {"id": val[keyColumn], "value": Number(val[valueColumn]), "label": val[keyColumn]}
-                });
+            newRowData = rowData.filter((item : any) => {
+                if (!arrFilter.includes(item[valueColumn])){
+                    arrFilter.push(item[valueColumn])
+                    return item;
+                }
+                return null
+            })
+            for (let i = 0; i < newRowData.length; i++){
+                count = 0
+                rowData.map((obj : any) => {
+                    if (obj[valueColumn] == newRowData[i][valueColumn]){
+                        count++
+                    }
+                })
+                dataForChart.push({"id": newRowData[i][valueColumn], "value": count, "label": newRowData[i][valueColumn]})
             }
             return dataForChart
         }
@@ -349,7 +359,7 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                            height: 600
                        }}>
                 <ResponsivePie
-                    data={prepareData(this.state.diagramParams.keyColumn, this.state.diagramParams.valueColumn, this.state.rowData)}
+                    data={prepareData(this.state.diagramParams.valueColumn, this.state.rowData)}
                     margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
                     innerRadius={0.5}
                     padAngle={0.7}
