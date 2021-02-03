@@ -96,9 +96,11 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
+                id === "axisYColumnName" ?
                 <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
-                    {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
+                    {this.props.columnDefs!.filter((c: any) => !c.get('hide')).filter((c: any) => c.get('type') === 'Integer' || c.get('type') === 'Decimal')
+                        .map((c: any) =>
                         <Select.Option
                             key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
                             value={c.get('field')}
@@ -106,6 +108,17 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                             {c.get('headerName')}
                         </Select.Option>)}
                 </NeoSelect>
+                    :
+                    <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
+                               placeholder={this.props.t(placeHolder)}>
+                        {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
+                            <Select.Option
+                                key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
+                                value={c.get('field')}
+                            >
+                                {c.get('headerName')}
+                            </Select.Option>)}
+                    </NeoSelect>
             )}
         </Form.Item>
         </div>
