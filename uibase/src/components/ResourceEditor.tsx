@@ -746,9 +746,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             return eq;
         }
         let foundNodes: {[key:string] : any}[] = [];
-        for (const [nodeKey, node] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
+        // eslint-disable-next-line
+        for (const [_, node] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
             let found = Object.keys(selector).length > 0;
-            let test = false;
             for (const [selectorKey, selectorValue] of Object.entries(selector)) {
                 if (typeof selectorValue === "string" && (node as { [key: string]: any }).props[selectorKey] !== selectorValue) {
                     found = false;
