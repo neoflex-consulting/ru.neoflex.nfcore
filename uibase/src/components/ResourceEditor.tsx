@@ -192,7 +192,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         API.instance().fetchResource(`${id}?ref=${rev}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
             const targetId = targetObjectId
                 ? targetObjectId : this.state.targetObject?._id
-                ? this.state.targetObject._id : id;
+                    ? this.state.targetObject._id : id;
             const mainEObject = resource.eResource().eContents()[0];
             const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
             const targetObject = findObjectById(nestedJSON, targetId);
@@ -204,7 +204,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
                 targetObject: targetObject ? targetObject : { eClass: "" },
                 tableData: tableData ? tableData : [],
-                edit: !!this.props.match.params.edit
+                edit: this.state.edit || (this.props.match.params.edit === 'true')
             }));
         })
     }
@@ -951,7 +951,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         eClass: firstEObject.eClass.eURI()
                     },
                     column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent'
-                        && firstEObject.eURI() !== targetObject.dataset?.$ref ? [] : targetObject.column
+                    && firstEObject.eURI() !== targetObject.dataset?.$ref ? [] : targetObject.column
                 })
             }
         }
