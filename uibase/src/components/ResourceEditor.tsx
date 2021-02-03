@@ -28,7 +28,6 @@ import {IMainContext} from "../MainContext";
 
 interface ITargetObject {
     eClass: string,
-
     [key: string]: any
 }
 
@@ -125,6 +124,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     splitterRef: React.RefObject<any>;
     treeRef: React.RefObject<any>;
+    eventHandlerClass = "ru.neoflex.nfcore.application#//EventHandler";
+    dynamicActionElementClass = "ru.neoflex.nfcore.application#//DynamicActionElement";
 
     constructor(props: any) {
         super(props);
@@ -146,7 +147,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         rightClickMenuVisible: false,
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
-        treeRightClickNode: {},
+        treeRightClickNode: {} as { [key: string]: any },
         addRefPropertyName: "",
         isSaving: false,
         addRefPossibleTypes: [],
@@ -642,6 +643,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const eClass = node.eClass;
         const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
         const allSubTypes = eClassObject.get('eAllSubTypes');
+        const allSuperTypes = eClassObject.get('eAllSuperTypes');
         node.isArray && eClassObject && allSubTypes.push(eClassObject);
         const allParentChildren = node.propertyName ? node.parentUpdater(null, undefined, node.propertyName, { operation: "getAllParentChildren" }) : undefined;
         const menu = (node.upperBound === undefined || node.upperBound === -1
@@ -709,6 +711,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     //exists collapsible elements
                     && this.state.expandedKeys.filter(e=>getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).includes(e)).length > 0
                     && <Menu.Item key="collapseAll">{this.props.t("collapse all")}</Menu.Item>}
+                    {//contains eventHandlers
+                    this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1}).length > 0
+                    && allSuperTypes.find((t:EObject)=>t.eURI() === this.dynamicActionElementClass)
+                    && node.upperBound !== -1
+                    && !eClassObject.get('abstract') 
+                    && <Menu.Item key="createEventHandler">{this.props.t("create event handler")}</Menu.Item>}
                 </Menu>
             </div>
         //check if menu items not exists
@@ -719,13 +727,40 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         return menu
     }
 
-    findTreeNode = (id: string) : {[key:string] : any} | undefined =>  {
-        for (const [key, value] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
-            if ((value as {[key:string] : any}).props.targetObject._id === id && key !== undefined) {
-                return (value as {[key:string] : any})
+    findTreeNodeById = (id: string) : {[key:string] : any} | undefined =>  {
+        const nodes = this.findTreeNodesBySelector({targetObject: {_id: id}})
+        return nodes.length > 0 ? nodes[0] : undefined
+    }
+
+    findTreeNodesBySelector = (selector: {[key:string] : any}) : {[key:string] : any}[] =>  {
+        function objectsHaveSameKeysValue(obj1:{[key:string] : any}, obj2:{[key:string] : any}) {
+            const intersect = Object.keys(obj1).filter((key: any, value: any) => {
+                return Object.keys(obj2).includes(key)
+            });
+            let eq = intersect.length > 0;
+            for (const key of intersect) {
+                if (obj1[key] !== obj2[key]) {
+                    eq = false;
+                }
+            }
+            return eq;
+        }
+        let foundNodes: {[key:string] : any}[] = [];
+        for (const [nodeKey, node] of Object.entries(this.treeRef.current?.tree.domTreeNodes)) {
+            let found = Object.keys(selector).length > 0;
+            let test = false;
+            for (const [selectorKey, selectorValue] of Object.entries(selector)) {
+                if (typeof selectorValue === "string" && (node as { [key: string]: any }).props[selectorKey] !== selectorValue) {
+                    found = false;
+                } else if (typeof selectorValue !== "string" && Object.keys(selectorValue).length > 0  && !objectsHaveSameKeysValue(selectorValue, (node as { [key: string]: any }).props[selectorKey])) {
+                    found = false;
+                }
+            }
+            if (found) {
+                foundNodes.push(node as {[key:string] : any})
             }
         }
-        return undefined
+        return foundNodes
     }
 
     goToObject = (id:string, obj:EObject|null) => {
@@ -746,7 +781,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     scrollToElementWithId = (id?:string) => {
-        const node = this.findTreeNode(id ? id : this.state.targetObject?._id);
+        const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
             node.selectHandle.scrollIntoView({
                 behavior: "smooth",
@@ -757,7 +792,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     handleRightMenuSelect = (e: any) => {
-        const targetObject: { [key: string]: any } = this.state.targetObject;
+        const targetObject = this.state.targetObject;
         const node: { [key: string]: any } = this.state.treeRightClickNode;
         if (e.keyPath[e.keyPath.length - 1] === "add") {
             const subTypeName = e.item.props.children;
@@ -813,7 +848,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 isModified: true
             }), () => {
                 if (this.state.selectedKeys.find(key => key === node.eventKey)) {
-                    this.setState({selectedKeys: [this.findTreeNode(updatedTargetObject._id)?.props.eventKey]})
+                    this.setState({selectedKeys: [this.findTreeNodeById(updatedTargetObject._id)?.props.eventKey]})
                 }
             })
         }
@@ -901,6 +936,40 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const childToCollapse = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
             const collapsedKeys = getAllChildrenKeys([childToCollapse]);
             this.setState({expandedKeys: this.state.expandedKeys.filter(k=>!collapsedKeys.includes(k))})
+        }
+        if (e.key === "createEventHandler") {
+            //Найти позицию в дереве куда поставить
+            const nodes = this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1});
+            if (nodes.length > 0) {
+                //Найти класс eventHandler
+                const eClass = this.eventHandlerClass;
+                const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+                const node = nodes[0].props;
+                const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+                //Создать пустышку класса
+                const newObject = {
+                    eClass: eClassObject.eURI(),
+                    _id: id,
+                    name: `${node.propertyName}_${id}`,
+                    //В пустышку прописать listenItem объект на node
+                    listenItem: [{
+                        $ref: this.state.treeRightClickNode.targetObject._id,
+                        eClass: this.state.treeRightClickNode.eClass
+                    }]
+                };
+                let updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" });
+                const nestedJSON = nestUpdaters(updatedJSON, null);
+                const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
+                const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                //Изменить состояние
+                this.setState({
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject,
+                    mainEObject: resource.eContents()[0],
+                    isModified: true,
+                    expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
+                }, this.scrollToElementWithId)
+            }
         }
     };
 
@@ -1195,7 +1264,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
         //Smooth highlight positioning
         if (prevState.targetObject?._id !== this.state.targetObject?._id) {
-            const node = this.findTreeNode(this.state.targetObject?._id);
+            const node = this.findTreeNodeById(this.state.targetObject?._id);
             if (node) {
                 this.setState({
                     selectedKeys: [node.props.eventKey],
@@ -1217,6 +1286,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS);
         window.addEventListener("keydown", this.deleteOnDel);
+        API.instance().findClass("application","EventHandler").then(eClass=>{
+            this.eventHandlerClass = eClass.eURI()
+        })
+        API.instance().findClass("application","DynamicActionElement").then(eClass=>{
+            this.dynamicActionElementClass = eClass.eURI()
+        })
     }
 
     checkLock(ePackageName: string, className: string, paramName: string) {
