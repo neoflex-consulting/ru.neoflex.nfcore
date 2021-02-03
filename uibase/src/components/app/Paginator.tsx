@@ -53,7 +53,7 @@ class Paginator extends React.Component<Props, any> {
         this.props.onPageChange(e);
     };
 
-    paginationSetPageSize = (p:any, pageSize : any) =>{
+    paginationSetPageSize = (pageSize : any) =>{
         if(isNaN(pageSize)){
             this.props.onPageSizeChange(this.props.totalNumberOfRows);
             this.setState({ paginationPageSize: this.props.totalNumberOfRows});
@@ -138,7 +138,7 @@ class Paginator extends React.Component<Props, any> {
                         pageSize={this.state.paginationPageSize}
                         locale={{ items_per_page: ''}}
                         pageSizeOptions={['10', '20', '30', '40', '100',this.props.i18n.language === "ru" ? 'Показать все' : 'Show all']}
-                        onShowSizeChange={(p: any, pageSize : any) => this.paginationSetPageSize(p, pageSize)}
+                        onShowSizeChange={(p, pageSize : any) => this.paginationSetPageSize(pageSize)}
                         itemRender={this.itemRender}
                     />
                 </div>

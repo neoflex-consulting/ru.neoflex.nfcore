@@ -296,6 +296,50 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
 }
 
 
+interface SelectComponentPropsForhightLight {
+    value: any,
+    onChange?: Function,
+    idx?: number,
+    ukey?: string,
+    mainObject: any,
+    upperBound: number,
+    id: string,
+    edit?: boolean,
+    showIcon?: boolean
+}
+
+function SelectComponentForhightLight(props: SelectComponentPropsForhightLight): JSX.Element {
+
+    const { mainObject, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
+
+    return (
+        <Select
+            className={"select-component"}
+            mode={upperBound === -1 ? "multiple" : "default"}
+            value={value}
+            key={ukey + "_" + idx}
+            style={{ width: "300px" }}
+            onChange={(newValue: any) => {
+                onChange && onChange!(newValue)
+            }}
+            disabled={!edit}
+        >
+            {mainObject.values.column._internal
+                .filter((obj: any) => obj.values.hide !== true)
+                .sort(function(a : any, b : any) {
+                    if(a.values.name.toLowerCase() < b.values.name.toLowerCase()) return -1;
+                    if(a.values.name.toLowerCase() > b.values.name.toLowerCase()) return 1;
+                    return 0;
+                })
+                .map((obj: any) =>
+                    <Select.Option key={ukey + "_opt_" + obj.values.name + "_" + id} value={obj.values.name}>
+                        <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.values.name] as SvgName}/>}{obj.values.name}</div>
+                    </Select.Option>)}
+        </Select>
+    )
+}
+
+
 interface TagComponentProps {
     value: any,
     onChange?: Function,
@@ -465,7 +509,22 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
+        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) {
+            return <SelectComponentForhightLight
+                idx={idx}
+                ukey={ukey}
+                value={targetValue || (eType.eContents()[0] && eType.eContents()
+                    .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")[0].get('name'))}
+                mainObject={props.mainEObject}
+                id={props.id}
+                onChange={(newValue: any) => {
+                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
+                }}
+                upperBound={props.upperBound}
+                edit={edit}
+                showIcon={showIcon}/>
+        }
+        else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}

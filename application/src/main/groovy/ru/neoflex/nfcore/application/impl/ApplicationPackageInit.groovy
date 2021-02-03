@@ -85,9 +85,10 @@ class ApplicationPackageInit {
                             maxHeaderOrder = allApplications[i].contents[0].headerOrder
                         }
                     }
-                    if (resource.contents[0].headerOrder == null) {
-                        resource.contents[0].headerOrder = maxHeaderOrder + 1;
-                    }
+                        if (resource.contents[0].headerOrder == null) {
+                            resource.contents[0].headerOrder = maxHeaderOrder + 1;
+                        }
+
                 }
             }
             })

@@ -192,8 +192,10 @@ abstract class DatasetColumnView extends ServerSideCondition {
     boolean hide
         @NFCore(documentation="Текст, отображаемый при наведении мыши на заголовок колонки")
     String headerTooltip
-        @NFCore(documentation="Отображать текст из 'headerTooltip'")
+        @NFCore(documentation="Отображать текст 'Tooltip'")
     boolean showTooltipField
+        @NFCore(documentation="Текст 'headerTooltip'", renderConditions="{'showTooltipField':true}")
+    String datasetColumnTooltip
         @NFCore(documentation="Закрепить столбец. Варианты: Undefined, Left, Right")
     Pinned pinned
         @NFCore(documentation="Возможность изменения ширины колонки пользователем")

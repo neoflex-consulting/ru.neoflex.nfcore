@@ -369,7 +369,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
                 rowData.set('valueFormatter', this.valueFormatter);
-                rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
+                rowData.set('tooltipField', (c.get('showTooltipField')&&c.get('datasetColumnTooltip')) ? c.get('datasetColumnTooltip') : undefined);
                 rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
                 //передаётся в DatasetGrid для подключения typography к заголоку грида
                 /*rowData.set('customHeader',c.get('headerName'));*/
@@ -1426,7 +1426,7 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{margin:'16px'}}>
+            <div style={{padding: "16px"}}>
                 {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
