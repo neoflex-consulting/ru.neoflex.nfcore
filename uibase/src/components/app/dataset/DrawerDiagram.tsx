@@ -96,7 +96,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                    placeHolder === "Column for graph" || placeHolder === "Столбец для графика" ?
+                    placeHolder === "Column for Pie graph" || placeHolder === "Столбец для Кругового графика" ?
                         <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                    placeholder={this.props.t(placeHolder)}>
                             {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>

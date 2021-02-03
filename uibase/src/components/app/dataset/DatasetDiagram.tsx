@@ -342,11 +342,11 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             })
             for (let i = 0; i < newRowData.length; i++){
                 count = 0
-                rowData.map((obj : any) => {
-                    if (obj[valueColumn] == newRowData[i][valueColumn]){
+                for (let g = 0; g < rowData.length; g++){
+                    if (rowData[g][valueColumn] === newRowData[i][valueColumn]){
                         count++
                     }
-                })
+                }
                 dataForChart.push({"id": newRowData[i][valueColumn], "value": count, "label": newRowData[i][valueColumn]})
             }
             return dataForChart
