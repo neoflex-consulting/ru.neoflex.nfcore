@@ -5,8 +5,8 @@ import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';
 import NeoIcon from "neo-icon/lib/icon";
 import {NeoButton, NeoHint} from "neo-design/lib";
-import '../../styles/Paginator.css';
-import {adaptiveElementSize, getAdaptiveSize} from "../../utils/adaptiveResizeUtils";
+import '../../../styles/Paginator.css';
+import {adaptiveElementSize, getAdaptiveSize} from "../../../utils/adaptiveResizeUtils";
 
 interface Props extends WithTranslation {
     paginationPageSize: number,

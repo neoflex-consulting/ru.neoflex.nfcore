@@ -1,33 +1,33 @@
 import * as React from "react";
-import {Button, Dropdown, Layout, Menu, notification} from "antd/lib";
+import {Dropdown, Layout, Menu, notification} from "antd/lib";
 import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowser from "./components/MetaBrowser";
-import ResourceEditor from "./components/ResourceEditor"
+// import ResourceEditor from "./components/ResourceEditor"
 import {Link, Route, Switch} from "react-router-dom";
 import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
-import {MainApp} from "./MainApp";
+// import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore, {EObject} from "ecore";
-import DynamicComponent from "./components/DynamicComponent"
-import Tools from "./components/Tools";
+// import DynamicComponent from "./components/DynamicComponent"
+// import Tools from "./components/Tools";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
-import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
+// import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import AppLogo from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
-import {NeoButton, NeoCol, NeoRow, NeoTypography, NeoHint} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoHint, NeoRow, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {Prohibited} from "./components/Prohibited";
-import DeveloperMain from "./components/DeveloperMain";
+// import DeveloperMain from "./components/DeveloperMain";
 
 const backgroundColor = "#2a356c";
 
@@ -37,7 +37,6 @@ interface State {
     principal?: any;
     languages: string[];
     notifierDuration: number;
-    breadcrumb: string[];
     applications: EObject[];
     applicationNames: string[];
     context: IMainContext;
@@ -52,7 +51,6 @@ interface State {
     globalSettings?: EObject;
 }
 
-
 export function encodeAppURL(path?: any[]) {
     return path ? `/app/${
         btoa(
@@ -66,46 +64,45 @@ export function encodeAppURL(path?: any[]) {
 }
 
 class EcoreApp extends React.Component<any, State> {
-
-    private docxHandlers: any[] = [];
-    private excelHandlers: any[] = [];
-    private eventActions: any[] = [];
-    private eventTracker = new EventTracker();
-
+//
+//     private docxHandlers: any[] = [];
+//     private excelHandlers: any[] = [];
+//     private eventActions: any[] = [];
+//     private eventTracker = new EventTracker();
+//
     constructor(props: any) {
         super(props);
         const context: IMainContext = {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
             getURL: this.getURL,
-            runQuery: this.runQuery,
-            runQueryDataset: this.runQueryDataset,
-            executeDMLOperation: this.executeDMLOperation,
+//             runQuery: this.runQuery,
+//             runQueryDataset: this.runQueryDataset,
+//             executeDMLOperation: this.executeDMLOperation,
             notification: this.notification,
             changeUserProfile: this.changeUserProfile,
-            addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
-            addExcelHandler: (handler: any) => { this.excelHandlers.push(handler) },
-            addEventAction: (action: IEventAction) => { this.eventActions.push(action) },
-            removeDocxHandler: () => { this.docxHandlers.pop() },
-            removeExcelHandler: () => { this.excelHandlers.pop() },
-            removeEventAction: () => { this.eventActions.pop() },
-            getDocxHandlers: ()=>{return this.docxHandlers},
-            getExcelHandlers: ()=>{return this.excelHandlers},
-            getEventActions: ()=>{return this.eventActions},
-            //По событию на странице
-            contextItemValues: new Map(),
-            globalValues: new Map(),
-            addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
-            removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
-            notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
-            getFullPath: this.getFullPath,
+//             addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
+//             addExcelHandler: (handler: any) => { this.excelHandlers.push(handler) },
+//             addEventAction: (action: IEventAction) => { this.eventActions.push(action) },
+//             removeDocxHandler: () => { this.docxHandlers.pop() },
+//             removeExcelHandler: () => { this.excelHandlers.pop() },
+//             removeEventAction: () => { this.eventActions.pop() },
+//             getDocxHandlers: ()=>{return this.docxHandlers},
+//             getExcelHandlers: ()=>{return this.excelHandlers},
+//             getEventActions: ()=>{return this.eventActions},
+//             //По событию на странице
+//             contextItemValues: new Map(),
+//             globalValues: new Map(),
+//             addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
+//             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
+//             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
+//             getFullPath: this.getFullPath,
             isDeveloper: this.isDeveloper,
         };
         this.state = {
             principal: undefined,
             languages: [],
             notifierDuration: 0,
-            breadcrumb: [],
             applications: [],
             applicationNames: [],
             context,
@@ -125,17 +122,17 @@ class EcoreApp extends React.Component<any, State> {
         }, cb)
     };
 
-    static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        if (nextProps.location.pathname.includes("app")) {
-            const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
-            return {
-                pathFull: pathFull,
-                appModuleName: pathFull[pathFull.length - 1].appModule
-            }
-        } else {
-            return null
-        }
-    }
+//     static getDerivedStateFromProps(nextProps: any, prevState: State) {
+//         if (nextProps.location.pathname.includes("app")) {
+//             const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
+//             return {
+//                 pathFull: pathFull,
+//                 appModuleName: pathFull[pathFull.length - 1].appModule
+//             }
+//         } else {
+//             return null
+//         }
+//     }
 
     getParameterPattern() {
         API.instance().findClass('auth', 'Parameter')
@@ -189,9 +186,9 @@ class EcoreApp extends React.Component<any, State> {
 
     notification = (title: string, description: string, notificationType: string) => {
         const {t} = this.props;
-        let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+        let btnCloseAll = (<NeoButton type={'link'} onClick={() => notification.destroy()}>
             {t("closeall")}
-        </Button>);
+        </NeoButton>);
         let key = title + description;
         if (notificationType === "success") {
             return (
@@ -239,126 +236,126 @@ class EcoreApp extends React.Component<any, State> {
         })
     };
 
-    prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
-        let resourceParameter = resourceSet.create({ uri: uri });
-        let serverOperations: EObject[] =
-            param === undefined
-                ?
-                param
-                :
-                param
-                    .filter( (p: any) => p['parameterName'] )
-                    .map( (p: any) => {
-                        return (
-                            pattern.create({
-                                parameterName: p['parameterName'],
-                                parameterValue: p['parameterValue'],
-                                parameterDataType: p['parameterDataType']||"String",
-                                isPrimaryKey: p['isPrimaryKey']
-                            } as IServerNamedParam)
-                        )
-                    });
-        resourceParameter.addAll(serverOperations);
-        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
-    };
-
-    prepareServerQueryParam = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
-        let resourceParameter = resourceSet.create({ uri: uri });
-        let serverOperations: EObject[] =
-            param === undefined
-                ?
-                param
-                :
-                param
-                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined && p['enable'] !== undefined)
-                    .map( (p: any) => {
-                        return (
-                            pattern.create({
-                                datasetColumn: p['datasetColumn'],
-                                operation: p['operation'],
-                                value: p['value'],
-                                enable: p['enable'],
-                                type: p['type']
-                            } as IServerQueryParam)
-                        )
-                    });
-        resourceParameter.addAll(serverOperations);
-        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
-    };
-
-    prepareServerQueryParamColumn = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
-        let resourceParameter = resourceSet.create({ uri: uri });
-        let serverOperations: EObject[] =
-            param === undefined
-                ?
-                param
-                :
-                param
-                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['enable'] !== undefined)
-                    .map( (p: any) => {
-                        return (
-                            pattern.create({
-                                datasetColumn: p['datasetColumn'],
-                                operation: p['operation'],
-                                value: p['value'],
-                                enable: p['enable'],
-                                type: p['type']
-                            } as IServerQueryParam)
-                        )
-                    });
-        resourceParameter.addAll(serverOperations);
-        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
-    };
-
-    runQuery = (
-        resource_: Ecore.Resource,
-        queryParams: IServerNamedParam[] = [],
-        filterParams: IServerQueryParam[] = [],
-        aggregationParams: IServerQueryParam[] = [],
-        sortParams: IServerQueryParam[] = [],
-        groupByParams: IServerQueryParam[] = [],
-        calculatedExpression: IServerQueryParam[] = [],
-        groupByColumn: IServerQueryParam[] = []
-    ) => {
-        const resource: Ecore.Resource = resource_;
-        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = 'runQuery';
-        let resourceSet = Ecore.ResourceSet.create();
-            return API.instance().call(ref, methodName, [
-            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
-            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
-            this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
-    };
-
-    executeDMLOperation = (
-        resource_: Ecore.Resource,
-        operation: dmlOperation,
-        queryParams: IServerNamedParam[] = []
-    ) => {
-        const resource: Ecore.Resource = resource_;
-        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = operation;
-        let resourceSet = Ecore.ResourceSet.create();
-        return API.instance().voidCall(ref, methodName, [
-            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
-            ]
-        )
-    };
-
-    runQueryDataset = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = []) => {
-        const resource: Ecore.Resource = resource_;
-        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-        const methodName: string = 'runQueryDataset';
-        let resourceSet = Ecore.ResourceSet.create();
-        return API.instance().call(ref, methodName, [
-            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
-        ])
-    };
-
+//     prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
+//         let resourceParameter = resourceSet.create({ uri: uri });
+//         let serverOperations: EObject[] =
+//             param === undefined
+//                 ?
+//                 param
+//                 :
+//                 param
+//                     .filter( (p: any) => p['parameterName'] )
+//                     .map( (p: any) => {
+//                         return (
+//                             pattern.create({
+//                                 parameterName: p['parameterName'],
+//                                 parameterValue: p['parameterValue'],
+//                                 parameterDataType: p['parameterDataType']||"String",
+//                                 isPrimaryKey: p['isPrimaryKey']
+//                             } as IServerNamedParam)
+//                         )
+//                     });
+//         resourceParameter.addAll(serverOperations);
+//         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+//     };
+//
+//     prepareServerQueryParam = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
+//         let resourceParameter = resourceSet.create({ uri: uri });
+//         let serverOperations: EObject[] =
+//             param === undefined
+//                 ?
+//                 param
+//                 :
+//                 param
+//                     .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined && p['enable'] !== undefined)
+//                     .map( (p: any) => {
+//                         return (
+//                             pattern.create({
+//                                 datasetColumn: p['datasetColumn'],
+//                                 operation: p['operation'],
+//                                 value: p['value'],
+//                                 enable: p['enable'],
+//                                 type: p['type']
+//                             } as IServerQueryParam)
+//                         )
+//                     });
+//         resourceParameter.addAll(serverOperations);
+//         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+//     };
+//
+//     prepareServerQueryParamColumn = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
+//         let resourceParameter = resourceSet.create({ uri: uri });
+//         let serverOperations: EObject[] =
+//             param === undefined
+//                 ?
+//                 param
+//                 :
+//                 param
+//                     .filter( (p: any) => p['datasetColumn'] !== undefined && p['enable'] !== undefined)
+//                     .map( (p: any) => {
+//                         return (
+//                             pattern.create({
+//                                 datasetColumn: p['datasetColumn'],
+//                                 operation: p['operation'],
+//                                 value: p['value'],
+//                                 enable: p['enable'],
+//                                 type: p['type']
+//                             } as IServerQueryParam)
+//                         )
+//                     });
+//         resourceParameter.addAll(serverOperations);
+//         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+//     };
+//
+//     runQuery = (
+//         resource_: Ecore.Resource,
+//         queryParams: IServerNamedParam[] = [],
+//         filterParams: IServerQueryParam[] = [],
+//         aggregationParams: IServerQueryParam[] = [],
+//         sortParams: IServerQueryParam[] = [],
+//         groupByParams: IServerQueryParam[] = [],
+//         calculatedExpression: IServerQueryParam[] = [],
+//         groupByColumn: IServerQueryParam[] = []
+//     ) => {
+//         const resource: Ecore.Resource = resource_;
+//         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+//         const methodName: string = 'runQuery';
+//         let resourceSet = Ecore.ResourceSet.create();
+//             return API.instance().call(ref, methodName, [
+//             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter'),
+//             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
+//             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
+//             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
+//             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
+//             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
+//             this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
+//     };
+//
+//     executeDMLOperation = (
+//         resource_: Ecore.Resource,
+//         operation: dmlOperation,
+//         queryParams: IServerNamedParam[] = []
+//     ) => {
+//         const resource: Ecore.Resource = resource_;
+//         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+//         const methodName: string = operation;
+//         let resourceSet = Ecore.ResourceSet.create();
+//         return API.instance().voidCall(ref, methodName, [
+//             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+//             ]
+//         )
+//     };
+//
+//     runQueryDataset = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = []) => {
+//         const resource: Ecore.Resource = resource_;
+//         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+//         const methodName: string = 'runQueryDataset';
+//         let resourceSet = Ecore.ResourceSet.create();
+//         return API.instance().call(ref, methodName, [
+//             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+//         ])
+//     };
+//
     isDatasetComponentsBufferEmpty = () => {
         if (this.state.context.datasetComponents) {
             for (const [key] of Object.entries(this.state.context.datasetComponents)) {
@@ -426,7 +423,7 @@ class EcoreApp extends React.Component<any, State> {
                 urlElement.appModule = appModuleName;
                 urlElement.tree = tree !== undefined ? tree : [];
                 urlElement.params = params ? params : [];
-                this.state.context.globalValues?.forEach(obj => {
+                this.state.context.globalValues!.forEach(obj => {
                     urlElement.params = urlElement.params!.concat(obj)
                 });
                 //Ограничить переходы
@@ -540,11 +537,10 @@ class EcoreApp extends React.Component<any, State> {
             i18n.changeLanguage(lng)
         };
 
-        const devMenu = (<Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+        const devMenu = <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'metadata'}>
                     <Link to={`/developer/metadata`}>
-
-                                                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('metadata')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('metadata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'data'}>
@@ -554,30 +550,25 @@ class EcoreApp extends React.Component<any, State> {
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'query'}>
                     <Link to={`/developer/query`}>
-                                                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('query')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('query')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'tools'}>
                     <Link to={`/developer/tools`}>
-
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/tools') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('tools')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'masterdata'}>
                     <Link to={`/developer/masterdata`}>
-
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/masterdata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('masterdata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'filesystem'}>
                     <Link to={`/developer/filesystem`}>
-
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/filesystem') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('filesystem')}</NeoTypography>
                     </Link>
                 </Menu.Item>
-            </Menu>
-
-        )
+            </Menu>;
 
 
         return (
@@ -593,11 +584,9 @@ class EcoreApp extends React.Component<any, State> {
                                 <img src={AppLogo} alt="App Logo"/>
                             </div>
                         </NeoCol>
-                        <NeoCol span={14}
-                                    style={{textAlign: 'center', alignItems: 'center', height: 'inherit'}}>
+                        <NeoCol span={14} style={{textAlign: 'center', alignItems: 'center', height: 'inherit'}}>
                             {
                                 this.props.location.pathname.includes('/app/') &&
-
                                 <MainContext.Consumer>
                                     {(context: any) => {
                                         return <HeaderMenu
@@ -609,111 +598,108 @@ class EcoreApp extends React.Component<any, State> {
                                 </MainContext.Consumer>
                             }
                             {
-
-                                        this.props.location.pathname.includes('/developer/') &&
-                                            <div>
-
-                                            <div>
-                                    <div className="headerDev-menu">
-                                        <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'main'}>
-                                                <Link to={`/developer/main`}>
-                                                    <span>
-                                                        {this.props.location.pathname.includes('/developer/main') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('main page')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('main page')}</NeoTypography>
-                                                        }
+                                this.props.location.pathname.includes('/developer/') &&
+                                <div>
+                                    <div>
+                                        <div className="headerDev-menu">
+                                            <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'main'}>
+                                                    <Link to={`/developer/main`}>
+                                                        <span>
+                                                            {this.props.location.pathname.includes('/developer/main') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('main page')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('main page')}</NeoTypography>
+                                                            }
                                                         </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'metadata'}>
-                                                <Link to={`/developer/metadata`}>
-                                                    <span>
-                                                        {this.props.location.pathname.includes('/developer/metadata') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('metadata')}</NeoTypography>
-                                                        :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('metadata')}</NeoTypography>
-                                                        }
+                                                    </Link>
+                                                </Menu.Item>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'metadata'}>
+                                                    <Link to={`/developer/metadata`}>
+                                                        <span>
+                                                            {this.props.location.pathname.includes('/developer/metadata') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('metadata')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('metadata')}</NeoTypography>
+                                                            }
                                                         </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'data'}>
-                                                <Link to={`/developer/data`}>
-                                                    <span>
-                                                        {this.props.location.pathname.includes('/developer/data') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('data')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('data')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'query'}>
-                                                <Link to={`/developer/query`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/query') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('query')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('query')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'tools'}>
-                                                <Link to={`/developer/tools`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/tools') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('tools')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('tools')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
-                                                <Link to={`/developer/masterdata`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/masterdata') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'filesystem'}>
-                                                <Link to={`/developer/filesystem`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/filesystem') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('filesystem')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('filesystem')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
-                                        </Menu>
-                                    </div>
-
-
-                                            </div>
-                                 <div className={'devMenuSmallWidth'}>
-                                    <Dropdown overlay={devMenu} placement="bottomCenter">
-                                        <div style={{float: "left"}}>
-                                            <NeoIcon color={'white'} icon={"table"} size={'m'}/>
+                                                    </Link>
+                                                </Menu.Item>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'data'}>
+                                                    <Link to={`/developer/data`}>
+                                                        <span>
+                                                            {this.props.location.pathname.includes('/developer/data') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('data')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('data')}</NeoTypography>
+                                                            }
+                                                            </span>
+                                                    </Link>
+                                                </Menu.Item>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'query'}>
+                                                    <Link to={`/developer/query`}>
+                                                         <span>
+                                                            {this.props.location.pathname.includes('/developer/query') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('query')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('query')}</NeoTypography>
+                                                            }
+                                                            </span>
+                                                    </Link>
+                                                </Menu.Item>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'tools'}>
+                                                    <Link to={`/developer/tools`}>
+                                                         <span>
+                                                            {this.props.location.pathname.includes('/developer/tools') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('tools')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('tools')}</NeoTypography>
+                                                            }
+                                                            </span>
+                                                    </Link>
+                                                </Menu.Item>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
+                                                    <Link to={`/developer/masterdata`}>
+                                                         <span>
+                                                            {this.props.location.pathname.includes('/developer/masterdata') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
+                                                            }
+                                                            </span>
+                                                    </Link>
+                                                </Menu.Item>
+                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'filesystem'}>
+                                                    <Link to={`/developer/filesystem`}>
+                                                         <span>
+                                                            {this.props.location.pathname.includes('/developer/filesystem') ?
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('filesystem')}</NeoTypography>
+                                                                :
+                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('filesystem')}</NeoTypography>
+                                                            }
+                                                            </span>
+                                                    </Link>
+                                                </Menu.Item>
+                                            </Menu>
                                         </div>
-                                    </Dropdown>
+                                    </div>
+                                    <div className={'devMenuSmallWidth'}>
+                                        <Dropdown overlay={devMenu} placement="bottomCenter">
+                                            <div style={{float: "left"}}>
+                                                <NeoIcon color={'white'} icon={"table"} size={'m'}/>
+                                            </div>
+                                        </Dropdown>
+                                    </div>
                                 </div>
-                                </div>
-                                    }
-
+                            }
                         </NeoCol>
-                        <NeoCol span={5}
-                             style={{
-                                    height: 'inherit',
-                                 alignItems: 'center'
-                             }}>
+                        <NeoCol
+                            span={5}
+                            style={{
+                                height: 'inherit',
+                                alignItems: 'center'
+                            }}
+                        >
                             <div className={'headerRightSide'}
                                 style={{
                                     width: '75%',
@@ -748,35 +734,34 @@ class EcoreApp extends React.Component<any, State> {
 
                                 }
                                 <NeoHint title={this.props.t('auto-close notification')}>
-                            <NeoButton
-                                type="link"
+                                    <NeoButton
+                                        type={"link"}
                                         style={{marginRight:'10px'}}
                                         onClick={this.onClickBellIcon}>
-                                    {localStorage.getItem('notifierDuration') === '5'  ?
-                                        <NeoIcon className={'bellButton'} icon={'notificationOff'} color={'white'} />
-                                    :
-                                        <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
-                            </NeoButton>
+                                        {localStorage.getItem('notifierDuration') === '5'  ?
+                                            <NeoIcon className={'bellButton'} icon={'notificationOff'} color={'white'} />
+                                        :
+                                            <NeoIcon className={'bellButton'} icon={'notification'} color={'white'} />}
+                                    </NeoButton>
                                 </NeoHint>
-                                    <span style={{
-                                        textTransform: "capitalize",
-                                        fontSize: '15px',
-                                        height: '32px',
-                                        color: '#ffffff',
-                                        marginRight:'25px',
-                                        lineHeight: '2'
-                                    }}>
-                                        <span className={'NameOfUser'}>{principal.name}</span>
-                                    </span>
+                                <span style={{
+                                    textTransform: "capitalize",
+                                    fontSize: '15px',
+                                    height: '32px',
+                                    color: '#ffffff',
+                                    marginRight:'25px',
+                                    lineHeight: '2'
+                                }}>
+                                    <span className={'NameOfUser'}>{principal.name}</span>
+                                </span>
                                 <NeoHint title={this.props.t('logout')}>
-                            <NeoButton
-                                style={{marginRight: "10px"}}
-
-                                onClick={this.logOut}
-                                type="link"
-                            >
-                                <NeoIcon icon={'exit'} color={'white'} />
-                            </NeoButton>
+                                    <NeoButton
+                                        style={{marginRight: "10px"}}
+                                        onClick={this.logOut}
+                                        type="link"
+                                    >
+                                        <NeoIcon icon={'exit'} color={'white'} />
+                                    </NeoButton>
                                 </NeoHint>
                             </div>
                         </NeoCol>
@@ -784,66 +769,56 @@ class EcoreApp extends React.Component<any, State> {
                 </Header>}
                 <Switch>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
-                    <Route path='/test' component={this.renderTest}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
-                    <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
+                    {/*<Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>*/}
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
-                    <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
-                    <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
+                    {/*<Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>*/}
+                    {/*<Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>*/}
+                    {/*<Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>*/}
                 </Switch>
-            </Layout>
+                    </Layout>
         )
     };
 
     renderDashboard = () => {
         this.changeURL(this.state.globalSettings!.get('dashboard').get('name'))
     };
-
-    private setSelectedKeys() {
-        let selectedKeys = ['developer', 'test'];
-        if (this.state.applicationNames) {
-            this.state.applicationNames.map((a: any) =>
-                selectedKeys.push(`app.${a}`));
-        }
-        if (this.props.location.pathname.includes('/app/')) {
-            const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule;
-            selectedKeys = selectedKeys
-                .filter(k => k.split('.').length > 1)
-                .filter( k =>
-                    currentApplication.includes(k.slice(4))
-                )
-        } else {
-            selectedKeys = selectedKeys.filter(k =>
-                this.props.location.pathname.split('/').includes(k) ||
-                this.props.location.pathname.split('/').includes(k.slice(4) !== "" && k.slice(4))
-            )
-        }
-        return selectedKeys;
-    }
-
-    renderTest = ()=> {
-        return (
-            <div>
-                {/*Correct test example*/}
-                <DynamicComponent componentPath={"components/reports/component.js"} componentName={"Report"}/>
-                {/*Example with error*/}
-                <DynamicComponent componentPath={"components/reports/component.js"} componentName={"UnCorrect"}/>
-            </div>
-    )};
-
+//
+//     private setSelectedKeys() {
+//         let selectedKeys = ['developer', 'test'];
+//         if (this.state.applicationNames) {
+//             this.state.applicationNames.map((a: any) =>
+//                 selectedKeys.push(`app.${a}`));
+//         }
+//         if (this.props.location.pathname.includes('/app/')) {
+//             const currentApplication = JSON.parse(decodeURIComponent(atob(this.props.location.pathname.split('/app/')[1])))[0].appModule;
+//             selectedKeys = selectedKeys
+//                 .filter(k => k.split('.').length > 1)
+//                 .filter( k =>
+//                     currentApplication.includes(k.slice(4))
+//                 )
+//         } else {
+//             selectedKeys = selectedKeys.filter(k =>
+//                 this.props.location.pathname.split('/').includes(k) ||
+//                 this.props.location.pathname.split('/').includes(k.slice(4) !== "" && k.slice(4))
+//             )
+//         }
+//         return selectedKeys;
+//     }
+//
     renderApplication = ()=>{
         return (
             <MainContext.Consumer>
                 {context => {
-                    return <MainApp
-                            {...this.props}
-                            context={context}
-                            pathFull={this.state.pathFull}
-                            appModuleName={this.state.appModuleName}
-                            showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)||this.state.appModuleName === "Dashboard"}
-                        />
+                    return  <div>MainApp</div>
+                    {/*<MainApp*/}
+//                             {...this.props}
+//                             context={context}
+//                             pathFull={this.state.pathFull}
+//                             appModuleName={this.state.appModuleName}
+//                             showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)||this.state.appModuleName === "Dashboard"}
+//                         />
                 }}
             </MainContext.Consumer>
         )
@@ -978,8 +953,8 @@ class EcoreApp extends React.Component<any, State> {
                     {this.state.principal === undefined ?
                         <Login onLoginSucceed={this.setPrincipal}/>
                         :
-                        this.renderDev(this.props)
-                    }
+                      this.renderDev(this.props)
+                     }
                 </Layout>
             </MainContext.Provider>
         )

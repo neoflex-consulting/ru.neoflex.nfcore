@@ -10,7 +10,6 @@ import {MainContext} from "../../../MainContext";
 import {Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
@@ -26,6 +25,7 @@ import domtoimage from "dom-to-image";
 import {Resizable} from "re-resizable";
 import {Link} from "react-router-dom";
 import {encodeAppURL} from "../../../EcoreApp";
+import Paginator from "../dataset/Paginator";
 
 const myNote = 'Личная заметка';
 
@@ -543,12 +543,12 @@ class Calendar extends React.Component<any, any> {
     private getDocxData(): docxExportObject {
         const width = (this.node) ? this.node.size.width : 700;
         const height = (this.node) ? this.node.size.height : 400;
-        if (this.node && this.node?.resizable !== null) {
+        if (this.node && this.node!.resizable !== null) {
             return {
                 hidden: this.props.hidden,
                 docxComponentType : docxElementExportType.diagram,
                 diagramData: {
-                    blob: domtoimage.toBlob(this.node?.resizable,{
+                    blob: domtoimage.toBlob(this.node!.resizable,{
                         width: width,
                         height: height,
                         filter: this.filter

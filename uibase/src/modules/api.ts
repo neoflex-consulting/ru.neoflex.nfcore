@@ -43,7 +43,7 @@ export class API implements IErrorHandler {
     private static _instance: API;
     public errorHandlers: Array<IErrorHandler>;
     private ePackagesPromise: Promise<Ecore.EPackage[]>;
-    private resolvePackages: (value?: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
+    private resolvePackages: (value: Ecore.EPackage[] | PromiseLike<Ecore.EPackage[]>) => void;
     private processes: any[];
     private processHandlers: ((processes: any[]) => void)[];
     private stompClient: Client | undefined;
@@ -670,13 +670,13 @@ export class API implements IErrorHandler {
                     return new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/socket-registry')
                 },
                 onConnect: () => {
-                    this.stompClient?.subscribe('/topic/afterSave', message => {
+                    this.stompClient!.subscribe('/topic/afterSave', message => {
                         if (this.updateObject) {
                             this.updateObject(JSON.parse(message.body));
                         }
                         console.log('ON CONNECT: ', JSON.parse(message.body));
                     });
-                    this.stompClient?.subscribe('/topic/disconnectFlag', message => {
+                    this.stompClient!.subscribe('/topic/disconnectFlag', message => {
                         if (message.body !== undefined && this.userName !== undefined) {
                             if (this.userName === message.body) {
                                 this.logout().then(()=>{

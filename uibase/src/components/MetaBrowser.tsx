@@ -3,11 +3,12 @@ import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
-import {NeoInput, NeoTabs} from "neo-design/lib";
+import {NeoInput} from "neo-design/lib";
 //CSS
 import './../styles/MetaBrowser.css';
 import DatasetGrid from "./app/dataset/DatasetGrid";
 import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
+import {Tabs} from "antd";
 
 export interface Props {
 }
@@ -265,7 +266,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     }
                 }
                 if (children2.length === 0) {
-                    delete child['children'];
+                    // delete child['children'];
                 }
                 children2.forEach(c=>{
                     eClassifiers.push(c);
@@ -323,12 +324,12 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         }}
                     />
                 </div>
-                <NeoTabs className={"meta-browser-tabs-region meta-browser-center-element"}
+                <Tabs className={"meta-browser-tabs-region meta-browser-center-element"}
                          defaultActiveKey={"ecore"}
                          tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ ){
-                            return <NeoTabs.NeoTabPane tab={eObj.name}
+                            return <Tabs.TabPane tab={eObj.name}
                                                        key={eObj.name}>
                                 <DatasetGrid
                                     ref={(ref:any)=> {
@@ -347,12 +348,12 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                         return ""
                                     }}
                                 />
-                            </NeoTabs.NeoTabPane>}
+                            </Tabs.TabPane>}
                         else{
                             return null
                         }
                     })}
-                </NeoTabs>
+                </Tabs>
             </div>
         )
     }

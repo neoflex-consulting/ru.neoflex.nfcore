@@ -8,7 +8,7 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import Paginator from "../Paginator";
+import Paginator from "./Paginator";
 import {
     agGridColumnTypes,
     appTypes,
@@ -225,7 +225,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     value: elem[el],
                     data: elem,
                     colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
-                    node: this.gridOptions.api?.getRowNode(index)
+                    node: this.gridOptions.api!.getRowNode(index)
                 };
                 const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
                 const cellStyle = params.colDef.cellStyle(params);
@@ -269,7 +269,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     value: elem[el],
                     data: elem,
                     colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
-                    node: this.gridOptions.api?.getRowNode(index)
+                    node: this.gridOptions.api!.getRowNode(index)
                 };
                 let dateTZ = undefined;
                 if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
@@ -398,7 +398,7 @@ class DatasetGrid extends React.Component<Props, any> {
                 textAlign: textAlign,
                 justifyContent: textAlign === "right" ? "flex-end" : textAlign === "left" ? "flex-start" : textAlign
             };
-            let highlights = this.props.highlights?.filter(h => h.enable && h.datasetColumn && h.highlightType) || [];
+            let highlights = this.props.highlights!.filter(h => h.enable && h.datasetColumn && h.highlightType) || [];
             for (const h of highlights) {
                 if (h.highlightType === 'Column') {
                     if (params.colDef.field === h.datasetColumn!) {
@@ -817,7 +817,7 @@ class DatasetGrid extends React.Component<Props, any> {
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
         });
-        this.gridOptions.api?.setHeaderHeight(minHeight)
+        this.gridOptions.api!.setHeaderHeight(minHeight)
     };
 
     colDefsToObject = (colDefs: Map<String,any>[], newColDef: {}[] = []) => {

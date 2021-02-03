@@ -1,5 +1,4 @@
 import * as React from "react";
-import {Button, Form} from 'antd';
 import Ecore from "ecore";
 import {API} from "../modules/api";
 import {Link} from "react-router-dom";
@@ -11,7 +10,7 @@ import {Helmet} from "react-helmet";
 import './../styles/Data.css'
 import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
-import Paginator from "./app/Paginator";
+import Paginator from "./app/dataset/Paginator";
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
@@ -275,7 +274,7 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                      <DataSearch
                         onSearch={this.handleSearch}
                         specialEClass={this.props.specialEClass}
-                        wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
+                        // wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
                      />
                  </div>
                  <div>
@@ -288,9 +287,14 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                              ?
                              <div>
                                  <div>
-                                     <Button title={t("select")} type="primary" onClick={this.handleSelect} disabled={!hasSelected} style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}>
+                                     <NeoButton
+                                         type={!hasSelected ? 'disabled' : 'primary'}
+                                         title={t("select")}
+                                         onClick={this.handleSelect}
+                                         style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}
+                                     >
                                          <NeoIcon icon={"big-grid"}/>
-                                    </Button>
+                                    </NeoButton>
                                  </div>
                                  <NeoTable
                                      scroll={{x: columnsWidth}}

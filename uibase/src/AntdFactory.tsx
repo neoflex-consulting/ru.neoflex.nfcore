@@ -1,9 +1,9 @@
 import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, InputNumber, Row, Select} from 'antd';
+import {Collapse, ConfigProvider, Drawer, Form, InputNumber, Select} from 'antd';
 
-import DatasetView from './components/app/dataset/DatasetView';
+// import DatasetView from './components/app/dataset/DatasetView';
 import {API} from './modules/api';
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
@@ -18,13 +18,14 @@ import {
     defaultDateFormat,
     defaultTimestampFormat,
     eventType,
-    grantType, neoIconMap,
+    grantType,
+    neoIconMap,
     positionEnum
 } from "./utils/consts";
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoSelect, NeoTabs} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoDatePicker, NeoInput, NeoParagraph, NeoRow, NeoSelect, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
@@ -233,13 +234,14 @@ class Col_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Col span={Number(this.viewObject.get('span')) || 24}
-                 key={this.viewObject._id}
-                 hidden={this.state.isHidden || this.props.isParentHidden}
-                 className={cssClass}
+            <NeoCol
+                span={Number(this.viewObject.get('span')) || 24}
+                key={this.viewObject._id}
+                hidden={this.state.isHidden || this.props.isParentHidden}
+                className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden)}
-            </Col>
+            </NeoCol>
         )
     }
 }
@@ -265,10 +267,11 @@ class Form_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Form style={{marginBottom: marginBottom}}
-                  hidden={this.state.isHidden || this.props.isParentHidden}
-                  key={this.viewObject._id.toString() + '_4'}
-                  className={cssClass}
+            <Form
+                // style={{marginBottom: marginBottom}}
+                //   hidden={this.state.isHidden || this.props.isParentHidden}
+                //   key={this.viewObject._id.toString() + '_4'}
+                //   className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden)}
             </Form>
@@ -305,24 +308,24 @@ class TabsViewReport_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden} style={{padding: "16px"}}>
-                <NeoTabs
-                    animated={false}
-                    className={cssClass}
-                    activeKey={this.state.activeKey}
-                    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}
-                    onTabClick={(newKey: string, e?: MouseEvent) => {
-                        if (!e) return false; //if keyboard pressed
-                        this.setState({activeKey: newKey})
-                    }}
-                >
-                    {
-                        children.map((c: Ecore.EObject) =>
-                            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >
-                                {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}
-                            </NeoTabs.NeoTabPane>
-                        )
-                    }
-                </NeoTabs>
+                {/*<NeoTabs*/}
+                {/*    animated={false}*/}
+                {/*    className={cssClass}*/}
+                {/*    activeKey={this.state.activeKey}*/}
+                {/*    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}*/}
+                {/*    onTabClick={(newKey: string, e?: MouseEvent) => {*/}
+                {/*        if (!e) return false; //if keyboard pressed*/}
+                {/*        this.setState({activeKey: newKey})*/}
+                {/*    }}*/}
+                {/*>*/}
+                {/*    {*/}
+                {/*        children.map((c: Ecore.EObject) =>*/}
+                {/*            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >*/}
+                {/*                {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}*/}
+                {/*            </NeoTabs.NeoTabPane>*/}
+                {/*        )*/}
+                {/*    }*/}
+                {/*</NeoTabs>*/}
             </div>
         )
     }
@@ -350,14 +353,13 @@ class Row_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Row
-                key={this.viewObject._id.toString() + '_7'}
+            <NeoRow
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 className={cssClass}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden)}
-            </Row>
+            </NeoRow>
         )
     }
 }
@@ -383,7 +385,7 @@ class Region_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Row
+            <NeoRow
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{
                     background: '#FFFFFF',
@@ -394,7 +396,7 @@ class Region_ extends ViewContainer {
                 className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden)}
-            </Row>
+            </NeoRow>
         )
     }
 }
@@ -1787,7 +1789,7 @@ class DatasetView_ extends ViewContainer {
             grantType: grantType,
             className: cssClass
         };
-        return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
+        return <div>H</div>/*<DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>*/
     }
 }
 

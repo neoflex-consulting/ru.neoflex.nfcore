@@ -7,7 +7,7 @@ import {NeoButton, NeoInput, NeoModal, NeoSelect} from "neo-design/lib";
 interface Props {
     classes: Ecore.EClass[]
     createResModalVisible: boolean;
-    refresh: ()=>void;
+    refresh: ()=> void;
     form: any;
     translate: Function;
     setModalVisible: Function;

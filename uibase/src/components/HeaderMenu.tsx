@@ -28,28 +28,19 @@ class HeaderMenu extends React.Component<any, any> {
             if (encodeAppURL(this.props.context.getURL(applications[i].eContents()[0].get('name'), false)) === this.props.location.pathname) {
                 if (applications[i].eContents()[0].get('name') === applicationName) {
 
-                    let temp: any
+                    let temp: any;
 
                     temp = applications[2].eContents()[0].get("headerOrder");
-                    /*applications[2].eContents()[0] = applications[i].eContents()[0];*/
                     applications[2].eContents()[0].values.headerOrder = applications[i].eContents()[0].get("headerOrder")
-                    /*applications[i].eContents()[0] = temp;*/
                     applications[i].eContents()[0].values.headerOrder = temp
 
                     temp = applications[1].eContents()[0].get("headerOrder");
-                    /*applications[1].eContents()[0] = applications[i].eContents()[0];*/
                     applications[1].eContents()[0].values.headerOrder = applications[i].eContents()[0].get("headerOrder")
-                    /*applications[i].eContents()[0] = temp;*/
                     applications[i].eContents()[0].values.headerOrder = temp
 
                     temp = applications[0].eContents()[0].get("headerOrder");
-                    /*applications[0].eContents()[0] = applications[i].eContents()[0];*/
                     applications[0].eContents()[0].values.headerOrder = applications[i].eContents()[0].get("headerOrder")
-                    /*applications[i].eContents()[0] = temp;*/
                     applications[i].eContents()[0].values.headerOrder = temp
-
-
-
                 }
             }
         }

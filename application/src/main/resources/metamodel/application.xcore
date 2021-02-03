@@ -40,6 +40,12 @@ abstract class GridComponent {
     boolean isEditGridComponent
 }
 
+@NFCore(documentation="Таблица справочников")
+class MasterdataView extends ViewElement {
+        @NFCore(documentation="Тип сущности из мастерданных")
+    refers EntityType entityType
+}
+
 @NFCore(documentation="Глобальные настройки приложения")
 class GlobalSettings extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")

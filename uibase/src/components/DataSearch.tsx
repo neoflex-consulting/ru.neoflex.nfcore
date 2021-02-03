@@ -1,8 +1,7 @@
 import * as React from "react";
 import Ecore from "ecore";
 import {API} from "../modules/api";
-import {Button, Form, Tabs} from "antd";
-import {FormComponentProps} from 'antd/lib/form/Form';
+import {Form, Layout, Tabs} from "antd";
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
 import ponyCat from '../icons/ponyCat.png';
@@ -10,10 +9,8 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
 import {NeoButton, NeoHint, NeoInput, NeoOption, NeoSelect} from "neo-design/lib";
-
-const FormItem = Form.Item;
-
-const [form] = Form.useForm();
+import {NeoIcon} from "neo-icon/lib";
+import {FormInstance} from "antd/lib/form";
 
 interface Props {
     onSearch: (resources: Ecore.Resource[]) => void;
@@ -23,19 +20,21 @@ interface Props {
 interface State {
     tags: Ecore.EObject[];
     classes: Ecore.EObject[];
-    indicatorError: boolean;
     createResModalVisible: boolean;
     selectTags: number;
     selectCount: number;
     selectDropdownVisible: boolean;
 }
 
-class DataSearch extends React.Component<Props & FormComponentProps & WithTranslation, State> {
+const { useForm } = Form;
+
+class DataSearch extends React.Component<Props & WithTranslation, State> {
+
+    // private formRef = React.createRef<FormInstance>();
 
     state = {
         tags: [],
         classes: [],
-        indicatorError: false,
         createResModalVisible: false,
         selectTags: 6,
         selectCount: 0,
@@ -48,32 +47,32 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
     };
 
     refresh = () => {
-        this.props.form.validateFields((err: any, values: any) => {
-            if (!err) {
-                this.setState({ indicatorError: false });
-                let selectedClassObject: Ecore.EClass | undefined;
-                if (this.props.specialEClass === undefined) {
-                    selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
-                } else {
-                    selectedClassObject = this.props.specialEClass
-                }
-                if (values.key === 'json_search') {
-                    API.instance().find(JSON.parse(values.json_field)).then(results => {
-                        this.props.onSearch(results.resources)
-                    })
-                } else if (selectedClassObject) {
-                    (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
-                        .then((resources) => {
-                            this.props.onSearch(resources)
-                        }))
-                } else {
-                    (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
-                        .then((resources) => {
-                            this.props.onSearch(resources)
-                        }))
-                }
-            } else this.setState({ indicatorError: true })
-        });
+        console.log("refresh")
+        // form.validateFields().then((values: any) => {
+        //     let selectedClassObject: Ecore.EClass | undefined;
+        //     if (this.props.specialEClass === undefined) {
+        //         selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
+        //     } else {
+        //         selectedClassObject = this.props.specialEClass
+        //     }
+        //     if (values.key === 'json_search') {
+        //         API.instance().find(JSON.parse(values.json_field)).then(results => {
+        //             this.props.onSearch(results.resources)
+        //         })
+        //     } else if (selectedClassObject) {
+        //         (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
+        //             .then((resources) => {
+        //                 this.props.onSearch(resources)
+        //             }))
+        //     } else {
+        //         (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
+        //             .then((resources) => {
+        //                 this.props.onSearch(resources)
+        //             }))
+        //     }
+        //
+        // }).catch( () => {
+        // });
     };
 
     getEClasses(): void {
@@ -109,198 +108,211 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         this.getAllTags();
     }
 
-    checkEClass = () => {
-        const checkRecursive = (cls:Ecore.EClass ) => {
-            let retVal = false;
-            if (cls.get('name') === 'Tagged') {
-                return true;
-            } else {
-                cls.get('eSuperTypes').each((cl:any)=>{
-                    retVal = checkRecursive(cl)
-                })
-            }
-            return retVal
-        };
-        const className = this.props.form.getFieldValue('selectEClass');
-        if (className === "" || !className) {
-            return false
-        }
-        const selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === className);
-        return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
-    };
+    // checkEClass = () => {
+    //     const checkRecursive = (cls:Ecore.EClass ) => {
+    //         let retVal = false;
+    //         if (cls.get('name') === 'Tagged') {
+    //             return true;
+    //         } else {
+    //             cls.get('eSuperTypes').each((cl:any)=>{
+    //                 retVal = checkRecursive(cl)
+    //             })
+    //         }
+    //         return retVal
+    //     };
+    //     const className = form.getFieldValue('selectEClass');
+    //     if (className === "" || !className) {
+    //         return false
+    //     }
+    //     const selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === className);
+    //     return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
+    // };
+
 
     render() {
-        const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
+        // const [form] = Form.useForm();
+        // const { getFieldValue, setFieldsValue } = this.formRef.current;
         const { TabPane } = Tabs;
         const { t } = this.props;
         return (
             <React.Fragment>
-                {this.state.createResModalVisible && <ResourceCreateFrom 
+                {this.state.createResModalVisible && <ResourceCreateFrom
                     classes={ this.state.classes }
                     refresh={ this.refresh }
                     createResModalVisible={ this.state.createResModalVisible }
-                    form = { this.props.form }
+                    form = { "form" }
                     translate={ t }
                     setModalVisible={this.setModalVisible}
                 />}
-                        <Form
-                            form={form}
-                            onSubmit={this.handleSubmit}
-                            className={'datasearch'}
-                            style={{width:'100%', padding:'10px 36px'}}
+                <Form
+                    name={"dataSearch"}
+                    initialValues={{ key: 'data_search' }}
+                    onFinish={this.handleSubmit}
+                    onFinishFailed={this.handleSubmit}
+                >
+                    <NeoButton
+                        title={t("createitem")}
+                        suffixIcon={<NeoIcon icon={"plus"}/>}
+                        type="primary"
+                        style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1}}
+                        size="large"
+                        onClick={ () => this.setModalVisible(true) }
+                    />
+                    <Form.Item
+                        name={"key"}
+                    >
+                        <Tabs
+                            // onChange={(key: string) => {
+                            //     this.formRef.current!.setFieldsValue({ key: { value: key } })
+                            // }}
                         >
-                            <Button
-                                title={t("createitem")}
-                                icon="plus"
-                                type="primary"
-                                style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1}}
-                                size="large"
-                                onClick={()=>this.setModalVisible(true)}
-                            />
-                            {getFieldDecorator('key', { initialValue: 'data_search' })(
-                                <Tabs onChange={(key: string) => {
-                                    setFields({ key: { value: key } });
-                                }}>
-
-                                    <TabPane className={'datasearch_region'} tab={this.props.t('data search')} key='data_search'>
-
-                                            <FormItem>
-                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>EClass</div>
-                                                {getFieldDecorator('selectEClass', {
-                                                    initialValue: this.props.specialEClass === undefined
-                                                        ? undefined :
-                                                        this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name'),
-                                                })(
-                                                    <NeoSelect
-                                                        className={'EClass_select'}
-                                                        width={'670px'}
-                                                        allowClear={true}
-                                                        showSearch={true}
-                                                        disabled={!!this.props.specialEClass}
-                                                        placeholder={t('eClass')}>
-                                                        {
-                                                            this.state.classes
-                                                                .filter((eclass: Ecore.EObject) => /*!eclass.get('abstract')
-                                                                    && */eclass.get('eAllStructuralFeatures')
-                                                                        .find((feature: Ecore.EStructuralFeature) =>
-                                                                            feature.get('eType').get('name') === 'QName'))
-                                                                .map((eclass: Ecore.EObject) =>
-                                                                    <NeoOption key={eclass.get('name')}
-                                                                                   value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
-                                                                        {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
-                                                                    </NeoOption>)
-                                                        }
-                                                    </NeoSelect>
-                                                )}
-                                            </FormItem>
-                                            <FormItem style={{display:'inline-block'}}>
-                                                    <div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>
-                                                {getFieldDecorator('name', {
-                                                    rules: [{
-                                                        required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
-                                                        message: 'Please enter name'
-                                                    }]
-                                                })(
-                                                    <NeoInput width={'670px'} />
-                                                )}
-                                            </FormItem>
-                                            <FormItem>
-                                                <div style={{lineHeight:'1', marginBottom:'4px'}}>{t('tags')}</div>
-                                                {getFieldDecorator('tags', {
-                                                    rules: []
-                                                })(
-                                                    <NeoSelect
-                                                        className={'tags-select'}
-                                                        allowClear={true}
-                                                        mode={"tags"}
-                                                        disabled={this.checkEClass()}
-                                                        width={'670px'}
-                                                        onChange={(event:any) => {
-                                                            this.setState({selectCount: event.toString().split(',').length})
-                                                        }}
-                                                        placeholder={t('choose from the list')}
-                                                        maxTagTextLength={7}
-                                                        maxTagCount={this.state.selectTags}
-                                                        maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
-                                                        onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
-                                                    >
-                                                        {
-                                                            this.state.tags.map((tag: Ecore.EObject) =>
-                                                                    <NeoOption key={tag.get('name')}
-                                                                               value={tag.get('name')}>
-                                                                        {this.state.selectDropdownVisible ?
-                                                                            tag.get('name')
-                                                                            :
-                                                                            <NeoHint title={tag.get('name')}>
-                                                                            {tag.get('name')}
-                                                                            </NeoHint>
-                                                                        }
-                                                                    </NeoOption>
-                                                                )
-                                                        }
-                                                     </NeoSelect>
-                                                )}
-                                            </FormItem>
-                                        <FormItem style={{marginBottom:'20px'}}>
-
-                                            <NeoButton
-                                                type={(getFieldValue('name') !== undefined || getFieldValue('selectEClass') !== undefined || getFieldValue('tags') !== undefined) ? 'primary': 'disabled'}
-                                                >
-                                                {t('searchsimple')}
-                                            </NeoButton>
-
-                                        </FormItem>
-                                        {this.state.indicatorError ?
-                                            <img alt={t('notfound')} src={ponyCat} className="error" />
-                                            :
-                                            undefined
+                            <Tabs.TabPane
+                                key='data_search'
+                                className={'datasearch_region'}
+                                tab={this.props.t('data search')}
+                            >
+                                <Form.Item
+                                    label={<div style={{lineHeight:'1', marginBottom:'4px'}}>EClass</div>}
+                                    name={"selectEClass"}
+                                    initialValue={this.props.specialEClass === undefined
+                                        ? undefined :
+                                        this.props.specialEClass.eContainer.get('name') + "." + this.props.specialEClass.get('name')}
+                                >
+                                    <NeoSelect
+                                        className={'EClass_select'}
+                                        width={'670px'}
+                                        allowClear={true}
+                                        showSearch={true}
+                                        disabled={!!this.props.specialEClass}
+                                        placeholder={t('eClass')}>
+                                        {
+                                            this.state.classes
+                                                .filter((eclass: Ecore.EObject) => /*!eclass.get('abstract')
+                                                    && */eclass.get('eAllStructuralFeatures')
+                                                        .find((feature: Ecore.EStructuralFeature) =>
+                                                            feature.get('eType').get('name') === 'QName'))
+                                                .map((eclass: Ecore.EObject) =>
+                                                    <NeoOption key={eclass.get('name')}
+                                                                   value={`${eclass.eContainer.get('name')}.${eclass.get('name')}`}>
+                                                        {`${eclass.eContainer.get('name')}.${eclass.get('name')}`}
+                                                    </NeoOption>)
                                         }
+                                    </NeoSelect>
+                                </Form.Item>
 
-                                    </TabPane>
-                                    <TabPane className={'datasearch_region'} tab={this.props.t('json search')} key='json_search'>
-                                        <FormItem>
-                                            {getFieldDecorator('json_field', {
-                                                initialValue: JSON.stringify({
-                                                    contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
-                                                }, null, 4),
-                                                rules: [{
-                                                    required: getFieldValue('key') === 'json_search',
-                                                    message: 'Please enter json'
-                                                }]
-                                            })(
-                                                <div>
-                                                    <AceEditor
-                                                        ref={"aceEditor"}
-                                                        mode={"json"}
-                                                        width={"100%"}
-                                                        onChange={(json_field: string) => {
-                                                            setFields({ json_field: { value: json_field } });
-                                                        }}
-                                                        editorProps={{ $blockScrolling: true }}
-                                                        value={getFieldValue('json_field')}
-                                                        showPrintMargin={false}
-                                                        theme={"tomorrow"}
-                                                        debounceChangePeriod={100}
-                                                        height={"104px"}
-                                                    />
-                                                </div>
-                                            )}
-                                        </FormItem>
-                                        <FormItem style={{marginBottom:'20px'}}>
 
-                                            <NeoButton
-                                                title={t("searchsimple")}
-                                                >
-                                                {t('searchsimple')}
-                                            </NeoButton>
 
-                                        </FormItem>
-                                    </TabPane>
-                                </Tabs>
-                            )}
-                        </Form>
+
+                                <Form.Item
+                                    style={{display:'inline-block'}}
+                                    label={<div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>}
+                                    name={"name"}
+                                    // rules={[{
+                                    //     required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
+                                    //     message: 'Please enter name'
+                                    // }]}
+                                >
+                                    <NeoInput width={'670px'} />
+                                </Form.Item>
+
+                                <Form.Item
+
+                                    label={t('tags')}
+                                    name={"tags"}
+                                >
+                                    <NeoSelect
+                                        className={'tags-select'}
+                                        allowClear={true}
+                                        mode={"tags"}
+                                        // disabled={this.checkEClass()}
+                                        width={'670px'}
+                                        onChange={(event:any) => {
+                                            this.setState({selectCount: event.toString().split(',').length})
+                                        }}
+                                        placeholder={t('choose from the list')}
+                                        maxTagTextLength={7}
+                                        maxTagCount={this.state.selectTags}
+                                        maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
+                                        onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
+                                    >
+                                        {
+                                            this.state.tags.map((tag: Ecore.EObject) =>
+                                                    <NeoOption key={tag.get('name')}
+                                                               value={tag.get('name')}>
+                                                        {this.state.selectDropdownVisible ?
+                                                            tag.get('name')
+                                                            :
+                                                            <NeoHint title={tag.get('name')}>
+                                                            {tag.get('name')}
+                                                            </NeoHint>
+                                                        }
+                                                    </NeoOption>
+                                                )
+                                        }
+                                     </NeoSelect>
+                                </Form.Item>
+
+                                <Form.Item style={{marginBottom:'20px'}}>
+                                    <NeoButton
+                                        // type={(getFieldValue('name') !== undefined || getFieldValue('selectEClass') !== undefined || getFieldValue('tags') !== undefined) ? 'primary': 'disabled'}
+                                    >
+                                        {t('searchsimple')}
+                                    </NeoButton>
+                                </Form.Item>
+
+                            </Tabs.TabPane>
+
+                            <Tabs.TabPane
+                                className={'datasearch_region'}
+                                tab={this.props.t('json search')}
+                                key='json_search'
+                            >
+                                <Form.Item
+                                    name={"json_field"}
+                                    initialValue={
+                                        JSON.stringify({
+                                            contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
+                                            }, null, 4)
+                                    }
+                                    // rules={[{
+                                    //     required: getFieldValue('key') === 'json_search',
+                                    //     message: 'Please enter json'
+                                    // }]}
+                                >
+                                    <div>
+                                        <AceEditor
+                                            ref={"aceEditor"}
+                                            mode={"json"}
+                                            width={"100%"}
+                                            // onChange={(json_field: string) => {
+                                            //     setFieldsValue({ json_field: { value: json_field } });
+                                            // }}
+                                            editorProps={{ $blockScrolling: true }}
+                                            // value={getFieldValue('json_field')}
+                                            showPrintMargin={false}
+                                            theme={"tomorrow"}
+                                            debounceChangePeriod={100}
+                                            height={"104px"}
+                                        />
+                                    </div>
+                                </Form.Item>
+
+                                <Form.Item style={{marginBottom:'20px'}}>
+                                    <NeoButton
+                                        title={t("searchsimple")}
+                                    >
+                                        {t('searchsimple')}
+                                    </NeoButton>
+                                </Form.Item>
+
+                            </Tabs.TabPane>
+
+                        </Tabs>
+                    </Form.Item>
+                </Form>
+
             </React.Fragment>
-        );
+        )
     }
 }
 

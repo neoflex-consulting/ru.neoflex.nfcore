@@ -18,8 +18,6 @@ interface State {
     open: boolean;
 }
 
-const [form] = Form.useForm();
-
 class SearchFilter extends React.Component<Props & WithTranslation, State> {
     state = {
         selectedRowKeys: [],
@@ -100,7 +98,10 @@ class SearchFilter extends React.Component<Props & WithTranslation, State> {
             };
 
             return (
-                <Form style={{ padding: '9px 16px' }} form={form}>
+                <Form
+                    style={{ padding: '9px 16px' }}
+                    // form={form}
+                >
                     <NeoInput
                         type={'search'}
                         placeholder={`${t('search')} ${columnsT}`}
