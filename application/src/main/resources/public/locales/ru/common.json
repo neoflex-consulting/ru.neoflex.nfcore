@@ -501,7 +501,8 @@
         "export all tabs": "Выгрузить все вкладки",
         "export all tabs or current tab": "Выгрузить все вкладки или открытую вкладку?",
         "all": "Все",
-        "current": "Открытую"
+        "current": "Открытую",
+        "create event handler": "Добавить обработчик"
 }
 
 

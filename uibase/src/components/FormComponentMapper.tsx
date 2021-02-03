@@ -130,10 +130,11 @@ interface SelectRefObjectProps {
     onBrowse?: Function,
     upperBound: number,
     edit?: boolean
+    goToObject?:(id:string, obj: Ecore.EObject| null)=>void
 }
 
 function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
-    const { eObject, upperBound, value, mainEObject, idx, ukey, edit } = props
+    const { eObject, upperBound, value, mainEObject, idx, ukey, edit, goToObject } = props
 
     const getRelatedResourceByRef = (reference: string) => {
         const refObject = (mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
@@ -153,6 +154,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                     }}
                     closable={edit}
                     key={el["$ref"]}
+                    onClick={()=>{
+                        goToObject && goToObject(el.$ref, getRelatedResourceByRef(el.$ref));
+                    }}
                 >
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.get('name')}&nbsp;
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp;
@@ -165,6 +169,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 }}
                 closable={edit}
                 key={value["$ref"]}
+                onClick={()=>{
+                    goToObject && goToObject(value.$ref, relatedResource);
+                }}
             >
                 {(relatedResource && relatedResource.get('name')) || (value.$ref && value.$ref.split('//')[1])}&nbsp;
                 {(relatedResource && relatedResource.eClass.get('name')) || (value.eClass && value.eClass.split('//')[2])}&nbsp;
@@ -408,6 +415,7 @@ interface Props {
     expanded?: boolean,
     syntax?: string,
     showIcon?: boolean,
+    goToObject?: (id?:string)=>void,
 }
 
 export default class ComponentMapper extends React.Component<Props, any> {
@@ -423,7 +431,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
         if (syntax) {
             return <EditableSyntaxArea
@@ -449,6 +457,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 onBrowse={props.onBrowse}
                 upperBound={props.upperBound}
                 edit={edit}
+                goToObject={goToObject}
             />
         } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
             return <BooleanSelect
@@ -500,7 +509,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}
             />
-        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && eObject.values.name === "datasetColumn") {
+        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) {
             return <SelectComponentForhightLight
                 idx={idx}
                 ukey={ukey}
