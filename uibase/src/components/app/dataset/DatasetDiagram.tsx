@@ -258,12 +258,13 @@ class DatasetDiagram extends React.Component<Props & any, State> {
             legendOffset: 30,
         };
         const axisY : AxisProps = {
-            tickSize: 5,
+            orient: 'left',
+            tickSize: 0,
             tickPadding: 5,
-            tickRotation: 0,
+            tickRotation: -50,
             legend: this.state.diagramParams.axisYLegend,
             legendPosition: 'middle',
-            legendOffset: -45,
+            legendOffset: -55,
         };
         return <div hidden={this.props.hide}>
             {/*Ссылка для выгрузки диаграммы в png*/}
@@ -284,10 +285,10 @@ class DatasetDiagram extends React.Component<Props & any, State> {
                     margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
-                    axisTop={(this.state.diagramParams.axisXPosition === "Top") ? axisX : null}
-                    axisRight={(this.state.diagramParams.axisYPosition === "Right") ? axisY : null}
-                    axisBottom={(this.state.diagramParams.axisXPosition === "Bottom") ? axisX : null}
-                    axisLeft={(this.state.diagramParams.axisYPosition === "Left") ? axisY : null}
+                    axisTop={null}
+                    axisRight={null}
+                    axisBottom={axisX}
+                    axisLeft={axisY}
                     colors={{ scheme: this.state.diagramParams.colorSchema }}
                     pointSize={10}
                     pointColor={{ theme: 'background' }}
