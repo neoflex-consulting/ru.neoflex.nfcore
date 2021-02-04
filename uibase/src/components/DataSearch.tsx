@@ -132,6 +132,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     render() {
         // const [form] = Form.useForm();
         // const { getFieldValue, setFieldsValue } = this.formRef.current;
+        const newT = "newT";
         const { TabPane } = Tabs;
         const { t } = this.props;
         return (

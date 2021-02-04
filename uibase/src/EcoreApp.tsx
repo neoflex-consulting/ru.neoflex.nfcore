@@ -4,22 +4,21 @@ import 'antd/dist/antd.css';
 import './styles/EcoreApp.css';
 import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowser from "./components/MetaBrowser";
-// import ResourceEditor from "./components/ResourceEditor"
+import ResourceEditor from "./components/ResourceEditor"
 import {Link, Route, Switch} from "react-router-dom";
 import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
-// import {MainApp} from "./MainApp";
+import {MainApp} from "./MainApp";
 import {withTranslation, WithTranslation} from "react-i18next";
 import Ecore, {EObject} from "ecore";
-// import DynamicComponent from "./components/DynamicComponent"
-// import Tools from "./components/Tools";
+import Tools from "./components/Tools";
 import {IEventAction, IMainContext, IServerNamedParam, IServerQueryParam, MainContext} from "./MainContext";
 import update from "immutability-helper";
 import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
-// import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
+import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
 import AppLogo from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
@@ -27,7 +26,7 @@ import 'neo-design/dist/neoDesign.css';
 import {NeoButton, NeoCol, NeoHint, NeoRow, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {Prohibited} from "./components/Prohibited";
-// import DeveloperMain from "./components/DeveloperMain";
+import DeveloperMain from "./components/DeveloperMain";
 
 const backgroundColor = "#2a356c";
 
@@ -64,39 +63,39 @@ export function encodeAppURL(path?: any[]) {
 }
 
 class EcoreApp extends React.Component<any, State> {
-//
-//     private docxHandlers: any[] = [];
-//     private excelHandlers: any[] = [];
-//     private eventActions: any[] = [];
-//     private eventTracker = new EventTracker();
-//
+
+    private docxHandlers: any[] = [];
+    private excelHandlers: any[] = [];
+    private eventActions: any[] = [];
+    private eventTracker = new EventTracker();
+
     constructor(props: any) {
         super(props);
         const context: IMainContext = {
             updateContext: this.updateContext,
             changeURL: this.changeURL,
             getURL: this.getURL,
-//             runQuery: this.runQuery,
-//             runQueryDataset: this.runQueryDataset,
-//             executeDMLOperation: this.executeDMLOperation,
+            runQuery: this.runQuery,
+            runQueryDataset: this.runQueryDataset,
+            executeDMLOperation: this.executeDMLOperation,
             notification: this.notification,
             changeUserProfile: this.changeUserProfile,
-//             addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
-//             addExcelHandler: (handler: any) => { this.excelHandlers.push(handler) },
-//             addEventAction: (action: IEventAction) => { this.eventActions.push(action) },
-//             removeDocxHandler: () => { this.docxHandlers.pop() },
-//             removeExcelHandler: () => { this.excelHandlers.pop() },
-//             removeEventAction: () => { this.eventActions.pop() },
-//             getDocxHandlers: ()=>{return this.docxHandlers},
-//             getExcelHandlers: ()=>{return this.excelHandlers},
-//             getEventActions: ()=>{return this.eventActions},
-//             //По событию на странице
-//             contextItemValues: new Map(),
-//             globalValues: new Map(),
-//             addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
-//             removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
-//             notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
-//             getFullPath: this.getFullPath,
+            addDocxHandler: (handler: any) => { this.docxHandlers.push(handler) },
+            addExcelHandler: (handler: any) => { this.excelHandlers.push(handler) },
+            addEventAction: (action: IEventAction) => { this.eventActions.push(action) },
+            removeDocxHandler: () => { this.docxHandlers.pop() },
+            removeExcelHandler: () => { this.excelHandlers.pop() },
+            removeEventAction: () => { this.eventActions.pop() },
+            getDocxHandlers: ()=>{return this.docxHandlers},
+            getExcelHandlers: ()=>{return this.excelHandlers},
+            getEventActions: ()=>{return this.eventActions},
+            //По событию на странице
+            contextItemValues: new Map(),
+            globalValues: new Map(),
+            addEventHandler: this.eventTracker.addEventHandler.bind(this.eventTracker),
+            removeEventHandler: this.eventTracker.removeEventHandler.bind(this.eventTracker),
+            notifyAllEventHandlers: this.eventTracker.notifyAllEventHandlers.bind(this.eventTracker),
+            getFullPath: this.getFullPath,
             isDeveloper: this.isDeveloper,
         };
         this.state = {
@@ -121,18 +120,6 @@ class EcoreApp extends React.Component<any, State> {
             return {context: update(state.context, {$merge: context})}
         }, cb)
     };
-
-//     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-//         if (nextProps.location.pathname.includes("app")) {
-//             const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
-//             return {
-//                 pathFull: pathFull,
-//                 appModuleName: pathFull[pathFull.length - 1].appModule
-//             }
-//         } else {
-//             return null
-//         }
-//     }
 
     getParameterPattern() {
         API.instance().findClass('auth', 'Parameter')
@@ -236,126 +223,126 @@ class EcoreApp extends React.Component<any, State> {
         })
     };
 
-//     prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
-//         let resourceParameter = resourceSet.create({ uri: uri });
-//         let serverOperations: EObject[] =
-//             param === undefined
-//                 ?
-//                 param
-//                 :
-//                 param
-//                     .filter( (p: any) => p['parameterName'] )
-//                     .map( (p: any) => {
-//                         return (
-//                             pattern.create({
-//                                 parameterName: p['parameterName'],
-//                                 parameterValue: p['parameterValue'],
-//                                 parameterDataType: p['parameterDataType']||"String",
-//                                 isPrimaryKey: p['isPrimaryKey']
-//                             } as IServerNamedParam)
-//                         )
-//                     });
-//         resourceParameter.addAll(serverOperations);
-//         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
-//     };
-//
-//     prepareServerQueryParam = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
-//         let resourceParameter = resourceSet.create({ uri: uri });
-//         let serverOperations: EObject[] =
-//             param === undefined
-//                 ?
-//                 param
-//                 :
-//                 param
-//                     .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined && p['enable'] !== undefined)
-//                     .map( (p: any) => {
-//                         return (
-//                             pattern.create({
-//                                 datasetColumn: p['datasetColumn'],
-//                                 operation: p['operation'],
-//                                 value: p['value'],
-//                                 enable: p['enable'],
-//                                 type: p['type']
-//                             } as IServerQueryParam)
-//                         )
-//                     });
-//         resourceParameter.addAll(serverOperations);
-//         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
-//     };
-//
-//     prepareServerQueryParamColumn = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
-//         let resourceParameter = resourceSet.create({ uri: uri });
-//         let serverOperations: EObject[] =
-//             param === undefined
-//                 ?
-//                 param
-//                 :
-//                 param
-//                     .filter( (p: any) => p['datasetColumn'] !== undefined && p['enable'] !== undefined)
-//                     .map( (p: any) => {
-//                         return (
-//                             pattern.create({
-//                                 datasetColumn: p['datasetColumn'],
-//                                 operation: p['operation'],
-//                                 value: p['value'],
-//                                 enable: p['enable'],
-//                                 type: p['type']
-//                             } as IServerQueryParam)
-//                         )
-//                     });
-//         resourceParameter.addAll(serverOperations);
-//         return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
-//     };
-//
-//     runQuery = (
-//         resource_: Ecore.Resource,
-//         queryParams: IServerNamedParam[] = [],
-//         filterParams: IServerQueryParam[] = [],
-//         aggregationParams: IServerQueryParam[] = [],
-//         sortParams: IServerQueryParam[] = [],
-//         groupByParams: IServerQueryParam[] = [],
-//         calculatedExpression: IServerQueryParam[] = [],
-//         groupByColumn: IServerQueryParam[] = []
-//     ) => {
-//         const resource: Ecore.Resource = resource_;
-//         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-//         const methodName: string = 'runQuery';
-//         let resourceSet = Ecore.ResourceSet.create();
-//             return API.instance().call(ref, methodName, [
-//             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter'),
-//             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
-//             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
-//             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
-//             this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
-//             this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
-//             this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
-//     };
-//
-//     executeDMLOperation = (
-//         resource_: Ecore.Resource,
-//         operation: dmlOperation,
-//         queryParams: IServerNamedParam[] = []
-//     ) => {
-//         const resource: Ecore.Resource = resource_;
-//         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-//         const methodName: string = operation;
-//         let resourceSet = Ecore.ResourceSet.create();
-//         return API.instance().voidCall(ref, methodName, [
-//             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
-//             ]
-//         )
-//     };
-//
-//     runQueryDataset = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = []) => {
-//         const resource: Ecore.Resource = resource_;
-//         const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
-//         const methodName: string = 'runQueryDataset';
-//         let resourceSet = Ecore.ResourceSet.create();
-//         return API.instance().call(ref, methodName, [
-//             this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
-//         ])
-//     };
-//
+    prepareServerQueryNamedParam = (resourceSet: any, pattern: any, param: IServerNamedParam[], uri: string) => {
+        let resourceParameter = resourceSet.create({ uri: uri });
+        let serverOperations: EObject[] =
+            param === undefined
+                ?
+                param
+                :
+                param
+                    .filter( (p: any) => p['parameterName'] )
+                    .map( (p: any) => {
+                        return (
+                            pattern.create({
+                                parameterName: p['parameterName'],
+                                parameterValue: p['parameterValue'],
+                                parameterDataType: p['parameterDataType']||"String",
+                                isPrimaryKey: p['isPrimaryKey']
+                            } as IServerNamedParam)
+                        )
+                    });
+        resourceParameter.addAll(serverOperations);
+        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+    };
+
+    prepareServerQueryParam = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
+        let resourceParameter = resourceSet.create({ uri: uri });
+        let serverOperations: EObject[] =
+            param === undefined
+                ?
+                param
+                :
+                param
+                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['operation'] !== undefined && p['enable'] !== undefined)
+                    .map( (p: any) => {
+                        return (
+                            pattern.create({
+                                datasetColumn: p['datasetColumn'],
+                                operation: p['operation'],
+                                value: p['value'],
+                                enable: p['enable'],
+                                type: p['type']
+                            } as IServerQueryParam)
+                        )
+                    });
+        resourceParameter.addAll(serverOperations);
+        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+    };
+
+    prepareServerQueryParamColumn = (resourceSet: any, pattern: any, param: IServerQueryParam[], uri: string) => {
+        let resourceParameter = resourceSet.create({ uri: uri });
+        let serverOperations: EObject[] =
+            param === undefined
+                ?
+                param
+                :
+                param
+                    .filter( (p: any) => p['datasetColumn'] !== undefined && p['enable'] !== undefined)
+                    .map( (p: any) => {
+                        return (
+                            pattern.create({
+                                datasetColumn: p['datasetColumn'],
+                                operation: p['operation'],
+                                value: p['value'],
+                                enable: p['enable'],
+                                type: p['type']
+                            } as IServerQueryParam)
+                        )
+                    });
+        resourceParameter.addAll(serverOperations);
+        return serverOperations.length === 1 ? [resourceParameter.to()] : resourceParameter.to();
+    };
+
+    runQuery = (
+        resource_: Ecore.Resource,
+        queryParams: IServerNamedParam[] = [],
+        filterParams: IServerQueryParam[] = [],
+        aggregationParams: IServerQueryParam[] = [],
+        sortParams: IServerQueryParam[] = [],
+        groupByParams: IServerQueryParam[] = [],
+        calculatedExpression: IServerQueryParam[] = [],
+        groupByColumn: IServerQueryParam[] = []
+    ) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'runQuery';
+        let resourceSet = Ecore.ResourceSet.create();
+            return API.instance().call(ref, methodName, [
+            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, filterParams, '/parameterFilter'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, aggregationParams, '/parameterAggregation'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, sortParams, '/parameterSort'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryFilterDTOPattern!, groupByParams, '/parameterGroupBy'),
+            this.prepareServerQueryParam(resourceSet, this.state.queryConditionDTOPattern!, calculatedExpression, '/parameterCalculatedExpression'),
+            this.prepareServerQueryParamColumn(resourceSet, this.state.queryConditionDTOPattern!, groupByColumn, '/parameterGroupByColumn')])
+    };
+
+    executeDMLOperation = (
+        resource_: Ecore.Resource,
+        operation: dmlOperation,
+        queryParams: IServerNamedParam[] = []
+    ) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = operation;
+        let resourceSet = Ecore.ResourceSet.create();
+        return API.instance().voidCall(ref, methodName, [
+            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+            ]
+        )
+    };
+
+    runQueryDataset = (resource_: Ecore.Resource, queryParams: IServerNamedParam[] = []) => {
+        const resource: Ecore.Resource = resource_;
+        const ref: string = `${resource.get('uri')}?rev=${resource.rev}`;
+        const methodName: string = 'runQueryDataset';
+        let resourceSet = Ecore.ResourceSet.create();
+        return API.instance().call(ref, methodName, [
+            this.prepareServerQueryNamedParam(resourceSet, this.state.queryParameterPattern!, queryParams, '/queryParameter')
+        ])
+    };
+
     isDatasetComponentsBufferEmpty = () => {
         if (this.state.context.datasetComponents) {
             for (const [key] of Object.entries(this.state.context.datasetComponents)) {
@@ -771,11 +758,11 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
-                    {/*<Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>*/}
+                    <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    {/*<Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>*/}
-                    {/*<Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>*/}
-                    {/*<Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>*/}
+                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
+                    <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
                 </Switch>
                     </Layout>
         )
@@ -811,14 +798,13 @@ class EcoreApp extends React.Component<any, State> {
         return (
             <MainContext.Consumer>
                 {context => {
-                    return  <div>MainApp</div>
-                    {/*<MainApp*/}
-//                             {...this.props}
-//                             context={context}
-//                             pathFull={this.state.pathFull}
-//                             appModuleName={this.state.appModuleName}
-//                             showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)||this.state.appModuleName === "Dashboard"}
-//                         />
+                    return <MainApp
+                            {...this.props}
+                            context={context}
+                            pathFull={this.state.pathFull}
+                            appModuleName={this.state.appModuleName}
+                            showTabTitle={this.state.applicationNames.includes(this.state.appModuleName)||this.state.appModuleName === "Dashboard"}
+                        />
                 }}
             </MainContext.Consumer>
         )

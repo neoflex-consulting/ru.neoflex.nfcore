@@ -3,7 +3,7 @@ import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {Collapse, ConfigProvider, Drawer, Form, InputNumber, Select} from 'antd';
 
-// import DatasetView from './components/app/dataset/DatasetView';
+import DatasetView from './components/app/dataset/DatasetView';
 import {API} from './modules/api';
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
 import {excelElementExportType, excelExportObject} from "./utils/excelExportUtils";
@@ -1789,7 +1789,7 @@ class DatasetView_ extends ViewContainer {
             grantType: grantType,
             className: cssClass
         };
-        return <div>H</div>/*<DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>*/
+        return <DatasetView {...props} key={this.viewObject._id.toString() + '_5'}/>
     }
 }
 
