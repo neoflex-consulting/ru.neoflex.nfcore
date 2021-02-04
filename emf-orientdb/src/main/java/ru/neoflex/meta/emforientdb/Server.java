@@ -19,9 +19,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -152,12 +150,41 @@ public class Server extends SessionFactory implements Closeable {
         return file;
     }
 
+    public File backupDatabase() throws IOException {
+        File backup = new File(home, "backups/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".zip");
+        return backupDatabase(backup);
+    }
+
+    public File backupDatabase(File file) throws IOException {
+        file.getParentFile().mkdirs();
+        try (OutputStream os = new FileOutputStream(file)) {
+            backupDatabase(os, new HashMap<>());
+        }
+        return file;
+    }
+
+    public void backupDatabase(OutputStream os, Map<String, Object> options) throws IOException {
+        try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
+            db.backup(os, options, null, System.out::print, 9, 4096);
+        }
+    }
+
+    public void restoreDatabase(File file) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            restoreDatabase(is, new HashMap<>());
+        }
+    }
+
+    public void restoreDatabase(InputStream is, Map<String, Object> options) throws IOException {
+        try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
+            db.restore(is, options, null, System.out::print);
+        }
+    }
+
     public void exportDatabase(OutputStream os) throws IOException {
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
             try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
-                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, (String iText)->{
-                    System.out.print(iText);
-                });
+                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, System.out::print);
                 try {
                     export.run();
                 }
@@ -168,20 +195,18 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
-    public void importDatabase(File file, boolean merge) throws IOException {
+    public void importDatabase(File file, String options) throws IOException {
         try (InputStream is = new FileInputStream(file)) {
-            importDatabase(is, merge);
+            importDatabase(is, options);
         }
     }
 
-    public void importDatabase(InputStream is, boolean merge) throws IOException {
+    public void importDatabase(InputStream is, String options) throws IOException {
         try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
             try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
-                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, (String iText)->{
-                    System.out.print(iText);
-                });
+                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, System.out::print);
                 try {
-                    import_.setMerge(merge);
+                    import_.setOptions(options);
                     import_.run();
                 }
                 finally {
@@ -193,7 +218,7 @@ public class Server extends SessionFactory implements Closeable {
 
     public void vacuum() throws IOException {
         File export = exportDatabase();
-        importDatabase(export, false);
+        importDatabase(export, "-preserveClusterIDs=true");
     }
 
     public File exportDatabase() throws IOException {

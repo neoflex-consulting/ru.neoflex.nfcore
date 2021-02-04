@@ -96,19 +96,33 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     }]
                 }
             )(
-                id === "axisYColumnName" ?
-                <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
-                    placeholder={this.props.t(placeHolder)}>
-                    {this.props.columnDefs!.filter((c: any) => !c.get('hide')).filter((c: any) => c.get('type') === 'Integer' || c.get('type') === 'Decimal')
-                        .map((c: any) =>
-                        <Select.Option
-                            key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
-                            value={c.get('field')}
-                        >
-                            {c.get('headerName')}
-                        </Select.Option>)}
-                </NeoSelect>
+                    placeHolder === "Column for Pie graph" || placeHolder === "Столбец для Кругового графика" ?
+                        <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
+                                   placeholder={this.props.t(placeHolder)}>
+                            {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
+                                <Select.Option
+                                    key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
+                                    value={c.get('field')}
+                                >
+                                    {c.get('headerName')}
+                                </Select.Option>)}
+                        </NeoSelect>
+
                     :
+                    id === "axisYColumnName" ?
+                        <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
+                                   placeholder={this.props.t(placeHolder)}>
+                            {this.props.columnDefs!.filter((c: any) => !c.get('hide')).filter((c: any) => c.get('type') === 'Integer' || c.get('type') === 'Decimal')
+                                .map((c: any) =>
+                                    <Select.Option
+                                        key={JSON.stringify({index: id, columnName: 'datasetColumn', value: c.get('field')})}
+                                        value={c.get('field')}
+                                    >
+                                        {c.get('headerName')}
+                                    </Select.Option>)}
+                        </NeoSelect>
+
+                        :
                     <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                placeholder={this.props.t(placeHolder)}>
                         {this.props.columnDefs!.filter((c: any) => !c.get('hide')).map((c: any) =>
@@ -249,14 +263,21 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                 <NeoRow className={'Selects'}>
                     {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
                 </NeoRow>
+                    {(this.state.diagramType==="Pie") ?
+                <NeoRow gutter={16} className={'Selects'}>
+                    <NeoCol className={'Selectss'} span={24}>
+                        {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
+                    </NeoCol>
+                </NeoRow>
+                        :
                 <NeoRow gutter={16} className={'Selects'}>
                     <NeoCol span={12} className={'Selectss'}>
                         {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
                     </NeoCol>
                     <NeoCol className={'Selectss'} span={12}>
-                        {this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
+                        {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
                     </NeoCol>
-                </NeoRow>
+                </NeoRow>}
                 {/*Временно отключено, пока через фильтры в datasetView*/}
                 {/*<Row>
                     <Col span={12}>

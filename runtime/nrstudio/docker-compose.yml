@@ -5,7 +5,7 @@ version: "3.7"
 # !!!do not down without stop, this may lead to db crash!!!
 # docker-compose -f runtime/nrstudio/docker-compose.yml down
 # to delete all databases
-# docker run -it --privileged --pid=host debian nsenter -t 1 -m -u -i sh
+# docker run -it --rm --privileged --pid=host debian nsenter -t 1 -m -u -i sh
 #  >rm -r /var/lib/docker/volumes/nrstudio_orientdb_data/_data/databases/
 services:
   nrstudio:
@@ -14,6 +14,7 @@ services:
     volumes:
       - orientdb_data:/opt/nrstudio/orientdb
       - ./logs:/opt/nrstudio/logs
+      - ./gitdb:/opt/nrstudio/gitdb
     env_file: env.properties
     ports:
       - 8090:8090
