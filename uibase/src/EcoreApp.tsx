@@ -20,7 +20,7 @@ import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
-import AppLogo from './icons/logo.svg';
+import {ReactComponent as AppLogo} from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
@@ -590,7 +590,8 @@ class EcoreApp extends React.Component<any, State> {
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
-                                <img src={AppLogo} alt="App Logo"/>
+                                {/*<img src={AppLogo} alt="App Logo"/>*/}
+                                <AppLogo/>
                             </div>
                         </NeoCol>
                         <NeoCol span={14}
