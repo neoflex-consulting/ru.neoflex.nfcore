@@ -28,6 +28,7 @@ import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoSelect, NeoTabs} fr
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
+import ChangeLogView from "./components/ChangeLogView";
 
 const marginBottom = '20px';
 
@@ -55,7 +56,8 @@ export enum AntdFactoryClasses {
     Region='ru.neoflex.nfcore.application#//Region',
     Checkbox='ru.neoflex.nfcore.application#//Checkbox',
     NeoIcon='ru.neoflex.nfcore.application#//NeoIcon',
-    RadioGroup='ru.neoflex.nfcore.application#//RadioGroup'
+    RadioGroup='ru.neoflex.nfcore.application#//RadioGroup',
+    ChangeLog='ru.neoflex.nfcore.application#//ChangeLog'
 }
 
 function getAgGridValue(this: any, returnValueType: string, defaultValue: string = "default") : string|{[key:string]:string|number|null} {
@@ -1769,10 +1771,61 @@ class Collapse_ extends ViewContainer {
                         {this.renderChildren()}
                     </Collapse.Panel>
                 </Collapse>
-
-
             </div>
         )
+    }
+}
+
+
+class ChangeLog_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        const cssClass = createCssClass(this.viewObject);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+            grantType: this.viewObject.get('grantType'),
+            cssClass: cssClass,
+            logEntries: []
+        };
+    }
+
+    getLogEntries() {
+        if (this.viewObject.get('dataset')) {
+            this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
+                if (this.viewObject.get('dataset').get('datasetColumn').array().length === 0) {
+                    this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
+                        this.props.t("exception while loading dataset. There is no columns in dataset") + ` ${this.viewObject.get('dataset').get('name')}`,
+                        "error")
+                } else {
+                    const log = JSON.parse(result).map((e:any)=>{
+                        return {
+                            logDateTime: moment(e[this.viewObject.get('dateTime')?.get('name')], defaultTimestampFormat),
+                            author: e[this.viewObject.get('author')?.get('name')],
+                            change: e[this.viewObject.get('message')?.get('name')]
+                        }
+                    });
+                    this.setState({logEntries: log})
+                }
+            });
+        }
+    }
+
+    componentDidMount(): void {
+        this.getLogEntries();
+        mountComponent.bind(this)(false, [{actionType: actionType.execute, callback: (value) => {
+                this.getLogEntries.bind(this)
+            }}] as IAction[]);
+    }
+
+    render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        return <ChangeLogView
+            className={this.state.cssClass}
+            hidden={this.state.isHidden || this.props.isParentHidden}
+            disabled={isReadOnly}
+            logEntries={this.state.logEntries}
+        />
     }
 }
 
@@ -1836,6 +1889,7 @@ class AntdFactory implements ViewFactory {
         this.components.set(AntdFactoryClasses.Checkbox, Checkbox_);
         this.components.set(AntdFactoryClasses.NeoIcon, NeoIcon_);
         this.components.set(AntdFactoryClasses.RadioGroup, RadioGroup_);
+        this.components.set(AntdFactoryClasses.ChangeLog, ChangeLog_);
     }
 
     createView(viewObject: Ecore.EObject, props: any, ref?: any): JSX.Element {

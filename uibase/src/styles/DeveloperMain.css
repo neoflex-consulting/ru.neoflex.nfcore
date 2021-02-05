@@ -132,3 +132,7 @@
 .grid-area thead tr {
     height: 45px
 }
+
+.application-changes > .change-log {
+    width: 100%
+}

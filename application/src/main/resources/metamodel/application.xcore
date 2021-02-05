@@ -482,6 +482,18 @@ class StyleSheet {
     String sheetContent
 }
 
+@NFCore(documentation="Лента изменений")
+class ChangeLog extends ViewElement {
+        @NFCore(documentation="Ссылка на dataset")
+    refers Dataset dataset
+        @NFCore(documentation="Поле в dataset указывающее автора изменений")
+    refers DatasetColumn author
+        @NFCore(documentation="Поле в dataset указывающее дату и время изменений")
+    refers DatasetColumn dateTime
+        @NFCore(documentation="Поле в dataset содержащее текст отображаемого сообщения")
+    refers DatasetColumn message
+}
+
 @NFCore(documentation="Выравнивание поля")
 enum TextAlign {
     Left
