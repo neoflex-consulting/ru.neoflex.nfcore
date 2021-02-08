@@ -3,26 +3,17 @@ import {withTranslation} from 'react-i18next';
 import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
-// import ServerFilter from './ServerFilter';
-// import ServerGroupBy from "./ServerGroupBy";
-// import ServerAggregate from './ServerAggregate';
-// import ServerSort from './ServerSort';
-// import Highlight from "./Highlight";
-// import Calculator, {encode} from "./Calculator";
+import ServerFilter from './ServerFilter';
 import DatasetGrid from "./DatasetGrid";
 import {getNamedParamByName, getNamedParams, replaceNamedParam} from "../../../utils/namedParamsUtils";
-// import DrawerDiagram from "./DrawerDiagram";
-// import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-// import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
 import moment from "moment";
 import format from "number-format.js";
-// import HiddenColumn from "./HiddenColumn";
 import {replaceAllCollisionless, hash, encode} from "../../../utils/replacer";
 import {
     actionType,
@@ -45,6 +36,15 @@ import {NeoDrawer, NeoModal} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
 import {checkServerSideCondition} from "../../../AntdFactory";
 import {ViewRegistry} from "../../../ViewRegistry";
+import Highlight from "./Highlight";
+import ServerAggregate from "./ServerAggregate";
+import ServerGroupByColumn from "./ServerGroupByColumn";
+import ServerGroupBy from "./ServerGroupBy";
+import ServerSort from "./ServerSort";
+import HiddenColumn from "./HiddenColumn";
+import Calculator from "./Calculator";
+import DrawerDiagram from "./DrawerDiagram";
+import DatasetDiagram from "./DatasetDiagram";
 
 const textAlignMap_: any = textAlignMap;
 
@@ -1557,12 +1557,12 @@ class DatasetView extends React.Component<any, State> {
                     }
                     {...this.props}
                 />}
-                {/*<DatasetDiagram*/}
-                {/*    {...this.props}*/}
-                {/*    hide={!this.state.currentDiagram}*/}
-                {/*    rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}*/}
-                {/*    diagramParams={this.state.currentDiagram}*/}
-                {/*/>*/}
+                <DatasetDiagram
+                    {...this.props}
+                    hide={!this.state.currentDiagram}
+                    rowData={this.state.rowData.filter(r=>!this.state.aggregatedRows.includes(r))}
+                    diagramParams={this.state.currentDiagram}
+                />
                 <DatasetGrid
                     gridKey={this.props.viewObject.eURI().split('#')[0]}
                     hidden={!!this.state.currentDiagram}
@@ -1603,38 +1603,38 @@ class DatasetView extends React.Component<any, State> {
                     onClose={()=>{this.handleDrawerVisibility(paramType.filter,!this.state.filtersMenuVisible)}}
                     mask={false}
                 >
-                    {/*{*/}
+                    {
 
-                    {/*    this.state.serverFilters && !this.state.isGroovyDataset &&*/}
-                    {/*        <ServerFilter*/}
-                    {/*            {...this.props}*/}
-                    {/*            popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}*/}
-                    {/*            parametersArray={this.state.serverFilters}*/}
-                    {/*            columnDefs={this.state.leafColumnDefs}*/}
-                    {/*            allOperations={this.state.allOperations}*/}
-                    {/*            onChangeParameters={this.onChangeParams}*/}
-                    {/*            saveChanges={this.changeDatasetViewState}*/}
-                    {/*            isVisible={this.state.filtersMenuVisible}*/}
-                    {/*            componentType={paramType.filter}*/}
-                    {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                    {/*        />*/}
-                    {/*}*/}
-                    {/*{*/}
-                    {/*    this.state.highlights && this.state.allHighlightType &&*/}
-                    {/*        <Highlight*/}
-                    {/*            {...this.props}*/}
-                    {/*            popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}*/}
-                    {/*            parametersArray={this.state.highlights}*/}
-                    {/*            columnDefs={this.state.leafColumnDefs}*/}
-                    {/*            allOperations={this.state.allOperations}*/}
-                    {/*            allHighlightType={this.state.allHighlightType}*/}
-                    {/*            onChangeParameters={this.onChangeParams}*/}
-                    {/*            saveChanges={this.changeDatasetViewState}*/}
-                    {/*            isVisible={this.state.filtersMenuVisible}*/}
-                    {/*            componentType={paramType.highlights}*/}
-                    {/*            rowData={this.state.rowData}*/}
-                    {/*        />*/}
-                    {/*}*/}
+                        this.state.serverFilters && !this.state.isGroovyDataset &&
+                            <ServerFilter
+                                {...this.props}
+                                popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
+                                parametersArray={this.state.serverFilters}
+                                columnDefs={this.state.leafColumnDefs}
+                                allOperations={this.state.allOperations}
+                                onChangeParameters={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.filtersMenuVisible}
+                                componentType={paramType.filter}
+                                handleDrawerVisability={this.handleDrawerVisibility}
+                            />
+                    }
+                    {
+                        this.state.highlights && this.state.allHighlightType &&
+                            <Highlight
+                                {...this.props}
+                                popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
+                                parametersArray={this.state.highlights}
+                                columnDefs={this.state.leafColumnDefs}
+                                allOperations={this.state.allOperations}
+                                allHighlightType={this.state.allHighlightType}
+                                onChangeParameters={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.filtersMenuVisible}
+                                componentType={paramType.highlights}
+                                rowData={this.state.rowData}
+                            />
+                    }
                 </NeoDrawer>
                 </div>
                 <div id={`aggregationButton${this.props.viewObject.eURI()}`}>
@@ -1646,21 +1646,21 @@ class DatasetView extends React.Component<any, State> {
                     onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesMenuVisible)}}
                     mask={false}
                 >
-                    {/*{*/}
-                    {/*    this.state.serverAggregates &&*/}
-                    {/*        <ServerAggregate*/}
-                    {/*            {...this.props}*/}
-                    {/*            popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}*/}
-                    {/*            parametersArray={this.state.serverAggregates}*/}
-                    {/*            columnDefs={this.state.leafColumnDefs}*/}
-                    {/*            allAggregates={this.state.allAggregates}*/}
-                    {/*            onChangeParameters={this.onChangeParams}*/}
-                    {/*            saveChanges={this.changeDatasetViewState}*/}
-                    {/*            isVisible={this.state.aggregatesMenuVisible}*/}
-                    {/*            componentType={paramType.aggregate}*/}
-                    {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                    {/*        />*/}
-                    {/*}*/}
+                    {
+                        this.state.serverAggregates &&
+                            <ServerAggregate
+                                {...this.props}
+                                popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
+                                parametersArray={this.state.serverAggregates}
+                                columnDefs={this.state.leafColumnDefs}
+                                allAggregates={this.state.allAggregates}
+                                onChangeParameters={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.aggregatesMenuVisible}
+                                componentType={paramType.aggregate}
+                                handleDrawerVisability={this.handleDrawerVisibility}
+                            />
+                    }
                 </NeoDrawer>
                     </div>
                 <div id={`aggregationGroupsButton${this.props.viewObject.eURI()}`}>
@@ -1672,40 +1672,40 @@ class DatasetView extends React.Component<any, State> {
                         onClose={()=>{this.handleDrawerVisibility(paramType.aggregate,!this.state.aggregatesGroupsMenuVisible)}}
                         mask={false}
                     >
-                        {/*{*/}
-                        {/*    this.state.groupByColumn &&*/}
-                        {/*        <ServerGroupByColumn*/}
-                        {/*            {...this.props}*/}
-                        {/*            popUpContainerId={`aggregationGroupsButton${this.props.viewObject.eURI()}`}*/}
-                        {/*            parametersArray={this.state.groupByColumn}*/}
-                        {/*            columnDefs={this.state.defaultLeafColumnDefs}*/}
-                        {/*            allAggregates={this.state.allAggregates}*/}
-                        {/*            onChangeParameters={this.onChangeParams}*/}
-                        {/*            saveChanges={this.changeDatasetViewState}*/}
-                        {/*            isVisible={this.state.aggregatesGroupsMenuVisible}*/}
-                        {/*            componentType={paramType.groupByColumn}*/}
-                        {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                        {/*            onReset={()=> {*/}
-                        {/*                this.setState({serverGroupBy:[], groupByColumn:[]});*/}
-                        {/*                this.onChangeParams(undefined, paramType.group);*/}
-                        {/*            }}*/}
-                        {/*        />*/}
-                        {/*}*/}
-                        {/*{*/}
-                        {/*    this.state.serverGroupBy &&*/}
-                        {/*        <ServerGroupBy*/}
-                        {/*            {...this.props}*/}
-                        {/*            popUpContainerId={`aggregationGroupsButton${this.props.viewObject.eURI()}`}*/}
-                        {/*            parametersArray={this.state.serverGroupBy}*/}
-                        {/*            columnDefs={this.state.defaultLeafColumnDefs}*/}
-                        {/*            allAggregates={this.state.allAggregates}*/}
-                        {/*            onChangeParameters={this.onChangeParams}*/}
-                        {/*            saveChanges={this.changeDatasetViewState}*/}
-                        {/*            isVisible={this.state.aggregatesGroupsMenuVisible}*/}
-                        {/*            componentType={paramType.group}*/}
-                        {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                        {/*        />*/}
-                        {/*}*/}
+                        {
+                            this.state.groupByColumn &&
+                                <ServerGroupByColumn
+                                    {...this.props}
+                                    popUpContainerId={`aggregationGroupsButton${this.props.viewObject.eURI()}`}
+                                    parametersArray={this.state.groupByColumn}
+                                    columnDefs={this.state.defaultLeafColumnDefs}
+                                    allAggregates={this.state.allAggregates}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.aggregatesGroupsMenuVisible}
+                                    componentType={paramType.groupByColumn}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
+                                    onReset={()=> {
+                                        this.setState({serverGroupBy:[], groupByColumn:[]});
+                                        this.onChangeParams(undefined, paramType.group);
+                                    }}
+                                />
+                        }
+                        {
+                            this.state.serverGroupBy &&
+                                <ServerGroupBy
+                                    {...this.props}
+                                    popUpContainerId={`aggregationGroupsButton${this.props.viewObject.eURI()}`}
+                                    parametersArray={this.state.serverGroupBy}
+                                    columnDefs={this.state.defaultLeafColumnDefs}
+                                    allAggregates={this.state.allAggregates}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.aggregatesGroupsMenuVisible}
+                                    componentType={paramType.group}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
+                                />
+                        }
                     </NeoDrawer>
                 </div>
                 <div id={`sortButton${this.props.viewObject.eURI()}`}>
@@ -1717,21 +1717,21 @@ class DatasetView extends React.Component<any, State> {
                     onClose={()=>{this.handleDrawerVisibility(paramType.sort,!this.state.sortsMenuVisible)}}
                     mask={false}
                 >
-                    {/*{*/}
-                    {/*    this.state.serverSorts &&*/}
-                    {/*        <ServerSort*/}
-                    {/*            {...this.props}*/}
-                    {/*            popUpContainerId={`sortButton${this.props.viewObject.eURI()}`}*/}
-                    {/*            parametersArray={this.state.serverSorts}*/}
-                    {/*            columnDefs={this.state.leafColumnDefs}*/}
-                    {/*            allSorts={this.state.allSorts}*/}
-                    {/*            onChangeParameters={this.onChangeParams}*/}
-                    {/*            saveChanges={this.changeDatasetViewState}*/}
-                    {/*            isVisible={this.state.sortsMenuVisible}*/}
-                    {/*            componentType={paramType.sort}*/}
-                    {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                    {/*        />*/}
-                    {/*}*/}
+                    {
+                        this.state.serverSorts &&
+                            <ServerSort
+                                {...this.props}
+                                popUpContainerId={`sortButton${this.props.viewObject.eURI()}`}
+                                parametersArray={this.state.serverSorts}
+                                columnDefs={this.state.leafColumnDefs}
+                                allSorts={this.state.allSorts}
+                                onChangeParameters={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.sortsMenuVisible}
+                                componentType={paramType.sort}
+                                handleDrawerVisability={this.handleDrawerVisibility}
+                            />
+                    }
                 </NeoDrawer>
                 </div>
                 <div id={`hiddenColumnsButton${this.props.viewObject.eURI()}`}>
@@ -1743,21 +1743,21 @@ class DatasetView extends React.Component<any, State> {
                         onClose={()=>{this.handleDrawerVisibility(paramType.hiddenColumns,!this.state.hiddenColumnsMenuVisible)}}
                         mask={false}
                     >
-                        {/*{*/}
-                        {/*    this.state.hiddenColumns &&*/}
-                        {/*        <HiddenColumn*/}
-                        {/*            {...this.props}*/}
-                        {/*            popUpContainerId={`hiddenColumnsButton${this.props.viewObject.eURI()}`}*/}
-                        {/*            parametersArray={this.state.hiddenColumns}*/}
-                        {/*            columnDefs={this.state.leafColumnDefs}*/}
-                        {/*            onChangeParameters={this.onChangeParams}*/}
-                        {/*            saveChanges={this.changeDatasetViewState}*/}
-                        {/*            isVisible={this.state.hiddenColumnsMenuVisible}*/}
-                        {/*            componentType={paramType.hiddenColumns}*/}
-                        {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                        {/*            datasetComponentVersion={this.state.currentDatasetComponent.eContents && this.state.currentDatasetComponent.eContents()[0].get('name')}*/}
-                        {/*        />*/}
-                        {/*}*/}
+                        {
+                            this.state.hiddenColumns &&
+                                <HiddenColumn
+                                    {...this.props}
+                                    popUpContainerId={`hiddenColumnsButton${this.props.viewObject.eURI()}`}
+                                    parametersArray={this.state.hiddenColumns}
+                                    columnDefs={this.state.leafColumnDefs}
+                                    onChangeParameters={this.onChangeParams}
+                                    saveChanges={this.changeDatasetViewState}
+                                    isVisible={this.state.hiddenColumnsMenuVisible}
+                                    componentType={paramType.hiddenColumns}
+                                    handleDrawerVisability={this.handleDrawerVisibility}
+                                    datasetComponentVersion={this.state.currentDatasetComponent.eContents && this.state.currentDatasetComponent.eContents()[0].get('name')}
+                                />
+                        }
                     </NeoDrawer>
                 </div>
                 <div id={`calculatableexpressionsButton${this.props.viewObject.eURI()}`}>
@@ -1769,26 +1769,26 @@ class DatasetView extends React.Component<any, State> {
                     onClose={()=>{this.handleDrawerVisibility(paramType.calculations,!this.state.calculationsMenuVisible)}}
                     mask={false}
                 >
-                    {/*{*/}
-                    {/*    this.state.serverCalculatedExpression &&*/}
-                    {/*        <Calculator*/}
-                    {/*            {...this.props}*/}
-                    {/*            popUpContainerId={`calculatableexpressionsButton${this.props.viewObject.eURI()}`}*/}
-                    {/*            parametersArray={this.state.serverCalculatedExpression}*/}
-                    {/*            //Можно в зависимости от видимости columnDef регулировать видимость стольцов*/}
-                    {/*            //но тогда нужна доработка для трансляции выражений*/}
-                    {/*            columnDefs={this.state.defaultLeafColumnDefs}*/}
-                    {/*            onChangeParameters={this.onChangeParams}*/}
-                    {/*            saveChanges={this.changeDatasetViewState}*/}
-                    {/*            isVisible={this.state.calculationsMenuVisible}*/}
-                    {/*            componentType={paramType.calculations}*/}
-                    {/*            onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}*/}
-                    {/*            defaultColumnDefs={this.state.defaultLeafColumnDefs}*/}
-                    {/*            formatMasks={this.state.formatMasks}*/}
-                    {/*            handleDrawerVisability={this.handleDrawerVisibility}*/}
-                    {/*            currentDatasetComponent={this.state.currentDatasetComponent}*/}
-                    {/*        />*/}
-                    {/*}*/}
+                    {
+                        this.state.serverCalculatedExpression &&
+                            <Calculator
+                                {...this.props}
+                                popUpContainerId={`calculatableexpressionsButton${this.props.viewObject.eURI()}`}
+                                parametersArray={this.state.serverCalculatedExpression}
+                                //Можно в зависимости от видимости columnDef регулировать видимость стольцов
+                                //но тогда нужна доработка для трансляции выражений
+                                columnDefs={this.state.defaultLeafColumnDefs}
+                                onChangeParameters={this.onChangeParams}
+                                saveChanges={this.changeDatasetViewState}
+                                isVisible={this.state.calculationsMenuVisible}
+                                componentType={paramType.calculations}
+                                onChangeColumnDefs={this.onChangeColumnDefs.bind(this)}
+                                defaultColumnDefs={this.state.defaultLeafColumnDefs}
+                                formatMasks={this.state.formatMasks}
+                                handleDrawerVisability={this.handleDrawerVisibility}
+                                currentDatasetComponent={this.state.currentDatasetComponent}
+                            />
+                    }
                 </NeoDrawer>
                 </div>
                 <div id={`diagramButton${this.props.viewObject.eURI()}`}>
@@ -1801,22 +1801,22 @@ class DatasetView extends React.Component<any, State> {
                     mask={false}
                     className={'diagram'}
                 >
-                    {/*{*/}
-                    {/*    <DrawerDiagram*/}
-                    {/*        {...this.props}*/}
-                    {/*        popUpContainerId={`diagramButton${this.props.viewObject.eURI()}`}*/}
-                    {/*        columnDefs={this.state.leafColumnDefs}*/}
-                    {/*        allAxisXPosition={this.state.allAxisXPosition}*/}
-                    {/*        allAxisYPosition={this.state.allAxisYPosition}*/}
-                    {/*        allLegendPosition={this.state.allLegendPosition}*/}
-                    {/*        allSorts={this.state.allSorts}*/}
-                    {/*        allAggregates={this.state.allAggregates}*/}
-                    {/*        saveChanges={this.handleDiagramChange}*/}
-                    {/*        action={"add"}*/}
-                    {/*        currentDiagram={undefined}*/}
-                    {/*        id={this.state.diagrams.length}*/}
-                    {/*    />*/}
-                    {/*}*/}
+                    {
+                        <DrawerDiagram
+                            {...this.props}
+                            popUpContainerId={`diagramButton${this.props.viewObject.eURI()}`}
+                            columnDefs={this.state.leafColumnDefs}
+                            allAxisXPosition={this.state.allAxisXPosition}
+                            allAxisYPosition={this.state.allAxisYPosition}
+                            allLegendPosition={this.state.allLegendPosition}
+                            allSorts={this.state.allSorts}
+                            allAggregates={this.state.allAggregates}
+                            saveChanges={this.handleDiagramChange}
+                            action={"add"}
+                            currentDiagram={undefined}
+                            id={this.state.diagrams.length}
+                        />
+                    }
                 </NeoDrawer>
                 </div>
                 <div id={`diagram${this.props.viewObject.eURI()}`}>
@@ -1828,22 +1828,22 @@ class DatasetView extends React.Component<any, State> {
                     onClose={()=>{this.handleDrawerVisibility(paramType.diagrams,!this.state.diagramEditMenuVisible)}}
                     mask={false}
                 >
-                    {/*{*/}
-                    {/*    <DrawerDiagram*/}
-                    {/*        {...this.props}*/}
-                    {/*        popUpContainerId={`diagram${this.props.viewObject.eURI()}`}*/}
-                    {/*        columnDefs={this.state.leafColumnDefs}*/}
-                    {/*        allAxisXPosition={this.state.allAxisXPosition}*/}
-                    {/*        allAxisYPosition={this.state.allAxisYPosition}*/}
-                    {/*        allLegendPosition={this.state.allLegendPosition}*/}
-                    {/*        allSorts={this.state.allSorts}*/}
-                    {/*        allAggregates={this.state.allAggregates}*/}
-                    {/*        saveChanges={this.handleDiagramChange}*/}
-                    {/*        action={"edit"}*/}
-                    {/*        currentDiagram={this.state.currentDiagram}*/}
-                    {/*        id={(this.state.currentDiagram)? this.state.currentDiagram.id: 0}*/}
-                    {/*    />*/}
-                    {/*}*/}
+                    {
+                        <DrawerDiagram
+                            {...this.props}
+                            popUpContainerId={`diagram${this.props.viewObject.eURI()}`}
+                            columnDefs={this.state.leafColumnDefs}
+                            allAxisXPosition={this.state.allAxisXPosition}
+                            allAxisYPosition={this.state.allAxisYPosition}
+                            allLegendPosition={this.state.allLegendPosition}
+                            allSorts={this.state.allSorts}
+                            allAggregates={this.state.allAggregates}
+                            saveChanges={this.handleDiagramChange}
+                            action={"edit"}
+                            currentDiagram={this.state.currentDiagram}
+                            id={(this.state.currentDiagram)? this.state.currentDiagram.id: 0}
+                        />
+                    }
                 </NeoDrawer>
                 </div>
                 <div id={`delete_menuButton${this.props.viewObject.eURI()}`}>
