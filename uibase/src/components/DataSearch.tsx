@@ -26,11 +26,9 @@ interface State {
     selectDropdownVisible: boolean;
 }
 
-const { useForm } = Form;
 
 class DataSearch extends React.Component<Props & WithTranslation, State> {
-
-    // private formRef = React.createRef<FormInstance>();
+    formRef = React.createRef<FormInstance>();
 
     state = {
         tags: [],
@@ -47,32 +45,31 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     refresh = () => {
-        console.log("refresh")
-        // form.validateFields().then((values: any) => {
-        //     let selectedClassObject: Ecore.EClass | undefined;
-        //     if (this.props.specialEClass === undefined) {
-        //         selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
-        //     } else {
-        //         selectedClassObject = this.props.specialEClass
-        //     }
-        //     if (values.key === 'json_search') {
-        //         API.instance().find(JSON.parse(values.json_field)).then(results => {
-        //             this.props.onSearch(results.resources)
-        //         })
-        //     } else if (selectedClassObject) {
-        //         (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
-        //             .then((resources) => {
-        //                 this.props.onSearch(resources)
-        //             }))
-        //     } else {
-        //         (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
-        //             .then((resources) => {
-        //                 this.props.onSearch(resources)
-        //             }))
-        //     }
-        //
-        // }).catch( () => {
-        // });
+        this.formRef.current?.validateFields().then((values: any) => {
+            let selectedClassObject: Ecore.EClass | undefined;
+            if (this.props.specialEClass === undefined) {
+                selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
+             } else {
+                 selectedClassObject = this.props.specialEClass
+             }
+             if (values.key === 'json_search') {
+                 API.instance().find(JSON.parse(values.json_field)).then(results => {
+                     this.props.onSearch(results.resources)
+                 })
+             } else if (selectedClassObject) {
+                 (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
+                     .then((resources) => {
+                        this.props.onSearch(resources)
+                    }))
+             } else {
+                (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
+                    .then((resources) => {
+                         this.props.onSearch(resources)
+                    }))
+            }
+
+        }).catch( () => {
+        });
     };
 
     getEClasses(): void {
@@ -130,8 +127,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
 
     render() {
-        // const [form] = Form.useForm();
-        // const { getFieldValue, setFieldsValue } = this.formRef.current;
         const { TabPane } = Tabs;
         const { t } = this.props;
         return (
@@ -145,6 +140,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     setModalVisible={this.setModalVisible}
                 />}
                 <Form
+                    ref={this.formRef}
                     name={"dataSearch"}
                     initialValues={{ key: 'data_search' }}
                     onFinish={this.handleSubmit}
@@ -207,10 +203,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                     style={{display:'inline-block'}}
                                     label={<div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>}
                                     name={"name"}
-                                    // rules={[{
-                                    //     required: getFieldValue('regular_expression') && getFieldValue('key') === 'data_search',
-                                    //     message: 'Please enter name'
-                                    // }]}
                                 >
                                     <NeoInput width={'670px'} />
                                 </Form.Item>
@@ -254,7 +246,8 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
                                 <Form.Item style={{marginBottom:'20px'}}>
                                     <NeoButton
-                                        // type={(getFieldValue('name') !== undefined || getFieldValue('selectEClass') !== undefined || getFieldValue('tags') !== undefined) ? 'primary': 'disabled'}
+                                        onClick={this.handleSubmit}
+                                       type={'primary'}
                                     >
                                         {t('searchsimple')}
                                     </NeoButton>
@@ -274,10 +267,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                             contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
                                             }, null, 4)
                                     }
-                                    // rules={[{
-                                    //     required: getFieldValue('key') === 'json_search',
-                                    //     message: 'Please enter json'
-                                    // }]}
                                 >
                                     <div>
                                         <AceEditor
