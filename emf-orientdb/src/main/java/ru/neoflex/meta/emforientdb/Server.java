@@ -148,6 +148,11 @@ public class Server extends SessionFactory implements Closeable {
         try (OutputStream os = new FileOutputStream(file)) {
             exportDatabase(os);
         }
+        List<String> list = listExports();
+        while (list.size() > 10) {
+            String fileName = list.remove(0);
+            new File(fileName).delete();
+        }
         return file;
     }
 
@@ -160,6 +165,11 @@ public class Server extends SessionFactory implements Closeable {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
             backupDatabase(os, new HashMap<>());
+        }
+        List<String> list = listBackups();
+        while (list.size() > 10) {
+            String fileName = list.remove(0);
+            new File(fileName).delete();
         }
         return file;
     }
@@ -219,8 +229,33 @@ public class Server extends SessionFactory implements Closeable {
 
     public void vacuum() throws IOException {
         File export = exportDatabase();
-        importDatabase(export, "-preserveClusterIDs=true");
+        importDatabase(export, "-merge=false");
     }
+
+    public List<String> listExports() {
+        List<String> result = new ArrayList<>();
+        File exportDir = new File(getHome(), "exports");
+        for (File file: exportDir.listFiles()) {
+            if (file.getName().startsWith(getDbName())) {
+                result.add(file.getAbsolutePath().replace("\\", "/"));
+            }
+        }
+        result.sort(String::compareTo);
+        return result;
+    }
+
+    public List<String> listBackups() {
+        List<String> result = new ArrayList<>();
+        File exportDir = new File(getHome(), "backups");
+        for (File file: exportDir.listFiles()) {
+            if (file.getName().startsWith(getDbName())) {
+                result.add(file.getAbsolutePath().replace("\\", "/"));
+            }
+        }
+        result.sort(String::compareTo);
+        return result;
+    }
+
 
     public File exportDatabase() throws IOException {
         File export = new File(home, "exports/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
