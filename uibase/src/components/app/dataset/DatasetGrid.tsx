@@ -105,7 +105,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     menu: GridMenu,
                     expand: Expand,
                     antdFactory: AntdFactoryWrapper/*,
-                    agColumnHeader: CustomHeader*/
+                    agColumnHeader: CustomHeaderNotUsed*/
                 },
                 defaultColDef: {
                     resizable: true
@@ -875,7 +875,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     valueFormatter: colDef.get('valueFormatter'),
                     tooltipField: colDef.get('tooltipField'),
                     //headerComponentFramework - используется для подключения typography к заголоку грида
-                    /*headerComponentFramework: colDef.get('customHeader') && CustomHeader,
+                    /*headerComponentFramework: colDef.get('customHeader') && CustomHeaderNotUsed,
                     headerComponentParams: colDef.get('customHeader') && {
                         viewObject: colDef.get('customHeader'),
                         appContext: this.props.context

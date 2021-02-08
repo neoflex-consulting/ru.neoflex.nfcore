@@ -26,6 +26,7 @@ interface State {
     selectDropdownVisible: boolean;
 }
 
+const { useForm } = Form;
 
 class DataSearch extends React.Component<Props & WithTranslation, State> {
     formRef = React.createRef<FormInstance>();
