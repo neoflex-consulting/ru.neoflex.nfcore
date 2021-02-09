@@ -11,3 +11,7 @@ tr:hover > td {
 .ant-table table {
     border-collapse: collapse;
 }
+
+.developer_table .ant-table-row .ant-select {
+    width: 100% !important;
+}

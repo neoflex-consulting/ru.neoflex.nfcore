@@ -338,8 +338,7 @@ class Row_ extends ViewContainer {
             isDisabled: this.viewObject.get('disabled') || false,
         };
     }
-
-
+    
     componentDidMount(): void {
         mountComponent.bind(this)(false);
     }
