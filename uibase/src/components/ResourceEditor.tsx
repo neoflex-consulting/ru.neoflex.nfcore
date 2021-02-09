@@ -95,7 +95,7 @@ interface State {
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
-    children.filter((ch:any)=>ch !== null).forEach((c:any)=> {
+    children.filter((ch:any)=>ch).forEach((c:any)=> {
         if (c !== undefined && c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
             expandedKeys.push(c.key);
             getAllChildrenKeys(c.props.children, expandedKeys)
@@ -123,8 +123,8 @@ const findChildrenKey = (children: any[], key: string):string => {
 
 const getChildNode = (children: any[], nodeKey:string) => {
     let retVal:any;
-    for (const c of children.filter((ch: any) => ch !== null)) {
-        if (c.props.children.filter((ch: any) => ch !== null).length !== 0) {
+    for (const c of children.filter((ch: any) => ch)) {
+        if (c.props.children.filter((ch: any) => ch).length !== 0) {
             if (c.key === nodeKey) {
                 return c
             } else {
@@ -502,7 +502,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         for (const [_, node] of Object.entries(this.treeRef.current?.state.keyEntities)) {
             let found = Object.keys(selector).length > 0;
             for (const [selectorKey, selectorValue] of Object.entries(selector)) {
-                if (typeof selectorValue === "string" && (node as { [key: string]: any })[selectorKey] !== selectorValue) {
+                if (typeof selectorValue === "string" && (node as { [key: string]: any })?.node?.data && (node as { [key: string]: any }).node.data[selectorKey] !== selectorValue) {
                     found = false;
                 } else if (typeof selectorValue !== "string" && Object.keys(selectorValue).length > 0  && !objectsHaveSameKeysValue(selectorValue, (node as { [key: string]: any }).props[selectorKey])) {
                     found = false;
@@ -678,12 +678,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }), this.scrollToElementWithId)
         }
         if (e.key === "expandAll") {
-            const childToExpand = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
+            const childToExpand = getChildNode([this.treeRef.current.props.children],node.key);
             const expandedKeys = getAllChildrenKeys([childToExpand]);
             this.setState({expandedKeys: [...new Set(expandedKeys.concat(this.state.expandedKeys))]})
         }
         if (e.key === "collapseAll") {
-            const childToCollapse = getChildNode([this.treeRef.current.tree.props.children],node.eventKey);
+            const childToCollapse = getChildNode([this.treeRef.current.props.children],node.key);
             const collapsedKeys = getAllChildrenKeys([childToCollapse]);
             this.setState({expandedKeys: this.state.expandedKeys.filter(k=>!collapsedKeys.includes(k))})
         }
@@ -734,6 +734,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const allSubTypes = eClassObject.get('eAllSubTypes');
         const allSuperTypes = eClassObject.get('eAllSuperTypes');
         node.data.isArray && eClassObject && allSubTypes.push(eClassObject);
+
+        const len = this.state.expandedKeys.filter(e=> {
+            const allKeys = getAllChildrenKeys([getChildNode([this.treeRef.current.props.children],node.key)]);
+            return allKeys.includes(e)
+        }).length
+        console.log(len)
+        const allChildren = getAllChildrenKeys([getChildNode([this.treeRef.current.props.children],node.key)])
+        console.log(allChildren.length)
+
+
         const allParentChildren = node.data.propertyName ? node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "getAllParentChildren" }) : undefined;
         const menu = (node.data.upperBound === undefined || node.data.upperBound === -1
             || (node.data.upperBound === 1))
@@ -791,14 +801,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
                     {this.state.edit && !node.data.isArray && !node.data.headline && <Menu.Item key="delete">{this.props.t("delete")}</Menu.Item>}
                     {!node.data.isArray && !node.data.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}
-                    {(node.data.children && node.data.children.filter((c:any)=>c).length>0)
+                    {(node.children && node.children.filter((c:any)=>c).length>0)
                     //exists expandable elements
-                    && !(this.state.expandedKeys.filter(e=>getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).includes(e)).length ===
-                        getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).length)
+                    && !(this.state.expandedKeys.filter(e=>allChildren.includes(e)).length ===
+                        allChildren.length)
                     && <Menu.Item key="expandAll">{this.props.t("expand all")}</Menu.Item>}
-                    {(node.data.children && node.data.children.filter((c:any)=>c).length>0)
+                    {(node.children && node.children.filter((c:any)=>c).length>0)
                     //exists collapsible elements
-                    && this.state.expandedKeys.filter(e=>getAllChildrenKeys([getChildNode([this.treeRef.current.tree.props.children],node.eventKey)]).includes(e)).length > 0
+                    && this.state.expandedKeys.filter(e=>allChildren.includes(e)).length > 0
                     && <Menu.Item key="collapseAll">{this.props.t("collapse all")}</Menu.Item>}
                     {//contains eventHandlers
                         this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1}).length > 0
