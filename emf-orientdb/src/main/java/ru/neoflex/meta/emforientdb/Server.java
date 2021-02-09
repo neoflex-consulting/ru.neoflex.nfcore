@@ -221,7 +221,7 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public String importDatabase(String fileName) throws IOException {
-        File dir = new File(getHome(), "backups");
+        File dir = new File(getHome(), "exports");
         return importDatabase(new File(dir, fileName), "-merge=false");
     }
 
