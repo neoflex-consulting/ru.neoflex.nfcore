@@ -310,24 +310,39 @@ public class SysController {
         });
     }
 
-    @PostMapping(value = "/backup", produces = "application/json; charset=utf-8")
+    @PostMapping(value = "/orientdb/backup", produces = "application/json; charset=utf-8")
     public List<String> dbBackup() throws Exception {
         return Collections.singletonList(provider.getServer().backupDatabase().getAbsolutePath());
     }
 
-    @PostMapping(value = "/restore", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/orientdb/buckup", produces = "application/json; charset=utf-8")
+    public List<String> dbListBackups() throws Exception {
+        return provider.getServer().listBackupNames();
+    }
+
+    @PostMapping(value = "/orientdb/restore", produces = "application/json; charset=utf-8")
     public List<String> dbRestore(@RequestParam String fileName) throws Exception {
         return Collections.singletonList(provider.getServer().restoreDatabase(fileName));
     }
 
-    @PostMapping(value = "/vacuum", produces = "application/json; charset=utf-8")
-    public List<String> dbVacuum() throws Exception {
-        return Collections.singletonList(provider.getServer().vacuum());
+    @PostMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
+    public List<String> dbExport() throws Exception {
+        return Collections.singletonList(provider.getServer().exportDatabase().getAbsolutePath());
     }
 
-    @GetMapping(value = "/buckup", produces = "application/json; charset=utf-8")
-    public List<String> dbListBackups() throws Exception {
-        return provider.getServer().listBackupNames();
+    @GetMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
+    public List<String> dbListExports() throws Exception {
+        return provider.getServer().listExportNames();
+    }
+
+    @PostMapping(value = "/orientdb/import", produces = "application/json; charset=utf-8")
+    public List<String> dbImport(@RequestParam String fileName) throws Exception {
+        return Collections.singletonList(provider.getServer().importDatabase(fileName));
+    }
+
+    @PostMapping(value = "/orientdb/vacuum", produces = "application/json; charset=utf-8")
+    public List<String> dbVacuum() throws Exception {
+        return Collections.singletonList(provider.getServer().vacuum());
     }
 
 }

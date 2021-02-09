@@ -220,10 +220,16 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
-    public void importDatabase(File file, String options) throws IOException {
+    public String importDatabase(String fileName) throws IOException {
+        File dir = new File(getHome(), "backups");
+        return importDatabase(new File(dir, fileName), "-merge=false");
+    }
+
+    public String importDatabase(File file, String options) throws IOException {
         try (InputStream is = new FileInputStream(file)) {
             importDatabase(is, options);
         }
+        return file.getAbsolutePath();
     }
 
     public void importDatabase(InputStream is, String options) throws IOException {
@@ -244,6 +250,15 @@ public class Server extends SessionFactory implements Closeable {
         File export = exportDatabase();
         importDatabase(export, "-merge=false");
         return export.getAbsolutePath();
+    }
+
+    public List<String> listExportNames() {
+        File[] files = new File(getHome(), "exports").listFiles();
+        return Arrays.stream(files != null ? files : new File[0])
+                .map(File::getName)
+                .filter(name -> name.startsWith(getDbName()))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     public List<String> listExports() {
@@ -271,9 +286,11 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public List<String> listBackupNames() {
-        return Arrays.stream(Objects.requireNonNull(new File(getHome(), "backups").listFiles()))
+        File[] files = new File(getHome(), "backups").listFiles();
+        return Arrays.stream(files != null ? files : new File[0])
                 .map(File::getName)
                 .filter(name -> name.startsWith(getDbName()))
+                .sorted()
                 .collect(Collectors.toList());
     }
 
