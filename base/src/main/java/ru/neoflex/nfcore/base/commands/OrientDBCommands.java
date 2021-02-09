@@ -40,32 +40,24 @@ public class OrientDBCommands {
 
     @ShellMethod("Import database")
     public String odbImport(File file,
-                            @ShellOption(defaultValue = "true") Boolean deleteRIDMapping,
-                            @ShellOption(defaultValue = "true") Boolean preserveClusterIDs,
-                            @ShellOption(defaultValue = "false") Boolean merge,
-                            @ShellOption(defaultValue = "true") Boolean migrateLinks,
-                            @ShellOption(defaultValue = "true") Boolean rebuildIndexes) throws IOException {
+                            @ShellOption(defaultValue=ShellOption.NULL) Boolean deleteRIDMapping,
+                            @ShellOption(defaultValue=ShellOption.NULL) Boolean preserveClusterIDs,
+                            @ShellOption(defaultValue=ShellOption.NULL) Boolean merge,
+                            @ShellOption(defaultValue=ShellOption.NULL) Boolean migrateLinks,
+                            @ShellOption(defaultValue=ShellOption.NULL) Boolean rebuildIndexes) throws IOException {
         StringBuffer options = new StringBuffer();
         if (deleteRIDMapping != null) options.append("-deleteRIDMapping").append("=").append(deleteRIDMapping).append(" ");
-        if (deleteRIDMapping != null) options.append("-preserveClusterIDs").append("=").append(preserveClusterIDs).append(" ");
-        if (deleteRIDMapping != null) options.append("-merge").append("=").append(merge).append(" ");
-        if (deleteRIDMapping != null) options.append("-migrateLinks").append("=").append(migrateLinks).append(" ");
-        if (deleteRIDMapping != null) options.append("-rebuildIndexes").append("=").append(rebuildIndexes).append(" ");
+        if (preserveClusterIDs != null) options.append("-preserveClusterIDs").append("=").append(preserveClusterIDs).append(" ");
+        if (merge != null) options.append("-merge").append("=").append(merge).append(" ");
+        if (migrateLinks != null) options.append("-migrateLinks").append("=").append(migrateLinks).append(" ");
+        if (rebuildIndexes != null) options.append("-rebuildIndexes").append("=").append(rebuildIndexes).append(" ");
         provider.getServer().importDatabase(file, options.toString());
         return "Done.";
     }
 
     @ShellMethod("List database exports")
     public List<String> odbListExports() {
-        List<String> result = new ArrayList<>();
-        File exportDir = new File(provider.getServer().getHome(), "exports");
-        for (File file: exportDir.listFiles()) {
-            if (file.getName().startsWith(provider.getServer().getDbName())) {
-                result.add(file.getAbsolutePath().replace("\\", "/"));
-            }
-        }
-        result.sort(String::compareTo);
-        return result;
+        return provider.getServer().listExports();
     }
 
     @ShellMethod("Backup database")
@@ -82,15 +74,7 @@ public class OrientDBCommands {
 
     @ShellMethod("List database backups")
     public List<String> odbListBackups() {
-        List<String> result = new ArrayList<>();
-        File exportDir = new File(provider.getServer().getHome(), "backups");
-        for (File file: exportDir.listFiles()) {
-            if (file.getName().startsWith(provider.getServer().getDbName())) {
-                result.add(file.getAbsolutePath().replace("\\", "/"));
-            }
-        }
-        result.sort(String::compareTo);
-        return result;
+        return provider.getServer().listBackups();
     }
 
     @ShellMethod("Run OETL processor")

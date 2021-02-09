@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -32,6 +33,7 @@ public class Server extends SessionFactory implements Closeable {
         super(dbName, packages);
         this.home = home;
         System.setProperty("ORIENTDB_HOME", home);
+        System.setProperty("ridBag.embeddedToSbtreeBonsaiThreshold", String.valueOf(Integer.MAX_VALUE));
         String dbPath = new File(home, "databases").getAbsolutePath();
         this.oServer = OServerMain.create(false);
         this.configuration = createDefaultServerConfiguration(dbPath);
@@ -93,25 +95,25 @@ public class Server extends SessionFactory implements Closeable {
                 protocol = "http";
                 ipAddress = "0.0.0.0";
                 portRange = "2480-2490";
-                commands = new OServerCommandConfiguration[] {new OServerCommandConfiguration() {{
+                commands = new OServerCommandConfiguration[]{new OServerCommandConfiguration() {{
                     implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
                     pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";
-                    parameters = new OServerEntryConfiguration[] {
+                    parameters = new OServerEntryConfiguration[]{
                             new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache"),
                             new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120"),
                     };
                 }}};
-                parameters = new OServerParameterConfiguration[] {
-                        new OServerParameterConfiguration("network.http.charset","UTF-8"),
-                        new OServerParameterConfiguration("network.http.jsonResponseError","true")
+                parameters = new OServerParameterConfiguration[]{
+                        new OServerParameterConfiguration("network.http.charset", "UTF-8"),
+                        new OServerParameterConfiguration("network.http.jsonResponseError", "true")
                 };
             }});
         }};
-        configuration.users = new OServerUserConfiguration[] {
+        configuration.users = new OServerUserConfiguration[]{
                 new OServerUserConfiguration("root", "ne0f1ex", "*"),
                 new OServerUserConfiguration("admin", "admin", "*"),
         };
-        configuration.properties = new OServerEntryConfiguration[] {
+        configuration.properties = new OServerEntryConfiguration[]{
 //                new OServerEntryConfiguration("orientdb.www.path", "www"),
 //                new OServerEntryConfiguration("orientdb.config.file", "C:/work/dev/orientechnologies/orientdb/releases/1.0rc1-SNAPSHOT/config/orientdb-server-config.xml"),
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
@@ -143,9 +145,18 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public File exportDatabase(File file) throws IOException {
+        return exportDatabase(file, 10);
+    }
+
+    public File exportDatabase(File file, int keep) throws IOException {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
             exportDatabase(os);
+        }
+        List<String> list = listExports();
+        while (list.size() > keep) {
+            String fileName = list.remove(0);
+            new File(fileName).delete();
         }
         return file;
     }
@@ -156,9 +167,18 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public File backupDatabase(File file) throws IOException {
+        return backupDatabase(file, 10);
+    }
+
+    public File backupDatabase(File file, int keep) throws IOException {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
             backupDatabase(os, new HashMap<>());
+        }
+        List<String> list = listBackups();
+        while (list.size() > keep) {
+            String fileName = list.remove(0);
+            new File(fileName).delete();
         }
         return file;
     }
@@ -169,10 +189,16 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
-    public void restoreDatabase(File file) throws IOException {
+    public String restoreDatabase(File file) throws IOException {
         try (InputStream is = new FileInputStream(file)) {
             restoreDatabase(is, new HashMap<>());
         }
+        return file.getAbsolutePath();
+    }
+
+    public String restoreDatabase(String fileName) throws IOException {
+        File dir = new File(getHome(), "backups");
+        return restoreDatabase(new File(dir, fileName));
     }
 
     public void restoreDatabase(InputStream is, Map<String, Object> options) throws IOException {
@@ -187,8 +213,7 @@ public class Server extends SessionFactory implements Closeable {
                 ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, System.out::print);
                 try {
                     export.run();
-                }
-                finally {
+                } finally {
                     export.close();
                 }
             }
@@ -202,24 +227,56 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public void importDatabase(InputStream is, String options) throws IOException {
-        try(GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
             try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
                 ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, System.out::print);
                 try {
                     import_.setOptions(options);
                     import_.run();
-                }
-                finally {
+                } finally {
                     import_.close();
                 }
             }
         }
     }
 
-    public void vacuum() throws IOException {
+    public String vacuum() throws IOException {
         File export = exportDatabase();
-        importDatabase(export, "-preserveClusterIDs=true");
+        importDatabase(export, "-merge=false");
+        return export.getAbsolutePath();
     }
+
+    public List<String> listExports() {
+        List<String> result = new ArrayList<>();
+        File exportDir = new File(getHome(), "exports");
+        for (File file : exportDir.listFiles()) {
+            if (file.getName().startsWith(getDbName())) {
+                result.add(file.getAbsolutePath().replace("\\", "/"));
+            }
+        }
+        result.sort(String::compareTo);
+        return result;
+    }
+
+    public List<String> listBackups() {
+        List<String> result = new ArrayList<>();
+        File exportDir = new File(getHome(), "backups");
+        for (File file : exportDir.listFiles()) {
+            if (file.getName().startsWith(getDbName())) {
+                result.add(file.getAbsolutePath().replace("\\", "/"));
+            }
+        }
+        result.sort(String::compareTo);
+        return result;
+    }
+
+    public List<String> listBackupNames() {
+        return Arrays.stream(Objects.requireNonNull(new File(getHome(), "backups").listFiles()))
+                .map(File::getName)
+                .filter(name -> name.startsWith(getDbName()))
+                .collect(Collectors.toList());
+    }
+
 
     public File exportDatabase() throws IOException {
         File export = new File(home, "exports/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
