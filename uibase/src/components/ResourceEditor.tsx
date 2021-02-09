@@ -734,16 +734,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const allSubTypes = eClassObject.get('eAllSubTypes');
         const allSuperTypes = eClassObject.get('eAllSuperTypes');
         node.data.isArray && eClassObject && allSubTypes.push(eClassObject);
-
-        const len = this.state.expandedKeys.filter(e=> {
-            const allKeys = getAllChildrenKeys([getChildNode([this.treeRef.current.props.children],node.key)]);
-            return allKeys.includes(e)
-        }).length
-        console.log(len)
-        const allChildren = getAllChildrenKeys([getChildNode([this.treeRef.current.props.children],node.key)])
-        console.log(allChildren.length)
-
-
+        const allChildren = getAllChildrenKeys([getChildNode([this.treeRef.current.props.children],node.key)]);
         const allParentChildren = node.data.propertyName ? node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "getAllParentChildren" }) : undefined;
         const menu = (node.data.upperBound === undefined || node.data.upperBound === -1
             || (node.data.upperBound === 1))
