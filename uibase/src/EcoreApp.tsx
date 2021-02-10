@@ -755,7 +755,7 @@ class EcoreApp extends React.Component<any, State> {
                     </NeoRow>
                 </Header>}
                 <Switch>
-                   {/* <Route path='/app/:appModuleName' component={this.renderApplication}/>*/}
+                    <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
                     <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>

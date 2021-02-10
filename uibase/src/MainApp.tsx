@@ -330,7 +330,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidMount(): void {
-        this.getEClassAppModule();
+        /*this.getEClassAppModule();
         window.addEventListener("appAdaptiveResize", this.handleResize);
         window.addEventListener("resize", this.handleResize);
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
@@ -338,7 +338,7 @@ export class MainApp extends React.Component<any, State> {
                 ? currentAppModule.tree
                 : this.appModuleMap.get(currentAppModule.appModule)
                     ? this.appModuleMap.get(currentAppModule.appModule)
-                    : [] })
+                    : [] })*/
     }
 
     componentWillUnmount() {
@@ -463,7 +463,7 @@ export class MainApp extends React.Component<any, State> {
         })
     };
 
-    renderReferences = (isShortSize = false) => {
+    /*renderReferences = (isShortSize = false) => {
         const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
@@ -500,7 +500,7 @@ export class MainApp extends React.Component<any, State> {
                 </Menu>
             </Layout>
         )
-    };
+    };*/
 
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string, isShortSize = false) => {
         const code = eObject.get('name');
@@ -590,7 +590,7 @@ export class MainApp extends React.Component<any, State> {
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
                 </Helmet>
                 <FetchSpinner/>
-                {this.renderEList(this.props.context.variableList)}
+                {/*{this.renderEList(this.props.context.variableList)}
                 {this.renderEList(this.props.context.groovyCommandList)}
                 {this.renderEList(this.props.context.eventHandlerList)}
                 <Splitter
@@ -674,7 +674,7 @@ export class MainApp extends React.Component<any, State> {
                             {this.renderFooter()}
                         </div>
                     </div>
-                </Splitter>
+                </Splitter>*/}
             </div>
         )
     }
