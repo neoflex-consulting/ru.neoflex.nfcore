@@ -13,30 +13,7 @@ import './../styles/Data.css'
 import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
-
-
-function TagComponent(props: any): JSX.Element {
-
-    const { eType, value, idx, ukey, onChange, id, edit } = props;
-
-    return (
-        <Select
-            mode={"tags"}
-            value={value}
-            key={ukey + "_" + idx}
-            style={{ width: "300px" }}
-            onChange={(newValue: any) => {
-                onChange && onChange!(newValue)
-            }}
-            disabled={!edit}
-        >
-            {eType.eContents()
-                .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
-                .map((obj: Ecore.EObject) =>
-                    <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
-        </Select>
-    )
-}
+import FormComponentMapper from "./FormComponentMapper";
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
@@ -89,33 +66,29 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
 
     onTagChange = (newTags:string[], objectName: string) => {
         const newEObjectTags = this.state.possibleTags.filter((td:any) => newTags.includes(td.eContents()[0].get('name')));
-        const tableData = this.state.tableData.find((td: any) => td.name === objectName);
+        const tableData = this.state.tableData.find((td: any) => td.name === objectName) as never as { resource:Resource, name: string, [key:string]: any};
         if (tableData) {
-            const changeEObject:EObject = (tableData as {resource:Resource}).resource.eContents()[0];
+            const changeEObject:EObject = tableData.resource.eContents()[0];
             if (changeEObject) {
-                API.instance().findByKindAndName(changeEObject.eClass, changeEObject.get('name')).then(resources => {
-                    const resource = resources[0];
-                    const resourceList: Ecore.EList = resource.eResource().eContainer.get('resources');
-                    resource.eContents()[0].get('tags').clear();
-                    newEObjectTags.forEach(r=>{
-                        if (!resourceList.find(rl=>rl.eContents()[0].eURI() === r.eURI())) {
-                            resourceList.add(r);
-                            const last = resourceList.last();
-                            const json = last.eResource().to()
-                            last.eResource().clear()
-                            last.eResource().parse(json)
-                            resource.eContents()[0].get('tags').add(last.eContents()[0])
-                        }
-                    });
-                    API.instance().saveResource(resource).then(result=>{
-                        this.refDataSearchRef.refresh()
-                    })
+                const resource = tableData.resource;
+                const resourceList: Ecore.EList = resource.eResource().eContainer.get('resources');
+                resource.eContents()[0].get('tags').clear();
+                newEObjectTags.forEach(r=>{
+                    if (!resourceList.find(rl=>rl.eContents()[0].eURI() === r.eURI())) {
+                        resourceList.add(r);
+                        const last = resourceList.last();
+                        const json = last.eResource().to()
+                        last.eResource().clear()
+                        last.eResource().parse(json)
+                        resource.eContents()[0].get('tags').add(last.eContents()[0])
+                    }
+                });
+                API.instance().saveResource(resource).then(result=>{
+                    tableData!.resource = result;
+                    this.setState({tableData: this.state.tableData})
                 })
             }
         }
-
-
-
     }
 
     handleSearch = (resources : Ecore.Resource[]): void => {
@@ -166,11 +139,15 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 sorter: column.get('name') !== 'tags' ? (a: any, b: any) => this.sortColumns(a, b, name, type) : undefined,
                 render: (text: any) => {
                 if (column.get('name') === 'tags' && text.tags) {
-                    return <TagComponent
-                        eType={Ecore.ResourceSet.create().create({ uri:"/"}).addAll(this.state.possibleTags.map(tag=>tag.eContents()[0]))}
-                        value={text && text.resource.eContents()[0].get('tags') && text.resource.eContents()[0].get('tags').map((v:EObject)=>v.get('name'))}
-                        edit={true}
-                        onChange={(tags:string[])=>this.onTagChange(tags, text.name)}/>
+                    return FormComponentMapper.getComponent({
+                        componentType: "Tag",
+                        value: text && text.resource.eContents()[0].get('tags') && text.resource.eContents()[0].get('tags').map((v:EObject)=>v.get('name')),
+                        eType: Ecore.ResourceSet.create().create({ uri:"/"}).addAll(this.state.possibleTags.map(tag=>tag.eContents()[0])),
+                        idx: "idx",
+                        ukey: "key",
+                        onChange: (tags:string[])=>this.onTagChange(tags, text.name),
+                        edit: true
+                    })
                 }
                 else if (text !== undefined && !!column.get('eType') && column.get('eType').eClass.get('name') !== 'EDataType') {
                         const maxJsonLength = text.indexOf('#') + 1;

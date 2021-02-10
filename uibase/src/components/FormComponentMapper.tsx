@@ -402,6 +402,7 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
 }
 
 interface Props {
+    componentType?: "SyntaxArea"|"SelectRef"|"BooleanSelect"|"TimePicker"|"DatePicker"|"TextArea"|"Select"|"SelectHighlight"|"Tag"
     value: any,
     targetObject?: { [key: string]: any },
     eObject: Ecore.EObject,
@@ -431,9 +432,9 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType } = props;
         const targetValue = value || props.eObject.get('defaultValueLiteral');
-        if (syntax) {
+        if (syntax || componentType === "SyntaxArea") {
             return <EditableSyntaxArea
                 ukey={ukey}
                 value={targetValue||""}
@@ -444,7 +445,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
             />
         }
 
-        if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
+        if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass') || componentType === "SelectRef") {
             return <SelectRefObject
                 idx={idx}
                 ukey={ukey}
@@ -459,7 +460,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 goToObject={goToObject}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") || componentType === "BooleanSelect") {
             return <BooleanSelect
                 idx={idx}
                 ukey={ukey}
@@ -469,7 +470,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 }}
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") || componentType === "TimePicker") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
@@ -477,7 +478,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 onChange={(newValue: any) => props.onChange && props.onChange!(newValue && newValue.format('YYYY-MM-DDTHH:mm:ss.SSSZZ'), 'DatePickerComponent', targetObject, props.eObject)}
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") || componentType === "DatePicker") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
@@ -494,7 +495,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 type="password"
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EEnum')) {
+        } else if ((eType && eType.isKindOf('EEnum')) || componentType === "Select") {
             return <SelectComponent
                 idx={idx}
                 ukey={ukey}
@@ -509,7 +510,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}
             />
-        }else if (props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) {
+        }else if ((props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) || componentType === "SelectHighlight") {
             return <SelectComponentForhightLight
                 idx={idx}
                 ukey={ukey}
@@ -524,7 +525,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}/>
         }
-        else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
+        else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) || componentType === "Tag") {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}
