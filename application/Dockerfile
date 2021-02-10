@@ -5,9 +5,15 @@ ENV dbtype orientdb
 ENV logging.file logs/nrstudio.log
 ENV logging.level.root info
 ENV server.port 8090
-ENV orientdb.home /opt/nrstudio/orientdb
-ENV gitdb.base /opt/nrstudio/gitdb
+ENV orientdb.home /opt/nrstudio/orient
+ENV gitdb.base /opt/nrstudio/git
+ENV extLib.dir /opt/nrstudio/extLib
+ENV deploy.dir /opt/nrstudio/deploy
+ENV logging.file /opt/nrstudio/logs/nrstudio.log
+ENV server.ssl.enabled false
+ENV logging.level.root info
 
+RUN mkdir /opt/nrstudio
 COPY extLib/* /opt/nrstudio/extLib/
 COPY deploy/* /opt/nrstudio/deploy/
 COPY target/application-${version}.jar /opt/nrstudio/application.jar

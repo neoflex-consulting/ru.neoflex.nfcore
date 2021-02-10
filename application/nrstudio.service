@@ -1,0 +1,15 @@
+# systemctl enable /opt/nrstudio/nrstudio.service
+[Unit]
+ Description = Java NRStudio Service
+
+[Service]
+ Type = forking
+ Restart=always
+ RestartSec=1
+ SuccessExitStatus=143 
+ ExecStart = /opt/nrstudio/nrstudio.sh start
+ ExecStop = /opt/nrstudio/nrstudio.sh stop
+ ExecReload = /opt/nrstudio/nrstudio.sh restart
+
+[Install]
+ WantedBy=multi-user.target
