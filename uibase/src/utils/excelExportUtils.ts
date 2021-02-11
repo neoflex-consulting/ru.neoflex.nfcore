@@ -16,7 +16,7 @@ export enum excelElementExportType {
 }
 
 export interface excelExportObject {
-    hidden: boolean;
+    hidden?: boolean;
     skipExport?: boolean;
     excelComponentType: excelElementExportType;
     diagramData?: {
@@ -69,7 +69,7 @@ function addTableData(excelData: excelExportObject, worksheet: ExcelJS.Worksheet
     }
 }
 
-async function handleExportExcel(handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: any, ignoreSkipped = true) {
+async function handleExportExcel(handlers: (()=>excelExportObject|undefined)[], withTable: boolean, isDownloadFromDiagramPanel: any, ignoreSkipped = true) {
     //Смещение отностиельно 0 ячейки
     let offset = 1;
     const workbook = new ExcelJS.Workbook();
@@ -77,8 +77,8 @@ async function handleExportExcel(handlers: any[], withTable: boolean, isDownload
 
     for (let i = 0; i < handlers.length; i++) {
 
-        const excelData: excelExportObject = handlers[i]();
-        if (!excelData.hidden && (!excelData.skipExport || ignoreSkipped)) {
+        const excelData = handlers[i]();
+        if (excelData && !excelData.hidden && (!excelData.skipExport || ignoreSkipped)) {
             if (excelData.excelComponentType === excelElementExportType.diagram
                 && excelData.diagramData !== undefined
                 && withTable

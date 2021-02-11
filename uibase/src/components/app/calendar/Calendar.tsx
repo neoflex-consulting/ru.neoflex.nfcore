@@ -278,8 +278,8 @@ class Calendar extends React.Component<any, any> {
     };
 
     onActionMenu = () => {
-        handleExportDocx(this.props.context.getDocxHandlers(), false, false).then(blob => {
-            saveAs(new Blob([blob]), "example.docx");
+        handleExportDocx(this.props.context.getDocxHandlers(), true, true).then(blob => {
+            saveAs(new Blob([blob]), "calendar.docx");
             console.log("Document created successfully");
         });
     }
@@ -436,7 +436,7 @@ class Calendar extends React.Component<any, any> {
 
     openNotification(notification: any, context: any): void  {
         let params: Object[] = [{
-            parameterName: 'reportDate',
+            parameterName: this.props.viewObject.get("urlDateParameterName"),
             parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date"
         }];
@@ -452,7 +452,7 @@ class Calendar extends React.Component<any, any> {
 
     openNotification2(notification: any, context: any): any  {
         let params: Object[] = [{
-            parameterName: 'reportDate',
+            parameterName: this.props.viewObject.get("urlDateParameterName"),
             parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date"
         }];
@@ -540,26 +540,25 @@ class Calendar extends React.Component<any, any> {
         return (node.className !== "verticalLine") && (node.className !== "btn btn-disabled calendarAlt") && (node.className !== "btn btn-link alignJustify") && (node.className !== "ant-dropdown ant-dropdown-placement-bottomRight slide-up-leave");
     }
 
-    private getDocxData(): docxExportObject {
-        const width = (this.node) ? this.node.size.width : 700;
-        const height = (this.node) ? this.node.size.height : 400;
-        if (this.node && this.node?.resizable !== null) {
-            return {
-                hidden: this.props.hidden,
-                docxComponentType : docxElementExportType.diagram,
-                diagramData: {
-                    blob: domtoimage.toBlob(this.node?.resizable,{
+    private getDocxData(): docxExportObject | undefined {
+        if (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) {
+            const width = (this.node) ? this.node.size.width : 700;
+            const height = (this.node) ? this.node.size.height : 400;
+            if (this.node && this.node?.resizable !== null) {
+                return {
+                    docxComponentType: docxElementExportType.diagram,
+                    diagramData: {
+                        blob: domtoimage.toBlob(this.node?.resizable, {
+                            width: width,
+                            height: height,
+                            filter: this.filter
+                        }),
                         width: width,
-                        height: height,
-                        filter: this.filter
-                    }),
-                    width: width,
-                    height: height
-                }
-            };
+                        height: height
+                    }
+                };
+            }
         }
-
-        return {hidden: this.props.hidden, docxComponentType: docxElementExportType.diagram}
     }
 
 

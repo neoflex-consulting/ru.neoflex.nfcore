@@ -62,6 +62,7 @@ interface Props extends WithTranslation {
     hidePagination?: boolean;
     gridKey?: string;
     context?: any;
+    isExportSuppressed?: boolean;
 }
 
 class AntdFactoryWrapper extends React.Component<any, {}> {
@@ -207,109 +208,111 @@ class DatasetGrid extends React.Component<Props, any> {
         return headerArr;
     }
 
-    private getDocxData() : docxExportObject {
-        let header = [];
-        const visible = [];
-        let gridHeader = this.calcExportSpans(this.state.columnDefs);
-        for (const elem of this.getLeafColumns(this.state.columnDefs)) {
-            if (!elem.hide) {
-                header.push({name: elem.headerName, filterButton: true});
-                visible.push(elem.field)
+    private getDocxData() : docxExportObject | undefined {
+        if (!this.props.hidden && !this.props.isExportSuppressed) {
+            let header = [];
+            const visible = [];
+            let gridHeader = this.calcExportSpans(this.state.columnDefs);
+            for (const elem of this.getLeafColumns(this.state.columnDefs)) {
+                if (!elem.hide) {
+                    header.push({name: elem.headerName, filterButton: true});
+                    visible.push(elem.field)
+                }
             }
-        }
-        let data = [];
-        for (const [index, elem] of this.state.rowData.entries()) {
-            let objectRow = [];
-            for (const el of visible) {
-                let params = {
-                    value: elem[el],
-                    data: elem,
-                    colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
-                    node: this.gridOptions.api?.getRowNode(index)
-                };
-                const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
-                const cellStyle = params.colDef.cellStyle(params);
-                objectRow.push({
-                    value: this.props.valueFormatter ? this.props.valueFormatter(params as ValueFormatterParams) : elem[el],
-                    highlight: {
-                        background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
-                        color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
-                    }
-                });
+            let data = [];
+            for (const [index, elem] of this.state.rowData.entries()) {
+                let objectRow = [];
+                for (const el of visible) {
+                    let params = {
+                        value: elem[el],
+                        data: elem,
+                        colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c: any) => c.field === el),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
+                    const cellStyle = params.colDef.cellStyle(params);
+                    objectRow.push({
+                        value: this.props.valueFormatter ? this.props.valueFormatter(params as ValueFormatterParams) : elem[el],
+                        highlight: {
+                            background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
+                            color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
+                        }
+                    });
+                }
+                data.push(objectRow);
             }
-            data.push(objectRow);
+            return {
+                skipExport: this.props.skipExport,
+                docxComponentType: docxElementExportType.grid,
+                gridHeader: (gridHeader.length === 0) ? [] : gridHeader,
+                gridData: data
+            };
         }
-        return  {
-            hidden: this.props.hidden!,
-            skipExport: this.props.skipExport,
-            docxComponentType : docxElementExportType.grid,
-            gridHeader:(gridHeader.length === 0) ? [] : gridHeader,
-            gridData: data
-        };
     }
 
-    private getExcelData() : excelExportObject {
-        let header = [];
-        const visible = [];
-        let gridHeader = this.calcExportSpans(this.state.columnDefs);
-        for (const elem of this.getLeafColumns(this.state.columnDefs)) {
-            if (!elem.hide) {
-                header.push({
-                    name: elem.headerName,
-                    filterButton: gridHeader.length <= 1
-                });
-                visible.push(elem.field)
-            }
-        }
-        let data = [];
-        for (const [index, elem] of this.state.rowData.entries()) {
-            let objectRow = [];
-            for (const el of visible) {
-                const params = {
-                    value: elem[el],
-                    data: elem,
-                    colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
-                    node: this.gridOptions.api?.getRowNode(index)
-                };
-                let dateTZ = undefined;
-                if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
-                    dateTZ = new Date(params.value);
+    private getExcelData() : excelExportObject | undefined {
+        if (!this.props.hidden && !this.props.isExportSuppressed) {
+            let header = [];
+            const visible = [];
+            let gridHeader = this.calcExportSpans(this.state.columnDefs);
+            for (const elem of this.getLeafColumns(this.state.columnDefs)) {
+                if (!elem.hide) {
+                    header.push({
+                        name: elem.headerName,
+                        filterButton: gridHeader.length <= 1
+                    });
+                    visible.push(elem.field)
                 }
-                const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
-                const cellStyle = params.colDef.cellStyle(params);
-                const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
-                objectRow.push({
-                    value: params.value
+            }
+            let data = [];
+            for (const [index, elem] of this.state.rowData.entries()) {
+                let objectRow = [];
+                for (const el of visible) {
+                    const params = {
+                        value: elem[el],
+                        data: elem,
+                        colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
+                        node: this.gridOptions.api?.getRowNode(index)
+                    };
+                    let dateTZ = undefined;
+                    if ([appTypes.Date,appTypes.Timestamp].includes(params.colDef.type)) {
+                        dateTZ = new Date(params.value);
+                    }
+                    const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
+                    const cellStyle = params.colDef.cellStyle(params);
+                    const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
+                    objectRow.push({
+                        value: params.value
                             ? params.colDef.type === appTypes.String ? params.value
                                 : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
-                                : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
-                                : params.value
+                                    : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                                        : params.value
                             : null,
-                    mask: mask
-                        ? mask
+                        mask: mask
+                            ? mask
                             : params.colDef.type === appTypes.Timestamp ? "dd.mm.yyyy hh:mm:ss"
-                            : params.colDef.type === appTypes.Date ? "dd.mm.yyyy"
-                            : params.colDef.type === appTypes.Decimal ? "### ### ### ##0.00;-### ### ### ##0.00;0.00"
-                            : params.colDef.type === appTypes.Integer ? "### ### ### ###;-### ### ### ###;0"
-                        : "",
-                    highlight: {
-                        background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
-                        color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
-                    }
-                })
+                                : params.colDef.type === appTypes.Date ? "dd.mm.yyyy"
+                                    : params.colDef.type === appTypes.Decimal ? "### ### ### ##0.00;-### ### ### ##0.00;0.00"
+                                        : params.colDef.type === appTypes.Integer ? "### ### ### ###;-### ### ### ###;0"
+                                            : "",
+                        highlight: {
+                            background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
+                            color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
+                        }
+                    })
+                }
+                data.push(objectRow);
             }
-            data.push(objectRow);
+            return  {
+                skipExport: this.props.skipExport,
+                excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
+                gridData: {
+                    columns: header,
+                    data: data
+                },
+                gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
+            };
         }
-        return  {
-            hidden: this.props.hidden!,
-            skipExport: this.props.skipExport,
-            excelComponentType : gridHeader.length > 1 ? excelElementExportType.complexGrid : excelElementExportType.grid,
-            gridData: {
-                columns: header,
-                data: data
-            },
-            gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
-        };
     }
 
     getLeafColumns(columnDefs: any[], leafColumnDefs: any[] = []) {

@@ -9,8 +9,8 @@ import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
-import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
-import {NeoButton, NeoColor, NeoParagraph, NeoTable, NeoTabs} from "neo-design/lib";
+import {breakPointsSizePx} from "./utils/adaptiveResizeUtils";
+import {NeoButton, NeoColor, NeoHint, NeoParagraph, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import _ from "lodash";
@@ -34,7 +34,7 @@ const FooterHeight = '40px';
 const backgroundColor = "#fdfdfd";
 const defaultVerticalSplitterSize = "300px";
 const defaultHorizontalSplitterSize = "400px";
-const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[0]}px`;
+const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[1]}px`;
 
 function getVerticalStoredSize() {
     return localStorage.getItem('mainapp_refsplitter_pos') || defaultVerticalSplitterSize;
@@ -321,18 +321,8 @@ export class MainApp extends React.Component<any, State> {
         }
     }
 
-
-    handleResize = () => {
-        const hideReferences = getAdaptiveSize(this.refSplitterRef.current.panePrimary.div.offsetWidth ? this.refSplitterRef.current.panePrimary.div.offsetWidth : 0, "referenceMenu") <= adaptiveElementSize.extraSmall;
-        if (hideReferences !== this.state.hideReferences && this.refSplitterRef.current.panePrimary.div.offsetWidth) {
-            this.setState({hideReferences})
-        }
-    };
-
     componentDidMount(): void {
         this.getEClassAppModule();
-        window.addEventListener("appAdaptiveResize", this.handleResize);
-        window.addEventListener("resize", this.handleResize);
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
         this.setState({openKeys: currentAppModule.tree && currentAppModule.tree.length > 0
                 ? currentAppModule.tree
@@ -344,8 +334,6 @@ export class MainApp extends React.Component<any, State> {
     componentWillUnmount() {
         //in case we change url outside appModule reference tree
         unmountStyleSheets(this.props.context.styleSheetsList);
-        window.removeEventListener("appAdaptiveResize", this.handleResize);
-        window.removeEventListener("resize", this.handleResize);
     }
 
     setVerticalSplitterWidth = (width:string, minWidth?:string, maxWidth: string = "50%") => {
@@ -504,10 +492,13 @@ export class MainApp extends React.Component<any, State> {
 
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string, isShortSize = false) => {
         const code = eObject.get('name');
+        //TODO добавит mouseEnterDelay в neo-desing после перехода на antd4 + заменить цвет на NeoColor.grey_7
+        // @ts-ignore
+        const hint = <NeoHint mouseEnterDelay={1} style={{backgroundColor: NeoColor.grey_7}} placement={"right"} title={code}>{code}</NeoHint>;
         const key = parentKey ? parentKey + '/' + code : code;
         // eslint-disable-next-line
         const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
-        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{code}</span></div>;
+        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{hint}</span></div>;
         let children = [];
         if (eObject.get('children')) {
             children = eObject.get('children')
@@ -569,15 +560,16 @@ export class MainApp extends React.Component<any, State> {
     }
 
     hideReferenceTree = () => {
-        if (this.state.hideReferences) {
-            const size = getVerticalStoredSize();
-            this.setVerticalSplitterWidth(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
-            setVerticalStoredSize(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
-        } else {
-            this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth);
-            setVerticalStoredSize(this.refSplitterRef.current.panePrimary.props.style.minWidth);
-        }
-        this.setState({hideReferences: !this.state.hideReferences})
+        this.setState({hideReferences: !this.state.hideReferences}, ()=> {
+            if (!this.state.hideReferences) {
+                const size = getVerticalStoredSize();
+                this.setVerticalSplitterWidth(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
+                setVerticalStoredSize(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
+            } else {
+                this.setVerticalSplitterWidth(`${breakPointsSizePx.referenceMenu[0]}px`);
+                setVerticalStoredSize(`${breakPointsSizePx.referenceMenu[0]}px`);
+            }
+        })
     };
 
     render = () => {
@@ -598,9 +590,13 @@ export class MainApp extends React.Component<any, State> {
                     ref={this.refSplitterRef}
                     position="vertical"
                     primaryPaneMaxWidth="50%"
-                    primaryPaneMinWidth={hasIcons ? verticalSplitterShortSize : "0px"}
+                    primaryPaneMinWidth={hasIcons && this.state.hideReferences
+                        ? breakPointsSizePx.referenceMenu[0]
+                        : this.state.hideReferences
+                            ? "0px"
+                            : breakPointsSizePx.referenceMenu[1]}
                     primaryPaneWidth={hasIcons && this.state.hideReferences
-                        ? verticalSplitterShortSize
+                        ? breakPointsSizePx.referenceMenu[0]
                         : this.state.hideReferences
                             ? 0
                             : getVerticalStoredSize()}

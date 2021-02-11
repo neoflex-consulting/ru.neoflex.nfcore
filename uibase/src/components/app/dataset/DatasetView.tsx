@@ -1564,7 +1564,8 @@ class DatasetView extends React.Component<any, State> {
                 />
                 <DatasetGrid
                     gridKey={this.props.viewObject.eURI().split('#')[0]}
-                    hidden={!!this.state.currentDiagram}
+                    hidden={!!this.state.currentDiagram || this.state.isHidden || this.props.isParentHidden}
+                    isExportSuppressed={this.props.isExportSuppressed}
                     skipExport={!this.props.isTabActive}
                     hidePagination={this.props.viewObject.get('hidePaginator')}
                     ref={this.gridRef}

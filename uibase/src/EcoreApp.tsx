@@ -28,6 +28,8 @@ import {NeoButton, NeoCol, NeoRow, NeoTypography, NeoHint} from "neo-design/lib"
 import {NeoIcon} from "neo-icon/lib";
 import {Prohibited} from "./components/Prohibited";
 import DeveloperMain from "./components/DeveloperMain";
+import {excelExportObject} from "./utils/excelExportUtils";
+import {docxExportObject} from "./utils/docxExportUtils";
 
 const backgroundColor = "#2a356c";
 
@@ -67,8 +69,8 @@ export function encodeAppURL(path?: any[]) {
 
 class EcoreApp extends React.Component<any, State> {
 
-    private docxHandlers: any[] = [];
-    private excelHandlers: any[] = [];
+    private docxHandlers: (()=>docxExportObject)[] = [];
+    private excelHandlers: (()=>excelExportObject|undefined)[] = [];
     private eventActions: any[] = [];
     private eventTracker = new EventTracker();
 

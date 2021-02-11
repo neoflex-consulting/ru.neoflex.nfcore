@@ -149,8 +149,8 @@ class FilesystemGroovyEditor extends React.Component<Props & WithTranslation, an
                         title={t('generate link')}
                         type={"link"}
                         onClick={()=>{
-                            copyToClipboard(this.state.path).then(()=>{
-                                this.props.notification!(this.props.t('path generated'), t('path generated into buffer') + ` "${this.state.path}"`, "success");
+                            copyToClipboard(this.state.path.replace("/","")).then(()=>{
+                                this.props.notification!(this.props.t('path generated'), t('path generated into buffer') + ` "${this.state.path.replace("/","")}"`, "success");
                             })
                         }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

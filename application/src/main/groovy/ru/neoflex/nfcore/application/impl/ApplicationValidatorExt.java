@@ -70,6 +70,14 @@ public class ApplicationValidatorExt extends ApplicationValidator {
         }
     }
 
+    @Override
+    public boolean validateCalendar_IsValid(Calendar calendar, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (calendar.getUrlDateParameterName() == null || calendar.getUrlDateParameterName().equals("")) {
+            return validate(calendar, diagnostics, context, String.format("Calendar '%s'. Parameter urlDateParameterName - must be non-empty string", calendar.getName()) );
+        }
+        return false;
+    }
+
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {
         if (diagnostics != null) {
             Object[] newMessage = new Object[] {message, getObjectLabel(validateEObject, context)};
