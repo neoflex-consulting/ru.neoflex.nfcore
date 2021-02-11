@@ -966,7 +966,8 @@ class DatasetComponentExt extends DatasetComponentImpl {
         if (dmlQuery && dmlQuery.generateFromModel) {
             if (jdbcDataset.tableName == "" || !jdbcDataset.tableName)
                 throw new IllegalArgumentException("jdbcDataset table is not specified")
-
+            //Case sensitive, strict column names
+            parameters.forEach(qp -> qp.parameterName = '"'+qp.parameterName+'"')
             String primaryKey = parameters.findAll{ qp -> qp.isPrimaryKey }
                     .collect{qp -> qp.parameterDataType == DataType.DATE.getName()
                             ? "${qp.parameterName} = to_date('${qp.parameterValue.substring(0,10)}','${qp.parameterDateFormat}')"
