@@ -10,6 +10,7 @@ import * as crypto from "crypto"
 import {appTypes} from "../../../utils/consts";
 import {NeoButton, NeoCol, NeoColor, NeoInput, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import {FormInstance} from "antd/lib/form";
 
 const inputOperationKey: string = "_inputOperationKey";
 const selectTypeKey: string = "_selectTypeKey";
@@ -266,7 +267,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
 
     handleSubmit = (e: any) => {
         e.preventDefault();
-        this.props.form.validateFields((err: any, values: any) => {
+        this.validateFields((err: any, values: any) => {
             if (err) {
                 this.props.context.notification('Calculator','Please, correct the mistakes', 'error')
             } else {
@@ -294,7 +295,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     reset = () => {
         this.props.onChangeParameters!(undefined, this.props.componentType);
         this.setState({parametersArray:[{index:1}],currentIndex:0});
-        this.props.formRef.current?.setFieldsValue({
+        this.setFieldsValue({
             [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
             [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
             [inputSelectKey]: null
@@ -304,7 +305,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     render() {
     return (
         <div id={"selectsInCalculator"}>
-            <Form style={{ marginTop: '24px' }} ref={this.props.formRef}>
+            <Form style={{ marginTop: '24px' }}>
                 <Form.Item style={{marginTop: '-28px', marginBottom:'15px', lineHeight:'19px'}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>
                             {this.t('calculatableExpressions')}
@@ -313,7 +314,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 <Form.Item style={{marginBottom:'15px'}}>
                     <NeoCol span={10} style={{justifyContent:'flex-start'}}>
                         {
-                            this.props.formRef.current!.getFieldDecorator(inputSelectKey,{
+                            this.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
                             })(
                                 <NeoSelect
@@ -349,7 +350,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent:'flex-end'}}>
                         {
-                            this.props.formRef.current?.getFieldDecorator(inputFieldKey,{
+                            this.getFieldDecorator(inputFieldKey,{
                                 rules: [{
                                     required:true,
                                     message: ' '
@@ -370,7 +371,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 <Form.Item style={{marginBottom:'32px'}}>
                 <NeoCol span={12} style={{justifyContent:'flex-start'}}>
                     {
-                        this.props.formRef.current?.getFieldDecorator(selectTypeKey,{
+                        this.getFieldDecorator(selectTypeKey,{
                             rules: [{
                             }]
                         })(
@@ -385,7 +386,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 </NeoCol>
                 <NeoCol span={12} style={{justifyContent:'flex-end'}}>
                     {
-                        this.props.formRef.current?.getFieldDecorator(selectMaskKey,{
+                        this.getFieldDecorator(selectMaskKey,{
                             rules: [{
                             }]
                         })(
@@ -409,7 +410,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                     <NeoRow style={{marginBottom: '12px'}}>
                         <NeoCol span={24}>
                             {
-                                this.props.formRef.current?.getFieldDecorator(inputOperationKey,{
+                                this.getFieldDecorator(inputOperationKey,{
                                     /*value: this.currentOperation,*/
                                     initialValue: "",
                                     rules: [{

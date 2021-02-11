@@ -38,6 +38,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     getFieldDecorator: any;
     setFieldsValue: any;
     getFieldValue: any;
+    validateFields: any;
     paramNotification: string;
     formRef = React.createRef<FormInstance>();
 
@@ -49,7 +50,8 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.formRef.current!.validateFields;
+        this.getFieldDecorator = this.formRef.current!;
+        this.validateFields = this.formRef.current!.validateFields;
         this.setFieldsValue = this.formRef.current!.setFieldsValue;
         this.getFieldValue = this.formRef.current!.getFieldValue;
         switch (this.props.componentType) {
