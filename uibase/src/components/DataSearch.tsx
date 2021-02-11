@@ -44,7 +44,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     refresh = () => {
-        this.formRef.current?.validateFields().then((values: any) => {
+        this.formRef.current!.validateFields().then((values: any) => {
             let selectedClassObject: Ecore.EClass | undefined;
             if (this.props.specialEClass === undefined) {
                 selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);

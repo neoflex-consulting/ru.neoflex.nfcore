@@ -18,9 +18,6 @@ interface Props extends ParameterDrawerProps {
     datasetComponentVersion?: string;
 }
 
-
-
-
 function trimHeader(header: string) {
     return header.length > 60 ? header.substring(0,60) + "..." : header
 }
@@ -74,7 +71,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
     constructor(props: any) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
-        this.getFieldDecorator = this.props.formRef.current?.getFieldDecorator;
+        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     onSortEnd = ({oldIndex, newIndex}:any) => {
