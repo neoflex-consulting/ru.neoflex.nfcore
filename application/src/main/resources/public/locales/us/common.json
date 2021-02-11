@@ -505,5 +505,7 @@
         "export all tabs or current tab": "Export all tabs or current tab?",
         "all": "All",
         "current": "Current",
-        "create event handler": "Create event handler"
+        "create event handler": "Create event handler",
+        "folder already exists": "Folder already exists",
+        "file already exists": "File already exists"
 }

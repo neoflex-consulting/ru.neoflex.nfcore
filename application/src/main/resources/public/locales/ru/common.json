@@ -502,7 +502,9 @@
         "export all tabs or current tab": "Выгрузить все вкладки или открытую вкладку?",
         "all": "Все",
         "current": "Открытую",
-        "create event handler": "Добавить обработчик"
+        "create event handler": "Добавить обработчик",
+        "folder already exists": "Каталог с таким названием уже существует в файловой системе",
+        "file already exists": "Файл с таким названием уже существует в файловой системе"
 }
 
 
