@@ -161,24 +161,51 @@ public class Server extends SessionFactory implements Closeable {
         return file;
     }
 
+    private static int getHanoiTowersSlot(int index) {
+        if (index == 0)
+            return 0;
+        int shift = 0;
+        while ((index&(1<<shift)) == 0)
+            ++shift;
+        return shift + 1;
+    }
+
     public File backupDatabase() throws IOException {
-        File backup = new File(home, "backups/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".zip");
-        return backupDatabase(backup);
+        List<String> names = listBackupNames();
+        int index = 0;
+        for (int i = names.size() - 1; i >= 0; --i) {
+            String[] parts = names.get(i).split("_");
+            try {
+                index = Integer.parseInt(parts[1]) + 1;
+                break;
+            }
+            catch (Throwable t) {
+            }
+        }
+        int slot = getHanoiTowersSlot(index);
+        File backups = new File(getHome(), "backups");
+        String fileName = String.format("%s_%06d_%03d_%s.zip",
+                getDbName(), index, slot, new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()));
+        File backup = new File(backups, fileName);
+        backupDatabase(backup);
+        for (int i = names.size() - 1; i >= 0; --i) {
+            String[] parts = names.get(i).split("_");
+            try {
+                if (Integer.parseInt(parts[2]) == slot) {
+                    File file = new File(backups, names.get(i));
+                    file.delete();
+                }
+            }
+            catch (Throwable t) {
+            }
+        }
+        return backup;
     }
 
     public File backupDatabase(File file) throws IOException {
-        return backupDatabase(file, 10);
-    }
-
-    public File backupDatabase(File file, int keep) throws IOException {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
             backupDatabase(os, new HashMap<>());
-        }
-        List<String> list = listBackups();
-        while (list.size() > keep) {
-            String fileName = list.remove(0);
-            new File(fileName).delete();
         }
         return file;
     }
@@ -197,8 +224,8 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public String restoreDatabase(String fileName) throws IOException {
-        File dir = new File(getHome(), "backups");
-        return restoreDatabase(new File(dir, fileName));
+        File backups = new File(getHome(), "backups");
+        return restoreDatabase(new File(backups, fileName));
     }
 
     public void restoreDatabase(InputStream is, Map<String, Object> options) throws IOException {
