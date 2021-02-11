@@ -250,15 +250,18 @@
     display: inline-flex;
     align-items: flex-start;
     line-height: 20px;
-    min-width: 233px;
 }
 
 #referenceTree .menu-content span {
     display: inline-flex;
     align-items: center;
     line-height: 20px;
-    min-width: 233px;
-    padding: 10px 0 10px;
+    margin: 10px 0 10px;
+    overflow : hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 #referenceTree .menu-content:hover {
