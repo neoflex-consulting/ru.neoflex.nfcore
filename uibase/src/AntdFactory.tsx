@@ -191,12 +191,13 @@ export async function checkServerSideCondition(conditionType: string, valueItems
 }
 
 abstract class ViewContainer extends View {
-    renderChildren = (isParentDisabled:boolean = false, isParentHidden:boolean = false) => {
+    renderChildren = (isParentDisabled:boolean = false, isParentHidden:boolean = false, isExportSuppressed:boolean = false) => {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];
         const props = {
             ...this.props,
             isParentDisabled: isParentDisabled,
             isParentHidden: isParentHidden,
+            isExportSuppressed: isExportSuppressed,
         };
         let childrenView = children.map(
             (c: Ecore.EObject) => {
@@ -209,7 +210,7 @@ abstract class ViewContainer extends View {
 
     render = () => {
         return <div key={this.viewObject._id.toString() + '_3'}>{
-            this.renderChildren()
+            this.renderChildren(false, false, this.props.isExportSuppressed)
         }</div>
     }
 }
@@ -240,7 +241,7 @@ class Col_ extends ViewContainer {
                  hidden={this.state.isHidden || this.props.isParentHidden}
                  className={cssClass}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Col>
         )
     }
@@ -272,7 +273,7 @@ class Form_ extends ViewContainer {
                   key={this.viewObject._id.toString() + '_4'}
                   className={cssClass}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Form>
         )
     }
@@ -357,7 +358,7 @@ class Row_ extends ViewContainer {
                 className={cssClass}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Row>
         )
     }
@@ -397,7 +398,7 @@ class Region_ extends ViewContainer {
                     marginBottom: '16px'}}
                 className={cssClass}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Row>
         )
     }
@@ -537,22 +538,20 @@ export class Select_ extends ViewContainer {
         }
     }
 
-    private getDocxData(): docxExportObject {
-        return {
+    private getDocxData(): docxExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
-    private getExcelData(): excelExportObject {
-        return {
+    private getExcelData(): excelExportObject | undefined{
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
     prepareString = (currentValue: string|string[]) => {
@@ -790,22 +789,20 @@ export class DatePicker_ extends ViewContainer {
         }
     }
 
-    private getDocxData(): docxExportObject {
-        return {
+    private getDocxData(): docxExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             docxComponentType : docxElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
-    private getExcelData(): excelExportObject {
-        return {
+    private getExcelData(): excelExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             excelComponentType : excelElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
     componentDidMount(): void {
@@ -1378,24 +1375,22 @@ class Typography_ extends ViewContainer {
         unmountComponent.bind(this)(true, true)
     }
 
-    private getDocxData(): docxExportObject {
-        return {
+    private getDocxData(): docxExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             docxComponentType : docxElementExportType.text,
             textData: this.state.label,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem,
             font: {bold: this.viewObject.get('strongStyle')}
-        };
+        } : undefined;
     }
 
-    private getExcelData(): excelExportObject {
-        return {
+    private getExcelData(): excelExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             excelComponentType : excelElementExportType.text,
             textData: this.state.label,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem,
             font: {bold: this.viewObject.get('strongStyle')}
-        };
+        } : undefined;
     }
 
     onChange = (str: string) => {
@@ -1622,7 +1617,7 @@ class Drawer_ extends ViewContainer {
                     position: 'absolute',
                 }}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, true)}
             </Drawer>
         )
     }
@@ -1767,7 +1762,7 @@ class Collapse_ extends ViewContainer {
                     defaultActiveKey={['1']}
                     expandIconPosition={'left'}>
                     <Collapse.Panel header={this.viewObject.get("name")} key={"1"} forceRender={this.state.isOpen}>
-                        {this.renderChildren()}
+                        {this.renderChildren(false, false, this.props.isExportSuppressed)}
                     </Collapse.Panel>
                 </Collapse>
             </div>
@@ -1839,6 +1834,7 @@ class DatasetView_ extends ViewContainer {
             disabled: disabled,
             hidden: hidden,
             isParentHidden: this.props.isParentHidden,
+            isExportSuppressed: this.props.isExportSuppressed,
             grantType: grantType,
             className: cssClass
         };
@@ -1855,6 +1851,7 @@ class Calendar_ extends ViewContainer {
             ...this.props,
             disabled: disabled,
             hidden: hidden || this.props.isParentHidden,
+            isExportSuppressed: this.props.isExportSuppressed,
             grantType: grantType,
         };
         return <Calendar {...props} key={this.viewObject._id}/>
