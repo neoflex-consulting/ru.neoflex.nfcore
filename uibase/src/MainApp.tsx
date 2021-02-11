@@ -14,6 +14,7 @@ import {NeoButton, NeoColor, NeoParagraph, NeoTable, NeoTabs} from "neo-design/l
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import _ from "lodash";
+import {ReactText} from "react";
 
 interface State {
     pathBreadcrumb: string[];
@@ -144,7 +145,9 @@ export class MainApp extends React.Component<any, State> {
                         findTreeOpenKeys(t, appModuleName, retArr);
                     }
                 })
-            } else if (refTree.get('AppModule')!.get('name') === appModuleName) {
+            } else if (refTree.get('AppModule') !== null &&
+                refTree.get('AppModule') !== undefined &&
+                refTree.get('AppModule')!.get('name') === appModuleName) {
                 retArr.push(appModuleName);
                 return retArr
             }
@@ -310,9 +313,9 @@ export class MainApp extends React.Component<any, State> {
                 this.props.context.updateContext!(({viewObject: undefined, applicationReferenceTree: undefined}))
             }
         }
-        // if (prevProps.location.pathname !== this.props.location.pathname) {
-        //     this.loadObject()
-        // }
+        if (prevProps.location.pathname !== this.props.location.pathname) {
+            this.loadObject()
+        }
         if (this.props.context !== prevProps.context) {
             //В момент инициализации даем понять адаптивным элементам что нужно пересчитать размеры
             window.dispatchEvent(new Event('appAdaptiveResize'));
@@ -322,7 +325,6 @@ export class MainApp extends React.Component<any, State> {
             unmountStyleSheets(prevProps.context.styleSheetsList)
         }
     }
-
 
     handleResize = () => {
         const hideReferences = getAdaptiveSize(this.refSplitterRef.current.panePrimary.div.offsetWidth ? this.refSplitterRef.current.panePrimary.div.offsetWidth : 0, "referenceMenu") <= adaptiveElementSize.extraSmall;
@@ -465,122 +467,122 @@ export class MainApp extends React.Component<any, State> {
         })
     };
 
-    // renderReferences = (isShortSize = false) => {
-    //     const {context} = this.props;
-    //     const {applicationReferenceTree, viewReferenceTree} = context;
-    //     const referenceTree = viewReferenceTree || applicationReferenceTree;
-    //     const cbs = new Map<string, () => void>();
-    //     const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
-    //     const pathReferenceTree = currentAppModule.tree && currentAppModule.tree.length > 0
-    //         ? currentAppModule.tree[currentAppModule.tree.length - 1]
-    //         : this.appModuleMap.get(currentAppModule.appModule) && this.appModuleMap.get(currentAppModule.appModule)![this.appModuleMap.get(currentAppModule.appModule)!.length - 1];
-    //     return !referenceTree ? null : (
-    //         <Layout style={{backgroundColor: backgroundColor}}>
-    //             <Menu
-    //                 id={"referenceTree"}
-    //                 inlineIndent={12}
-    //                 className={`${isShortSize && "short-size"}`}
-    //                 openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
-    //                 selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
-    //                 // onSelect={params => {
-    //                 //     const cb = cbs.get(params.key);
-    //                 //     if (cb) cb();
-    //                 // }}
-    //                 // onOpenChange={openKeys => {
-    //                 //     this.setState({openKeys: getOpenedPath(openKeys)});
-    //                 //     //Восстанавливаем ширину если были в свернутом виде
-    //                 //     if (this.state.hideReferences) {
-    //                 //         setVerticalStoredSize(defaultVerticalSplitterSize);
-    //                 //         this.setVerticalSplitterWidth(getVerticalStoredSize())
-    //                 //     }
-    //                 // }}
-    //                 mode="inline"
-    //             >
-    //                 {referenceTree.get('children')
-    //                     .filter((c: Ecore.EObject)=> (isShortSize && c.get('icon')) || !isShortSize)
-    //                     .map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, undefined, isShortSize))}
-    //             </Menu>
-    //         </Layout>
-    //     )
-    // };
+    renderReferences = (isShortSize = false) => {
+        const {context} = this.props;
+        const {applicationReferenceTree, viewReferenceTree} = context;
+        const referenceTree = viewReferenceTree || applicationReferenceTree;
+        const cbs = new Map<string, () => void>();
+        const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
+        const pathReferenceTree = currentAppModule.tree && currentAppModule.tree.length > 0
+            ? currentAppModule.tree[currentAppModule.tree.length - 1]
+            : this.appModuleMap.get(currentAppModule.appModule) && this.appModuleMap.get(currentAppModule.appModule)![this.appModuleMap.get(currentAppModule.appModule)!.length - 1];
+        return !referenceTree ? null : (
+            <Layout style={{backgroundColor: backgroundColor}}>
+                <Menu
+                    id={"referenceTree"}
+                    inlineIndent={12}
+                    className={`${isShortSize && "short-size"}`}
+                    openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
+                    selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
+                    onSelect={(params: any) => {
+                        const cb = cbs.get(params.key);
+                        if (cb) cb();
+                    }}
+                    onOpenChange={(openKeys: any) => {
+                        this.setState({openKeys: getOpenedPath(openKeys)});
+                        //Восстанавливаем ширину если были в свернутом виде
+                        if (this.state.hideReferences) {
+                            setVerticalStoredSize(defaultVerticalSplitterSize);
+                            this.setVerticalSplitterWidth(getVerticalStoredSize())
+                        }
+                    }}
+                    mode="inline"
+                >
+                    {referenceTree.get('children')
+                        .filter((c: Ecore.EObject)=> (isShortSize && c.get('icon')) || !isShortSize)
+                        .map((c: Ecore.EObject) => this.renderTreeNode(c, cbs, undefined, isShortSize))}
+                </Menu>
+            </Layout>
+        )
+    };
 
-    // renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string, isShortSize = false) => {
-    //     const code = eObject.get('name');
-    //     const key = parentKey ? parentKey + '/' + code : code;
-    //     // eslint-disable-next-line
-    //     const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
-    //     const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{code}</span></div>;
-    //     let children = [];
-    //     if (eObject.get('children')) {
-    //         children = eObject.get('children')
-    //             .map((c: Ecore.EObject) =>
-    //                 this.renderTreeNode(c, cbs, key));
-    //     }
-    //
-    //     const isLeaf = !eObject.isKindOf('CatalogNode');
-    //
-    //     if (eObject.isKindOf('AppModuleNode')) {
-    //         cbs.set(key, () => {
-    //             if (eObject.get('AppModule')) {
-    //                 this.setURL(eObject, this.state.openKeys.concat(key));
-    //             }
-    //         });
-    //         if (eObject.get('AppModule'))
-    //             this.appModuleMap.set(eObject.get('AppModule').get('name'), this.state.openKeys.concat(key));
-    //     }
-    //     else if (eObject.isKindOf('ViewNode') ) {
-    //         cbs.set(key, () => {
-    //             if (eObject.get('view')) {
-    //                 this.setURL(eObject, this.state.openKeys.concat(key));
-    //             }
-    //         })
-    //     }
-    //     else if (eObject.isKindOf('EClassNode')) {
-    //         cbs.set(key, () => {
-    //             if (eObject.get('aClass') && eObject.get('view')) {
-    //                 this.setURL(eObject, this.state.openKeys.concat(key));
-    //             }
-    //         })
-    //     }
-    //     else if (eObject.isKindOf('DynamicNode')) {
-    //         cbs.set(key, () => {
-    //             if (eObject.get('methodName') && eObject.get('eObject')) {
-    //                 this.setURL(eObject, this.state.openKeys.concat(key));
-    //             }
-    //         })
-    //     }
-    //     if (isShortSize) {
-    //         const cb = cbs.get(key);
-    //         cbs.set(key, () => {
-    //             cb && cb();
-    //         })
-    //     }
-    //     return eObject.get('grantType') === grantType.denied ? undefined : (
-    //         isLeaf
-    //             ? <Menu.Item className={icon ? "item-with-icon": "item-without-icon"} key={key}>{content}</Menu.Item>
-    //             : <SubMenu className={icon ? "submenu-with-icon": "submenu-without-icon"} onTitleClick={()=>{isShortSize && this.setState({hideReferences: false})}} key={key} title={content}>{children}</SubMenu>
-    //     )
-    // };
+    renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string, isShortSize = false) => {
+        const code = eObject.get('name');
+        const key = parentKey ? parentKey + '/' + code : code;
+        // eslint-disable-next-line
+        const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
+        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{code}</span></div>;
+        let children = [];
+        if (eObject.get('children')) {
+            children = eObject.get('children')
+                .map((c: Ecore.EObject) =>
+                    this.renderTreeNode(c, cbs, key));
+        }
 
-    // private setURL(eObject: Ecore.EObject, keys: string[]) {
-    //     const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule;
-    //     let tree = keys;
-    //     let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
-    //     unmountStyleSheets(this.props.context.styleSheetsList);
-    //     this.props.context.changeURL!(appModuleName, useParentReferenceTree, tree)
-    // }
+        const isLeaf = !eObject.isKindOf('CatalogNode');
 
-    // hideReferenceTree = () => {
-    //     if (this.state.hideReferences) {
-    //         const size = getVerticalStoredSize();
-    //         this.setVerticalSplitterWidth(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
-    //         setVerticalStoredSize(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
-    //     } else {
-    //         this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth);
-    //         setVerticalStoredSize(this.refSplitterRef.current.panePrimary.props.style.minWidth);
-    //     }
-    //     this.setState({hideReferences: !this.state.hideReferences})
-    // };
+        if (eObject.isKindOf('AppModuleNode')) {
+            cbs.set(key, () => {
+                if (eObject.get('AppModule')) {
+                    this.setURL(eObject, this.state.openKeys.concat(key));
+                }
+            });
+            if (eObject.get('AppModule'))
+                this.appModuleMap.set(eObject.get('AppModule').get('name'), this.state.openKeys.concat(key));
+        }
+        else if (eObject.isKindOf('ViewNode') ) {
+            cbs.set(key, () => {
+                if (eObject.get('view')) {
+                    this.setURL(eObject, this.state.openKeys.concat(key));
+                }
+            })
+        }
+        else if (eObject.isKindOf('EClassNode')) {
+            cbs.set(key, () => {
+                if (eObject.get('aClass') && eObject.get('view')) {
+                    this.setURL(eObject, this.state.openKeys.concat(key));
+                }
+            })
+        }
+        else if (eObject.isKindOf('DynamicNode')) {
+            cbs.set(key, () => {
+                if (eObject.get('methodName') && eObject.get('eObject')) {
+                    this.setURL(eObject, this.state.openKeys.concat(key));
+                }
+            })
+        }
+        if (isShortSize) {
+            const cb = cbs.get(key);
+            cbs.set(key, () => {
+                cb && cb();
+            })
+        }
+        return eObject.get('grantType') === grantType.denied ? undefined : (
+            isLeaf
+                ? <Menu.Item className={icon ? "item-with-icon": "item-without-icon"} key={key}>{content}</Menu.Item>
+                : <SubMenu className={icon ? "submenu-with-icon": "submenu-without-icon"} onTitleClick={()=>{isShortSize && this.setState({hideReferences: false})}} key={key} title={content}>{children}</SubMenu>
+        )
+    };
+
+    private setURL(eObject: Ecore.EObject, keys: string[]) {
+        const appModuleName = eObject.get('AppModule') ? eObject.get('AppModule').get('name') : this.props.pathFull[0].appModule;
+        let tree = keys;
+        let useParentReferenceTree = eObject.get('AppModule') !== undefined ? (eObject.get('AppModule').get('useParentReferenceTree') || false) : true;
+        unmountStyleSheets(this.props.context.styleSheetsList);
+        this.props.context.changeURL!(appModuleName, useParentReferenceTree, tree)
+    }
+
+    hideReferenceTree = () => {
+        if (this.state.hideReferences) {
+            const size = getVerticalStoredSize();
+            this.setVerticalSplitterWidth(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
+            setVerticalStoredSize(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
+        } else {
+            this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth);
+            setVerticalStoredSize(this.refSplitterRef.current.panePrimary.props.style.minWidth);
+        }
+        this.setState({hideReferences: !this.state.hideReferences})
+    };
 
     render = () => {
         const hasIcons: boolean = this.props.context.applicationReferenceTree
@@ -596,32 +598,32 @@ export class MainApp extends React.Component<any, State> {
                 {this.renderEList(this.props.context.groovyCommandList)}
                 {this.renderEList(this.props.context.eventHandlerList)}
                 <Splitter
-                    // allowResize={!this.state.hideReferences}
+                    allowResize={!this.state.hideReferences}
                     ref={this.refSplitterRef}
                     position="vertical"
-                    // primaryPaneMaxWidth="50%"
-                    // primaryPaneMinWidth={hasIcons ? verticalSplitterShortSize : "0px"}
-                    // primaryPaneWidth={hasIcons && this.state.hideReferences
-                    //     ? verticalSplitterShortSize
-                    //     : this.state.hideReferences
-                    //         ? 0
-                    //         : getVerticalStoredSize()}
-                    // dispatchResize={true}
-                    // postPoned={false}
-                    // onDragFinished={() => {
-                    //     if (this.refSplitterRef.current) {
-                    //         setVerticalStoredSize(this.refSplitterRef.current.panePrimary.props.style.width)
-                    //     }
-                    // }}
+                    primaryPaneMaxWidth="50%"
+                    primaryPaneMinWidth={hasIcons ? verticalSplitterShortSize : "0px"}
+                    primaryPaneWidth={hasIcons && this.state.hideReferences
+                        ? verticalSplitterShortSize
+                        : this.state.hideReferences
+                            ? 0
+                            : getVerticalStoredSize()}
+                    dispatchResize={true}
+                    postPoned={false}
+                    onDragFinished={() => {
+                        if (this.refSplitterRef.current) {
+                            setVerticalStoredSize(this.refSplitterRef.current.panePrimary.props.style.width)
+                        }
+                    }}
                 >
                     <div className={'left-splitter'} style={{flexGrow: 1, backgroundColor: backgroundColor, height: '100%'}}>
-                        {/*{this.renderReferences(this.state.hideReferences)}*/}
+                        {this.renderReferences(this.state.hideReferences)}
                         {this.props.context.applicationReferenceTree && <div className={'references-tree-footer'}>
                             <NeoButton
                                 className={"footer-item"}
                                 title={this.state.hideReferences ? this.props.t("show menu") : this.props.t("hide menu")}
                                 type={"link"}
-                                // onClick={this.hideReferenceTree}
+                                onClick={this.hideReferenceTree}
                             >
                                 <NeoIcon color={NeoColor.grey_8} icon={this.state.hideReferences ? "table" : "arrowLong"} />
                                 {!this.state.hideReferences && <NeoParagraph type={"body_regular"}>{this.props.t("hide menu")}</NeoParagraph>}
@@ -631,19 +633,19 @@ export class MainApp extends React.Component<any, State> {
                     <div style={{backgroundColor: backgroundColor, height: '100%'}}>
                         <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
                             <Splitter
-                                // ref={this.toolsSplitterRef}
+                                ref={this.toolsSplitterRef}
                                 position="horizontal"
-                                // primaryPaneMaxHeight="100%"
-                                // primaryPaneMinHeight="0%"
-                                // primaryPaneHeight={getHorizontalStoredSize()}
-                                // dispatchResize={true}
-                                // postPoned={false}
-                                // maximizedPrimaryPane={this.state.hideLog && this.state.hideURL}
-                                // allowResize={!(this.state.hideLog && this.state.hideURL)}
-                                // onDragFinished={() => {
-                                //     const size: string = this.toolsSplitterRef.current!.panePrimary.props.style.height;
-                                //     setHorizontalStoredSize(size);
-                                // }}
+                                primaryPaneMaxHeight="100%"
+                                primaryPaneMinHeight="0%"
+                                primaryPaneHeight={getHorizontalStoredSize()}
+                                dispatchResize={true}
+                                postPoned={false}
+                                maximizedPrimaryPane={this.state.hideLog && this.state.hideURL}
+                                allowResize={!(this.state.hideLog && this.state.hideURL)}
+                                onDragFinished={() => {
+                                    const size: string = this.toolsSplitterRef.current!.panePrimary.props.style.height;
+                                    setHorizontalStoredSize(size);
+                                }}
                             >
                                 <div style={{zIndex: 10, backgroundColor: backgroundColor}}>
                                     <div style={{
