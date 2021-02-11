@@ -436,7 +436,7 @@ class Calendar extends React.Component<any, any> {
 
     openNotification(notification: any, context: any): void  {
         let params: Object[] = [{
-            parameterName: 'reportDate',
+            parameterName: this.props.viewObject.get("urlDateParameterName"),
             parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date"
         }];
@@ -452,7 +452,7 @@ class Calendar extends React.Component<any, any> {
 
     openNotification2(notification: any, context: any): any  {
         let params: Object[] = [{
-            parameterName: 'reportDate',
+            parameterName: this.props.viewObject.get("urlDateParameterName"),
             parameterValue: notification.contents[0]['notificationDateOn'],
             parameterDataType: "Date"
         }];
