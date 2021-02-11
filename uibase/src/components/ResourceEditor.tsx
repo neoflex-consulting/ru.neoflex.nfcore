@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Col, Input, Layout, Menu, Row, Tree} from 'antd';
-import Ecore, {EObject, Resource} from "ecore";
+import Ecore, {EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
@@ -187,9 +187,126 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     componentDidMount(): void {
         this.getEClasses();
-        // window.addEventListener("click", this.hideRightClickMenu);
-        // window.addEventListener("keydown", this.saveOnCtrlS);
+        window.addEventListener("click", this.hideRightClickMenu);
+        window.addEventListener("keydown", this.saveOnCtrlS);
+        /*window.addEventListener("keydown", this.deleteOnDel);
+        API.instance().findClass("application","EventHandler").then(eClass=>{
+            this.eventHandlerClass = eClass.eURI()
+        })
+        API.instance().findClass("application","DynamicActionElement").then(eClass=>{
+            this.dynamicActionElementClass = eClass.eURI()
+        })*/
     }
+
+    componentWillUnmount() {
+        if (!this.state.removalProcess) {
+            this.changeEdit(true)
+        }
+        window.removeEventListener("click", this.hideRightClickMenu);
+        window.removeEventListener("keydown", this.saveOnCtrlS)
+        /*window.removeEventListener("keydown", this.deleteOnDel)*/
+    }
+
+    private saveOnCtrlS = (event: any) => {
+        if (event.ctrlKey && event.code === 'KeyS') {
+            this.save(false, false);
+            event.preventDefault();
+        }
+    };
+
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        //if true that means resourceJSON was edited
+        if (this.state.targetObject !== undefined
+            && this.state.resourceJSON !== prevState.resourceJSON
+            && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
+            const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
+            let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
+            this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
+        }
+        //Initial expand all elements && highlight selected
+        if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
+            const selectedKeys = [findChildrenKey([this.treeRef.current.props.children], this.state.targetObject?._id)]
+            this.setState({
+                expandedKeys: getAllChildrenKeys([this.treeRef.current.props.children]),
+                selectedKeys: selectedKeys
+            }, this.scrollToElementWithId)
+        }
+        //Component load after getEObject
+        if (prevState.mainEObject._id === undefined && this.state.mainEObject._id !== undefined) {
+            this.checkLock('auth','CurrentLock', 'currentLockPattern');
+        }
+        //Smooth highlight positioning
+        if (prevState.targetObject?._id !== this.state.targetObject?._id && this.state.targetObject?._id !== undefined) {
+            const node = this.findTreeNodeById(this.state.targetObject?._id);
+            if (node) {
+                this.setState({
+                    selectedKeys: [node.eventKey],
+                    uniqKey: node.eventKey,
+                })
+            }
+        }
+        /*Проверка, обновилась ли версия объекта в других источниках*/
+        if (this.state.mainEObject._id !== undefined &&
+            !this.props.location.pathname.includes("/new/") &&
+            this.state.mainEObject._id === this.props.location.pathname.split("/")[4] &&
+            this.state.mainEObject.eResource().rev < this.props.location.pathname.split("/")[5]) {
+            this.refresh(true);
+        }
+    }
+
+    fetchEObject(id: string, rev: string, resourceSet: ResourceSet, targetObjectId?: string ): void {
+        API.instance().fetchResource(`${id}?ref=${rev}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
+            const targetId = targetObjectId
+                ? targetObjectId : this.state.targetObject?._id
+                    ? this.state.targetObject._id : id;
+            const mainEObject = resource.eResource().eContents()[0];
+            const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
+            const targetObject = findObjectById(nestedJSON, targetId);
+            const tableData = targetObject ? this.prepareTableData(targetObject, mainEObject, targetId) : undefined;
+            this.setState((state, props) => ({
+                mainEObject: mainEObject,
+                resourceJSON: nestedJSON,
+                resource: resource,
+                selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
+                targetObject: targetObject ? targetObject : { eClass: "" },
+                tableData: tableData ? tableData : [],
+                edit: this.state.edit || (this.props.match.params.edit === 'true')
+            }));
+        })
+    }
+
+    checkLock(ePackageName: string, className: string, paramName: string) {
+        API.instance().findClass(ePackageName, className)
+            .then((result: EObject) => {
+                if (paramName === 'currentLockPattern') {
+                    API.instance().findByKind(result,  {contents: {eClass: result.eURI()}})
+                        .then((result: Ecore.Resource[]) => {
+                            if (result.length !== 0) {
+                                let currentLockFile = result
+                                    .filter( (r: EObject) =>
+                                        (r.eContents()[0].get('name') === this.state.mainEObject._id &&
+                                            r.eContents()[0].get('audit').get('createdBy') === this.props.principal.name)
+                                    );
+                                if (currentLockFile.length !== 0) {
+                                    this.setState({edit: true});
+                                } else {
+                                    if (this.props.match.params.edit) {
+                                        this.changeEdit(false)
+                                    }
+                                }
+                            } else {
+                                if (this.props.match.params.edit) {
+                                    this.changeEdit(false)
+                                }
+                            }
+                        })
+                }
+            })
+    };
+
+    hideRightClickMenu = (e: any) => {
+        this.state.rightClickMenuVisible && this.setState({ rightClickMenuVisible: false })
+    };
 
     getEClasses(): void {
         API.instance().fetchAllClasses(false).then(classes => {
@@ -200,25 +317,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     getEObject(): void {
-        const resourceSet = Ecore.ResourceSet.create();
-        this.props.match.params.id !== 'new' ?
-            API.instance().fetchResource(`${this.props.match.params.id}?ref=${this.props.match.params.ref}`, 999, resourceSet, {}).then((resource: Ecore.Resource) => {
-                const mainEObject = resource.eResource().eContents()[0];
-                const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
-                this.setState((state, props) => ({
-                    mainEObject: mainEObject,
-                    resourceJSON: nestedJSON,
-                    resource: resource,
-                    selectedKeys: this.state.selectedKeys !== undefined && this.state.selectedKeys.length > 0 ? this.state.selectedKeys : [],
-                    //If we create a new sibling (without saving), when click on it, information appears in the property table.
-                    //But if we click the refresh button, the new created sibling will disappear, but the property table still will
-                    //show information from an old targetObject. To prevent those side effects we have to null targetObject and tableData.
-                    targetObject: this.state.targetObject ? this.state.targetObject : { eClass: "" },
-                    tableData: this.state.tableData!.length > 0 ? this.state.tableData : []
-                }));
-            })
-            :
-            this.generateEObject()
+        this.props.match.params.id !== 'new'
+            ? this.fetchEObject(this.props.match.params.id, this.props.match.params.ref, Ecore.ResourceSet.create(), this.props.match.params.targetId)
+            : this.generateEObject()
     }
 
     generateEObject(): void {
@@ -500,16 +601,18 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         let foundNodes: {[key:string] : any}[] = [];
         // eslint-disable-next-line
         for (const [_, node] of Object.entries(this.treeRef.current?.state.keyEntities)) {
-            let found = Object.keys(selector).length > 0;
-            for (const [selectorKey, selectorValue] of Object.entries(selector)) {
-                if (typeof selectorValue === "string" && (node as { [key: string]: any })?.node?.data && (node as { [key: string]: any }).node.data[selectorKey] !== selectorValue) {
-                    found = false;
-                } else if (typeof selectorValue !== "string" && Object.keys(selectorValue).length > 0  && !objectsHaveSameKeysValue(selectorValue, (node as { [key: string]: any }).props[selectorKey])) {
-                    found = false;
+            if ((node as { [key: string]: any })?.node.data) {
+                let found = Object.keys(selector).length > 0;
+                for (const [selectorKey, selectorValue] of Object.entries(selector)) {
+                    if (typeof selectorValue === "string" && (node as { [key: string]: any })?.node?.data && (node as { [key: string]: any }).node.data[selectorKey] !== selectorValue) {
+                        found = false;
+                    } else if (typeof selectorValue !== "string" && Object.keys(selectorValue).length > 0 && !objectsHaveSameKeysValue(selectorValue, (node as { [key: string]: any }).node.data[selectorKey])) {
+                        found = false;
+                    }
                 }
-            }
-            if (found) {
-                foundNodes.push(node as {[key:string] : any})
+                if (found) {
+                    foundNodes.push(node as { [key: string]: any })
+                }
             }
         }
         return foundNodes
@@ -530,26 +633,28 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ modalResourceVisible: false })
     };
 
+    // Добавалениеб редоктирование, сохранение
+
     scrollToElementWithId = (id?:string) => {
-        const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
+        /*const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
             node.selectHandle.scrollIntoView({
                 behavior: "smooth",
                 block: 'center',
                 inline: 'center'
             });
-        }
+        }*/
     }
 
     handleRightMenuSelect = (e: any) => {
         const targetObject = this.state.targetObject;
         const node: { [key: string]: any } = this.state.treeRightClickNode;
         if (e.keyPath[e.keyPath.length - 1] === "add") {
-            const subTypeName = e.item.props.children;
-            const eClass = node.eClass;
+            const subTypeName = e.item.props.eventKey;
+            const eClass = node.data.eClass;
             const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
             const allSubTypes = eClassObject.get('eAllSubTypes');
-            node.isArray && eClassObject && allSubTypes.push(eClassObject);
+            node.data.isArray && eClassObject && allSubTypes.push(eClassObject);
             const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName);
             const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
             const newObject = {
@@ -558,10 +663,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 name: e.key+` ${id}`
             };
             let updatedJSON;
-            if (node.upperBound === -1) {
-                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
+            if (node.data.upperBound === -1) {
+                updatedJSON = node.data.parentUpdater(newObject, undefined, node.data.propertyName, { operation: "push" })
             } else {
-                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
+                updatedJSON = node.data.parentUpdater(newObject, undefined, node.data.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
@@ -571,7 +676,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 isModified: true,
-                expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
+                expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))]
             }, this.scrollToElementWithId)
         }
 
@@ -605,11 +710,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         if (e.key === "delete"||e.key === "Delete") {
             let updatedJSON;
-            if (node.featureUpperBound === -1) {
+            if (node.data.featureUpperBound === -1) {
                 const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
-                updatedJSON = index && node.parentUpdater(null, undefined, node.propertyName, { operation: "splice", index: index })
+                updatedJSON = index && node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "splice", index: index })
             } else {
-                updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "set" })
+                updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
@@ -619,7 +724,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
-                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                selectedKeys: state.selectedKeys.filter(key => key !== node.Key),
                 isModified: true
             }))
         }
@@ -757,11 +862,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 zIndex: 100
             }}>
                 <Menu onClick={this.handleRightMenuSelect} style={{ width: 150, border: "none" }} mode="vertical">
-                    {this.state.edit && allSubTypes.length > 0 && (node.upperBound === 1 && node.arrayLength > 0 ? false : true) && <Menu.SubMenu
+                    {this.state.edit && allSubTypes.length > 0 && (!(node.upperBound === 1 && node.arrayLength > 0)) && <Menu.SubMenu
                         key="add"
                         title={this.props.t("add child")}
                     >
-                        {allSubTypes
+                            {allSubTypes
                             .sort((a: any, b: any) => this.sortEClasses(a, b))
                             .map((type: Ecore.EObject, idx: Number) =>
                                 type.get('abstract') ?
@@ -816,6 +921,127 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
         return menu
     }
+
+    redirect = () => {
+        const win = window.open(`/app/${
+            btoa(
+                encodeURIComponent(
+                    JSON.stringify(
+                        [{
+                            appModule: this.state.mainEObject.get('name'),
+                            tree: [],
+                            useParentReferenceTree: this.state.mainEObject.get('useParentReferenceTree')
+                        }]
+                    )
+                )
+            )
+        }`, '_blank');
+        win!.focus();
+    };
+
+    saveResource = (resource : any, redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
+        function getNewIds( oldJSON: {[key: string]: any }, newJSON: { [key: string]: any }, ids:{[key:string]: string} = {}) {
+            for (const [key, value] of Object.entries(oldJSON)) {
+                if (typeof value === "object") {
+                    getNewIds(oldJSON[key], newJSON[key], ids)
+                } else if (key === "_id") {
+                    ids[oldJSON._id] = newJSON._id
+                }
+            }
+            return ids
+        }
+        this.setState({isSaving: true});
+        API.instance().saveResource(resource, 99999).then((resource: any) => {
+            const nestedJSON = nestUpdaters(resource.eResource().eContents()[0].eResource().to(), null);
+            const oldNestedJSON = this.state.mainEObject.eResource && nestUpdaters(this.state.mainEObject.eResource().to(), null);
+            //ids after serialization
+            const newIds = getNewIds(oldNestedJSON, nestedJSON);
+            const updatedTargetObject = findObjectById(nestedJSON, this.state.targetObject && newIds[this.state.targetObject._id]);
+            if (this.props.match.params.id === 'new') {
+                resource.eContents()[0]._id !== undefined && API.instance().createLock(resource.eContents()[0]._id, resource.eContents()[0].get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
+                    .then(() => {
+                        this.setState({edit: true});
+                        if (!saveAndExit) {
+                            this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
+                            this.refresh(true)
+                        }
+                    });
+                this.setState({
+                    isSaving: false,
+                    isModified: false,
+                    targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
+                })
+            } else {
+                this.setState({
+                    isSaving: false,
+                    isModified: false,
+                    modalApplyChangesVisible: false,
+                    mainEObject: resource.eResource().eContents()[0],
+                    targetObject: updatedTargetObject ? updatedTargetObject : this.state.targetObject,
+                    resource: resource,
+                }, ()=>callback && callback());
+            }
+            if (redirectAfterSave) {
+                this.redirect();
+            }
+        }).catch(() => {
+            this.setState({ isSaving: false, isModified: true });
+        })
+
+
+    }
+
+    save = (redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
+        const {t} = this.props;
+        this.state.mainEObject.eResource().clear();
+        const resource = this.state.mainEObject.eResource().parse(this.state.resourceJSON as Ecore.EObject);
+        if (resource) {
+            if (resource.eContents()[0].eClass._id === "//User" &&
+                resource.eContents()[0].get("name") === this.props.principal.name) {
+                this.props.notification(t('notification'), t('updated user class'), "info");
+            }
+            this.saveResource(resource, redirectAfterSave, saveAndExit, callback)
+        }
+    };
+
+    changeEdit = (redirect: boolean, removalProcess?: boolean) => {
+        if (removalProcess) {
+            if (this.state.edit) {
+                API.instance().checkLock(this.state.mainEObject._id).then(locked =>{
+                    if (locked) {
+                        API.instance().deleteLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eResource().rev)
+                            .then(() => {
+                                this.setState({edit: false})
+                            })
+                            .catch(() => {
+                                this.setState({edit: false})
+                            })
+                    }
+                })
+            }
+        } else if (this.state.edit) {
+            API.instance().checkLock(this.state.mainEObject._id).then(locked =>{
+                if (locked) {
+                    API.instance().deleteLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eResource().rev)
+                        .then(() => {
+                            this.save(false, redirect);
+                            this.setState({edit: false});
+                        })
+                        .catch(() => {
+                            this.save(false, redirect);
+                            this.setState({edit: false});
+                        })
+                }
+            });
+        }
+        else {
+            this.state.mainEObject._id !== undefined && API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
+                .then(() => {
+                    this.setState({edit: true});
+                    this.refresh(true)
+                })
+        }
+    };
 
     createTree() {
         const getTitle = (object: { [key: string]: any }) => {
@@ -950,7 +1176,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             <NeoButton
                                 className="panel-button"
                                 type={"ghost"}
-                                // onClick={ ()=> this.changeEdit(false)}
+                                onClick={ ()=> this.changeEdit(false)}
                                 title={this.props.t("apply and quit")}
                                 suffixIcon={<NeoIcon icon={"arrowLeft"}/>}
                             >
@@ -960,7 +1186,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 className="panel-button"
                                 type={"ghost"}
                                 suffixIcon={<NeoIcon icon={"edit"}/>}
-                                // onClick={ ()=> this.changeEdit(false)}
+                                onClick={ ()=> this.changeEdit(false)}
                                 title={this.props.t("edit")}
                             />)
                     }
@@ -971,7 +1197,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 className="panel-button"
                                 type={"ghost"}
                                 suffixIcon={<NeoIcon icon={"save"}/>}
-                                // onClick={()=>this.save(false, false)}
+                                onClick={()=>this.save(false, false)}
                                 title={this.props.t("save")}
                             />)
                     }

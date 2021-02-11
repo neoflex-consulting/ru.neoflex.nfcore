@@ -94,10 +94,12 @@ function mountStyleSheets(styleSheetsList?: Ecore.EList) {
 }
 
 function unmountStyleSheets(styleSheetsList?: Ecore.EList) {
-    styleSheetsList!.each(o=>{
+    if (styleSheetsList){
+    styleSheetsList.each(o=>{
         const sheet = document.getElementById(o.get('name'));
         sheet && document.body.removeChild(sheet);
     });
+}
 }
 
 export class MainApp extends React.Component<any, State> {

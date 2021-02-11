@@ -26,7 +26,8 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     @Override
     public boolean validateApplication_IsValid(Application application, DiagnosticChain diagnostics, Map<Object, Object> context) {
         boolean testResult = false;
-        EList<Resource> allApplications = (EList<Resource>) Utils.findAllEClass(ApplicationPackage.Literals.APPLICATION);
+        // Delete after Merge Branch
+        /*EList<Resource> allApplications = (EList<Resource>) Utils.findAllEClass(ApplicationPackage.Literals.APPLICATION);
         for (Resource resource : allApplications) {
             EList<Application> apps = (EList<Application>) (EList<?>) resource.getContents();
             if (application.getHeaderOrder() != null
@@ -35,7 +36,7 @@ public class ApplicationValidatorExt extends ApplicationValidator {
                     && apps.get(0).getHeaderOrder().equals(application.getHeaderOrder())) {
                 testResult = validate(application, diagnostics, context, "two applications cant have same headerOrder application " + apps.get(0).getName() + " and " + application.getName());
             }
-        }
+        }*/
         if (application.isUseParentReferenceTree() && application.getReferenceTree() != null) {
             return validate(application, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
         }
