@@ -1686,9 +1686,8 @@ li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item {
   justify-content: unset!important;
 }
 
-a.limksInMoreWord{
-  padding-top: 15px;
-  padding-left: 16px;
+.linksInMoreWord {
+  justify-content: center;
 }
 
 a.linksInMoreWord:hover{
@@ -1897,3 +1896,11 @@ padding: 3px 24px;
 }
 
 
+/* Antd V.4 !!!!!!!!!! */
+
+.ant-tree.ant-tree-directory .ant-tree-treenode-selected::before {
+  background: unset !important;
+}
+a{
+  justify-content: center;
+}

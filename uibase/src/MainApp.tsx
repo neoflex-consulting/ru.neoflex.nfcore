@@ -359,8 +359,8 @@ export class MainApp extends React.Component<any, State> {
     renderFooter = () => {
         return (
             <div className={"application-footer"}>
-                {this.props.context.isDeveloper() && <Tabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
-                    <Tabs.TabPane key={"log"} tab={<NeoButton
+                {this.props.context.isDeveloper() && <NeoTabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
+                    <NeoTabs.TabPane key={"log"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideLog ? this.props.t("show log") : this.props.t("hide log")}
@@ -377,7 +377,7 @@ export class MainApp extends React.Component<any, State> {
                         type={"link"}>
                         <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("Logs")}
                     </NeoButton>}/>
-                    <Tabs.TabPane key={"url"} tab={<NeoButton
+                    <NeoTabs.TabPane key={"url"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideURL ? this.props.t("show url decode") : this.props.t("show url decode")}
@@ -389,7 +389,7 @@ export class MainApp extends React.Component<any, State> {
                         type={"link"}>
                         <NeoIcon color={this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6} icon={"cloudServer"} />URL
                     </NeoButton>}/>
-                </Tabs>}
+                </NeoTabs>}
             </div>
         )
     };
@@ -480,18 +480,18 @@ export class MainApp extends React.Component<any, State> {
                     className={`${isShortSize && "short-size"}`}
                     openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
-                    // onSelect={params => {
-                    //     const cb = cbs.get(params.key);
-                    //     if (cb) cb();
-                    // }}
-                    // onOpenChange={openKeys => {
-                    //     this.setState({openKeys: getOpenedPath(openKeys)});
-                    //     //Восстанавливаем ширину если были в свернутом виде
-                    //     if (this.state.hideReferences) {
-                    //         setVerticalStoredSize(defaultVerticalSplitterSize);
-                    //         this.setVerticalSplitterWidth(getVerticalStoredSize())
-                    //     }
-                    // }}
+                    onSelect={(params:any) => {
+                        const cb = cbs.get(params.key);
+                        if (cb) cb();
+                    }}
+                    onOpenChange={(openKeys:any) => {
+                        this.setState({openKeys: getOpenedPath(openKeys)});
+                        //Восстанавливаем ширину если были в свернутом виде
+                        if (this.state.hideReferences) {
+                            setVerticalStoredSize(defaultVerticalSplitterSize);
+                            this.setVerticalSplitterWidth(getVerticalStoredSize())
+                        }
+                    }}
                     mode="inline"
                 >
                     {referenceTree.get('children')
