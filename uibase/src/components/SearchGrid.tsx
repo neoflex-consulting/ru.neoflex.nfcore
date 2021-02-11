@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Form, Select} from 'antd';
+import {Button, Form} from 'antd';
 import Ecore, {EObject, Resource} from "ecore";
 import {API} from "../modules/api";
 import {Link} from "react-router-dom";
