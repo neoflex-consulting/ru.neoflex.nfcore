@@ -3,12 +3,11 @@ import Ecore from "ecore"
 import {API} from "../modules/api";
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
-import {NeoInput} from "neo-design/lib";
+import {NeoInput, NeoTabs} from "neo-design/lib";
 //CSS
 import './../styles/MetaBrowser.css';
 import DatasetGrid from "./app/dataset/DatasetGrid";
 import {getClassAnnotationByClassAndKey} from "../utils/eCoreUtil";
-import {Tabs} from "antd";
 
 export interface Props {
 }
@@ -173,7 +172,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
                 let description = getClassAnnotationByClassAndKey(eClassifier,'documentation');
-                let child = {
+                let child:any = {
                     key: eClassifier.eURI(),
                     name: this.getName(eClassifier),
                     type: eClassifier.eClass.get('name'),
@@ -266,7 +265,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                     }
                 }
                 if (children2.length === 0) {
-                    // delete child['children'];
+                    delete child['children'];
                 }
                 children2.forEach(c=>{
                     eClassifiers.push(c);
@@ -324,12 +323,12 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                         }}
                     />
                 </div>
-                <Tabs className={"meta-browser-tabs-region meta-browser-center-element"}
+                <NeoTabs className={"meta-browser-tabs-region meta-browser-center-element"}
                          defaultActiveKey={"ecore"}
                          tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ ){
-                            return <Tabs.TabPane tab={eObj.name}
+                            return <NeoTabs.TabPane tab={eObj.name}
                                                        key={eObj.name}>
                                 <DatasetGrid
                                     ref={(ref:any)=> {
@@ -348,12 +347,12 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                         return ""
                                     }}
                                 />
-                            </Tabs.TabPane>}
+                            </NeoTabs.TabPane>}
                         else{
                             return null
                         }
                     })}
-                </Tabs>
+                </NeoTabs>
             </div>
         )
     }

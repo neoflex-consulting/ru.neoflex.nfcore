@@ -498,10 +498,10 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
                 {branchRegion}
-                <Tabs className={"tools-tabs-region tools-vertical-center-element"}
+                <NeoTabs className={"tools-tabs-region tools-vertical-center-element"}
                     defaultActiveKey={"export"}
                     tabPosition={'top'}>
-                    <Tabs.TabPane tab={t("export")} key={`${t("export")}`}>
+                    <NeoTabs.TabPane tab={t("export")} key={`${t("export")}`}>
                         <div
                             className={"tools-export-region tools-vertical-center-element"}>
                             {exportAllObjectsRegion}
@@ -509,8 +509,8 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                             {exportObjectsRegion}
                         </div>
                         {exportButtonRegion}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab={t("import")} key={`${t("import")}`} >
+                    </NeoTabs.TabPane>
+                    <NeoTabs.TabPane tab={t("import")} key={`${t("import")}`} >
                         <div
                             className={"tools-import-region tools-vertical-center-element"}>
                             {importParametersRegion}
@@ -518,8 +518,8 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                             {importMasterData}
                         </div>
                         {importButtonRegion}
-                    </Tabs.TabPane>
-                </Tabs>
+                    </NeoTabs.TabPane>
+                </NeoTabs>
             </div>
         );
     }

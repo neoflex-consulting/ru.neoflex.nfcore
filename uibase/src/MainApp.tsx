@@ -14,7 +14,6 @@ import {NeoButton, NeoColor, NeoParagraph, NeoTable, NeoTabs} from "neo-design/l
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import _ from "lodash";
-import {ReactText} from "react";
 
 interface State {
     pathBreadcrumb: string[];
@@ -206,8 +205,7 @@ export class MainApp extends React.Component<any, State> {
                                     );
                                     if (this.props.pathFull.length !== 1) {
                                         this.setState({hideReferences: parseInt(getVerticalStoredSize()) <= parseInt(verticalSplitterShortSize)},
-                                            ()=>this.setVerticalSplitterWidth(getVerticalStoredSize())
-                                        );
+                                            ()=>this.setVerticalSplitterWidth(getVerticalStoredSize()));
                                     }
                                 }
                             })
@@ -285,8 +283,7 @@ export class MainApp extends React.Component<any, State> {
                         }
                         if (objectApp.get('referenceTree') !== null && objectApp.get('referenceTree').eContents().length !== 0) {
                             this.setState({hideReferences: parseInt(getVerticalStoredSize()) <= parseInt(verticalSplitterShortSize)},
-                                ()=>this.setVerticalSplitterWidth(getVerticalStoredSize())
-                            )
+                                ()=>this.setVerticalSplitterWidth(getVerticalStoredSize()))
                         }
                     }
                 })
@@ -326,6 +323,7 @@ export class MainApp extends React.Component<any, State> {
         }
     }
 
+
     handleResize = () => {
         const hideReferences = getAdaptiveSize(this.refSplitterRef.current.panePrimary.div.offsetWidth ? this.refSplitterRef.current.panePrimary.div.offsetWidth : 0, "referenceMenu") <= adaptiveElementSize.extraSmall;
         if (hideReferences !== this.state.hideReferences && this.refSplitterRef.current.panePrimary.div.offsetWidth) {
@@ -363,8 +361,8 @@ export class MainApp extends React.Component<any, State> {
     renderFooter = () => {
         return (
             <div className={"application-footer"}>
-                {this.props.context.isDeveloper() && <Tabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
-                    <Tabs.TabPane key={"log"} tab={<NeoButton
+                {this.props.context.isDeveloper() && <NeoTabs className={"debug-tabs-pane"} activeKey={this.state.activeTab}>
+                    <NeoTabs.TabPane key={"log"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideLog ? this.props.t("show log") : this.props.t("hide log")}
@@ -381,7 +379,7 @@ export class MainApp extends React.Component<any, State> {
                         type={"link"}>
                         <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("Logs")}
                     </NeoButton>}/>
-                    <Tabs.TabPane key={"url"} tab={<NeoButton
+                    <NeoTabs.TabPane key={"url"} tab={<NeoButton
                         className={"debug-item"}
                         style={{color:this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6}}
                         title={this.state.hideURL ? this.props.t("show url decode") : this.props.t("show url decode")}
@@ -393,7 +391,7 @@ export class MainApp extends React.Component<any, State> {
                         type={"link"}>
                         <NeoIcon color={this.state.hideURL ? NeoColor.violete_4 : NeoColor.violete_6} icon={"cloudServer"} />URL
                     </NeoButton>}/>
-                </Tabs>}
+                </NeoTabs>}
             </div>
         )
     };

@@ -109,11 +109,12 @@ class HeaderMenu extends React.Component<any, any> {
         </Menu>);
 
         return (
-            <div>
-                <div className={'HeaderWithNames'}>
+            <div style={{width:'100%'}}>
+                <div className={'HeaderWithNames'} style={{width:'100%'}}>
                     <NeoRow style={{width: '100%'}}>
                         {applications.slice(0, 3).map((app: any) =>
                             <NeoCol
+                                flex={'center'}
                                 className='btn-appName'
                                 span={applications.length < 4 ? 8 : 7}
                                 key={app.eContents()[0].get('name')}
@@ -223,7 +224,7 @@ class HeaderMenu extends React.Component<any, any> {
 
     render() {
         return (
-            <NeoRow style={{marginTop: '0px', width: '100%'}} className='apps-menu'>
+            <NeoRow style={{marginTop: '0px', width: '100%'}} className='apps-menu' justify={"center"}>
                 {
                     this.state.applications.length === 0 && this.state.selectedApp === undefined
                         ?
