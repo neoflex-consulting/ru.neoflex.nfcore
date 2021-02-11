@@ -38,6 +38,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     getFieldDecorator: any;
     setFieldsValue: any;
     getFieldValue: any;
+    validateFields: any;
     paramNotification: string;
     formRef = React.createRef<FormInstance>();
 
@@ -49,9 +50,10 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.formRef.current?.validateFields;
-        this.setFieldsValue = this.formRef.current?.setFieldsValue;
-        this.getFieldValue = this.formRef.current?.getFieldValue;
+        this.getFieldDecorator = this.formRef.current!;
+        this.validateFields = this.formRef.current!.validateFields;
+        this.setFieldsValue = this.formRef.current!.setFieldsValue;
+        this.getFieldValue = this.formRef.current!.getFieldValue;
         switch (this.props.componentType) {
             case paramType.sort:
                 this.paramNotification = "Sort notification";
@@ -82,7 +84,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
             && JSON.stringify(this.props.parametersArray) !== JSON.stringify(this.state.parametersArray)) {
-            this.props.formRef.current?.validateFields().then((err: any, values: any) => {
+            this.props.formRef.current!.validateFields().then((err: any, values: any) => {
                 if (err) {
                     this.props.context.notification(this.paramNotification,'Please, correct the mistakes', 'error')
                 }
@@ -154,7 +156,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     };
 
     deleteRow = (e: any) => {
-        this.formRef.current?.resetFields();
+        this.formRef.current!.resetFields();
         let newServerParam: IServerQueryParam[] = [];
         this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
             if (element.index !== e.index) {
@@ -252,7 +254,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
         //         this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
         //     }
         // this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-        this.props.formRef.current?.validateFields().then((err: any, values: any) => {
+        this.props.formRef.current!.validateFields().then((err: any, values: any) => {
             if (!err) {
                 this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
             } else {

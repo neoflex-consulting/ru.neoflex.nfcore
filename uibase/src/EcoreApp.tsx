@@ -121,6 +121,19 @@ class EcoreApp extends React.Component<any, State> {
         }, cb)
     };
 
+    /*Run in start Application*/
+    static getDerivedStateFromProps(nextProps: any, prevState: State) {
+        if (nextProps.location.pathname.includes("app")) {
+            const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
+            return {
+                pathFull: pathFull,
+                appModuleName: pathFull[pathFull.length - 1].appModule
+            }
+        } else {
+            return null
+        }
+    }
+
     getParameterPattern() {
         API.instance().findClass('auth', 'Parameter')
             .then( (parameterPattern: EObject ) => {

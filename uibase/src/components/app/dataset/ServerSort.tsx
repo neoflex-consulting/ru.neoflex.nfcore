@@ -42,7 +42,7 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                     <Form.Item style={{ margin: 'auto' }}>
                         {value.getFieldDecorator(`${value.idDatasetColumn}`,
                             {
-                                initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
+                                initialValue: (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined,
                                 rules: [{
                                     required:
                                     value.operation,
@@ -61,7 +61,7 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                                                         //Либо значение этого поля при валидации перед запуском
                                                         currentField = value
                                                     }
-                                                    return (currentField)? currentObject.datasetColumn === currentField: false
+                                                    return (currentField) ? currentObject.datasetColumn === currentField : false
                                                 })
                                                 .map(function (currentObject: any) {
                                                     return currentObject.datasetColumn
@@ -163,7 +163,7 @@ class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current?.getFieldDecorator;
+        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{

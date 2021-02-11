@@ -94,10 +94,12 @@ function mountStyleSheets(styleSheetsList?: Ecore.EList) {
 }
 
 function unmountStyleSheets(styleSheetsList?: Ecore.EList) {
-    styleSheetsList!.each(o=>{
+    if (styleSheetsList){
+    styleSheetsList.each(o=>{
         const sheet = document.getElementById(o.get('name'));
         sheet && document.body.removeChild(sheet);
     });
+}
 }
 
 export class MainApp extends React.Component<any, State> {
@@ -144,7 +146,9 @@ export class MainApp extends React.Component<any, State> {
                         findTreeOpenKeys(t, appModuleName, retArr);
                     }
                 })
-            } else if (refTree.get('AppModule')!.get('name') === appModuleName) {
+            } else if (refTree.get('AppModule') !== null &&
+                refTree.get('AppModule') !== undefined &&
+                refTree.get('AppModule')!.get('name') === appModuleName) {
                 retArr.push(appModuleName);
                 return retArr
             }
@@ -330,7 +334,7 @@ export class MainApp extends React.Component<any, State> {
     };
 
     componentDidMount(): void {
-        /*this.getEClassAppModule();
+        this.getEClassAppModule();
         window.addEventListener("appAdaptiveResize", this.handleResize);
         window.addEventListener("resize", this.handleResize);
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
@@ -338,7 +342,7 @@ export class MainApp extends React.Component<any, State> {
                 ? currentAppModule.tree
                 : this.appModuleMap.get(currentAppModule.appModule)
                     ? this.appModuleMap.get(currentAppModule.appModule)
-                    : [] })*/
+                    : [] })
     }
 
     componentWillUnmount() {
@@ -463,7 +467,7 @@ export class MainApp extends React.Component<any, State> {
         })
     };
 
-    /*renderReferences = (isShortSize = false) => {
+    renderReferences = (isShortSize = false) => {
         const {context} = this.props;
         const {applicationReferenceTree, viewReferenceTree} = context;
         const referenceTree = viewReferenceTree || applicationReferenceTree;
@@ -480,11 +484,11 @@ export class MainApp extends React.Component<any, State> {
                     className={`${isShortSize && "short-size"}`}
                     openKeys={this.state.hideReferences || isShortSize ? [] : this.state.openKeys}
                     selectedKeys={pathReferenceTree ? [pathReferenceTree] : undefined}
-                    onSelect={(params:any) => {
+                    onSelect={(params: any) => {
                         const cb = cbs.get(params.key);
                         if (cb) cb();
                     }}
-                    onOpenChange={(openKeys:any) => {
+                    onOpenChange={(openKeys: any) => {
                         this.setState({openKeys: getOpenedPath(openKeys)});
                         //Восстанавливаем ширину если были в свернутом виде
                         if (this.state.hideReferences) {
@@ -500,7 +504,7 @@ export class MainApp extends React.Component<any, State> {
                 </Menu>
             </Layout>
         )
-    };*/
+    };
 
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string, isShortSize = false) => {
         const code = eObject.get('name');
@@ -590,7 +594,7 @@ export class MainApp extends React.Component<any, State> {
                     <link rel="shortcut icon" type="image/png" href="/application.ico" />
                 </Helmet>
                 <FetchSpinner/>
-                {/*{this.renderEList(this.props.context.variableList)}
+                {this.renderEList(this.props.context.variableList)}
                 {this.renderEList(this.props.context.groovyCommandList)}
                 {this.renderEList(this.props.context.eventHandlerList)}
                 <Splitter
@@ -619,7 +623,8 @@ export class MainApp extends React.Component<any, State> {
                                 className={"footer-item"}
                                 title={this.state.hideReferences ? this.props.t("show menu") : this.props.t("hide menu")}
                                 type={"link"}
-                                onClick={this.hideReferenceTree}>
+                                onClick={this.hideReferenceTree}
+                            >
                                 <NeoIcon color={NeoColor.grey_8} icon={this.state.hideReferences ? "table" : "arrowLong"} />
                                 {!this.state.hideReferences && <NeoParagraph type={"body_regular"}>{this.props.t("hide menu")}</NeoParagraph>}
                             </NeoButton>
@@ -674,7 +679,7 @@ export class MainApp extends React.Component<any, State> {
                             {this.renderFooter()}
                         </div>
                     </div>
-                </Splitter>*/}
+                </Splitter>
             </div>
         )
     }

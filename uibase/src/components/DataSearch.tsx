@@ -1,10 +1,9 @@
 import * as React from "react";
 import Ecore from "ecore";
 import {API} from "../modules/api";
-import {Form, Layout, Tabs} from "antd";
+import {Form, Tabs} from "antd";
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
-import ponyCat from '../icons/ponyCat.png';
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
@@ -44,31 +43,28 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     refresh = () => {
-        this.formRef.current?.validateFields().then((values: any) => {
-            let selectedClassObject: Ecore.EClass | undefined;
-            if (this.props.specialEClass === undefined) {
-                selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
-             } else {
-                 selectedClassObject = this.props.specialEClass
-             }
-             if (values.key === 'json_search') {
-                 API.instance().find(JSON.parse(values.json_field)).then(results => {
-                     this.props.onSearch(results.resources)
-                 })
-             } else if (selectedClassObject) {
-                 (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
-                     .then((resources) => {
-                        this.props.onSearch(resources)
-                    }))
-             } else {
-                (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
-                    .then((resources) => {
-                         this.props.onSearch(resources)
-                    }))
-            }
-
-        }).catch( () => {
-        });
+        const values = this.formRef.current!.getFieldsValue();
+        let selectedClassObject: Ecore.EClass | undefined;
+        if (this.props.specialEClass === undefined) {
+            selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
+         } else {
+             selectedClassObject = this.props.specialEClass
+         }
+         if (values.key === 'json_search') {
+             API.instance().find(JSON.parse(values.json_field)).then(results => {
+                 this.props.onSearch(results.resources)
+             })
+         } else if (selectedClassObject) {
+             (API.instance().findByKindAndRegexp(selectedClassObject as Ecore.EClass, values.name, 1, values.tags ? values.tags.join(",") : undefined)
+                 .then((resources) => {
+                    this.props.onSearch(resources)
+                }))
+         } else {
+            (API.instance().findByTagsAndRegex( values.tags ? values.tags.join(",") : undefined, values.name,1)
+                .then((resources) => {
+                     this.props.onSearch(resources)
+                }))
+        }
     };
 
     getEClasses(): void {
@@ -104,25 +100,25 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
         this.getAllTags();
     }
 
-    // checkEClass = () => {
-    //     const checkRecursive = (cls:Ecore.EClass ) => {
-    //         let retVal = false;
-    //         if (cls.get('name') === 'Tagged') {
-    //             return true;
-    //         } else {
-    //             cls.get('eSuperTypes').each((cl:any)=>{
-    //                 retVal = checkRecursive(cl)
-    //             })
-    //         }
-    //         return retVal
-    //     };
-    //     const className = form.getFieldValue('selectEClass');
-    //     if (className === "" || !className) {
-    //         return false
-    //     }
-    //     const selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === className);
-    //     return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
-    // };
+    checkEClass = () => {
+        const checkRecursive = (cls:Ecore.EClass ) => {
+            let retVal = false;
+            if (cls.get('name') === 'Tagged') {
+                return true;
+            } else {
+                cls.get('eSuperTypes').each((cl:any)=>{
+                    retVal = checkRecursive(cl)
+                })
+            }
+            return retVal
+        };
+        const className = this.formRef.current !== null ? this.formRef.current!.getFieldValue('selectEClass') : "";
+        if (className === "" || !className) {
+            return false
+        }
+        const selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === className);
+        return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
+    };
 
 
     render() {
@@ -143,7 +139,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     name={"dataSearch"}
                     initialValues={{ key: 'data_search' }}
                     onFinish={this.handleSubmit}
-                    onFinishFailed={this.handleSubmit}
                     style={{padding: '0 36px'}}
                 >
                     <NeoButton
@@ -156,9 +151,9 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                         name={"key"}
                     >
                         <NeoTabs
-                            // onChange={(key: string) => {
-                            //     this.formRef.current!.setFieldsValue({ key: { value: key } })
-                            // }}
+                            onChange={(key: string) => {
+                                this.formRef.current!.setFieldsValue({ key: { value: key } })
+                            }}
                         >
                             <NeoTabs.TabPane
                                 key='data_search'
@@ -196,8 +191,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                 </Form.Item>
 
 
-
-
                                 <Form.Item
                                     style={{display:'block'}}
                                     label={<div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>}
@@ -215,7 +208,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                         className={'tags-select'}
                                         allowClear={true}
                                         mode={"tags"}
-                                        // disabled={this.checkEClass()}
+                                        disabled={this.checkEClass()}
                                         width={'670px'}
                                         onChange={(event:any) => {
                                             this.setState({selectCount: event.toString().split(',').length})
@@ -272,11 +265,11 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                             ref={"aceEditor"}
                                             mode={"json"}
                                             width={"100%"}
-                                            // onChange={(json_field: string) => {
-                                            //     setFieldsValue({ json_field: { value: json_field } });
-                                            // }}
+                                            onChange={(json_field: string) => {
+                                                this.formRef.current!.setFieldsValue({ json_field: { value: json_field } });
+                                            }}
                                             editorProps={{ $blockScrolling: true }}
-                                            // value={getFieldValue('json_field')}
+                                            value={this.formRef.current !== null ? this.formRef.current!.getFieldValue('json_field') : undefined}
                                             showPrintMargin={false}
                                             theme={"tomorrow"}
                                             debounceChangePeriod={100}
