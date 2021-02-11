@@ -26,6 +26,24 @@ import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoCol, NeoColor, NeoHint, NeoModal, NeoOption, NeoRow, NeoSelect, NeoTable} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
 
+
+interface DataNode {
+    title: any;
+    key: string;
+    isLeaf?: boolean;
+    children?: DataNode[];
+    headline?: boolean,
+    eClass?: string,
+    targetObject?: {},
+    parentUpdater?: any,
+    upperBound? : any,
+    isArray?: boolean,
+    arrayLength?: number,
+    propertyName?: string,
+    featureUpperBound?: any,
+
+}
+
 interface ITargetObject {
     eClass: string,
     [key: string]: any
@@ -76,10 +94,54 @@ interface State {
     selectCount: number,
 }
 
+const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
+    children.filter((ch:any)=>ch).forEach((c:any)=> {
+        if (c !== undefined && c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
+            expandedKeys.push(c.key);
+            getAllChildrenKeys(c.props.children, expandedKeys)
+        }
+    });
+    return expandedKeys
+};
+
+const findChildrenKey = (children: any[], key: string):string => {
+    const childrenNodes = children.filter((ch:any) => ch !== null);
+    for (const c of childrenNodes) {
+        if (c !== undefined && c.props.targetObject?._id === key) {
+            return c.key;
+        } else if (c !== undefined && c.props.isArray !== true && Array.isArray(c.props.targetObject) && c.props.targetObject.find((t: { _id: string; })=>t._id === key)) {
+            return c.key;
+        } if (c !== undefined && c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
+            const retKey = findChildrenKey(c.props.children, key);
+            if (retKey !== "") {
+                return retKey
+            }
+        }
+    }
+    return ""
+};
+
+const getChildNode = (children: any[], nodeKey:string) => {
+    let retVal:any;
+    for (const c of children.filter((ch: any) => ch)) {
+        if (c.props.children.filter((ch: any) => ch).length !== 0) {
+            if (c.key === nodeKey) {
+                return c
+            } else {
+                retVal = getChildNode(c.props.children, nodeKey);
+                if (retVal) { break }
+            }
+        }
+    }
+    return retVal
+};
+
 class ResourceEditor extends React.Component<Props & WithTranslation & any, State> {
 
     splitterRef: React.RefObject<any>;
     treeRef: React.RefObject<any>;
+    eventHandlerClass = "ru.neoflex.nfcore.application#//EventHandler";
+    dynamicActionElementClass = "ru.neoflex.nfcore.application#//DynamicActionElement";
 
     constructor(props: any) {
         super(props);
@@ -101,7 +163,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         rightClickMenuVisible: false,
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
-        treeRightClickNode: {},
+        treeRightClickNode: {} as { [key: string]: any },
         addRefPropertyName: "",
         isSaving: false,
         addRefPossibleTypes: [],
@@ -188,7 +250,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     onTreeRightClick = (e: any) => {
         const posX = e.event.clientX;
         const posY = e.event.clientY;
-        const nodeProps = e.node.props;
+        const nodeProps = e.node;
         getClipboardContents().then(json => {
             let eObject = {eClass: ""} as ITargetObject;
             try {
@@ -206,13 +268,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     onTreeSelect = (selectedKeys: React.Key[], e: any) => {
-        if (selectedKeys[0] && e.node.props.targetObject.eClass) {
-            const targetObject = e.node.props.targetObject;
-            const uniqKey = e.node.props.eventKey;
+        if (selectedKeys[0] && e.node.data.targetObject.eClass) {
+            const targetObject = e.node.data.targetObject;
+            const uniqKey = e.node.data.eventKey;
             this.setState({
                 tableData: this.prepareTableData(targetObject, this.state.mainEObject, uniqKey),
                 targetObject: targetObject,
-                currentNode: e.node.props,
+                currentNode: e.node,
                 uniqKey: uniqKey,
                 selectedKeys: selectedKeys
             })
@@ -416,6 +478,345 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
+    sortEClasses = (a: any, b: any): number => {
+        if (a.eContainer.get('name') + a._id < b.eContainer.get('name') + b._id) return -1;
+        if (a.eContainer.get('name') + a._id > b.eContainer.get('name') + b._id) return 0;
+        else return 0;
+    };
+
+    findTreeNodesBySelector = (selector: {[key:string] : any}) : {[key:string] : any}[] =>  {
+        function objectsHaveSameKeysValue(obj1:{[key:string] : any}, obj2:{[key:string] : any}) {
+            const intersect = Object.keys(obj1).filter((key: any, value: any) => {
+                return Object.keys(obj2).includes(key)
+            });
+            let eq = intersect.length > 0;
+            for (const key of intersect) {
+                if (obj1[key] !== obj2[key]) {
+                    eq = false;
+                }
+            }
+            return eq;
+        }
+        let foundNodes: {[key:string] : any}[] = [];
+        // eslint-disable-next-line
+        for (const [_, node] of Object.entries(this.treeRef.current?.state.keyEntities)) {
+            let found = Object.keys(selector).length > 0;
+            for (const [selectorKey, selectorValue] of Object.entries(selector)) {
+                if (typeof selectorValue === "string" && (node as { [key: string]: any })?.node?.data && (node as { [key: string]: any }).node.data[selectorKey] !== selectorValue) {
+                    found = false;
+                } else if (typeof selectorValue !== "string" && Object.keys(selectorValue).length > 0  && !objectsHaveSameKeysValue(selectorValue, (node as { [key: string]: any }).props[selectorKey])) {
+                    found = false;
+                }
+            }
+            if (found) {
+                foundNodes.push(node as {[key:string] : any})
+            }
+        }
+        return foundNodes
+    }
+
+    findTreeNodeById = (id: string) : {[key:string] : any} | undefined =>  {
+        const nodes = this.findTreeNodesBySelector({targetObject: {_id: id}})
+        return nodes.length > 0 ? nodes[0] : undefined
+    }
+
+    handleAddNewResource = (resources: Ecore.Resource[]): void => {
+        const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources');
+        resources.forEach(r=>{
+            if (!resourceList.find(rl=>r.eContents()[0].eURI() === rl.eContents()[0].eURI())) {
+                resourceList.add(r)
+            }
+        });
+        this.setState({ modalResourceVisible: false })
+    };
+
+    scrollToElementWithId = (id?:string) => {
+        const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
+        if (node) {
+            node.selectHandle.scrollIntoView({
+                behavior: "smooth",
+                block: 'center',
+                inline: 'center'
+            });
+        }
+    }
+
+    handleRightMenuSelect = (e: any) => {
+        const targetObject = this.state.targetObject;
+        const node: { [key: string]: any } = this.state.treeRightClickNode;
+        if (e.keyPath[e.keyPath.length - 1] === "add") {
+            const subTypeName = e.item.props.children;
+            const eClass = node.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
+            node.isArray && eClassObject && allSubTypes.push(eClassObject);
+            const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName);
+            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+            const newObject = {
+                eClass: foundEClass.eURI(),
+                _id: id,
+                name: e.key+` ${id}`
+            };
+            let updatedJSON;
+            if (node.upperBound === -1) {
+                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
+            } else {
+                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
+            }
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState({
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject,
+                mainEObject: resource.eContents()[0],
+                isModified: true,
+                expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
+            }, this.scrollToElementWithId)
+        }
+
+        if (e.key === "moveUp" || e.key === "moveDown") {
+            let updatedJSON;
+            if (node.featureUpperBound === -1) {
+                if (e.key === "moveUp") {
+                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
+                }
+                if (e.key === "moveDown") {
+                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
+                }
+            }
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState((state, props) => ({
+                mainEObject: resource.eContents()[0],
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
+                tableData: updatedTargetObject ? state.tableData : [],
+                isModified: true
+            }), () => {
+                if (this.state.selectedKeys.find(key => key === node.eventKey)) {
+                    this.setState({selectedKeys: [this.findTreeNodeById(updatedTargetObject._id)?.props.eventKey]})
+                }
+            })
+        }
+
+        if (e.key === "delete"||e.key === "Delete") {
+            let updatedJSON;
+            if (node.featureUpperBound === -1) {
+                const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                updatedJSON = index && node.parentUpdater(null, undefined, node.propertyName, { operation: "splice", index: index })
+            } else {
+                updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "set" })
+            }
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState((state, props) => ({
+                mainEObject: resource.eContents()[0],
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
+                tableData: updatedTargetObject ? state.tableData : [],
+                selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                isModified: true
+            }))
+        }
+
+        if (e.key === "copy") {
+            const json = JSON.stringify(node.targetObject);
+            copyToClipboard(json)
+                .catch((err:any) => {
+                    console.error('Failed to copy: ', err);
+                })
+        }
+
+        if (e.key === "paste") {
+            let updatedJSON;
+            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+            const newObject = {
+                ...this.state.clipboardObject,
+                _id: id
+            };
+            let added:any[] = [];
+            const pattern = new RegExp("(^//@[a-zA-Z]+)|^(ui_generated_[0-9]+)",'g');
+            traverseEObject(newObject,  (obj:any, key: string, level: number)=>{
+                //Add missing external refs
+                if (key === "$ref"
+                    && obj[key].search(new RegExp('^[0-9#]','g')) === 0) {
+                    if (!added.includes( API.parseRef(obj[key]).id)) {
+                        added.push(API.parseRef(obj[key]).id)
+                        const resourceSet = Ecore.ResourceSet.create();
+                        API.instance().fetchResource(obj[key], 1, resourceSet, {}).then((resource: Ecore.Resource) => {
+                            this.handleAddNewResource([resource])
+                        });
+                    }
+                }
+                //Change inner _id if its child of copy element
+                if (key === "_id") {
+                    obj[key] = obj[key] === id ? id : (id + obj[key] as string)
+                }
+                //Change same page ref for children (deprecated?)
+                if (key === "$ref" && level !== 1) {
+                    obj[key] = (obj[key] as string).replace(pattern,id)
+                }
+            });
+            if (node.upperBound === -1) {
+                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
+            } else {
+                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
+            }
+            const nestedJSON = nestUpdaters(updatedJSON, null);
+            const updatedTargetObject = findObjectById(nestedJSON, id);
+            const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+            this.setState((state, props) => ({
+                resourceJSON: nestedJSON,
+                targetObject: updatedTargetObject,
+                mainEObject: resource.eContents()[0],
+                isModified: true,
+            }), this.scrollToElementWithId)
+        }
+        if (e.key === "expandAll") {
+            const childToExpand = getChildNode([this.treeRef.current.props.children],node.key);
+            const expandedKeys = getAllChildrenKeys([childToExpand]);
+            this.setState({expandedKeys: [...new Set(expandedKeys.concat(this.state.expandedKeys))]})
+        }
+        if (e.key === "collapseAll") {
+            const childToCollapse = getChildNode([this.treeRef.current.props.children],node.key);
+            const collapsedKeys = getAllChildrenKeys([childToCollapse]);
+            this.setState({expandedKeys: this.state.expandedKeys.filter(k=>!collapsedKeys.includes(k))})
+        }
+        if (e.key === "createEventHandler") {
+            //Найти позицию в дереве куда поставить
+            const nodes = this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1});
+            if (nodes.length > 0) {
+                //Найти класс eventHandler
+                const eClass = this.eventHandlerClass;
+                const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+                const node = nodes[0].props;
+                const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+                //Создать пустышку класса
+                const newObject = {
+                    eClass: eClassObject.eURI(),
+                    _id: id,
+                    name: `${node.propertyName}_${id}`,
+                    //В пустышку прописать listenItem объект на node
+                    listenItem: [{
+                        $ref: this.state.treeRightClickNode.data.targetObject._id,
+                        eClass: this.state.treeRightClickNode.data.eClass
+                    }]
+                };
+                let updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" });
+                const nestedJSON = nestUpdaters(updatedJSON, null);
+                const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
+                const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                //Изменить состояние
+                this.setState({
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject,
+                    mainEObject: resource.eContents()[0],
+                    isModified: true,
+                    expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
+                }, this.scrollToElementWithId)
+            }
+        }
+    };
+
+
+    renderRightMenu(): any {
+        const node: { [key: string]: any } = this.state.treeRightClickNode;
+        if (!node.data.eClass) {
+            return null
+        }
+        const eClass = node.data.eClass;
+        const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+        const allSubTypes = eClassObject.get('eAllSubTypes');
+        const allSuperTypes = eClassObject.get('eAllSuperTypes');
+        node.data.isArray && eClassObject && allSubTypes.push(eClassObject);
+        const allChildren = getAllChildrenKeys([getChildNode([this.treeRef.current.props.children],node.key)]);
+        const allParentChildren = node.data.propertyName ? node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "getAllParentChildren" }) : undefined;
+        const menu = (node.data.upperBound === undefined || node.data.upperBound === -1
+            || (node.data.upperBound === 1))
+            && node.data.propertyName !== undefined
+            &&
+            <div style={{
+                position: "absolute",
+                display: "grid",
+                boxShadow: "2px 2px 8px -1px #cacaca",
+                borderRadius: "4px",
+                minHeight: "10px",
+                maxHeight: "100%",
+                minWidth: "100px",
+                maxWidth: "300px",
+                left: this.state.rightMenuPosition.x,
+                top: this.state.rightMenuPosition.y,
+                backgroundColor: "#fff",
+                padding: "1px",
+                lineHeight: 2,
+                zIndex: 100
+            }}>
+                <Menu onClick={this.handleRightMenuSelect} style={{ width: 150, border: "none" }} mode="vertical">
+                    {this.state.edit && allSubTypes.length > 0 && (node.upperBound === 1 && node.arrayLength > 0 ? false : true) && <Menu.SubMenu
+                        key="add"
+                        title={this.props.t("add child")}
+                    >
+                        {allSubTypes
+                            .sort((a: any, b: any) => this.sortEClasses(a, b))
+                            .map((type: Ecore.EObject, idx: Number) =>
+                                type.get('abstract') ?
+                                    undefined
+                                    :
+                                    <Menu.Item
+                                        style={{
+                                            marginTop: idx === 0 && allSubTypes.length > 5
+                                                ? '80px' : allSubTypes.length > 5 ? '-20px' : '0px'
+                                        }}
+                                        key={type.get('name')}
+                                    >
+                                        {type.get('name')}
+                                    </Menu.Item>)}
+                    </Menu.SubMenu>}
+                    {this.state.edit && allSubTypes.length > 0
+                    && (!(node.data.upperBound === 1 && node.data.arrayLength > 0))
+                    && this.state.clipboardObject.eClass
+                    && allSubTypes.find((el: any) => el.get('name') === this.state.clipboardObject.eClass.split("//")[1])
+                    && <Menu.Item key="paste">{this.props.t("paste")}</Menu.Item>}
+
+                    {this.state.edit && Number(node.pos.split('-')[node.pos.split('-').length - 1]) !== 0 &&
+                    !node.data.isArray && !node.data.headline && <Menu.Item key="moveUp">{this.props.t("move up")}</Menu.Item>}
+
+                    {this.state.edit && (allParentChildren ? allParentChildren.length !== 1 : false) &&
+                    Number(node.pos.split('-')[node.pos.split('-').length - 1]) !== allParentChildren.length - 1 &&
+                    !node.data.isArray && !node.data.headline && <Menu.Item key="moveDown">{this.props.t("move down")}</Menu.Item>}
+
+                    {this.state.edit && !node.data.isArray && !node.data.headline && <Menu.Item key="delete">{this.props.t("delete")}</Menu.Item>}
+                    {!node.data.isArray && !node.data.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}
+                    {(node.children && node.children.filter((c:any)=>c).length>0)
+                    //exists expandable elements
+                    && !(this.state.expandedKeys.filter(e=>allChildren.includes(e)).length ===
+                        allChildren.length)
+                    && <Menu.Item key="expandAll">{this.props.t("expand all")}</Menu.Item>}
+                    {(node.children && node.children.filter((c:any)=>c).length>0)
+                    //exists collapsible elements
+                    && this.state.expandedKeys.filter(e=>allChildren.includes(e)).length > 0
+                    && <Menu.Item key="collapseAll">{this.props.t("collapse all")}</Menu.Item>}
+                    {//contains eventHandlers
+                        this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1}).length > 0
+                        && allSuperTypes.find((t:EObject)=>t.eURI() === this.dynamicActionElementClass)
+                        && node.data.upperBound !== -1
+                        && !eClassObject.get('abstract')
+                        && <Menu.Item key="createEventHandler">{this.props.t("create event handler")}</Menu.Item>}
+                </Menu>
+            </div>
+        //check if menu items not exists
+        if (typeof menu === "object" && menu.props.children?.props?.children.filter((me: any)=> me !== false).length === 0) {
+            this.props.notification(this.props.t('notification'), this.props.t('editing is not available'), "info");
+            return null
+        }
+        return menu
+    }
+
     createTree() {
         const getTitle = (object: { [key: string]: any }) => {
             const possibleTitles: Array<string> = ["name", "qname", "createdBy", "code", "rdbmsFieldName", "fieldName", "title"];
@@ -440,19 +841,44 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         json[feature.get('name')]
                         :
                         json[feature.get('name')] ? [json[feature.get('name')]] : [];
-                    return <Tree.TreeNode
-                        key={parentKey}
+                    const dataTree : DataNode = {
+                        key: parentKey,
+                        title: feature.get('name'),
+                        parentUpdater: json.updater,
+                        upperBound: upperBound,
+                        isArray: true,
+                        arrayLength: targetObject.length,
+                        eClass: feature.get('eType').eURI(),
+                        propertyName: feature.get('name'),
+                        targetObject: targetObject,
 
+                    }
+                    return <Tree.TreeNode
+                        data={dataTree}
+                        key={parentKey}
                         className={!isVisible ? "hidden-leaf" : ""}
                         title={feature.get('name')}
+                        icon={upperBound === 1 ? <NeoIcon icon={"link"} style={{ color: "#d831ff", fontSize: 12 }} /> : <NeoIcon icon={"data-line"} style={{ color: "#d831ff" }} />}
                     >
                         {targetObject.map((object: { [key: string]: any }, cidx: number) => {
                             const res = Ecore.ResourceSet.create();
                             const eClass = res.getEObject(object.eClass);
                             const title = getTitle(object);
+                            const dataTree2 : DataNode = {
+                                key: `${parentKey}.${cidx}`,
+                                parentUpdater: json.updater,
+                                featureUpperBound: upperBound,
+                                eClass: object.eClass ? object.eClass : feature.get('eType').eURI(),
+                                propertyName: feature.get('name'),
+                                targetObject: object,
+                                title: <React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>
+
+                            }
                             return  <Tree.TreeNode
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
+                                data={dataTree2}
+                                icon={<NeoIcon icon={"lock"} style={{ color: "#88bc51" }} />}
                             >
                                 {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                             </Tree.TreeNode>
@@ -463,15 +889,24 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             })
         };
 
+        const dataTree : DataNode = {
+            key: "/",
+            title: this.state.mainEObject.eClass.get('name'),
+            headline: true,
+            eClass: this.state.mainEObject.eClass.eURI(),
+            targetObject: this.state.resourceJSON,
+        }
+
+
         return(
             <Tree
                 ref={this.treeRef}
                 key="mainTree"
-                // draggable
+                draggable
                 // onDrop={onDrop}
-                // blockNode
-                // switcherIcon={<NeoIcon icon={"download"} />}
-                // showIcon
+                blockNode
+                switcherIcon={<NeoIcon icon={"download"} />}
+                showIcon
                 showLine //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
 
@@ -489,6 +924,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     <Tree.TreeNode
                         key={"/"}
                         title={this.state.mainEObject.eClass.get('name')}
+                        data={dataTree}
+                        icon={<NeoIcon icon={"clipboard"} style={{ color: "#2484fe" }} />}
                     >
                         {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                     </Tree.TreeNode>
@@ -585,7 +1022,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     }
                 </Layout.Header>
                 <div style={{ flexGrow: 1 }}>
-                    {/*{this.state.rightClickMenuVisible && this.renderRightMenu()}*/}
+                    {this.state.rightClickMenuVisible && this.renderRightMenu()}
                     <Splitter
                         ref={this.splitterRef}
                         position="horizontal"
