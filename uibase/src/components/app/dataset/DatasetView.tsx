@@ -890,18 +890,18 @@ class DatasetView extends React.Component<any, State> {
             let translatedOperation = expr.operation;
             calculatorFunctionTranslator.forEach(translation => {
                 let regex = new RegExp( translation.key, "i");
-                if (regex.test(translatedOperation!)) {
-                    translatedOperation = translatedOperation!.replace(new RegExp(translation.key, 'gi'), translation.value);
+                if (translatedOperation !== undefined && regex.test(translatedOperation)) {
+                    translatedOperation = translatedOperation.replace(new RegExp(translation.key, 'gi'), translation.value);
                 }
             });
             sortMap.forEach(colDef => {
-                if (translatedOperation!.includes(colDef.fieldCode)) {
-                    translatedOperation = translatedOperation!.replace(new RegExp(colDef.fieldCode, 'g'), colDef.fieldHash);
+                if (translatedOperation !== undefined && translatedOperation.includes(colDef.fieldCode)) {
+                    translatedOperation = translatedOperation.replace(new RegExp(colDef.fieldCode, 'g'), colDef.fieldHash);
                 }
             });
             sortMap.forEach(colDef => {
-                if (translatedOperation!.includes(colDef.fieldHash)) {
-                    translatedOperation = translatedOperation!.replace(new RegExp(colDef.fieldHash, 'g'), `"${colDef.fieldName}"`);
+                if (translatedOperation !== undefined && translatedOperation.includes(colDef.fieldHash)) {
+                    translatedOperation = translatedOperation.replace(new RegExp(colDef.fieldHash, 'g'), `"${colDef.fieldName}"`);
                 }
             });
             return {

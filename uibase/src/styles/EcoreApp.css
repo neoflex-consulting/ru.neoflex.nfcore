@@ -105,7 +105,7 @@ header .header-menu span span {
 
 header .header-menu{
 	float: right;
-	/*line-height: 60px;*/
+	line-height: 46px !important;
 	border: none;
 	background-color: #2a356c;
 	padding: 0 5px;

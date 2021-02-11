@@ -79,14 +79,14 @@ export class Login extends React.Component<any, State> {
                                 </NeoButton>
                             </div>
                         }
-                        <NeoRow>
-                            <div className={"nameOfApp"}>Neoflex Reporting</div>
+                        <NeoRow justify={"center"} className={'nameOfApp'}>
+                                Neoflex Reporting
                         </NeoRow>
 
-                        <NeoRow>
-                            <div className={"authorizing"}>{t('authorization')}</div>
+                        <NeoRow justify={"center"} className={"authorizing"}>
+                                {t('authorization')}
                         </NeoRow>
-                        <NeoRow className={"Login"}>
+                        <NeoRow className={"Login"} justify={"center"}>
                             {t('login')}
                         </NeoRow>
                         <div className={"inputLogin"}>
@@ -100,7 +100,7 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                         </div>
-                        <NeoRow className={"Password"}>
+                        <NeoRow className={"Password"} justify={"center"}>
                             {t('password')}
                         </NeoRow>
                         <div className={"inputPassword"}>
@@ -114,7 +114,7 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                         </div>
-                        <NeoRow className={"button"} style={{textAlign: "center"}}>
+                        <NeoRow className={"button"} justify={"center"} style={{textAlign: "center"}}>
                             <NeoButton key="conbutton" className={"loginButton"}
                                        onClick={this.authenticate}>
                                 {t('login')}

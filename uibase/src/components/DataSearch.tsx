@@ -8,7 +8,7 @@ import ponyCat from '../icons/ponyCat.png';
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import ResourceCreateFrom from './ResourceCreateForm'
-import {NeoButton, NeoHint, NeoInput, NeoOption, NeoSelect} from "neo-design/lib";
+import {NeoButton, NeoHint, NeoInput, NeoOption, NeoSelect, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {FormInstance} from "antd/lib/form";
 
@@ -44,7 +44,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     refresh = () => {
-        this.formRef.current?.validateFields().then((values: any) => {
+        this.formRef.current!.validateFields().then((values: any) => {
             let selectedClassObject: Ecore.EClass | undefined;
             if (this.props.specialEClass === undefined) {
                 selectedClassObject = this.state.classes.find((c: Ecore.EClass) => c.eContainer.get('name') + "." + c.get('name') === values.selectEClass);
@@ -67,8 +67,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     }))
             }
 
-        }).catch( () => {
-        });
+        }).catch( () => {});
     };
 
     getEClasses(): void {
@@ -156,17 +155,18 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     <Form.Item
                         name={"key"}
                     >
-                        <Tabs
+                        <NeoTabs
                             // onChange={(key: string) => {
                             //     this.formRef.current!.setFieldsValue({ key: { value: key } })
                             // }}
                         >
-                            <Tabs.TabPane
+                            <NeoTabs.TabPane
                                 key='data_search'
                                 className={'datasearch_region'}
                                 tab={this.props.t('data search')}
                             >
                                 <Form.Item
+                                    style={{display:'block'}}
                                     label={<div style={{lineHeight:'1', marginBottom:'4px'}}>EClass</div>}
                                     name={"selectEClass"}
                                     initialValue={this.props.specialEClass === undefined
@@ -199,7 +199,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
 
                                 <Form.Item
-                                    style={{display:'inline-block'}}
+                                    style={{display:'block'}}
                                     label={<div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>}
                                     name={"name"}
                                 >
@@ -207,8 +207,8 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                 </Form.Item>
 
                                 <Form.Item
-
-                                    label={t('tags')}
+                                    style={{display:'block'}}
+                                    label={<div style={{lineHeight:'1', marginBottom:'4px'}}>{t('tags')}</div>}
                                     name={"tags"}
                                 >
                                     <NeoSelect
@@ -252,7 +252,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                     </NeoButton>
                                 </Form.Item>
 
-                            </Tabs.TabPane>
+                            </NeoTabs.TabPane>
 
                             <Tabs.TabPane
                                 className={'datasearch_region'}
@@ -295,7 +295,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
                             </Tabs.TabPane>
 
-                        </Tabs>
+                        </NeoTabs>
                     </Form.Item>
                 </Form>
 

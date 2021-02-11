@@ -98,7 +98,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item style={{ margin: 'auto' }}>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
+                            initialValue: (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined,
                             rules: [{
                                 required:
                                 value.operation,
@@ -267,7 +267,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current?.getFieldDecorator;
+        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{

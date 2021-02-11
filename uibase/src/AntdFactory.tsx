@@ -308,24 +308,24 @@ class TabsViewReport_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden} style={{padding: "16px"}}>
-                {/*<NeoTabs*/}
-                {/*    animated={false}*/}
-                {/*    className={cssClass}*/}
-                {/*    activeKey={this.state.activeKey}*/}
-                {/*    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}*/}
-                {/*    onTabClick={(newKey: string, e?: MouseEvent) => {*/}
-                {/*        if (!e) return false; //if keyboard pressed*/}
-                {/*        this.setState({activeKey: newKey})*/}
-                {/*    }}*/}
-                {/*>*/}
-                {/*    {*/}
-                {/*        children.map((c: Ecore.EObject) =>*/}
-                {/*            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >*/}
-                {/*                {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}*/}
-                {/*            </NeoTabs.NeoTabPane>*/}
-                {/*        )*/}
-                {/*    }*/}
-                {/*</NeoTabs>*/}
+                <NeoTabs
+                    animated={false}
+                    className={cssClass}
+                    activeKey={this.state.activeKey}
+                    tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}
+                    // onTabClick={(newKey: string, e?: MouseEvent) => {
+                    //     if (!e) return false; //if keyboard pressed
+                    //     this.setState({activeKey: newKey})
+                    // }}
+                >
+                    {
+                        children.map((c: Ecore.EObject) =>
+                            <NeoTabs.TabPane tab={c.get('name')} key={c._id} forceRender={true} >
+                                {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}
+                            </NeoTabs.TabPane>
+                        )
+                    }
+                </NeoTabs>
             </div>
         )
     }

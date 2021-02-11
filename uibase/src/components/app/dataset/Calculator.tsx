@@ -112,7 +112,7 @@ export function hash(s: string) : string {
 
 function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
     return <List style={{padding:'8px 12px 17px'}}>
-                {columnDefs?.map((element, index) =>{
+                {columnDefs!.map((element, index) =>{
                     return <NeoButton
                         type={'link'}
                         style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left", display: "block", height: "auto", padding: "7px 0 7px 0" }}
@@ -145,7 +145,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 
     componentDidMount(): void {
-        this.getALLFunctions(this.props.currentDatasetComponent?.eResource());
+        this.getALLFunctions(this.props.currentDatasetComponent!.eResource());
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
@@ -313,7 +313,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 <Form.Item style={{marginBottom:'15px'}}>
                     <NeoCol span={10} style={{justifyContent:'flex-start'}}>
                         {
-                            this.props.formRef.current?.getFieldDecorator(inputSelectKey,{
+                            this.props.formRef.current!.getFieldDecorator(inputSelectKey,{
                                 initialValue: this.getFieldValue(inputFieldKey)
                             })(
                                 <NeoSelect
@@ -323,7 +323,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     onChange={(e: any) => {
                                         this.setState({currentIndex:e});
                                     }}>
-                                    {this.state.parametersArray?.filter((e)=>e.datasetColumn)
+                                    {this.state.parametersArray!.filter((e)=>e.datasetColumn)
                                         .map((element)=> {
                                         return <option
                                             key={(element.datasetColumn)? element.datasetColumn : ""}

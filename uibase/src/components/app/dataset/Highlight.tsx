@@ -26,7 +26,6 @@ interface Props extends ParameterDrawerProps {
     allHighlightType?: Array<EObject>;
 }
 
-
 const SortableList = SortableContainer(({items}:any) => {
     return (
         <ul className="SortableList">
@@ -59,7 +58,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <NeoRow>
                     {value.getFieldDecorator(`${value.idDatasetColumn}`,
                         {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
+                            initialValue: (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined,
                             rules: [{
                                 required:
                                     value.operation ||
@@ -418,7 +417,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current?.getFieldDecorator;
+        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     handleColorPicker = (type: string) => {
@@ -468,7 +467,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
         this.setState({parametersArray, backgroundColorVisible: false, textColorVisible: false, color: undefined, colorIndex: undefined},
             ()=> {
                 if (saveParameter) {
-                    this.props.formRef.current?.validateFields((err: any, values: any) => {
+                    this.props.formRef.current!.validateFields((err: any, values: any) => {
                         if (!err) {
                             this.props.onChangeParameters!(parametersArray, this.props.componentType);
                         }
@@ -484,9 +483,9 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     };
 
     deleteRow = (e: any) => {
-        this.props.formRef.current?.resetFields();
+        this.props.formRef.current!.resetFields();
         let newServerParam: IServerQueryParam[] = [];
-        this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
+        this.state.parametersArray!.forEach((element:IServerQueryParam, index:number) => {
             if (element.index !== e.index) {
                 newServerParam.push({
                     index: newServerParam.length + 1,
