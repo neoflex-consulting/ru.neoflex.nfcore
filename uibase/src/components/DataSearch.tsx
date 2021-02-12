@@ -38,15 +38,11 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     handleSubmit = (e: any) => {
-        let isJson = false;
-        if (e.currentTarget.classList.contains("jsonButton")){
-            isJson = true
-        }
         e.preventDefault();
-        this.refresh(isJson);
+        this.refresh();
     };
 
-    refresh = (isJson?: boolean) => {
+    refresh = () => {
         const values = this.formRef.current!.getFieldsValue();
         let selectedClassObject: Ecore.EClass | undefined;
         if (this.props.specialEClass === undefined) {
@@ -54,7 +50,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
          } else {
              selectedClassObject = this.props.specialEClass
          }
-         if (values.json_field && isJson) {
+         if (values.key.value === "json_search") {
              API.instance().find(JSON.parse(values.json_field.value)).then(results => {
                  this.props.onSearch(results.resources)
              })
@@ -152,9 +148,9 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                         size="large"
                         onClick={ () => this.setModalVisible(true) }
                     />
-                    {/*<Form.Item
+                    <Form.Item
                         name={"key"}
-                    >*/}
+                    >
                         <NeoTabs
                             onChange={(key: string) => {
                                 this.formRef.current!.setFieldsValue({ key: { value: key } })
@@ -299,7 +295,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
                                 <Form.Item style={{marginBottom:'20px'}}>
                                     <NeoButton
-                                        className={"jsonButton"}
                                         title={t("searchsimple")}
                                         onClick={this.handleSubmit}
                                     >
@@ -310,7 +305,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                             </Tabs.TabPane>
 
                         </NeoTabs>
-                    {/*</Form.Item>*/}
+                    </Form.Item>
                 </Form>
 
             </React.Fragment>
