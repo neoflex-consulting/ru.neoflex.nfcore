@@ -124,7 +124,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     render() {
         const { TabPane } = Tabs;
         const { t } = this.props;
-        // @ts-ignore
         return (
             <React.Fragment>
                 {this.state.createResModalVisible && <ResourceCreateFrom
@@ -139,15 +138,15 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     ref={this.formRef}
                     name={"dataSearch"}
                     initialValues={{ key: 'data_search' }}
+                    onFinish={this.handleSubmit}
+                    style={{padding: '0 36px'}}
                 >
                     <NeoButton
                         title={t("createitem")}
-                        suffixIcon={<NeoIcon icon={"plus"}/>}
                         type="primary"
-                        style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1}}
-                        size="large"
+                        style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1, padding: '8px', width: '32px'}}
                         onClick={ () => this.setModalVisible(true) }
-                    />
+                    ><NeoIcon color={'white'} icon={"plus"} /></NeoButton>
                     <Form.Item
                         name={"key"}
                     >
