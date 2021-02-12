@@ -32,6 +32,14 @@ abstract class Component extends Tagged {
 abstract class DynamicActionElement {
 }
 
+@NFCore(documentation="Элемент ввода")
+abstract class InputElement {
+        @NFCore(documentation="Заголовок элемента")
+    String title
+        @NFCore(documentation="Положение заголовка")
+    TitleOrientation titleOrientation
+}
+
 @NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в таблицах, в строках с данными")
 abstract class GridComponent {
         @NFCore(documentation="Определяет значение, передаваемое из таблицы в компоненту. Варианты: String - напрямую значение из ячейки; Object - вся строка целиком; None - пустая строка")
@@ -285,7 +293,7 @@ class Typography extends ViewElement {
 }
 
 @NFCore(documentation="Выпадающий список")
-class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
+class Select extends ViewElement, ValueItem, CommandElement, GridComponent, InputElement {
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
         @NFCore(documentation="Режим отображения опций внутри выпадающего списка: Default, Multiple, Tags")
@@ -302,14 +310,10 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     refers DatasetColumn datasetValueColumn
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
-        @NFCore(documentation="Текст, отображающийся рядом с полем")
-    String title
-        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
-    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Компонента для выбора дат")
-class DatePicker extends ViewElement, ValueItem, GridComponent {
+class DatePicker extends ViewElement, ValueItem, GridComponent, InputElement {
         @NFCore(documentation="Показывать кнопку очистки поля")
     boolean allowClear
         @NFCore(documentation="Формат отображения поля. Имеет первый приоритет.")
@@ -318,10 +322,6 @@ class DatePicker extends ViewElement, ValueItem, GridComponent {
     boolean showTime
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
-        @NFCore(documentation="Текст, отображающийся рядом с полем")
-    String title
-        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
-    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Любой Html контент")
@@ -331,7 +331,7 @@ class HtmlContent extends ViewElement, CommandElement, GridComponent {
 }
 
 @NFCore(documentation="Текстовое поле")
-class Input extends ViewElement, ValueItem, GridComponent {
+class Input extends ViewElement, ValueItem, GridComponent,InputElement {
         @NFCore(documentation="Формат данных. Варианты: InputNumber, InputString")
     InputType inputType = "InputString"
         @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
@@ -344,10 +344,6 @@ class Input extends ViewElement, ValueItem, GridComponent {
     String placeholder
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
-        @NFCore(documentation="Текст, отображающийся рядом с полем")
-    String title
-        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
-    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Компонента с флагом")

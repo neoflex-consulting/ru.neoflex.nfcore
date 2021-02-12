@@ -31,6 +31,7 @@ import {SvgName} from "neo-icon/lib/icon/icon";
 import ChangeLogView from "./components/ChangeLogView";
 
 const marginBottom = '20px';
+const inputElementStandardWidth = "200px";
 
 let startResource: Object;
 
@@ -704,7 +705,6 @@ export class Select_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = '200px';
         const componentRenderCondition = getRenderConditionResult.bind(this)("Select.componentRenderCondition");
         const cssClass = createCssClass(this.viewObject);
         return (
@@ -717,10 +717,10 @@ export class Select_ extends ViewContainer {
                     key={this.viewObject._id}
                     className={cssClass}
                     disabled={isReadOnly}
+                    width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                     showSearch={this.viewObject.get('showSearch')}
                     placeholder={this.viewObject.get('placeholder')}
                     mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
-                    style={{width: this.props.isAgEdit ? undefined : width}}
                     defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
                     value={(this.state.currentValue)? this.state.currentValue: undefined}
                     onChange={(currentValue: string|string[]) => {
@@ -848,6 +848,7 @@ export class DatePicker_ extends ViewContainer {
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
                         //Fullscreen ag-grid render
+                        width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         getCalendarContainer={this.props.gridId ? () => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement : undefined}
                         key={this.viewObject._id}
                         className={cssClass}
@@ -1147,7 +1148,6 @@ export class Input_ extends ViewContainer {
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
-        const width = "200px";
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
                 <div
@@ -1156,7 +1156,7 @@ export class Input_ extends ViewContainer {
                     <InputNumber
                         hidden={this.state.isHidden || this.props.isParentHidden}
                         className={cssClass}
-                        style={{width: width}}
+                        width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         disabled={isReadOnly}
                         min={this.viewObject.get('minValue') || 1}
                         max={this.viewObject.get('maxValue') || 99}
@@ -1179,8 +1179,9 @@ export class Input_ extends ViewContainer {
                      style={{marginBottom: marginBottom}}>
                     <NeoInput
                         hidden={this.state.isHidden}
+                        width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         className={cssClass}
-                        style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
+                        style={{display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={isReadOnly}
                         placeholder={this.viewObject.get('placeholder')}
                         defaultValue={this.viewObject.get('value')}
@@ -1705,6 +1706,7 @@ export class RadioGroup_ extends ViewContainer {
                     ? this.state.gridBoxes && this.state.gridBoxes.split(',').map((box:string, index:number)=>{
                         return <NeoInput
                             key={`${this.viewObject.eURI()}${box}${index}`}
+
                             disabled={isReadOnly}
                             checked={contextValue && contextValue.parameterValue === box}
                             className={cssClass}
