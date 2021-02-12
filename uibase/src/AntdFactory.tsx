@@ -29,6 +29,7 @@ import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
 import ChangeLogView from "./components/ChangeLogView";
+import InlineHelp from "./components/app/InlineHelp";
 
 const marginBottom = '20px';
 const inputElementStandardWidth = "200px";
@@ -710,7 +711,7 @@ export class Select_ extends ViewContainer {
         return (
             componentRenderCondition ? <div
                 hidden={this.state.isHidden || this.props.isParentHidden}
-                style={{marginBottom: marginBottom}}>
+                style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
                 <NeoSelect
                     //Fullscreen ag-grid render
                     getPopupContainer={this.props.gridId ? () => document.getElementById (this.props.gridId) as HTMLElement : undefined}
@@ -746,6 +747,7 @@ export class Select_ extends ViewContainer {
                             </Select.Option>
                     }
                 </NeoSelect>
+                {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
             </div> : <div>{this.props.getValue()}</div>
         )
     }
@@ -843,7 +845,7 @@ export class DatePicker_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}
-                 style={{marginBottom: marginBottom}}
+                 style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}
             >
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
@@ -865,6 +867,7 @@ export class DatePicker_ extends ViewContainer {
                         title={this.viewObject.get('title')}
                         titleOrientation={this.viewObject.get('titleOrientation')}
                     />
+                    {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </ConfigProvider>
             </div>
         )
@@ -1152,7 +1155,7 @@ export class Input_ extends ViewContainer {
             return(
                 <div
                     key={this.viewObject._id}
-                    style={{marginBottom: marginBottom}}>
+                    style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
                     <InputNumber
                         hidden={this.state.isHidden || this.props.isParentHidden}
                         className={cssClass}
@@ -1171,12 +1174,13 @@ export class Input_ extends ViewContainer {
                         }}
                         value={this.state.currentValue}
                     />
+                    {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </div>
             )
         } else {
             return(
                 <div key={this.viewObject._id}
-                     style={{marginBottom: marginBottom}}>
+                     style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
                     <NeoInput
                         hidden={this.state.isHidden}
                         width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
@@ -1193,6 +1197,7 @@ export class Input_ extends ViewContainer {
                         titleOrientation={this.viewObject.get('titleOrientation')}
                         title={this.viewObject.get('title')}
                     />
+                    {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </div>
             )
         }

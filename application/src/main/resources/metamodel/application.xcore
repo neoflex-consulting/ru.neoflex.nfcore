@@ -38,6 +38,10 @@ abstract class InputElement {
     String title
         @NFCore(documentation="Положение заголовка")
     TitleOrientation titleOrientation
+        @NFCore(documentation="Текст указанный в подсказке")
+    String helpText
+        @NFCore(documentation="Положение выпадающей подсказки")
+    HelpOrientation helpOrientation
 }
 
 @NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в таблицах, в строках с данными")
@@ -704,4 +708,19 @@ enum ButtonSize {
     normal
     medium
     large
+}
+
+enum HelpOrientation {
+    bottomLeft,
+    bottom,
+    bottomRight,
+    rightBottom,
+    right,
+    rightTop,
+    topRight,
+    top,
+    topLeft,
+    leftTop,
+    left,
+    leftBottom
 }
