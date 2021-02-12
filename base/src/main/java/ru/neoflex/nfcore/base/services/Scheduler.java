@@ -29,6 +29,8 @@ import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -60,6 +62,13 @@ public class Scheduler {
 //                logger.error("Scheduler: ", e);
 //            }
 //        }, Duration.ofSeconds(10));
+        taskScheduler.schedule(() -> {
+            try {
+                refreshScheduler();
+            } catch (Exception e) {
+                logger.error("Refresh Scheduler: ", e);
+            }
+        }, Instant.now().plus(10, ChronoUnit.SECONDS));
     }
 
     public synchronized ObjectNode refreshScheduler() throws Exception {
