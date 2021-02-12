@@ -126,6 +126,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     treeRef: React.RefObject<any>;
     eventHandlerClass = "ru.neoflex.nfcore.application#//EventHandler";
     dynamicActionElementClass = "ru.neoflex.nfcore.application#//DynamicActionElement";
+    redirectChecked = false;
 
     constructor(props: any) {
         super(props);
@@ -205,7 +206,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
                 targetObject: targetObject ? targetObject : { eClass: "" },
                 tableData: tableData ? tableData : [],
-                edit: this.state.edit || (this.props.match.params.edit === 'true')
             }));
         })
     }
@@ -1279,6 +1279,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.state.mainEObject.eResource().rev < this.props.location.pathname.split("/")[5]) {
             this.refresh(true);
         }
+        if (this.state.edit !== prevState.edit) {
+            this.setState({tableData: this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey)})
+        }
     }
 
     componentDidMount(): void {
@@ -1299,23 +1302,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             .then((result: EObject) => {
                 if (paramName === 'currentLockPattern') {
                     API.instance().findByKind(result,  {contents: {eClass: result.eURI()}})
-                        .then((result: Ecore.Resource[]) => {
-                            if (result.length !== 0) {
-                                let currentLockFile = result
-                                    .filter( (r: EObject) =>
-                                        (r.eContents()[0].get('name') === this.state.mainEObject._id &&
-                                            r.eContents()[0].get('audit').get('createdBy') === this.props.principal.name)
-                                    );
-                                if (currentLockFile.length !== 0) {
-                                    this.setState({edit: true});
-                                } else {
-                                    if (this.props.match.params.edit) {
-                                        this.changeEdit(false)
-                                    }
-                                }
+                        .then((locks: Ecore.Resource[]) => {
+                            const currentLockFile = locks.find( (r: EObject) =>
+                                    (r.eContents()[0].get('name') === this.state.mainEObject._id &&
+                                        r.eContents()[0].get('audit').get('createdBy') === this.props.principal.name)
+                                );
+                            if (currentLockFile) {
+                                this.setState({edit: true });
                             } else {
-                                if (this.props.match.params.edit) {
-                                    this.changeEdit(false)
+                                if (this.props.match.params.edit && !this.redirectChecked) {
+                                    this.redirectChecked = true;
+                                    this.changeEdit(false);
                                 }
                             }
                         })

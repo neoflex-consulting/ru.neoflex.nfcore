@@ -10,7 +10,7 @@ import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
-import {neoIconMap} from "../utils/consts";
+import {neoIconMap, NeoIconTypeArray} from "../utils/consts";
 import {SvgName} from "neo-icon/lib/icon/icon";
 
 interface EditableSQLAreaProps {
@@ -289,7 +289,7 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
                 })
                 .map((obj: Ecore.EObject) =>
                 <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
-                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
+                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
                 </Select.Option>)}
         </Select>
     )
@@ -433,7 +433,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
 
     static getComponent(props: any) {
         const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType } = props;
-        const targetValue = value || props.eObject.get('defaultValueLiteral');
+        const targetValue = value || props.eObject?.get('defaultValueLiteral');
         if (syntax || componentType === "SyntaxArea") {
             return <EditableSyntaxArea
                 ukey={ukey}
