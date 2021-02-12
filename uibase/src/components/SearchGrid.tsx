@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Button, Form} from 'antd';
-import Ecore, {EObject, Resource} from "ecore";
+import Ecore, {EObject, EStructuralFeature, Resource} from "ecore";
 import {API} from "../modules/api";
 import {Link} from "react-router-dom";
 import forEach from "lodash/forEach"
@@ -34,6 +34,21 @@ interface State {
     currentPage?: number;
     possibleTags: Ecore.EObject[];
 
+}
+
+function containsPassword(obj: EObject, key: string) : boolean {
+    if (obj.eClass.get('eAllStructuralFeatures').find((f:EStructuralFeature) => f.get('name') === key && f.get('eType').get('name') === "Password")) {
+        return true
+    } else if (obj.get(key)?.array) {
+        //При необходимости расширить на большую глубину
+        const contents = obj.get(key).array()
+        for (const c of contents) {
+            if (c.eClass.get('eAllStructuralFeatures').find((f:EStructuralFeature) => f.get('eType').get('name') === "Password")) {
+                return true
+            }
+        }
+    }
+    return false
 }
 
 class SearchGrid extends React.Component<Props & FormComponentProps & WithTranslation, State> {
@@ -131,14 +146,16 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         for (let column of AllFeatures){
             let name: string = "";
             let title: string = "";
+            //exclude password fields
+            if (column.get('eType').get('name') === "Password") { continue }
             column.get('name') === "children" ? name = "_children" :
                 name = column.get('name');
             title = column.get('name')/*column.eContainer.eContainer.get('name') + ".eClasses." + column.eContainer.get('name') + ".eStructuralFeatures." + column.get('name') + ".caption"*/
             const type: string = !!column.get('eType') && column.get('eType').eClass.get('name') === 'EDataType' ? this.getDataType(column.get('eType').get('name')) : "stringType";
             AllColumns.push({title: title, dataIndex: name, key: name, type: type,
-                sorter: column.get('name') !== 'tags' ? (a: any, b: any) => this.sortColumns(a, b, name, type) : undefined,
+                sorter: !(column.eContainer.get('name') === 'Tagged') ? (a: any, b: any) => this.sortColumns(a, b, name, type) : undefined,
                 render: (text: any) => {
-                if (column.get('name') === 'tags' && text.tags) {
+                if (column.eContainer.get('name') === 'Tagged' && text.tags) {
                     return FormComponentMapper.getComponent({
                         componentType: "Tag",
                         value: text && text.resource.eContents()[0].get('tags') && text.resource.eContents()[0].get('tags').map((v:EObject)=>v.get('name')),
@@ -155,7 +172,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                 else if (text !== undefined && text.length > 100) {return "..."}
                 else if (text !== undefined && text.length > 40) {return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, 40) + "..."}</NeoHint>}
                 else {return text}},
-                ...this.getColumnSearchProps(name, title, column.get('name') === 'tags'),
+                ...this.getColumnSearchProps(name, title, column.eContainer.get('name') === 'Tagged'),
                 filterIcon: (filtered: any) => (
                     <NeoIcon icon={"search"} style={{ color: filtered ? "#1890ff" : undefined }} />
                 ),
@@ -189,10 +206,13 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         prepared.map((res:any, idx) => {
             res["key"] = idx;
             forEach(res, (val,key)=>{
-                if (typeof val === "object" && key !== "resource" && key !== "tags") {
+                const isPasswordField = containsPassword(res.resource.eContents()[0], key);
+                if (typeof val === "object" && key !== "resource" && key !== "tags" && !isPasswordField) {
                     res[key] = JSON.stringify(val)
-                } else if (key === "tags") {
+                } else if (key === "tags" && !isPasswordField) {
                     res[key] = res
+                } else if (isPasswordField) {
+                    res[key] = undefined
                 }
             });
             return res
