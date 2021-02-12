@@ -174,7 +174,7 @@ public class Server extends SessionFactory implements Closeable {
     private static int getBackupIndex(String fileName) {
         String[] parts = fileName.split("_");
         try {
-            return Integer.parseInt(parts[1]) + 1;
+            return Integer.parseInt(parts[1]);
         }
         catch (Throwable t) {
             return -1;
