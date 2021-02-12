@@ -433,7 +433,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
 
     static getComponent(props: any) {
         const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType } = props;
-        const targetValue = value || props.eObject.get('defaultValueLiteral');
+        const targetValue = value || props.eObject?.get('defaultValueLiteral');
         if (syntax || componentType === "SyntaxArea") {
             return <EditableSyntaxArea
                 ukey={ukey}
