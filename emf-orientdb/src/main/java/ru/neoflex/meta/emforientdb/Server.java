@@ -25,9 +25,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
-    private String home;
-    private OServer oServer;
+    private final String home;
+    private final OServer oServer;
     private OServerConfiguration configuration;
+    private int numOfProtectedBackups = 0;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
@@ -170,33 +171,49 @@ public class Server extends SessionFactory implements Closeable {
         return shift + 1;
     }
 
+    private static int getBackupIndex(String fileName) {
+        String[] parts = fileName.split("_");
+        try {
+            return Integer.parseInt(parts[1]) + 1;
+        }
+        catch (Throwable t) {
+            return -1;
+        }
+    }
+
     public File backupDatabase() throws IOException {
         List<String> names = listBackupNames();
-        int index = 0;
+        int nextIndex = 0;
         for (int i = names.size() - 1; i >= 0; --i) {
-            String[] parts = names.get(i).split("_");
-            try {
-                index = Integer.parseInt(parts[1]) + 1;
+            int index = getBackupIndex(names.get(i));
+            if (index >= 0) {
+                nextIndex = index + 1;
                 break;
             }
-            catch (Throwable t) {
-            }
         }
-        int slot = getHanoiTowersSlot(index);
+        int nextSlot = getHanoiTowersSlot(nextIndex);
         File backups = new File(getHome(), "backups");
         String fileName = String.format("%s_%06d_%03d_%s.zip",
-                getDbName(), index, slot, new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()));
+                getDbName(), nextIndex, nextSlot, new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()));
         File backup = new File(backups, fileName);
         backupDatabase(backup);
-        for (int i = names.size() - 1; i >= 0; --i) {
-            String[] parts = names.get(i).split("_");
-            try {
-                if (Integer.parseInt(parts[2]) == slot) {
-                    File file = new File(backups, names.get(i));
-                    file.delete();
+        names.add(fileName);
+        // remove non-protected duplicated slots
+        for (int n = names.size() - 1 - getNumOfProtectedBackups(); n > 0; --n) {
+            int lastNonProtectedIndex = getBackupIndex(names.get(n));
+            if (lastNonProtectedIndex > 0) {
+                int slotToRemove = getHanoiTowersSlot(lastNonProtectedIndex);
+                for (int i = 0; i < n; ++i) {
+                    int indexToTest = getBackupIndex(names.get(i));
+                    if (indexToTest > 0) {
+                        int slotToTest = getHanoiTowersSlot(indexToTest);
+                        if (slotToTest == slotToRemove) {
+                            File file = new File(backups, names.get(i));
+                            file.delete();
+                        }
+                    }
                 }
-            }
-            catch (Throwable t) {
+                break;
             }
         }
         return backup;
@@ -345,5 +362,13 @@ public class Server extends SessionFactory implements Closeable {
 
     public OServer getOServer() {
         return oServer;
+    }
+
+    public int getNumOfProtectedBackups() {
+        return numOfProtectedBackups;
+    }
+
+    public void setNumOfProtectedBackups(int numOfProtectedBackups) {
+        this.numOfProtectedBackups = numOfProtectedBackups;
     }
 }
