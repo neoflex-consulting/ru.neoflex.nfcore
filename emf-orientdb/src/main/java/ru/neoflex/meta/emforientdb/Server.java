@@ -25,9 +25,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
-    private String home;
-    private OServer oServer;
+    private final String home;
+    private final OServer oServer;
     private OServerConfiguration configuration;
+    private int numOfProtectedBackups = 0;
 
     public Server(String home, String dbName, List<EPackage> packages) throws Exception {
         super(dbName, packages);
@@ -161,24 +162,67 @@ public class Server extends SessionFactory implements Closeable {
         return file;
     }
 
+    private static int getHanoiTowersSlot(int index) {
+        if (index == 0)
+            return 0;
+        int shift = 0;
+        while ((index&(1<<shift)) == 0)
+            ++shift;
+        return shift + 1;
+    }
+
+    private static int getBackupIndex(String fileName) {
+        String[] parts = fileName.split("_");
+        try {
+            return Integer.parseInt(parts[1]) + 1;
+        }
+        catch (Throwable t) {
+            return -1;
+        }
+    }
+
     public File backupDatabase() throws IOException {
-        File backup = new File(home, "backups/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".zip");
-        return backupDatabase(backup);
+        List<String> names = listBackupNames();
+        int nextIndex = 0;
+        for (int i = names.size() - 1; i >= 0; --i) {
+            int index = getBackupIndex(names.get(i));
+            if (index >= 0) {
+                nextIndex = index + 1;
+                break;
+            }
+        }
+        int nextSlot = getHanoiTowersSlot(nextIndex);
+        File backups = new File(getHome(), "backups");
+        String fileName = String.format("%s_%06d_%03d_%s.zip",
+                getDbName(), nextIndex, nextSlot, new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()));
+        File backup = new File(backups, fileName);
+        backupDatabase(backup);
+        names.add(fileName);
+        // remove non-protected duplicated slots
+        for (int n = names.size() - 1 - getNumOfProtectedBackups(); n > 0; --n) {
+            int lastNonProtectedIndex = getBackupIndex(names.get(n));
+            if (lastNonProtectedIndex > 0) {
+                int slotToRemove = getHanoiTowersSlot(lastNonProtectedIndex);
+                for (int i = 0; i < n; ++i) {
+                    int indexToTest = getBackupIndex(names.get(i));
+                    if (indexToTest > 0) {
+                        int slotToTest = getHanoiTowersSlot(indexToTest);
+                        if (slotToTest == slotToRemove) {
+                            File file = new File(backups, names.get(i));
+                            file.delete();
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        return backup;
     }
 
     public File backupDatabase(File file) throws IOException {
-        return backupDatabase(file, 10);
-    }
-
-    public File backupDatabase(File file, int keep) throws IOException {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
             backupDatabase(os, new HashMap<>());
-        }
-        List<String> list = listBackups();
-        while (list.size() > keep) {
-            String fileName = list.remove(0);
-            new File(fileName).delete();
         }
         return file;
     }
@@ -197,8 +241,8 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public String restoreDatabase(String fileName) throws IOException {
-        File dir = new File(getHome(), "backups");
-        return restoreDatabase(new File(dir, fileName));
+        File backups = new File(getHome(), "backups");
+        return restoreDatabase(new File(backups, fileName));
     }
 
     public void restoreDatabase(InputStream is, Map<String, Object> options) throws IOException {
@@ -318,5 +362,13 @@ public class Server extends SessionFactory implements Closeable {
 
     public OServer getOServer() {
         return oServer;
+    }
+
+    public int getNumOfProtectedBackups() {
+        return numOfProtectedBackups;
+    }
+
+    public void setNumOfProtectedBackups(int numOfProtectedBackups) {
+        this.numOfProtectedBackups = numOfProtectedBackups;
     }
 }
