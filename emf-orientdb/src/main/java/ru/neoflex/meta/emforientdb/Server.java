@@ -173,6 +173,10 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
+    public File backupDatabase() throws IOException {
+        return backupDatabase(getDbName());
+    }
+
     public File backupDatabase(String dbName) throws IOException {
         dbName = StringUtils.isEmpty(dbName)?getDbName():dbName;
         List<String> names = listBackupNames(dbName);
