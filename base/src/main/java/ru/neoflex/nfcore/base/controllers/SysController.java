@@ -311,13 +311,13 @@ public class SysController {
     }
 
     @PostMapping(value = "/orientdb/backup", produces = "application/json; charset=utf-8")
-    public List<String> dbBackup() throws Exception {
-        return Collections.singletonList(provider.getServer().backupDatabase().getAbsolutePath());
+    public List<String> dbBackup(@RequestParam String dbName) throws Exception {
+        return Collections.singletonList(provider.getServer().backupDatabase(dbName).getAbsolutePath());
     }
 
     @GetMapping(value = "/orientdb/buckup", produces = "application/json; charset=utf-8")
-    public List<String> dbListBackups() throws Exception {
-        return provider.getServer().listBackupNames();
+    public List<String> dbListBackups(@RequestParam String dbName) throws Exception {
+        return provider.getServer().listBackupNames(dbName);
     }
 
     @PostMapping(value = "/orientdb/restore", produces = "application/json; charset=utf-8")
@@ -326,13 +326,13 @@ public class SysController {
     }
 
     @PostMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
-    public List<String> dbExport() throws Exception {
-        return Collections.singletonList(provider.getServer().exportDatabase().getAbsolutePath());
+    public List<String> dbExport(@RequestParam String dbName) throws Exception {
+        return Collections.singletonList(provider.getServer().exportDatabase(dbName).getAbsolutePath());
     }
 
     @GetMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
-    public List<String> dbListExports() throws Exception {
-        return provider.getServer().listExportNames();
+    public List<String> dbListExports(@RequestParam String dbName) throws Exception {
+        return provider.getServer().listExportNames(dbName);
     }
 
     @PostMapping(value = "/orientdb/import", produces = "application/json; charset=utf-8")
@@ -341,8 +341,8 @@ public class SysController {
     }
 
     @PostMapping(value = "/orientdb/vacuum", produces = "application/json; charset=utf-8")
-    public List<String> dbVacuum() throws Exception {
-        return Collections.singletonList(provider.getServer().vacuum());
+    public List<String> dbVacuum(@RequestParam String dbName) throws Exception {
+        return Collections.singletonList(provider.getServer().vacuum(dbName));
     }
 
 }

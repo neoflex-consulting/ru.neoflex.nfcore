@@ -27,14 +27,17 @@ public class OrientDBCommands {
     }
 
     @ShellMethod("Vacuum database")
-    public String odbVacuum() throws IOException {
-        provider.getServer().vacuum();
+    public String odbVacuum(@ShellOption(defaultValue="") String dbName) throws IOException {
+        provider.getServer().vacuum(dbName);
         return "Done.";
     }
 
     @ShellMethod("Export database")
-    public String odbExport(@ShellOption(defaultValue=ShellOption.NULL) File file) throws IOException {
-        File export = file == null ? provider.getServer().exportDatabase() : provider.getServer().exportDatabase(file);
+    public String odbExport(
+            @ShellOption(defaultValue="") String dbName,
+            @ShellOption(defaultValue=ShellOption.NULL) File file) throws IOException {
+        File export = file == null ? provider.getServer().exportDatabase(dbName) :
+                provider.getServer().exportDatabase(dbName, file);
         return "Exported " + export.getAbsolutePath();
     }
 
@@ -56,13 +59,16 @@ public class OrientDBCommands {
     }
 
     @ShellMethod("List database exports")
-    public List<String> odbListExports() {
-        return provider.getServer().listExports();
+    public List<String> odbListExports(@ShellOption(defaultValue="") String dbName) {
+        return provider.getServer().listExports(dbName);
     }
 
     @ShellMethod("Backup database")
-    public String odbBackup(@ShellOption(defaultValue=ShellOption.NULL) File file) throws IOException {
-        File export = file == null ? provider.getServer().backupDatabase() : provider.getServer().backupDatabase(file);
+    public String odbBackup(
+            @ShellOption(defaultValue="") String dbName,
+            @ShellOption(defaultValue=ShellOption.NULL) File file) throws IOException {
+        File export = file == null ? provider.getServer().backupDatabase(dbName) :
+                provider.getServer().backupDatabase(dbName, file);
         return "Backed up " + export.getAbsolutePath();
     }
 
@@ -73,8 +79,8 @@ public class OrientDBCommands {
     }
 
     @ShellMethod("List database backups")
-    public List<String> odbListBackups() {
-        return provider.getServer().listBackups();
+    public List<String> odbListBackups(@ShellOption(defaultValue="") String dbName) {
+        return provider.getServer().listBackups(dbName);
     }
 
     @ShellMethod("Run OETL processor")

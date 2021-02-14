@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 public abstract class SessionFactory {
     public final static String ORIENTDB = "orientdb";
-    private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger logger = LoggerFactory.getLogger(SessionFactory.class);
     public final static String QNAME = "qName";
 
     private Function<EClass, EStructuralFeature> qualifiedNameDelegate;

@@ -13,7 +13,10 @@ import com.orientechnologies.orient.server.config.*;
 import com.orientechnologies.orient.server.network.OServerNetworkListener;
 import com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpAbstract;
 import com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.EPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -25,6 +28,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Server extends SessionFactory implements Closeable {
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
     private final String home;
     private final OServer oServer;
     private OServerConfiguration configuration;
@@ -52,22 +56,19 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public void registerWwwAsStudio() {
-        OCallable oCallable = new OCallable<Object, String>() {
-            @Override
-            public Object call(final String iArgument) {
-                String fileName = "www/" + iArgument;
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                final URL url = classLoader.getResource(fileName);
+        OCallable<Object, String> oCallable = iArgument -> {
+            String fileName = "www/" + iArgument;
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            final URL url = classLoader.getResource(fileName);
 
-                if (url != null) {
-                    final OServerCommandGetStaticContent.OStaticContent content = new OServerCommandGetStaticContent.OStaticContent();
-                    content.is = new BufferedInputStream(classLoader.getResourceAsStream(fileName));
-                    content.contentSize = -1;
-                    content.type = OServerCommandGetStaticContent.getContentType(url.getFile());
-                    return content;
-                }
-                return null;
+            if (url != null) {
+                final OServerCommandGetStaticContent.OStaticContent content = new OServerCommandGetStaticContent.OStaticContent();
+                content.is = new BufferedInputStream(classLoader.getResourceAsStream(fileName));
+                content.contentSize = -1;
+                content.type = OServerCommandGetStaticContent.getContentType(url.getFile());
+                return content;
             }
+            return null;
         };
         final OServerNetworkListener httpListener = getOServer().getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
         if (httpListener != null) {
@@ -145,19 +146,10 @@ public class Server extends SessionFactory implements Closeable {
         this.configuration = configuration;
     }
 
-    public File exportDatabase(File file) throws IOException {
-        return exportDatabase(file, 10);
-    }
-
-    public File exportDatabase(File file, int keep) throws IOException {
+    public File exportDatabase(String dbName, File file) throws IOException {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
-            exportDatabase(os);
-        }
-        List<String> list = listExports();
-        while (list.size() > keep) {
-            String fileName = list.remove(0);
-            new File(fileName).delete();
+            exportDatabase(dbName, os);
         }
         return file;
     }
@@ -181,8 +173,9 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
-    public File backupDatabase() throws IOException {
-        List<String> names = listBackupNames();
+    public File backupDatabase(String dbName) throws IOException {
+        dbName = StringUtils.isEmpty(dbName)?getDbName():dbName;
+        List<String> names = listBackupNames(dbName);
         int nextIndex = 0;
         for (int i = names.size() - 1; i >= 0; --i) {
             int index = getBackupIndex(names.get(i));
@@ -194,9 +187,9 @@ public class Server extends SessionFactory implements Closeable {
         int nextSlot = getHanoiTowersSlot(nextIndex);
         File backups = new File(getHome(), "backups");
         String fileName = String.format("%s_%06d_%03d_%s.zip",
-                getDbName(), nextIndex, nextSlot, new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()));
+                dbName, nextIndex, nextSlot, new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date()));
         File backup = new File(backups, fileName);
-        backupDatabase(backup);
+        backupDatabase(dbName, backup);
         names.add(fileName);
         // remove non-protected duplicated slots
         for (int n = names.size() - 1 - getNumOfProtectedBackups(); n > 0; --n) {
@@ -219,23 +212,24 @@ public class Server extends SessionFactory implements Closeable {
         return backup;
     }
 
-    public File backupDatabase(File file) throws IOException {
+    public File backupDatabase(String dbName, File file) throws IOException {
         file.getParentFile().mkdirs();
         try (OutputStream os = new FileOutputStream(file)) {
-            backupDatabase(os, new HashMap<>());
+            backupDatabase(dbName, os, new HashMap<>());
         }
         return file;
     }
 
-    public void backupDatabase(OutputStream os, Map<String, Object> options) throws IOException {
-        try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
-            db.backup(os, options, null, System.out::print, 9, 4096);
+    public void backupDatabase(String dbName, OutputStream os, Map<String, Object> options) throws IOException {
+        try (ODatabaseDocumentInternal db = getOServer().openDatabase(dbName)) {
+            db.backup(os, options, null, logger::info, 9, 4096);
         }
     }
 
     public String restoreDatabase(File file) throws IOException {
+        String dbName = file.getName().split("_")[0];
         try (InputStream is = new FileInputStream(file)) {
-            restoreDatabase(is, new HashMap<>());
+            restoreDatabase(dbName, is, new HashMap<>());
         }
         return file.getAbsolutePath();
     }
@@ -245,16 +239,17 @@ public class Server extends SessionFactory implements Closeable {
         return restoreDatabase(new File(backups, fileName));
     }
 
-    public void restoreDatabase(InputStream is, Map<String, Object> options) throws IOException {
-        try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
-            db.restore(is, options, null, System.out::print);
+    public void restoreDatabase(String dbName, InputStream is, Map<String, Object> options) throws IOException {
+        try (ODatabaseDocumentInternal db = getOServer().openDatabase(dbName)) {
+            db.restore(is, options, null, logger::info);
         }
     }
 
-    public void exportDatabase(OutputStream os) throws IOException {
+    public void exportDatabase(String dbName, OutputStream os) throws IOException {
+        dbName = StringUtils.isEmpty(dbName)?getDbName():dbName;
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(os)) {
-            try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
-                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, System.out::print);
+            try (ODatabaseDocumentInternal db = getOServer().openDatabase(dbName)) {
+                ODatabaseExport export = new ODatabaseExport(db, gzipOutputStream, logger::info);
                 try {
                     export.run();
                 } finally {
@@ -270,16 +265,17 @@ public class Server extends SessionFactory implements Closeable {
     }
 
     public String importDatabase(File file, String options) throws IOException {
+        String dbName = file.getName().split("_")[0];
         try (InputStream is = new FileInputStream(file)) {
-            importDatabase(is, options);
+            importDatabase(dbName, is, options);
         }
         return file.getAbsolutePath();
     }
 
-    public void importDatabase(InputStream is, String options) throws IOException {
+    public void importDatabase(String dbName, InputStream is, String options) throws IOException {
         try (GZIPInputStream gzipInputStream = new GZIPInputStream(is)) {
-            try (ODatabaseDocumentInternal db = getOServer().openDatabase(getDbName())) {
-                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, System.out::print);
+            try (ODatabaseDocumentInternal db = getOServer().openDatabase(dbName)) {
+                ODatabaseImport import_ = new ODatabaseImport(db, gzipInputStream, logger::info);
                 try {
                     import_.setOptions(options);
                     import_.run();
@@ -290,58 +286,53 @@ public class Server extends SessionFactory implements Closeable {
         }
     }
 
-    public String vacuum() throws IOException {
-        File export = exportDatabase();
+    public String vacuum(String dbName) throws IOException {
+        File export = exportDatabase(dbName);
         importDatabase(export, "-merge=false");
         return export.getAbsolutePath();
     }
 
-    public List<String> listExportNames() {
+    public List<String> listExportNames(String dbName) {
         File[] files = new File(getHome(), "exports").listFiles();
         return Arrays.stream(files != null ? files : new File[0])
                 .map(File::getName)
-                .filter(name -> name.startsWith(getDbName()))
+                .filter(name -> StringUtils.isEmpty(dbName) || name.startsWith(dbName))
                 .sorted()
                 .collect(Collectors.toList());
     }
 
-    public List<String> listExports() {
-        List<String> result = new ArrayList<>();
-        File exportDir = new File(getHome(), "exports");
-        for (File file : exportDir.listFiles()) {
-            if (file.getName().startsWith(getDbName())) {
-                result.add(file.getAbsolutePath().replace("\\", "/"));
-            }
-        }
-        result.sort(String::compareTo);
-        return result;
+    public List<String> listExports(String dbName) {
+        File[] files = new File(getHome(), "exports").listFiles();
+        return Arrays.stream(files != null ? files : new File[0])
+                .filter(file -> StringUtils.isEmpty(dbName) || file.getName().startsWith(dbName))
+                .map(file -> file.getAbsolutePath().replace("\\", "/"))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
-    public List<String> listBackups() {
-        List<String> result = new ArrayList<>();
-        File exportDir = new File(getHome(), "backups");
-        for (File file : exportDir.listFiles()) {
-            if (file.getName().startsWith(getDbName())) {
-                result.add(file.getAbsolutePath().replace("\\", "/"));
-            }
-        }
-        result.sort(String::compareTo);
-        return result;
+    public List<String> listBackups(String dbName) {
+        File[] files = new File(getHome(), "backups").listFiles();
+        return Arrays.stream(files != null ? files : new File[0])
+                .filter(file -> StringUtils.isEmpty(dbName) || file.getName().startsWith(dbName))
+                .map(file -> file.getAbsolutePath().replace("\\", "/"))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
-    public List<String> listBackupNames() {
+    public List<String> listBackupNames(String dbName) {
         File[] files = new File(getHome(), "backups").listFiles();
         return Arrays.stream(files != null ? files : new File[0])
                 .map(File::getName)
-                .filter(name -> name.startsWith(getDbName()))
+                .filter(name -> StringUtils.isEmpty(dbName) || name.startsWith(dbName))
                 .sorted()
                 .collect(Collectors.toList());
     }
 
 
-    public File exportDatabase() throws IOException {
-        File export = new File(home, "exports/" + getDbName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
-        return exportDatabase(export);
+    public File exportDatabase(String dbName) throws IOException {
+        File export = new File(home, "exports/" + (StringUtils.isEmpty(dbName)?getDbName():dbName) + "_" +
+                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".json.gz");
+        return exportDatabase(dbName, export);
     }
 
     public static void main(String[] args) {
