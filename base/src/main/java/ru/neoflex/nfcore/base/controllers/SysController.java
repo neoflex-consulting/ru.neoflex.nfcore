@@ -311,12 +311,12 @@ public class SysController {
     }
 
     @PostMapping(value = "/orientdb/backup", produces = "application/json; charset=utf-8")
-    public List<String> dbBackup(@RequestParam String dbName) throws Exception {
+    public List<String> dbBackup(@RequestParam(required = false) String dbName) throws Exception {
         return Collections.singletonList(provider.getServer().backupDatabase(dbName).getAbsolutePath());
     }
 
     @GetMapping(value = "/orientdb/buckup", produces = "application/json; charset=utf-8")
-    public List<String> dbListBackups(@RequestParam String dbName) throws Exception {
+    public List<String> dbListBackups(@RequestParam(required = false) String dbName) throws Exception {
         return provider.getServer().listBackupNames(dbName);
     }
 
@@ -326,12 +326,12 @@ public class SysController {
     }
 
     @PostMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
-    public List<String> dbExport(@RequestParam String dbName) throws Exception {
+    public List<String> dbExport(@RequestParam(required = false) String dbName) throws Exception {
         return Collections.singletonList(provider.getServer().exportDatabase(dbName).getAbsolutePath());
     }
 
     @GetMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
-    public List<String> dbListExports(@RequestParam String dbName) throws Exception {
+    public List<String> dbListExports(@RequestParam(required = false) String dbName) throws Exception {
         return provider.getServer().listExportNames(dbName);
     }
 
@@ -341,7 +341,7 @@ public class SysController {
     }
 
     @PostMapping(value = "/orientdb/vacuum", produces = "application/json; charset=utf-8")
-    public List<String> dbVacuum(@RequestParam String dbName) throws Exception {
+    public List<String> dbVacuum(@RequestParam(required = false) String dbName) throws Exception {
         return Collections.singletonList(provider.getServer().vacuum(dbName));
     }
 
