@@ -248,7 +248,7 @@
 }
 
 /*Выровнять ячейки по ширине*/
-.calendar .body .col {
+.calendar .body .col, .calendar .days .col {
     flex-grow: 0;
     flex-basis: calc(100%/7);
     /*width: calc(100%/7);*/
