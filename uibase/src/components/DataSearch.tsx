@@ -50,8 +50,8 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
          } else {
              selectedClassObject = this.props.specialEClass
          }
-         if (values.key === 'json_search') {
-             API.instance().find(JSON.parse(values.json_field)).then(results => {
+         if (values.key.value === "json_search") {
+             API.instance().find(JSON.parse(values.json_field.value)).then(results => {
                  this.props.onSearch(results.resources)
              })
          } else if (selectedClassObject) {
@@ -128,7 +128,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
             <React.Fragment>
                 {this.state.createResModalVisible && <ResourceCreateFrom
                     classes={ this.state.classes }
-                    refresh={ this.refresh }
+                    refresh={ this.refresh}
                     createResModalVisible={ this.state.createResModalVisible }
                     form = { "form" }
                     translate={ t }
@@ -235,15 +235,27 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                         }
                                      </NeoSelect>
                                 </Form.Item>
+                                {this.formRef.current ?
+                                    <Form.Item style={{margin:'20px auto 16px'}} shouldUpdate={true}>
+                                        {() => (
+                                        <NeoButton
+                                            type={((this.formRef.current!.getFieldValue('tags') === undefined ||
+                                                this.formRef.current!.getFieldValue('tags').length === 0) &&
+                                                this.formRef.current!.getFieldValue('selectEClass') === undefined &&
+                                                (this.formRef.current!.getFieldValue('name') === undefined ||
+                                                    this.formRef.current!.getFieldValue('name') === ""))
+                                                ? 'disabled': 'primary'}
+                                            onClick={this.handleSubmit}
+                                        >
+                                            {t('searchsimple')}
+                                        </NeoButton>
+                                        )}
+                                    </Form.Item>
 
-                                <Form.Item style={{margin:'20px auto 16px'}}>
-                                    <NeoButton
-                                        onClick={this.handleSubmit}
-                                       type={'primary'}
-                                    >
-                                        {t('searchsimple')}
-                                    </NeoButton>
-                                </Form.Item>
+                                    :
+                                    null
+                                }
+
 
                             </NeoTabs.TabPane>
 
@@ -254,11 +266,9 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                             >
                                 <Form.Item
                                     name={"json_field"}
-                                    initialValue={
-                                        JSON.stringify({
-                                            contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
-                                            }, null, 4)
-                                    }
+                                    initialValue={this.formRef.current !== null && this.formRef.current!.getFieldValue("json_field") === undefined ? this.formRef.current!.setFieldsValue({ json_field: { value: JSON.stringify({
+                                                contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
+                                            }, null, 4) } }) : undefined}
                                 >
                                     <div>
                                         <AceEditor
@@ -269,7 +279,10 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                                 this.formRef.current!.setFieldsValue({ json_field: { value: json_field } });
                                             }}
                                             editorProps={{ $blockScrolling: true }}
-                                            value={this.formRef.current !== null ? this.formRef.current!.getFieldValue('json_field') : undefined}
+                                            /*value={this.formRef.current !== null ? this.formRef.current!.getFieldValue('json_field') : undefined}*/
+                                            defaultValue={JSON.stringify({
+                                                contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
+                                            }, null, 4)}
                                             showPrintMargin={false}
                                             theme={"tomorrow"}
                                             debounceChangePeriod={100}
@@ -278,9 +291,11 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                     </div>
                                 </Form.Item>
 
+
                                 <Form.Item style={{marginBottom:'20px'}}>
                                     <NeoButton
                                         title={t("searchsimple")}
+                                        onClick={this.handleSubmit}
                                     >
                                         {t('searchsimple')}
                                     </NeoButton>

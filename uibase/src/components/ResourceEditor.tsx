@@ -5,13 +5,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {
-    findObjectById,
-    findObjectByIdCallback,
-    getPrimitiveType,
-    nestUpdaters,
-    traverseEObject
-} from '../utils/resourceEditorUtils'
+import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -85,7 +79,7 @@ interface State {
     modalApplyChangesVisible: Boolean,
     clipboardObject: ITargetObject,
     edit: boolean,
-    expandedKeys: React.Key[],
+    expandedKeys: any[],
     saveMenuVisible: boolean,
     removalProcess: boolean,
     modalDeleteResourceVisible: boolean,
@@ -1084,7 +1078,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key={parentKey}
                         className={!isVisible ? "hidden-leaf" : ""}
                         title={feature.get('name')}
-                        icon={upperBound === 1 ? <NeoIcon icon={"link"} style={{ color: "#d831ff", fontSize: 12 }} /> : <NeoIcon icon={"data-line"} style={{ color: "#d831ff" }} />}
+                        //@ts-ignore
+                        switcherIcon={this.state.expandedKeys.includes(`${parentKey}`) ?
+                            <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
+                            <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
                     >
                         {targetObject.map((object: { [key: string]: any }, cidx: number) => {
                             const res = Ecore.ResourceSet.create();
@@ -1104,7 +1101,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
-                                icon={<NeoIcon icon={"lock"} style={{ color: "#88bc51" }} />}
+                                //@ts-ignore
+                                switcherIcon={this.state.expandedKeys.includes(`${parentKey}.${cidx}`) ?
+                                    <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
+                                    <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
                             >
                                 {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                             </Tree.TreeNode>
@@ -1121,37 +1121,39 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             headline: true,
             eClass: this.state.mainEObject.eClass.eURI(),
             targetObject: this.state.resourceJSON,
-        }
-
-
+        };
         return(
             <Tree
                 ref={this.treeRef}
                 key="mainTree"
-                draggable
+                // draggable
                 // onDrop={onDrop}
-                blockNode
-                switcherIcon={<NeoIcon icon={"download"} />}
-                showIcon
-                showLine //показывать линию между пунктами
+                // blockNode
+                // switcherIcon={<NeoIcon icon={"download"}/>}
+                // showIcon
+                showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
 
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
                 selectedKeys={this.state.selectedKeys}
                 expandedKeys={[...this.state.expandedKeys]}
-                onExpand={expanded => {
+                onExpand={(expanded: any) => {
                     this.setState({
                         expandedKeys: [...expanded]
                     })
                 }}
+
             >
                 {
                     <Tree.TreeNode
                         key={"/"}
                         title={this.state.mainEObject.eClass.get('name')}
                         data={dataTree}
-                        icon={<NeoIcon icon={"clipboard"} style={{ color: "#2484fe" }} />}
+                        //@ts-ignore
+                        switcherIcon={this.state.expandedKeys.includes("/") ?
+                            <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
+                            <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
                     >
                         {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                     </Tree.TreeNode>
@@ -1162,6 +1164,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     render() {
+
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
