@@ -23,7 +23,7 @@ import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
-import {NeoButton, NeoCol, NeoColor, NeoHint, NeoModal, NeoOption, NeoRow, NeoSelect, NeoTable} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoColor, NeoHint, NeoInput, NeoModal, NeoOption, NeoRow, NeoSelect, NeoTable} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
 
 
@@ -1175,39 +1175,42 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         this.state.mainEObject._id !== undefined && (this.state.edit ?
                             <NeoButton
                                 className="panel-button"
-                                type={"ghost"}
+                                type={"ghost-icon"}
                                 onClick={ ()=> this.changeEdit(false)}
                                 title={this.props.t("apply and quit")}
-                                suffixIcon={<NeoIcon icon={"arrowLeft"}/>}
                             >
+                                <NeoIcon icon={"arrowLeft"}/>
                             </NeoButton>
                             :
                             <NeoButton
                                 className="panel-button"
-                                type={"ghost"}
-                                suffixIcon={<NeoIcon icon={"edit"}/>}
+                                type={"ghost-icon"}
                                 onClick={ ()=> this.changeEdit(false)}
                                 title={this.props.t("edit")}
-                            />)
+                            >
+                                <NeoIcon icon={"edit"}/>
+                            </NeoButton>)
                     }
                     {
                         (this.state.edit || this.state.mainEObject._id === undefined) && (this.state.isSaving
                             ? <NeoIcon icon={"upload"} className="panel-icon"/>
                             : <NeoButton
                                 className="panel-button"
-                                type={"ghost"}
-                                suffixIcon={<NeoIcon icon={"save"}/>}
+                                type={"ghost-icon"}
                                 onClick={()=>this.save(false, false)}
                                 title={this.props.t("save")}
-                            />)
+                            >
+                                <NeoIcon icon={"save"}/>
+                            </NeoButton>)
                     }
                     <NeoButton
                         className="panel-button"
-                        type={"ghost"}
-                        suffixIcon={<NeoIcon icon={"download"}/>}
+                        type={"ghost-icon"}
                         // onClick={ ()=> this.refresh(true)}
                         title={this.props.t("refresh")}
-                    />
+                    >
+                        <NeoIcon icon={"download"}/>
+                    </NeoButton>
                     {this.state.resource.get && this.state.resource.get('uri') &&
                     <Operations
                         translate={t}
@@ -1221,29 +1224,32 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     />}
                     <NeoButton
                         className="panel-button"
-                        type={"ghost"}
-                        suffixIcon={<NeoIcon icon={"copy"}/>}
+                        type={"ghost-icon"}
                         onClick={this.cloneResource}
                         title={this.props.t("copy")}
-                    />
+                    >
+                        <NeoIcon icon={"copy"}/>
+                    </NeoButton>
                     <NeoButton
                         className="panel-button"
-                        suffixIcon={<NeoIcon icon={"delete"}/>}
-                        type={'ghost'}
+                        type={'ghost-icon'}
                         // onClick={this.handleDeleteResourceModalVisible}
                         title={this.props.t("delete")}
-                    />
+                    >
+                        <NeoIcon icon={"delete"}/>
+                    </NeoButton>
                     {this.state.mainEObject
                     && this.state.mainEObject.eClass
                     && ["AppModule", "Application"].includes(this.state.mainEObject.eClass.get('name'))
                         ?
                         <NeoButton
                             className="panel-button"
-                            type={"ghost"}
-                            suffixIcon={<NeoIcon icon={"play"}/>}
+                            type={"ghost-icon"}
                             title={this.props.t("preview")}
                             // onClick={this.run}
-                        />
+                        >
+                            <NeoIcon icon={"play"}/>
+                        </NeoButton>
                         : null
                     }
                 </Layout.Header>
@@ -1263,25 +1269,27 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         }}
                     >
                         <div style={{marginLeft: '20px', marginTop: '20px'}}>
-                            <Row>
-                                <Col span={18}>
+                            <NeoRow justify={"space-around"} style={{alignItems:'unset'}}>
+                                <NeoCol span={18} style={{alignItems:'unset'}}>
                                     {this.state.mainEObject.eClass && this.createTree()}
-                                </Col>
-                                <Col span={5} >
+                                </NeoCol>
+                                <NeoCol span={5} style={{alignItems:'unset'}}>
                                     <NeoButton
                                         title={t('additem')}
-                                        suffixIcon={<NeoIcon icon={"plus"}/>}
-                                        type={"secondary"}
+                                        type={"circle"}
                                         size={"medium"}
                                         onClick={() => this.setState({ modalResourceVisible: true })}
-                                    />
-                                    <Input
-                                        style={{ width: '99%'}}
-                                        onChange={(e)=>{
+                                        style={{alignSelf:'flex-end', margin: 'auto 8px 16px auto'}}
+                                    >
+                                        <NeoIcon icon={"plus"} size={'m'} color={'white'} />
+                                    </NeoButton>
+                                    <NeoInput
+                                        width={'99%'}
+                                        onChange={(e:any)=>{
                                             this.setState({searchResources: `${e.target.value}`})
                                         }}
                                         placeholder={this.props.t("search")}>
-                                    </Input>
+                                    </NeoInput>
 
                                     <div className="resource-container">
                                         {this.state.mainEObject.eClass && this.state.mainEObject.eResource().eContainer.get('resources').size() > 0 &&
@@ -1293,8 +1301,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <div style={{width:'85%'}}>
-                                                        <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer">
+                                                    <div style={{width:'100%'}}>
+                                                        <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer"
+                                                        style={{justifyContent:'center'}}>
                                                             <span
                                                                 title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`}
                                                                 className="item-title"
@@ -1311,8 +1320,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             )
                                         }
                                     </div>
-                                </Col>
-                            </Row>
+                                </NeoCol>
+                            </NeoRow>
                         </div>
                         <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
                             <NeoTable

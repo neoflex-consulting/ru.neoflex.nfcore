@@ -236,7 +236,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                      </NeoSelect>
                                 </Form.Item>
 
-                                <Form.Item style={{marginBottom:'20px'}}>
+                                <Form.Item style={{margin:'20px auto 16px'}}>
                                     <NeoButton
                                         onClick={this.handleSubmit}
                                        type={'primary'}

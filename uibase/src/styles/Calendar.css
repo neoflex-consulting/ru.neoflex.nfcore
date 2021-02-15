@@ -66,9 +66,9 @@
     width: 100%;
 }
 
-.col-start {
+.header .col-start {
     flex-grow: 2;
-    justify-content: flex-end !important;
+    align-items: flex-end;
     text-align: end;
 }
 
@@ -79,9 +79,9 @@
     text-transform: capitalize;
 }
 
-.col-end {
+.header .col-end {
     flex-grow: 3;
-    justify-content: flex-start !important;
+    align-items: flex-start;
     text-align: start;
 }
 
@@ -118,7 +118,7 @@
 
 .calendar .header .date div, .calendar .header .date button {
     /*font-weight: 600;*/
-    align-items: center;
+    /*align-items: center;*/
 }
 
 .calendar .date {

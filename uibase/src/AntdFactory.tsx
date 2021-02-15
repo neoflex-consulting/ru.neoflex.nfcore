@@ -940,6 +940,7 @@ class HtmlContent_ extends ViewContainer {
                          const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                          handleClick.bind(this)(value);
                      }}
+                 style={{width:'100%'}}
             >
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
@@ -1181,7 +1182,8 @@ export class Input_ extends ViewContainer {
                     <NeoInput
                         hidden={this.state.isHidden}
                         className={cssClass}
-                        style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
+                        width={this.viewObject.get('width')}
+                        style={{display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={isReadOnly}
                         placeholder={this.viewObject.get('placeholder')}
                         defaultValue={this.viewObject.get('value')}

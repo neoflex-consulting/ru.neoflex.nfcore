@@ -337,6 +337,8 @@ class Input extends ViewElement, ValueItem, GridComponent {
     String maxValue = "99"
         @NFCore(documentation="Шаг значений, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
     String step = "1"
+        @NFCore(documentation="Ширина поля")
+    String width
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")

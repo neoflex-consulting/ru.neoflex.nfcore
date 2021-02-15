@@ -1130,7 +1130,7 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
-            <div hidden={this.state.isHidden}>
+            <div hidden={this.state.isHidden} style={{width:'100%'}}>
                 <MainContext.Consumer>
                     { context => (
                         <Fullscreen
