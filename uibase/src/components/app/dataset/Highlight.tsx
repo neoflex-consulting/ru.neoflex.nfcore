@@ -417,7 +417,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
+       /* this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;*/
     }
 
     handleColorPicker = (type: string) => {
@@ -521,7 +521,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
-                <Form.Item style={{marginBottom:'0', maxHeight:'280px', overflow:'auto'}}>
+                {/*<Form.Item style={{marginBottom:'0', maxHeight:'280px', overflow:'auto'}}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((highlights: any) => (
@@ -552,7 +552,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                                     rowData: this.state.rowData
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
-                </Form.Item>
+                </Form.Item>*/}
                 <Form.Item>
                     <NeoButton
                         type={'link'}

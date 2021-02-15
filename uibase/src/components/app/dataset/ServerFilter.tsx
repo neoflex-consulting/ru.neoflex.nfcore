@@ -178,7 +178,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
+        /*this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;*/
     }
 
     handleOnSubmit=(e:any)=>{
@@ -204,7 +204,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
-                <Form.Item style={{marginBottom:'0'}}>
+               {/* <Form.Item style={{marginBottom:'0'}}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((serverFilter: any) => (
@@ -226,7 +226,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                                     popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
-                </Form.Item>
+                </Form.Item>*/}
                 <Form.Item>
                     <NeoButton
                         type={'link'}

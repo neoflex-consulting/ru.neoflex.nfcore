@@ -1078,6 +1078,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key={parentKey}
                         className={!isVisible ? "hidden-leaf" : ""}
                         title={feature.get('name')}
+                        //@ts-ignore
                         switcherIcon={this.state.expandedKeys.includes(`${parentKey}`) ?
                             <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
@@ -1100,6 +1101,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
+                                //@ts-ignore
                                 switcherIcon={this.state.expandedKeys.includes(`${parentKey}.${cidx}`) ?
                                     <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
                                     <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
@@ -1120,7 +1122,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             eClass: this.state.mainEObject.eClass.eURI(),
             targetObject: this.state.resourceJSON,
         };
-
         return(
             <Tree
                 ref={this.treeRef}
@@ -1142,12 +1143,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         expandedKeys: [...expanded]
                     })
                 }}
+
             >
                 {
                     <Tree.TreeNode
                         key={"/"}
                         title={this.state.mainEObject.eClass.get('name')}
                         data={dataTree}
+                        //@ts-ignore
                         switcherIcon={this.state.expandedKeys.includes("/") ?
                             <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
@@ -1161,6 +1164,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     render() {
+
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
