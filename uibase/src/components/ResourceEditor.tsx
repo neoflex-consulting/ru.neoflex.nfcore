@@ -1079,9 +1079,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         className={!isVisible ? "hidden-leaf" : ""}
                         title={feature.get('name')}
                         //@ts-ignore
-                        switcherIcon={this.state.expandedKeys.includes(`${parentKey}`) ?
-                            <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
-                            <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
+                        switcherIcon={!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
+                            <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                            targetObject.length !== 0 ?
+                                <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                            <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>}
                     >
                         {targetObject.map((object: { [key: string]: any }, cidx: number) => {
                             const res = Ecore.ResourceSet.create();
@@ -1094,17 +1096,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 eClass: object.eClass ? object.eClass : feature.get('eType').eURI(),
                                 propertyName: feature.get('name'),
                                 targetObject: object,
-                                title: <React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>
+                                title: <React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>
 
                             }
                             return  <Tree.TreeNode
                                 key={`${parentKey}.${cidx}`}
-                                title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: "#b1b1b1" }}>{eClass.get('name')}</span></React.Fragment>}
+                                title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
-                                //@ts-ignore
-                                switcherIcon={this.state.expandedKeys.includes(`${parentKey}.${cidx}`) ?
-                                    <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
-                                    <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
                             >
                                 {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                             </Tree.TreeNode>
@@ -1152,8 +1150,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         data={dataTree}
                         //@ts-ignore
                         switcherIcon={this.state.expandedKeys.includes("/") ?
-                            <NeoIcon icon={"minus-square"} className={'icon-tree'} color={'#8C8C8C'}/> :
-                            <NeoIcon icon={"plus-square"} className={'icon-tree'} color={'#8C8C8C'}/>}
+                            <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                            <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/>}
                     >
                         {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                     </Tree.TreeNode>
