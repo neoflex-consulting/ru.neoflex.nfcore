@@ -1037,6 +1037,12 @@ class DatasetView extends React.Component<any, State> {
         return rowData.slice(rowData.length - numAggRows, rowData.length)
     }
 
+    changeEditMode(): void {
+        this.setState({isEditMode:!this.state.isEditMode},()=>{
+            this.gridRef.current.onEdit()
+        })
+    }
+
     refresh(resetGrouping:boolean = false): void {
         if (this.state.currentDatasetComponent.eResource && !resetGrouping) {
             this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
@@ -1048,9 +1054,7 @@ class DatasetView extends React.Component<any, State> {
                 this.state.groupByColumn,
                 ()=>{
                     if (this.state.isEditMode)
-                        this.setState({isEditMode:!this.state.isEditMode},()=>{
-                            this.gridRef.current.onEdit()
-                        })
+                        this.changeEditMode()
                 }
             );
         } else if (this.state.currentDatasetComponent.eResource) {
@@ -1062,10 +1066,8 @@ class DatasetView extends React.Component<any, State> {
                 [],
                 [],
                 ()=>{
-                    if (!this.state.isEditMode)
-                        this.setState({isEditMode:!this.state.isEditMode},()=>{
-                            this.gridRef.current.onEdit()
-                        })
+                    if (this.state.isEditMode)
+                        this.changeEditMode()
                 })
         }
     }
@@ -1387,10 +1389,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
             const params = primaryKey.concat(values);
-            this.props.context.executeDMLOperation(this.state.currentDatasetComponent, d.operationMark__, params).then(()=>{
-
-                }
-            ).catch(()=>{
+            this.props.context.executeDMLOperation(this.state.currentDatasetComponent, d.operationMark__, params).catch(()=>{
                     //Выходим из редактора, чтобы не ловить ошибки ag-grid
                     this.setState({isEditMode:false},() => {
                         //Восстанавливаем значение в случае ошибки
@@ -1459,9 +1458,7 @@ class DatasetView extends React.Component<any, State> {
                             || this.state.serverCalculatedExpression.filter(c => c.enable && c.datasetColumn).length > 0) {
                             this.refresh(true);
                         } else {
-                            this.setState({isEditMode: !this.state.isEditMode}, () => {
-                                this.gridRef.current.onEdit()
-                            })
+                            this.changeEditMode()
                         }
                     }}
                     onChangeDatasetComponent={(e: string) => {
@@ -1507,9 +1504,7 @@ class DatasetView extends React.Component<any, State> {
                             || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
                             this.refresh()
                         } else if (this.gridRef.current.whichEdited().length === 0) {
-                            this.setState({isEditMode:!this.state.isEditMode},()=>{
-                                this.gridRef.current.onEdit()
-                            });
+                            this.changeEditMode()
                         }
                     }}
                     onInsertRowClick={() => this.gridRef.current.onInsert()}
@@ -1884,21 +1879,15 @@ class DatasetView extends React.Component<any, State> {
                         visible={this.state.isCheckEditBufferVisible}
                         onLeftButtonClick={()=>{
                             this.gridRef.current.resetBuffer();
-                            this.setState({isEditMode:false
-                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
-                            this.gridRef.current.onEdit();
-                            this.refresh()
-                        })
+                            this.refresh();
+                            this.setState({isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible});
                     }}
                        onRightButtonClick={()=>{
                            this.gridRef.current.removeRowsFromGrid();
                            this.onApplyEditChanges(this.gridRef.current.getBuffer());
                            this.setState({
-                               isEditMode:!this.state.isEditMode,
                                isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                           },()=>{
-                               this.gridRef.current.onEdit();
-                           })
+                           });
                        }}
                        textOfLeftButton={t("delete")}
                        textOfRightButton={t("save")}
