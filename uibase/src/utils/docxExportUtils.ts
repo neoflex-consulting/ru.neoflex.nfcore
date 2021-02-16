@@ -6,7 +6,7 @@ export enum docxElementExportType {
     text
 }
 
-export interface docxExportObject {
+export type docxExportObject = {
     hidden?: boolean;
     skipExport?: boolean;
     docxComponentType: docxElementExportType;
@@ -35,7 +35,7 @@ async function handleExportDocx(this: any, handlers: (()=>docxExportObject)[], w
 
         const docxData: docxExportObject = handlers[i]();
 
-        if (!docxData.hidden && (!docxData.skipExport || ignoreSkipped)) {
+        if (docxData && !docxData.hidden && (!docxData.skipExport || ignoreSkipped)) {
             if (docxData.docxComponentType === docxElementExportType.diagram
                 && docxData.diagramData !== undefined
                 && withTable

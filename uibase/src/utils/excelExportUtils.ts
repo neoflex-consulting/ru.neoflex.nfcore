@@ -15,7 +15,14 @@ export enum excelElementExportType {
     complexGrid
 }
 
-export interface excelExportObject {
+export type gridHeaderType = {
+    headerName: string,
+    columnSpan: number
+    rowSpan: number,
+    spanMarker?: boolean
+}
+
+export type excelExportObject = {
     hidden?: boolean;
     skipExport?: boolean;
     excelComponentType: excelElementExportType;
@@ -29,11 +36,7 @@ export interface excelExportObject {
         data:{value:string, mask:string, highlight:{color:string, background:string}}[][]
     },
     textData?: string,
-    gridHeader?: {
-        headerName: string,
-        columnSpan: number
-        rowSpan: number
-    }[][],
+    gridHeader?: gridHeaderType[][],
     font?: {
         bold?: boolean
     }
@@ -107,6 +110,12 @@ async function handleExportExcel(handlers: (()=>excelExportObject|undefined)[], 
                     pattern:"solid",
                     fgColor:{argb:'9bbb59'}
                 }
+                worksheet.getCell(`${encode(columnIndex)}:${offset}`).border = {
+                    top: {style:'thin'},
+                    left: {style:'thin'},
+                    bottom: {style:'thin'},
+                    right: {style:'thin'}
+                };
             }
             addTableData(excelData, worksheet, offset + 1);
             worksheet.autoFilter = `A${offset}:${encode(excelData.gridData.columns.length-1)}${offset}`;
@@ -125,40 +134,56 @@ async function handleExportExcel(handlers: (()=>excelExportObject|undefined)[], 
             && excelData.gridHeader !== undefined
             && excelData.gridData !== undefined
         ) {
-            //Header
+            //header
             for (const headerRow of excelData.gridHeader) {
                 let columnSpan = 0;
                 for (const headerCell of headerRow) {
-                    if (headerCell.columnSpan > 1) {
+                    //horizontal merge
+                    if (headerCell.columnSpan > 1 && headerCell.rowSpan === 1 && !headerCell.spanMarker) {
                         worksheet.mergeCells(encode(columnSpan) + offset +
-                                                ':' +
-                                                encode(columnSpan+headerCell.columnSpan-1) + offset)
+                            ':' +
+                            encode(columnSpan+headerCell.columnSpan-1) + offset)
                     }
-                    if (headerCell.rowSpan > 1) {
+                    //vertical merge
+                    if (headerCell.rowSpan > 1 && headerCell.columnSpan === 1 && !headerCell.spanMarker) {
                         worksheet.mergeCells(encode(columnSpan) + offset +
-                                                ':' +
-                                                encode(columnSpan) + (offset + headerCell.rowSpan - 1))
+                            ':' +
+                            encode(columnSpan) + (offset + headerCell.rowSpan - 1))
                     }
-                    columnSpan += headerCell.columnSpan;
-                    let cell = worksheet.getCell(encode(columnSpan-1) + offset);
-                    if (!cell.value) {
-                        cell.value = headerCell.headerName;
-                    } else {
-                        while (cell.value) {
-                            columnSpan+=1;
-                            cell = worksheet.getCell(encode(columnSpan-1) + offset);
+                    //both sides
+                    if (headerCell.rowSpan > 1 && headerCell.columnSpan > 1 && !headerCell.spanMarker) {
+                        worksheet.mergeCells(encode(columnSpan) + offset +
+                            ':' +
+                            encode(columnSpan+headerCell.columnSpan-1) + (offset + headerCell.rowSpan - 1))
+                    }
+                    columnSpan++;
+                    //use marker only for correct columnSpan offset calculation
+                    if (!headerCell.spanMarker) {
+                        let cell = worksheet.getCell(encode(columnSpan-1) + offset);
+                        if (!cell.value) {
+                            cell.value = headerCell.headerName;
+                        } else {
+                            while (cell.value) {
+                                columnSpan+=1;
+                                cell = worksheet.getCell(encode(columnSpan-1) + offset);
+                            }
+                            cell.value = headerCell.headerName;
                         }
-                        cell.value = headerCell.headerName;
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern:"solid",
+                            fgColor:{argb:'9bbb59'}
+                        };
+                        cell.font = {
+                            color: { argb: '000000' }
+                        };
+                        cell.border = {
+                            top: {style:'thin'},
+                            left: {style:'thin'},
+                            bottom: {style:'thin'},
+                            right: {style:'thin'}
+                        };
                     }
-                    cell.fill = {
-                        type: 'pattern',
-                        pattern:"solid",
-                        fgColor:{argb:'9bbb59'}
-                    };
-                    cell.font = {
-                        color: { argb: '000000' }
-                    };
-                    cell.alignment = { vertical: 'middle', horizontal: 'center' }
                 }
                 offset += 1;
             }

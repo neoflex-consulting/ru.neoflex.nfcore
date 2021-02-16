@@ -5,7 +5,7 @@ import {ConfigProvider} from 'antd';
 import {WithTranslation, withTranslation} from 'react-i18next';
 import Ecore from 'ecore';
 import {docxElementExportType, docxExportObject} from "../../../utils/docxExportUtils";
-import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
+import {excelElementExportType, excelExportObject, gridHeaderType} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import Paginator from "../Paginator";
@@ -80,6 +80,104 @@ class AntdFactoryWrapper extends React.Component<any, {}> {
     }
 }
 
+function findDepth(node:{children:any[]}) {
+    let maxDepth=0;
+    if (node.children !== undefined){
+        let depth = 0;
+        for (const child of node.children) {
+            depth = findDepth(child) + 1;
+            maxDepth = depth > maxDepth ? depth: maxDepth;
+        }
+    }
+    return maxDepth;
+}
+
+
+function getLeafColumns(columnDefs: any[], leafColumnDefs: any[] = []) {
+    columnDefs.forEach( (c: any) => {
+        if (c.children) {
+            getLeafColumns(c.children, leafColumnDefs)
+        } else {
+            leafColumnDefs.push(c)
+        }
+    });
+    return leafColumnDefs;
+}
+
+function calcExportSpans(columnDefs:any[]) {
+    function getEmptyArrays(depth: number) {
+        return Array(depth).fill(undefined).map(e=>[] as any)
+    }
+    let maxDepth = 0;
+    columnDefs.forEach(ch=>{
+        maxDepth = (findDepth(ch) + 1 > maxDepth) ? findDepth(ch) + 1 : maxDepth
+    });
+    let childrenToVisit = columnDefs.map(c=>{
+        return {
+            ...c,
+            parentDepth: maxDepth,
+            parentSpans: 0,
+        }
+    });
+    let headerArr = getEmptyArrays(maxDepth);
+    while (childrenToVisit.length !== 0) {
+        const current = childrenToVisit.shift();
+        let depth = 0;
+        let sumSpans = 0;
+        if (!current.hide) {
+            if ((current.children && getLeafColumns(current.children).filter(c=>!c.hide).length > 0)
+                || !current.children) {
+                //Количество занимаемых ячеек в столбце
+                const columnSpan = current.children ? getLeafColumns(current.children).filter(c=>!c.hide).length : 1;
+                //количество уровней потомков
+                depth = findDepth(current);
+                //Количество занимаемых ячеек в строке
+                const rowSpan = current.parentDepth - depth;
+                //Сколько ячеек уже занято в строках
+                sumSpans = rowSpan + current.parentSpans;
+                //parentSpans фактически индекс для вставки
+                headerArr[current.parentSpans].push({
+                    headerName: current.headerName,
+                    columnSpan: columnSpan,
+                    rowSpan: rowSpan
+                });
+            }
+        }
+        if (current.children) {
+            childrenToVisit = childrenToVisit.concat(current.children.map((c: any)=>{
+                return {
+                    ...c,
+                    parentDepth: depth,
+                    parentSpans: sumSpans
+                }
+            }))
+        }
+    }
+    return headerArr;
+}
+
+function getMarkedHeader(gridHeader: gridHeaderType[][], height: number, width: number) : gridHeaderType[][] {
+    let arrayToFill = Array(height).fill(undefined).map(e=>Array(width).fill(undefined));
+    for (let i=0; i<gridHeader.length; i++) {
+        for (let j=0; j<gridHeader[i].length; j++) {
+            let minOffset = 0;
+            while (arrayToFill[i][minOffset] !== undefined) {
+                minOffset++;
+            }
+            for (let k=0; k<gridHeader[i][j].rowSpan; k++) {
+                for (let l=0; l<gridHeader[i][j].columnSpan; l++) {
+                    let offset = l+minOffset;
+                    while (arrayToFill[k+i][offset] !== undefined) {
+                        offset++;
+                    }
+                    arrayToFill[k+i][offset] = (k === 0 && l === 0) ? gridHeader[i][j] : {spanMarker:true};
+                }
+            }
+        }
+    }
+    return arrayToFill
+}
+
 class DatasetGrid extends React.Component<Props, any> {
 
     private grid: React.RefObject<any>;
@@ -112,7 +210,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     resizable: true
                 }
             },
-            cellStyle: {},
+            cellStyle: ()=>{},
             overlayNoRowsTemplate: `<span>${this.props.t("no rows to show")}</span>`
         };
         this.grid = React.createRef();
@@ -158,62 +256,12 @@ class DatasetGrid extends React.Component<Props, any> {
         }
     };
 
-    calcExportSpans(columnDefs:any[]) {
-        function findDepth(node:{children:any[]}){
-            let maxDepth=0;
-            if (node.children !== undefined){
-                let depth =0;
-                node.children.forEach((child:any) => {
-                    depth = findDepth(child) + 1;
-                    maxDepth = depth > maxDepth ? depth: maxDepth;
-                })
-            }
-            return maxDepth;
-        }
-        let headerArr = [];
-        let headerRow = [];
-        let childrenToVisit = columnDefs.map(c=>c);
-        let levelSize = columnDefs.length;
-        let index = 0;
-        let maxDepth = 0;
-        childrenToVisit.forEach(ch=>{
-            maxDepth = (findDepth(ch) + 1 > maxDepth) ? findDepth(ch) + 1 : maxDepth
-        });
-        while (childrenToVisit.length !== 0) {
-            const current = childrenToVisit.shift();
-            if (!current.hide) {
-                if ((current.children && this.getLeafColumns(current.children).filter(c=>!c.hide).length > 0)
-                    || !current.children) {
-                    headerRow.push({
-                        headerName: current.headerName,
-                        columnSpan: current.children ? this.getLeafColumns(current.children).filter(c=>!c.hide).length : 1,
-                        rowSpan: current.children
-                            ? maxDepth - findDepth(current)
-                            : (maxDepth - headerArr.length) > 0
-                                ? maxDepth - headerArr.length
-                                : 1
-                    });
-                }
-            }
-            if (current.children) {
-                childrenToVisit = childrenToVisit.concat(current.children)
-            }
-            index += 1;
-            if (index >= levelSize) {
-                levelSize += childrenToVisit.length;
-                headerArr.push(headerRow);
-                headerRow = [];
-            }
-        }
-        return headerArr;
-    }
-
     private getDocxData() : docxExportObject | undefined {
         if (!this.props.hidden && !this.props.isExportSuppressed) {
             let header = [];
             const visible = [];
-            let gridHeader = this.calcExportSpans(this.state.columnDefs);
-            for (const elem of this.getLeafColumns(this.state.columnDefs)) {
+            let gridHeader = calcExportSpans(this.state.columnDefs.filter((c:any)=>!c.hide));
+            for (const elem of getLeafColumns(this.state.columnDefs)) {
                 if (!elem.hide) {
                     header.push({name: elem.headerName, filterButton: true});
                     visible.push(elem.field)
@@ -226,7 +274,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     let params = {
                         value: elem[el],
                         data: elem,
-                        colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c: any) => c.field === el),
+                        colDef: getLeafColumns(this.gridOptions.columnDefs!).find((c: any) => c.field === el),
                         node: this.gridOptions.api?.getRowNode(index)
                     };
                     const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
@@ -254,16 +302,19 @@ class DatasetGrid extends React.Component<Props, any> {
         if (!this.props.hidden && !this.props.isExportSuppressed) {
             let header = [];
             const visible = [];
-            let gridHeader = this.calcExportSpans(this.state.columnDefs);
-            for (const elem of this.getLeafColumns(this.state.columnDefs)) {
+            const rawHeader = calcExportSpans(this.state.columnDefs.filter((c:any)=>!c.hide));
+            for (const elem of getLeafColumns(this.state.columnDefs)) {
                 if (!elem.hide) {
                     header.push({
                         name: elem.headerName,
-                        filterButton: gridHeader.length <= 1
+                        filterButton: rawHeader.length <= 1
                     });
                     visible.push(elem.field)
                 }
             }
+            //разворачиваем span в таблицу width X height т.к. exceljs не может понять какие ячейки нужно соединить в отличии от docx
+            //spanMarker индикатор того что элемент не нужно выводить в excel
+            const gridHeader = getMarkedHeader(rawHeader, rawHeader.length, visible.length);
             let data = [];
             for (const [index, elem] of this.state.rowData.entries()) {
                 let objectRow = [];
@@ -271,7 +322,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     const params = {
                         value: elem[el],
                         data: elem,
-                        colDef: this.getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
+                        colDef: getLeafColumns(this.gridOptions.columnDefs!).find((c:any)=>c.field === el),
                         node: this.gridOptions.api?.getRowNode(index)
                     };
                     let dateTZ = undefined;
@@ -280,21 +331,29 @@ class DatasetGrid extends React.Component<Props, any> {
                     }
                     const rowStyle = this.gridOptions.getRowStyle && this.gridOptions.getRowStyle(params);
                     const cellStyle = params.colDef.cellStyle(params);
-                    const mask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams);
+                    const excelMask = this.props.excelCellMask && this.props.excelCellMask(params as ValueFormatterParams)
+                    const mask = excelMask
+                        ? excelMask
+                        : params.colDef.type === appTypes.Timestamp
+                            ? "dd.mm.yyyy hh:mm:ss"
+                            : params.colDef.type === appTypes.Date
+                                ? "dd.mm.yyyy"
+                                : params.colDef.type === appTypes.Decimal
+                                    ? "### ### ### ##0.00;-### ### ### ##0.00;0.00"
+                                    : params.colDef.type === appTypes.Integer
+                                        ? "### ### ### ###;-### ### ### ###;0"
+                                        : "";
                     objectRow.push({
-                        value: params.value
-                            ? params.colDef.type === appTypes.String ? params.value
-                                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type) ? Number(params.value)
-                                    : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
+                        value: mask !== "" && params.value
+                            ? params.colDef.type === appTypes.String
+                                ? params.value
+                                : [appTypes.Integer,appTypes.Decimal].includes(params.colDef.type)
+                                    ? Number(params.value)
+                                    : [appTypes.Date,appTypes.Timestamp].includes(params.colDef.type) && dateTZ
+                                        ? new Date( Date.UTC( dateTZ.getFullYear(), dateTZ.getMonth(), dateTZ.getDate(), dateTZ.getHours(), dateTZ.getMinutes(), dateTZ.getSeconds() ) )
                                         : params.value
-                            : null,
-                        mask: mask
-                            ? mask
-                            : params.colDef.type === appTypes.Timestamp ? "dd.mm.yyyy hh:mm:ss"
-                                : params.colDef.type === appTypes.Date ? "dd.mm.yyyy"
-                                    : params.colDef.type === appTypes.Decimal ? "### ### ### ##0.00;-### ### ### ##0.00;0.00"
-                                        : params.colDef.type === appTypes.Integer ? "### ### ### ###;-### ### ### ###;0"
-                                            : "",
+                            : this.props.valueFormatter ? this.props.valueFormatter(params as ValueFormatterParams) : elem[el],
+                        mask: mask,
                         highlight: {
                             background: (cellStyle && cellStyle.background) || (rowStyle && rowStyle.background),
                             color: (cellStyle && cellStyle.color) || (rowStyle && rowStyle.color)
@@ -313,17 +372,6 @@ class DatasetGrid extends React.Component<Props, any> {
                 gridHeader:(gridHeader.length === 0) ? [[]] : gridHeader
             };
         }
-    }
-
-    getLeafColumns(columnDefs: any[], leafColumnDefs: any[] = []) {
-        columnDefs.forEach( (c: any) => {
-            if (c.children) {
-                this.getLeafColumns(c.children, leafColumnDefs)
-            } else {
-                leafColumnDefs.push(c)
-            }
-        });
-        return leafColumnDefs;
     }
 
     cleanCheckboxContext = () => {

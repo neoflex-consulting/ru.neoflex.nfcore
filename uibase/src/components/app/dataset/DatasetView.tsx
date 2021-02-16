@@ -323,13 +323,14 @@ class DatasetView extends React.Component<any, State> {
         return mask;
     }
 
-    async getChildrenColumns(column: Ecore.EList, resource: Ecore.Resource) {
+    async getChildrenColumns(column: Ecore.EList, resource: Ecore.Resource, isParentHidden: boolean = false) {
         let columnDefs:any[] = [];
         for (const c of column.array()) {
             if (c.get('column')) {
                 let rowData = new Map();
                 rowData.set('headerName', c.get('columnName'));
-                rowData.set('children', await this.getChildrenColumns(c.get('column'), resource));
+                rowData.set('children', await this.getChildrenColumns(c.get('column'), resource, !!c.get('hide') || isParentHidden));
+                rowData.set('hide', c.get('hide'));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -339,7 +340,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('headerName', c.get('columnName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
                 const serverSideCondition = await checkServerSideCondition(c.get('conditionType'), c.get('serverSideConditionValueItems'), c.get('serverSideConditionDataset'), c.get('expression'), this.props.context)
-                rowData.set('hide', !serverSideCondition || c.get('hide'));
+                rowData.set('hide', !serverSideCondition || c.get('hide') || isParentHidden);
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
