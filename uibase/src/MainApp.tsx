@@ -4,7 +4,7 @@ import Splitter from './components/CustomSplitter'
 import {Layout, Menu} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
-import Ecore from "ecore"
+import Ecore, {Resource} from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
@@ -14,6 +14,7 @@ import {NeoButton, NeoColor, NeoHint, NeoParagraph, NeoTable, NeoTabs} from "neo
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import _ from "lodash";
+import {Link} from "react-router-dom";
 
 interface State {
     pathBreadcrumb: string[];
@@ -27,6 +28,7 @@ interface State {
     log: string;
     activeTab: string;
     urlTableHeight: number;
+    urlAppModules: Resource[];
 }
 
 
@@ -118,7 +120,8 @@ export class MainApp extends React.Component<any, State> {
             hideURL: true,
             log: "",
             activeTab: "",
-            urlTableHeight: 0
+            urlTableHeight: 0,
+            urlAppModules: []
         }
     }
 
@@ -319,6 +322,15 @@ export class MainApp extends React.Component<any, State> {
             //in case we change url outside appModule reference tree
             unmountStyleSheets(prevProps.context.styleSheetsList)
         }
+        if (!this.state.hideURL
+            && this.state.urlAppModules.length !== this.props.pathFull.length) { //initial load on click
+            if (this.state.eClassAppModule !== undefined) {
+                const modules = (this.props.pathFull as ConfigUrlElement[]).map(e=>e.appModule).reduce((p,c)=>p+"|"+c);
+                API.instance().findByKindAndRegexp(this.state.eClassAppModule, modules, 999).then(resources => {
+                    this.setState({urlAppModules:resources})
+                })
+            }
+        }
     }
 
     componentDidMount(): void {
@@ -408,9 +420,14 @@ export class MainApp extends React.Component<any, State> {
         } else if (!this.state.hideURL) {
             const urlParams:ConfigUrlElement[] = this.props.context.getFullPath();
             const dataSource = urlParams.map((up,index)=>{
+                const resource = this.state.urlAppModules.find(r=>r.eContents()[0].get('name') === up.appModule);
+                const id = resource?.get('uri');
+                const rev = resource?.rev;
                 return {
                     key: index,
-                    appModule: up.appModule ? up.appModule : "null",
+                    appModule: up.appModule && id && rev ? <Link to={`/developer/data/editor/${id}/${rev}`}>
+                        {up.appModule}
+                    </Link> : up.appModule,
                     treeNode: up.tree.length > 0 && up.tree[up.tree.length - 1],
                     useParentReferenceTree: up.useParentReferenceTree ? up.useParentReferenceTree.toString() : "",
                     parameters: up.params && up.params.length > 0 && up.params.map((p, paramIndex)=>{
