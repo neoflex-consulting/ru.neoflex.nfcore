@@ -318,6 +318,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 </div>
                 <div style={{marginTop: "15px"}}/>
                 <NeoDrawer
+                    className={'toolsDrawer'}
                     title={this.props.t("select data")}
                     width={'50vw'}
                     visible={this.state.drawerResourceVisible}
@@ -325,7 +326,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                     onClose={()=>this.setState({drawerResourceVisible: false})}
                 >
                     <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
-                                specialEClass={undefined}/>
+                                specialEClass={undefined} />
                 </NeoDrawer>
             </div>
         </div>;

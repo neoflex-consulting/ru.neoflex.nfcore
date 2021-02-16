@@ -45,7 +45,7 @@
 
 /*icons&text positions */
 .directory-tree .ant-tree-checkbox {
-    margin: 8px 0 0 16px !important;
+    margin: 12px 0 0 16px;
 }
 
 .directory-tree .ant-tree-switcher > svg {

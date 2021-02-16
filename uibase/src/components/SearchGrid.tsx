@@ -286,14 +286,14 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                          this.props.onSelect !== undefined
                              ?
                              <div>
-                                 <div>
+                                 <div style={{marginBottom:'16px'}}>
                                      <NeoButton
                                          type={!hasSelected ? 'disabled' : 'primary'}
                                          title={t("select")}
                                          onClick={this.handleSelect}
-                                         style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}
+                                         style={{width: '100px', fontSize: '17px'}}
                                      >
-                                         <NeoIcon icon={"big-grid"}/>
+                                         <NeoIcon icon={"big-grid"} color={'white'}/>
                                     </NeoButton>
                                  </div>
                                  <NeoTable

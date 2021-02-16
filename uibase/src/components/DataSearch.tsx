@@ -141,12 +141,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     onFinish={this.handleSubmit}
                     style={{padding: '0 36px'}}
                 >
-                    <NeoButton
-                        title={t("createitem")}
-                        type="primary"
-                        style={{ display: 'block', backgroundColor:'#424D78', margin: '0px 0px 10px auto', position:'absolute', right:'56px', zIndex:1, padding: '8px', width: '32px'}}
-                        onClick={ () => this.setModalVisible(true) }
-                    ><NeoIcon color={'white'} icon={"plus"} /></NeoButton>
                     <Form.Item
                         name={"key"}
                     >
@@ -170,7 +164,8 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                 >
                                     <NeoSelect
                                         className={'EClass_select'}
-                                        width={'670px'}
+                                        width={'100%'}
+                                        style={{maxWidth: '670px'}}
                                         allowClear={true}
                                         showSearch={true}
                                         disabled={!!this.props.specialEClass}
@@ -196,7 +191,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                     label={<div style={{lineHeight:'1', marginBottom:'4px'}}>{t('name')}</div>}
                                     name={"name"}
                                 >
-                                    <NeoInput width={'670px'} />
+                                    <NeoInput width={'100%'} style={{maxWidth: '670px'}} />
                                 </Form.Item>
 
                                 <Form.Item
@@ -209,7 +204,8 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                         allowClear={true}
                                         mode={"tags"}
                                         disabled={this.checkEClass()}
-                                        width={'670px'}
+                                        width={'100%'}
+                                        style={{maxWidth: '670px'}}
                                         onChange={(event:any) => {
                                             this.setState({selectCount: event.toString().split(',').length})
                                         }}
@@ -302,7 +298,13 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                 </Form.Item>
 
                             </Tabs.TabPane>
-
+                            <NeoButton
+                                title={t("createitem")}
+                                type="primary"
+                                style={{ display: 'block', backgroundColor:'#424D78', position:'absolute', right:'0', top: '0', zIndex:1, padding: '8px', width: '32px'}}
+                                onClick={ () => this.setModalVisible(true) }
+                            >
+                                <NeoIcon color={'white'} icon={"plus"} /></NeoButton>
                         </NeoTabs>
                     </Form.Item>
                 </Form>

@@ -278,6 +278,18 @@
     resize: none;
 }
 
+.toolsDrawer .ant-drawer-body {
+    padding: 0 0 80px !important;
+}
+
+.toolsDrawer .ant-drawer-body #dataSearch {
+    padding: 0 !important;
+}
+
+.toolsDrawer .ant-drawer-body > div {
+    padding: 16px 40px !important;
+}
+
 @media screen and (max-width: 800px){
     .tools-branch-region div {
         width: 100%
