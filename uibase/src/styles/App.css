@@ -1312,7 +1312,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     margin-top: 6px!important;
   }
   .header-menu{
-    margin-bottom: 7px!important;
+    line-height: 2;
   }
 
 }
