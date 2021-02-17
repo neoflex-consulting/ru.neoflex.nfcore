@@ -507,5 +507,6 @@
         "current": "Current",
         "create event handler": "Create event handler",
         "folder already exists": "Folder already exists",
-        "file already exists": "File already exists"
+        "file already exists": "File already exists",
+        "execute": "Execute"
 }

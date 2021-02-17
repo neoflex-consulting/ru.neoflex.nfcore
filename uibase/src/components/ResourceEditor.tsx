@@ -555,7 +555,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     edit: this.state.edit && !isDisabled,
                     showIcon: isNeoIconSelect,
                     syntax,
-                    goToObject: this.goToObject
+                    goToObject: this.goToObject,
+                    t: this.props.t
                 };
                 let value = FormComponentMapper.getComponent(props);
                 value = isExpandable ? FormComponentMapper.getComponentWrapper({

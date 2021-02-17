@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from 'react';
+import React, {Fragment, useCallback, useEffect, useState} from 'react';
 import Ecore from 'ecore';
 import {Button, DatePicker, Input, Select} from 'antd';
 import moment from 'moment';
@@ -12,48 +12,151 @@ import 'brace/mode/sql';
 import 'brace/mode/groovy';
 import {neoIconMap, NeoIconTypeArray} from "../utils/consts";
 import {SvgName} from "neo-icon/lib/icon/icon";
+import {API} from "../modules/api";
+import {WithTranslation} from "react-i18next";
 
-interface EditableSQLAreaProps {
+interface EditableAreaProps {
     value: string,
     onChange?: Function,
     ukey?: string,
     edit?: boolean,
-    syntax: "sql"|"groovy",
-    expanded?: boolean
+    expanded?: boolean,
+    t: any
 }
 
-function EditableSyntaxArea(props: EditableSQLAreaProps): JSX.Element {
+function EditableSQLArea(props: EditableAreaProps): JSX.Element {
 
-    const { value, ukey, onChange, edit, syntax, expanded } = props;
+    const { value, ukey, onChange, edit, expanded } = props;
     const [innerValue, setInnerValue] = useState(value);
 
     useEffect(() => {
         setInnerValue(value)
     },[value]);
 
-    return (
-        <AceEditor
+    return <AceEditor
             readOnly={!edit}
             key={ukey}
             width={"100%"}
             className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
-            mode={syntax}
+            mode={"sql"}
             theme={"tomorrow"}
             onChange={(text: string) => {
                 setInnerValue(text)
             }}
             editorProps={{$blockScrolling: true}}
             value={innerValue}
-            onBlur={() => {
-                onChange && onChange!(innerValue)
-            }}
+            onBlur={() => { onChange && onChange(innerValue) }}
             showPrintMargin={false}
             enableBasicAutocompletion={true}
             minLines={3}
             maxLines={!expanded ? 10 : undefined}
         />
-    )
+}
 
+function EditableGroovyArea(props: EditableAreaProps): JSX.Element {
+
+    const { value, ukey, onChange, edit, expanded, t } = props;
+    const [initialValue, setInitialValue] = useState(value);
+    const [innerValue, setInnerValue] = useState(value);
+    const [executionResult, setExecutionResult] = useState("");
+    const onEditorChange = useCallback(
+        (text: string) => {
+            setInnerValue(text)
+        },[setInnerValue]);
+    const onEditorBlur = useCallback(
+        ()=>{
+            onChange && onChange!(innerValue)
+        },[onChange, innerValue]);
+    const onSave = useCallback(
+        ()=>{
+            setInitialValue(innerValue);
+        },[innerValue]);
+    const onCancel = useCallback(
+        ()=>{
+            setInnerValue(initialValue);
+            onChange && onChange(initialValue);
+        },[initialValue, onChange]);
+    const onRun = useCallback(
+        ()=>{
+            API.instance().fetchJson(`/script/evaluate?name=""`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: innerValue
+            }).then(ret => {
+                let result = ""
+                if (ret.out) {
+                    result = result + ret.out + "\n"
+                }
+                if (ret.result && ret.result !== "null") {
+                    result = result + ">> " + ret.result
+                }
+                setExecutionResult(result)
+            })
+        },[innerValue]);
+
+
+    useEffect(() => {
+        setInnerValue(value)
+    },[value]);
+
+    if (!expanded) {
+        return <AceEditor
+            readOnly={!edit}
+            key={ukey}
+            width={"100%"}
+            className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+            mode={"groovy"}
+            theme={"tomorrow"}
+            onChange={(text: string) => { setInnerValue(text) }}
+            editorProps={{$blockScrolling: true}}
+            value={innerValue}
+            onBlur={onEditorBlur}
+            showPrintMargin={false}
+            enableBasicAutocompletion={true}
+            minLines={3}
+            maxLines={!expanded ? 10 : undefined}
+        />
+    } else {
+        return <div className={"groovy-expand-editor"}>
+            <AceEditor
+                readOnly={!edit}
+                key={ukey}
+                height={"70%"}
+                width={"100%"}
+                className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+                mode={"groovy"}
+                theme={"tomorrow"}
+                onChange={onEditorChange}
+                editorProps={{$blockScrolling: true}}
+                value={innerValue}
+                onBlur={onEditorBlur}
+                showPrintMargin={false}
+                enableBasicAutocompletion={true}
+                minLines={3}
+                maxLines={!expanded ? 10 : undefined}
+            />
+            <AceEditor
+                mode={'text'}
+                height={"20%"}
+                width={"100%"}
+                theme={'tomorrow'}
+                value={executionResult}
+                debounceChangePeriod={0}
+                showPrintMargin={false}
+                focus={false}
+                readOnly={true}
+                minLines={5}
+                highlightActiveLine={false}
+            />
+            <div className={"groovy-expand-editor-bar"}>
+                <NeoButton onClick={onSave} type={"primary"}>{t("save")}</NeoButton>
+                <NeoButton onClick={onRun} type={"primary"}>{t("execute")}</NeoButton>
+                <NeoButton onClick={onCancel} type={"primary"}>{t("cancel")}</NeoButton>
+            </div>
+        </div>
+    }
 }
 
 interface EditableTextAreaProps {
@@ -390,7 +493,7 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
         {expanded && <NeoModal
             type={'edit'}
             width={'1000px'}
-            className={"expand-modal"}
+            className={"expand-modal " + React.Children.map(children, (c:any)=>c.type.name).reduce((c,n)=>c + " "+ n)}
             key={`ExpandModal`}
             visible={expanded}
             footer={null}
@@ -419,7 +522,7 @@ interface Props {
     goToObject?: (id?:string)=>void,
 }
 
-export default class ComponentMapper extends React.Component<Props, any> {
+export default class ComponentMapper extends React.Component<Props & WithTranslation, any> {
 
     static getComponentWrapper(props: {type:"expand", wrappedComponent: JSX.Element, expandedComponent:JSX.Element}) {
         const { type, wrappedComponent, expandedComponent} = props;
@@ -432,14 +535,23 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, t } = props;
         const targetValue = value || props.eObject?.get('defaultValueLiteral');
-        if (syntax || componentType === "SyntaxArea") {
-            return <EditableSyntaxArea
+        if (syntax === "sql") {
+            return <EditableSQLArea
+                t={t}
                 ukey={ukey}
                 value={targetValue||""}
                 edit={edit}
-                syntax={syntax}
+                expanded={expanded}
+                onChange={(text: string) => props.onChange && props.onChange!(text, 'EditableTextArea', targetObject, props.eObject)}
+            />
+        } else if (syntax === "groovy") {
+            return <EditableGroovyArea
+                t={t}
+                ukey={ukey}
+                value={targetValue||""}
+                edit={edit}
                 expanded={expanded}
                 onChange={(text: string) => props.onChange && props.onChange!(text, 'EditableTextArea', targetObject, props.eObject)}
             />
