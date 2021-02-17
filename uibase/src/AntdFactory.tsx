@@ -25,7 +25,16 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoCol, NeoDatePicker, NeoInput, NeoParagraph, NeoRow, NeoSelect, NeoTabs} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoCol,
+    NeoDatePicker,
+    NeoInput,
+    NeoParagraph,
+    NeoRow,
+    NeoSelect,
+    NeoTabs
+} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
@@ -1716,7 +1725,7 @@ export class RadioGroup_ extends ViewContainer {
                             type={"radio"}
                             name={this.viewObject.get('name')}
                             onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                                this.onChange(event.currentTarget.labels[0].outerText)
+                                this.onChange(event.nativeEvent.target.labels[0].outerText)
                             }}
                         >{box}
                         </NeoInput>
@@ -1730,7 +1739,7 @@ export class RadioGroup_ extends ViewContainer {
                         type={"radio"}
                         name={this.viewObject.get('name')}
                         onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                            this.onChange(event.currentTarget.labels[0].outerText)
+                            this.onChange(event.nativeEvent.target.labels[0].outerText)
                         }}
                     >{box}
                     </NeoInput>
