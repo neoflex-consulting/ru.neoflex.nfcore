@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Button, Form} from 'antd';
 import Ecore, {EObject, EStructuralFeature, Resource} from "ecore";
-import {API} from "../modules/api";
+import {API, QueryResult} from "../modules/api";
 import {Link} from "react-router-dom";
 import forEach from "lodash/forEach"
 import {FormComponentProps} from "antd/lib/form";
@@ -14,6 +14,7 @@ import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/Paginator";
 import FormComponentMapper from "./FormComponentMapper";
+import AceEditor from "react-ace";
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
@@ -107,14 +108,30 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
     }
 
     handleSearch = (resources : Ecore.Resource[]): void => {
-        this.setState({selectedRowKeys: []});
         const tableData:Array<any> = this.prepareTableData(resources);
-        this.setState({ tableData: tableData });
         const columns:Array<Ecore.EStructuralFeature> = resources.length > 0 ? this.prepareColumns(resources): [];
-        this.setState({ resources: resources, columns: columns});
-        this.setState({notFoundActivator: true});
-        this.setState({tableDataFilter: []});
+        this.setState({
+            selectedRowKeys: [],
+            tableData: tableData,
+            resources: resources,
+            columns: columns,
+            notFoundActivator: true,
+            tableDataFilter: [],
+            result: ""
+        })
+    };
 
+    handleJSONSearch = (results : QueryResult): void => {
+        const {executionStats, resources, bookmark, warning} = results;
+        const objects = resources.map((r:Resource)=>
+            Object.assign(r.to(), {$ref: `${r.get('uri')}?rev=${r.rev}`})
+        );
+        this.setState({
+            notFoundActivator: false,
+            resources: [],
+            tableData: [],
+            tableDataFilter: [],
+            result: JSON.stringify({objects, executionStats, bookmark, warning}, null, 4)});
     };
 
     prepareColumns(resources:Ecore.Resource[]):Array<Ecore.EStructuralFeature>{
@@ -306,6 +323,15 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         this.setState({currentPage: page === 0 ? 1 : page})
     }
 
+    handleReset = () => {
+        this.setState({
+            notFoundActivator: false,
+            resources: [],
+            tableData: [],
+            result: ""
+        })
+    }
+
     render() {
         const {t} = this.props;
         const columnsT = this.state.columns.map( (c: any) =>(
@@ -352,12 +378,30 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                  <div>
                      <DataSearch
                         onSearch={this.handleSearch}
+                        onJSONSearch={this.handleJSONSearch}
+                        onReset={this.handleReset}
                         specialEClass={this.props.specialEClass}
                         wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
                      />
                  </div>
                  <div>
-
+                     {this.state.result !== "" &&
+                         <AceEditor
+                             className={"json-search-pane"}
+                             ref={"console"}
+                             mode={'json'}
+                             width={''}
+                             height={'500px'}
+                             theme={'tomorrow'}
+                             editorProps={{ $blockScrolling: Infinity }}
+                             value={this.state.result}
+                             showPrintMargin={false}
+                             focus={false}
+                             readOnly={true}
+                             minLines={5}
+                             highlightActiveLine={false}
+                         />
+                     }
                      {this.state.resources.length === 0
                          ?
                          !this.state.notFoundActivator ? '' : t('notfound')
@@ -381,17 +425,18 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                              </div>
                              :
                              <>
-                             <NeoTable
-                                 className={'developer_table'}
-                                 scroll={{x: columnsWidth}}
-                                 columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
-                                 dataSource={this.filteredData()}
-                                 bordered={true}
-                                 style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
-                                 pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
-                             />
-                             <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
-                             <Paginator
+                                 <NeoTable
+                                     className={'developer_table'}
+                                     scroll={{x: columnsWidth}}
+                                     columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
+                                     dataSource={this.filteredData()}
+                                     bordered={true}
+                                     style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
+                                     pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
+                                 />
+                                 <div
+                                  className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
+                                 <Paginator
                                      {...this.props}
                                      currentPage = {this.state.currentPage}
                                      totalNumberOfPage = {Math.ceil(this.filteredData().length/this.state.paginationPageSize)}
@@ -400,7 +445,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                                      onPageChange={this.onPageChange}
                                      onPageSizeChange = {(size)=>{this.setState({paginationPageSize: size})}}
                                  />
-                             </div>
+                                 </div>
                              </>
                      }
                  </div>

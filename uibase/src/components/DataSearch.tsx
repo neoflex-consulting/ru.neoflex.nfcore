@@ -1,6 +1,6 @@
 import * as React from "react";
 import Ecore from "ecore";
-import {API} from "../modules/api";
+import {API, QueryResult} from "../modules/api";
 import {Button, Form, Tabs} from "antd";
 import {FormComponentProps} from 'antd/lib/form/Form';
 import AceEditor from "react-ace";
@@ -14,7 +14,9 @@ import {NeoButton, NeoHint, NeoInput, NeoOption, NeoSelect} from "neo-design/lib
 const FormItem = Form.Item;
 
 interface Props {
+    onJSONSearch: (results: QueryResult) => void;
     onSearch: (resources: Ecore.Resource[]) => void;
+    onReset: () => void;
     specialEClass?: Ecore.EClass | undefined;
 }
 
@@ -26,6 +28,7 @@ interface State {
     selectTags: number;
     selectCount: number;
     selectDropdownVisible: boolean;
+    isJSONResult: boolean;
 }
 
 class DataSearch extends React.Component<Props & FormComponentProps & WithTranslation, State> {
@@ -37,7 +40,8 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         createResModalVisible: false,
         selectTags: 6,
         selectCount: 0,
-        selectDropdownVisible: false
+        selectDropdownVisible: false,
+        isJSONResult: false
     };
 
     handleSubmit = (e: any) => {
@@ -55,7 +59,11 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                 } else {
                     selectedClassObject = this.props.specialEClass
                 }
-                if (values.key === 'json_search') {
+                if (this.state.isJSONResult) {
+                    API.instance().find(JSON.parse(values.json_field)).then(results=>{
+                        this.props.onJSONSearch(results)
+                    })
+                } else if (values.key === 'json_search') {
                     API.instance().find(JSON.parse(values.json_field)).then(results => {
                         this.props.onSearch(results.resources)
                     })
@@ -127,6 +135,14 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
         return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
     };
 
+    onSearchClick = () => {
+        this.setState({isJSONResult: false}, ()=>this.handleSubmit)
+    };
+
+    onJSONSearchClick = () => {
+        this.setState({isJSONResult: true}, ()=>this.handleSubmit)
+    };
+
     render() {
         const { getFieldDecorator, getFieldValue, setFields } = this.props.form;
         const { TabPane } = Tabs;
@@ -153,6 +169,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                             {getFieldDecorator('key', { initialValue: 'data_search' })(
                                 <Tabs onChange={(key: string) => {
                                     setFields({ key: { value: key } });
+                                    this.props.onReset()
                                 }}>
 
                                     <TabPane className={'datasearch_region'} tab={this.props.t('data search')} key='data_search'>
@@ -282,9 +299,19 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                                         <FormItem style={{marginBottom:'20px'}}>
 
                                             <NeoButton
-                                                title={t("searchsimple")}
+                                                title={t("table view")}
+                                                onClick={this.onSearchClick}
                                                 >
-                                                {t('searchsimple')}
+                                                {t('table view')}
+                                            </NeoButton>
+
+                                            <NeoButton
+                                                style={{marginLeft:"16px"}}
+                                                type={"secondary"}
+                                                title={t("json view")}
+                                                onClick={this.onJSONSearchClick}
+                                            >
+                                                {t('json view')}
                                             </NeoButton>
 
                                         </FormItem>

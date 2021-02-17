@@ -6,7 +6,6 @@ import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowser from "./components/MetaBrowser";
 import ResourceEditor from "./components/ResourceEditor"
 import {Link, Route, Switch} from "react-router-dom";
-import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
@@ -652,17 +651,6 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'query'}>
-                                                <Link to={`/developer/query`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/query') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('query')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('query')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
                                             <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'tools'}>
                                                 <Link to={`/developer/tools`}>
                                                      <span>
@@ -789,7 +777,6 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/test' component={this.renderTest}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
-                    <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
                     <Route path='/developer/data/editor/:id/:ref/:edit?/:targetId?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
