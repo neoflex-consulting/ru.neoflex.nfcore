@@ -388,13 +388,6 @@ height: 8px!important;
   border-radius: 4px;
   box-shadow: none !important;
 }
-/* Paginator ! */
-
-.paginator .ant-select-dropdown-placement-bottomLeft,
-.paginator .ant-select-dropdown-placement-topLeft {
-  top: unset!important;
-  transform: translate(0,-163px) !important;
-}
 
 /*DropDown*/
 
