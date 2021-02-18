@@ -169,7 +169,7 @@ class DataSearch extends React.Component<Props & FormComponentProps & WithTransl
                             {getFieldDecorator('key', { initialValue: 'data_search' })(
                                 <Tabs onChange={(key: string) => {
                                     setFields({ key: { value: key } });
-                                    this.props.onReset()
+                                    this.setState({isJSONResult: false}, ()=> this.props.onReset())
                                 }}>
 
                                     <TabPane className={'datasearch_region'} tab={this.props.t('data search')} key='data_search'>
