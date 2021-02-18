@@ -70,7 +70,7 @@ function isDublicatee(parametersArray :any, index: number) : boolean{
     for (let i = 0; i < parametersArray.length; i++){
         if (i !== index){
             if (parametersArray[i].datasetColumn === parametersArray[index].datasetColumn &&
-                parametersArray[i].operation === parametersArray[index].operation){
+                parametersArray[i].operation === parametersArray[index].operation && parametersArray[i].datasetColumn !== undefined && parametersArray[i].operation !== undefined){
                 return true
             }
         }
@@ -79,6 +79,10 @@ function isDublicatee(parametersArray :any, index: number) : boolean{
 }
 
 const SortableItem = SortableElement(({value}: any) => {
+    let mapOfValues = new Map()
+    mapOfValues.set("column" + value.index, (value.datasetColumn)?value.translate(value.datasetColumn):undefined)
+    mapOfValues.set("operation" + value.index, value.t(value.operation) || undefined)
+    value.setFieldsOnReset(mapOfValues)
     return <div className="SortableItem">
         <NeoRow style={{height:'100%'}}>
             <NeoCol span={1}>
@@ -95,27 +99,27 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
-                        {
-                            initialValue: (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined,
-                            rules: [{
-                                required:
-                                value.operation,
-                                message: ' '
-                            },{
-                                validator: (rule: any, values: any, callback: any) => {
-                                    let isDuplicate: boolean = false;
-                                    isDuplicate = isDublicatee(value.parametersArray, value.index - 1)
-                                    if (isDuplicate) {
-                                        callback('Error message');
-                                        return;
-                                    }
-                                    callback();
-                                },
-                                message: value.t('duplicateRow'),
-                            }]
-                        })(
+                <Form.Item style={{ margin: 'auto' }}
+                           initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
+                           name={"column" + value.index}
+                           rules={[
+                               {
+                                   required: value.operation,
+                                   message: '',
+                               },
+                               {
+                                   validator: (rule: any, values: any, callback: any) => {
+                                       let isDuplicate: boolean = false;
+                                       isDuplicate = isDublicatee(value.parametersArray, value.index - 1)
+                                       if (isDuplicate) {
+                                           callback('Error message');
+                                           return;
+                                       }
+                                       callback();
+                                   },
+                                   message: value.t('duplicateRow')},
+                           ]}
+                >
                         <NeoSelect
                             width={'259px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -139,34 +143,30 @@ const SortableItem = SortableElement(({value}: any) => {
 
                             }
                         </NeoSelect>
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
                 {
-                    <Form.Item style={{margin: 'auto'}}>
-                        {value.getFieldDecorator(`${value.idOperation}`,
-                            {
-                                initialValue: value.t(value.operation) || undefined,
-                                rules: [{
-                                    required:
-                                    value.datasetColumn,
-                                    message: ' '
-                                }
-                                ,{
-
-                            validator: (rule: any, values: any, callback: any) => {
-                                let isDuplicate: boolean = false;
-                                isDuplicate = isValid(value.parametersArray, value.index - 1, value.columnDefs)
-                                if (isDuplicate) {
-                                    callback('Error message');
-                                    return;
-                                    }
-                            callback();
-                        },
-                            message: value.t('wrongOperation'),
-                        }]
-                            })(
+                    <Form.Item style={{margin: 'auto'}}
+                    name={"operation" + value.index}
+                               initialValue={value.t(value.operation) || undefined}
+                               rules={[
+                                   {
+                                       required: value.datasetColumn,
+                                       message: '',
+                                   },{
+                                       validator: (rule: any, values: any, callback: any) => {
+                                           let isDuplicate: boolean = false;
+                                           isDuplicate = isValid(value.parametersArray, value.index - 1, value.columnDefs)
+                                           if (isDuplicate) {
+                                               callback('Error message');
+                                               return;
+                                           }
+                                           callback();
+                                       },
+                                       message: value.t('wrongOperation')}
+                               ]}
+                    >
                             <NeoSelect
                                 width={'239px'}
                                 getPopupContainer={() => document.getElementById(value.popUpContainerId) as HTMLElement}
@@ -241,7 +241,6 @@ const SortableItem = SortableElement(({value}: any) => {
 
                                 }
                             </NeoSelect>
-                        )}
                     </Form.Item>
                 }
             </NeoCol>
@@ -251,7 +250,8 @@ const SortableItem = SortableElement(({value}: any) => {
                         type={'link'}
                         title={value.t("delete row")}
                         id={'deleteRowButton'}
-                        onClick={(e: any) => {value.deleteRow({index: value.index})}}
+                        onClick={(e: any) => {
+                            value.deleteRow({index: value.index})}}
                     >
                         <NeoIcon icon={'rubbish'} size={'m'} color="#B3B3B3"/>
                     </NeoButton>
@@ -267,7 +267,6 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{
@@ -278,7 +277,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
     render() {
         const {t} = this.props
         return (
-            <Form style={{ marginTop: '25px' }} ref={this.props.formRef}>
+            <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
@@ -302,7 +301,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                                     idDatasetColumn : `${JSON.stringify({index: serverAggregate.index, columnName: 'datasetColumn', value: serverAggregate.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverAggregate.index, columnName: 'operation', value: serverAggregate.operation})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allAggregates: this.props.allAggregates,
                                     handleChange: this.handleChange,

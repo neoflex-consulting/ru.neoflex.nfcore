@@ -71,7 +71,6 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
     constructor(props: any) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
-        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     onSortEnd = ({oldIndex, newIndex}:any) => {
@@ -90,7 +89,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
         const {parametersArray} = this.state;
         return (
                     <div>
-            <Form style={{ marginTop: '15px' }} ref={this.props.formRef}>
+            <Form style={{ marginTop: '15px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
                         <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
@@ -122,7 +121,6 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     t : t,
                                     idDatasetColumn : `${JSON.stringify({index: hiddenColumn.index, columnName: 'datasetColumn', value: hiddenColumn.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: hiddenColumn.index, columnName: 'operation', value: hiddenColumn.operation})}`,
-                                    getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,
                                     handleChange: this.handleChange,
                                     parametersArray: parametersArray,

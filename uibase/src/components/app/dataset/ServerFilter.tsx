@@ -27,6 +27,14 @@ const SortableList = SortableContainer(({items}:any) => {
 });
 
 const SortableItem = SortableElement(({value}: any) => {
+    if (value.formRef.current !== null) {
+        value.formRef.current!.setFieldsValue({
+            ["column" + value.index]: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
+            ["operation" + value.index]: value.t(value.operation) || undefined,
+            ["value" + value.index]: value.value
+        })
+    }
+
     return <div className="SortableItem">
         <NeoRow style={{height:'100%'}}>
             <NeoCol span={1}>
@@ -46,18 +54,18 @@ const SortableItem = SortableElement(({value}: any) => {
             </NeoCol>
             <NeoCol span={8}>
                 <Form.Item
+                    name={"column" + value.index}
+                    initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
                     style={{ margin: 'auto' }}
-                >
-                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
+                    rules={[
                         {
-                            initialValue: (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined,
-                            rules: [{
-                                required:
-                                    value.operation ||
-                                    value.value,
-                                message: ' '
-                            }]
-                        })(
+                            required:
+                                value.operation ||
+                                value.value,
+                            message: ' '
+                        }
+                    ]}
+                >
                         <NeoSelect
                            width={'208px'}
                            getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -80,21 +88,21 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </option>)
                             }
                         </NeoSelect>
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={8}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idOperation}`,
-                        {
-                            initialValue: value.t(value.operation) || undefined,
-                            rules: [{
-                                required:
-                                    value.datasetColumn ||
-                                    value.value,
-                                message: ' '
-                            }]
-                        })(
+                <Form.Item style={{ margin: 'auto' }}
+                           initialValue={value.t(value.operation) || undefined}
+                           name={"operation" + value.index}
+                           rules={[
+                               {
+                                   required:
+                                       value.datasetColumn ||
+                                       value.value,
+                                   message: ' '
+                               }
+                           ]}
+                >
                         <NeoSelect
                             width={'208px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -109,7 +117,7 @@ const SortableItem = SortableElement(({value}: any) => {
                             {
                                 value.allOperations!
                                     .filter((o:any)=> {
-                                        return value.columnDefs.find((c:any)=>c.get('headerName') === value.getFieldValue(`${value.idDatasetColumn}`))!.get('convertDataType') === "Date"
+                                        return value.columnDefs.find((c:any)=>c.get('headerName') === value.formRef.current?.getFieldValue(`column`))?.get('convertDataType') === "Date"
                                             ? dateOperations.includes(o.get('name'))
                                             : true
                                     })
@@ -122,21 +130,21 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </option>)
                             }
                         </NeoSelect>
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={4}>
-                <Form.Item style={{  margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idValue}`,
-                        {
-                            initialValue: value.value,
-                            rules: [{
-                                required:
-                                    (value.datasetColumn ||
-                                    value.operation) && !(value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty'),
-                                message: ' '
-                            }]
-                        })(
+                <Form.Item style={{  margin: 'auto' }}
+                           initialValue={value.value}
+                           name={"value" + value.index}
+                           rules={[
+                               {
+                                   required:
+                                       (value.datasetColumn ||
+                                           value.operation) && !(value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty'),
+                                   message: ' '
+                               }
+                           ]}
+                >
                         <NeoInput
                             width={'90px'}
                             placeholder={value.t('value')}
@@ -152,7 +160,6 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.handleOnSubmit(e);
                             }}
                         />
-                    )}
                 </Form.Item>
             </NeoCol>
 
@@ -178,7 +185,6 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        /*this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;*/
     }
 
     handleOnSubmit=(e:any)=>{
@@ -189,7 +195,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }} ref={this.props.formRef}>
+            <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('sysfilters')}</NeoTypography>
@@ -204,7 +210,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
-               {/* <Form.Item style={{marginBottom:'0'}}>
+                <Form.Item style={{marginBottom:'0'}}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((serverFilter: any) => (
@@ -214,19 +220,19 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                                     idOperation : `${JSON.stringify({index: serverFilter.index, columnName: 'operation', value: serverFilter.operation})}`,
                                     idValue : `${JSON.stringify({index: serverFilter.index, columnName: 'value', value: serverFilter.value})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    formRef: this.formRef,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allOperations: this.props.allOperations,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     parametersArray: this.state.parametersArray,
                                     handleOnSubmit: this.handleOnSubmit,
-                                    getFieldValue: this.getFieldValue,
                                     popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
-                </Form.Item>*/}
+                </Form.Item>
                 <Form.Item>
                     <NeoButton
                         type={'link'}
