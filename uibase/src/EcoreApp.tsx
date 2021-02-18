@@ -31,6 +31,7 @@ import {excelExportObject} from "./utils/excelExportUtils";
 import {docxExportObject} from "./utils/docxExportUtils";
 
 const backgroundColor = "#2a356c";
+const userProfileUpdateDebounceInterval = 1000;
 
 const { Header } = Layout;
 
@@ -72,6 +73,7 @@ class EcoreApp extends React.Component<any, State> {
     private excelHandlers: (()=>excelExportObject|undefined)[] = [];
     private eventActions: any[] = [];
     private eventTracker = new EventTracker();
+    private userProfileTimer: NodeJS.Timeout;
 
     constructor(props: any) {
         super(props);
@@ -182,8 +184,11 @@ class EcoreApp extends React.Component<any, State> {
                         updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
                     }
                 }
-                const prom =  API.instance().saveResource(updatedUserProfile.eResource(), 99999);
-                this.state.context.updateContext!(({userProfilePromise: prom}))
+                clearTimeout(this.userProfileTimer);
+                this.userProfileTimer = setTimeout(()=>{
+                    const prom =  API.instance().saveResource(updatedUserProfile.eResource(), 99999);
+                    this.state.context.updateContext!(({userProfilePromise: prom}))
+                }, userProfileUpdateDebounceInterval)
             }
         })
     };
