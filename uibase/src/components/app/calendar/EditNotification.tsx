@@ -79,10 +79,10 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
         return (
             <div id={'editNotificationButton'}>
                 <NeoRow>
-                    <NeoCol span={10} style={{marginRight: '10px',textAlign: 'right'}}>
+                    <NeoCol span={10} style={{alignItems:'initial'}}>
                         <span>{t('fullName')}</span>
                     </NeoCol>
-                    <NeoCol span={12}>
+                    <NeoCol span={12} style={{alignItems:'initial'}}>
                         <NeoInput
                             width={'200px'}
                             value={editableNotification['fullName']}
@@ -96,10 +96,10 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                     </NeoCol>
                 </NeoRow>
                 <NeoRow style={{marginTop: '10px'}}>
-                <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                <NeoCol span={10} style={{alignItems:'initial'}}>
                     <span>{t('shortName')}</span>
                 </NeoCol>
-                <NeoCol span={12}>
+                <NeoCol span={12} style={{alignItems:'initial'}}>
                     <NeoInput
                         width={'200px'}
                         value={editableNotification['shortName']}
@@ -113,10 +113,10 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                 </NeoCol>
                 </NeoRow>
                 <NeoRow style={{marginTop: '10px'}}>
-                    <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoCol span={10} style={{alignItems:'initial'}}>
                         <span>{t('weekendReporting')}</span>
                     </NeoCol>
-                    <NeoCol span={12}>
+                    <NeoCol span={12} style={{alignItems:'initial'}}>
                         <NeoSwitch
                             checked={editableNotification['weekendReporting']}
                             disabled={!this.state.myNotificationVisible}
@@ -129,11 +129,11 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                 </NeoRow>
                 <NeoRow style={{marginTop: '10px'}}>
 
-                    <NeoRow style={{marginTop: '10px'}}>
-                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoRow>
+                        <NeoCol span={10} style={{alignItems:'initial'}}>
                             <span>{t('periodicity')}</span>
                         </NeoCol>
-                        <NeoCol span={12}>
+                        <NeoCol span={12} style={{alignItems:'initial'}}>
                             <NeoSelect
                                 disabled={!this.state.myNotificationVisible}
                                 value={t(editableNotification['periodicity'])}
@@ -159,10 +159,10 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                     </NeoRow>
 
                     <NeoRow style={{marginTop: '10px'}}>
-                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                        <NeoCol span={10} style={{alignItems:'initial'}}>
                             <span>{t('deadlineDay')}</span>
                         </NeoCol>
-                        <NeoCol span={12}>
+                        <NeoCol span={12} style={{alignItems:'initial'}}>
                             <NeoInputNumber
                                 width={'200px'}
                                 min={1}
@@ -178,10 +178,10 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
                     </NeoRow>
 
                     <NeoRow style={{marginTop: '10px'}}>
-                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                        <NeoCol span={10} style={{alignItems:'initial'}}>
                             <span>{t('deadlineTime')}</span>
                         </NeoCol>
-                        <NeoCol span={12}>
+                        <NeoCol span={12} style={{alignItems:'initial'}}>
                             <NeoInputNumber
                                 width={'200px'}
                                 min={0}
@@ -202,9 +202,9 @@ class EditNotification extends React.Component<Props & WithTranslation & any, St
 
 
                 <NeoRow style={{marginTop: '15px'}}>
-                    <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoCol span={10} style={{alignItems:'initial'}}>
                     </NeoCol>
-                    <NeoCol span={13}>
+                    <NeoCol span={13} style={{alignItems:'initial'}}>
 
                         {
                             this.state.spinnerVisible &&

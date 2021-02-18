@@ -70,6 +70,7 @@
         "name": "Наименование",
         "notfound": "Не найдено",
         "operation": "Операция",
+        "operations": "Операции",
         "operationsettings": "Настройки операции",
         "password": "Пароль",
         "query": "Запрос",

@@ -25,7 +25,16 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoCol, NeoDatePicker, NeoInput, NeoParagraph, NeoRow, NeoSelect, NeoTabs} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoCol,
+    NeoDatePicker,
+    NeoInput,
+    NeoParagraph,
+    NeoRow,
+    NeoSelect,
+    NeoTabs
+} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
@@ -940,6 +949,7 @@ class HtmlContent_ extends ViewContainer {
                          const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                          handleClick.bind(this)(value);
                      }}
+                 style={{width:'100%'}}
             >
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
@@ -1181,7 +1191,8 @@ export class Input_ extends ViewContainer {
                     <NeoInput
                         hidden={this.state.isHidden}
                         className={cssClass}
-                        style={{width: width, display: (this.state.isHidden) ? 'none' : undefined}}
+                        width={this.viewObject.get('width')}
+                        style={{display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={isReadOnly}
                         placeholder={this.viewObject.get('placeholder')}
                         defaultValue={this.viewObject.get('value')}
@@ -1714,7 +1725,7 @@ export class RadioGroup_ extends ViewContainer {
                             type={"radio"}
                             name={this.viewObject.get('name')}
                             onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                                this.onChange(event.currentTarget.labels[0].outerText)
+                                this.onChange(event.nativeEvent.target.labels[0].outerText)
                             }}
                         >{box}
                         </NeoInput>
@@ -1728,7 +1739,7 @@ export class RadioGroup_ extends ViewContainer {
                         type={"radio"}
                         name={this.viewObject.get('name')}
                         onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                            this.onChange(event.currentTarget.labels[0].outerText)
+                            this.onChange(event.nativeEvent.target.labels[0].outerText)
                         }}
                     >{box}
                     </NeoInput>

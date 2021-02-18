@@ -189,7 +189,13 @@ export default function Operations(props: Props): JSX.Element {
         };
 
         return <Dropdown placement="bottomCenter" overlay={menu}>
-            <NeoButton className="panel-button" suffixIcon={<NeoIcon icon={"success"}/>} title={"Operations"} />
+            <NeoButton
+                className="panel-button"
+                type={"ghost-icon"}
+                title={t("operations")}
+            >
+                <NeoIcon icon={"success"}/>
+            </NeoButton>
         </Dropdown>
     }
 

@@ -1028,11 +1028,11 @@ class Calendar extends React.Component<any, any> {
         let startDate = dateFns.startOfWeek(this.state.currentMonth, {locale: ru});
         for (let i = 0; i < 7; i++) {
             days.push(
-                <NeoCol span={3} key={i}
+                <div key={i}
                      className="col col-center col-text border-line" style={{fontSize: "110%"}}
                 >
                     {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
-                </NeoCol>
+                </div>
             );
         }
         return <NeoRow className="days row">{days}</NeoRow>;
@@ -1130,7 +1130,7 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
-            <div hidden={this.state.isHidden}>
+            <div hidden={this.state.isHidden} style={{width:'100%'}}>
                 <MainContext.Consumer>
                     { context => (
                         <Fullscreen

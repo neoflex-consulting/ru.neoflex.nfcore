@@ -9,12 +9,17 @@
     position: absolute;
     display: inline-flex;
     justify-content: space-between;
-    right: 256px;
+    right: 200px;
     font-size: 14px;
     font-family: 'Roboto', sans-serif;
     color: #8C8C8C;
     align-items: center;
-    bottom: 1px;
+    height: 25px;
+    line-height: 1.8;
+}
+
+.paginator .page-view-container .hint {
+    margin-right: 15px;
 }
 
 .paginator.paginator-small .page-view-container {
@@ -23,15 +28,19 @@
 
 .paginator.single-page .page-view-container {
     justify-content: center;
-    bottom: 3px;
 }
 
 .paginator.single-page > .page-view-container {
-    right: 128px !important;
+    right: 60px !important;
+}
+
+.paginator.single-page .mini .ant-pagination-options {
+    margin-left: 40px;
 }
 
 .paginator.single-page .ant-pagination-next {
-    margin-right: 90px !important;
+    margin-right: 50px !important;
+    margin-left: 10px;
 }
 
 .paginator .Arrow{
@@ -128,6 +137,10 @@
     color: #022af7!important;
 }
 
+.paginator .ant-pagination.mini {
+    line-height: initial;
+}
+
 .paginator .ant-pagination.mini .ant-pagination-prev, .ant-pagination.mini .ant-pagination-next {
     line-height: 22px !important;
 }
@@ -161,9 +174,7 @@
     border-color: #424D78 !important;
     box-shadow: unset!important;
 }
-.paginator .ant-pagination.mini .ant-pagination-item{
-    margin: 0 5px !important;
-}
+
 .paginator .ant-pagination.mini .ant-select-sm .ant-select-selection--single{
     margin-left: 12px;
 }
@@ -202,8 +213,38 @@
     display: none;
 }
 
-.pagionator .ant-select-sm.ant-pagination-options-size-changer.ant-select.ant-select-enabled{
+.paginator .ant-select-sm.ant-pagination-options-size-changer.ant-select.ant-select-enabled{
     z-index: 99999;
 }
 
+.paginator .ant-pagination-jump-next {
+    display: none;
+}
 
+.paginator .mini .ant-pagination-options {
+    margin-left: 10px;
+}
+
+.developer_paginator {
+    background: #e6e6e6;
+    height: 40px;
+    padding: 8px 16px !important;
+    margin: 0 35px;
+    max-width: 100%;
+    width: unset !important;
+}
+
+.paginator .ant-select-dropdown-placement-bottomLeft,
+.paginator .ant-select-dropdown-placement-topLeft,
+.paginator .ant-select-dropdown-placement-topRight {
+    top: unset!important;
+    transform: translate(-20px,-260px) !important;
+}
+
+.developer_paginator .paginator-large {
+    margin: unset !important;
+}
+
+.developer_paginator .paginator-large .ant-pagination-options {
+    margin-left: 15px;
+}

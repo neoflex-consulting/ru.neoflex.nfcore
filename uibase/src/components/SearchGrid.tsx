@@ -239,12 +239,12 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                 fixed: 'right',
                 width: 130,
                 render: (text:string, record:any) => {
-                    const viewButton = <Link key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
+                    const viewButton = <Link target='_blank' key={`edit${record.key}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
                         <NeoButton type={'link'} title={t('view')}>
                             <NeoIcon icon={"show"}/>
                         </NeoButton>
                     </Link>;
-                    const editButton = <Link key={`edit${record.name}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}/true`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
+                    const editButton = <Link target='_blank' key={`edit${record.name}`} to={`/developer/data/editor/${record.resource.get('uri')}/${record.resource.rev}/true`} style={{display:'inline-block', margin:'auto 14px auto 5px'}}>
                         <NeoButton type={'link'} title={t('edit')}>
                             <NeoIcon icon={"edit"}/>
                         </NeoButton>
@@ -286,14 +286,14 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                          this.props.onSelect !== undefined
                              ?
                              <div>
-                                 <div>
+                                 <div style={{marginBottom:'16px'}}>
                                      <NeoButton
                                          type={!hasSelected ? 'disabled' : 'primary'}
                                          title={t("select")}
                                          onClick={this.handleSelect}
-                                         style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}
+                                         style={{width: '100px', fontSize: '17px'}}
                                      >
-                                         <NeoIcon icon={"big-grid"}/>
+                                         <NeoIcon icon={"big-grid"} color={'white'}/>
                                     </NeoButton>
                                  </div>
                                  <NeoTable

@@ -1423,7 +1423,7 @@ class DatasetView extends React.Component<any, State> {
                 ? "diagram"
                 : "normal";
         return (
-        <div hidden={this.state.isHidden || this.props.isParentHidden}>
+        <div hidden={this.state.isHidden || this.props.isParentHidden} style={{width:'100%'}}>
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>

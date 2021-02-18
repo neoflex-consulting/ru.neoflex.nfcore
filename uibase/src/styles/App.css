@@ -388,13 +388,6 @@ height: 8px!important;
   border-radius: 4px;
   box-shadow: none !important;
 }
-/* Paginator ! */
-
-.paginator .ant-select-dropdown-placement-bottomLeft,
-.paginator .ant-select-dropdown-placement-topLeft {
-  top: unset!important;
-  transform: translate(0,-163px) !important;
-}
 
 /*DropDown*/
 
@@ -1312,7 +1305,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     margin-top: 6px!important;
   }
   .header-menu{
-    margin-bottom: 7px!important;
+    line-height: 2;
   }
 
 }
@@ -1707,7 +1700,7 @@ a.linksInMoreWord:hover{
   /*max-width: 1808px !important;*/
   box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
-  padding: 20px 16px 0;
+  padding: 16px 16px 0;
 }
 
 .ag-tooltip{
@@ -1901,33 +1894,7 @@ padding: 3px 24px;
 .ant-tree.ant-tree-directory .ant-tree-treenode-selected::before {
   background: unset !important;
 }
-a{
-  justify-content: center;
-}
 
-.ant-select-item-option .ant-select-item-option-content {
-  justify-content: start;
-}
-
-.ant-table.ant-table-bordered > .ant-table-container > .ant-table-content > table > thead > tr > th {
-  border: 1px solid #e6e6e6 !important;
-}
-
-.table .ant-table-column-sorters-with-tooltip {
-  display: flex;
-}
-
-.table .ant-table-filter-trigger-container {
-  align-items: center;
-}
-
-.table .ant-table-measure-row {
-  display: none;
-}
-.table .ant-table-selection {
-  display: unset;
-}
-
-.table .ant-table-tbody > tr.ant-table-row-selected > td {
-  background: unset;
+.pane.horizontal.primary .ant-row-space-around {
+  justify-content: space-around;
 }

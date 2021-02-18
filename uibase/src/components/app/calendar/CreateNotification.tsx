@@ -64,10 +64,10 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
         return (
             <div id="selectButton">
                 <NeoRow>
-                    <NeoCol span={10} style={{marginRight: '10px',textAlign: 'right'}}>
+                    <NeoCol span={10} style={{alignItems:'initial'}}>
                         <span>{t('fullName')}</span>
                     </NeoCol>
-                    <NeoCol span={12}>
+                    <NeoCol span={12} style={{alignItems:'initial'}}>
                         <NeoInput
                             value={newNotification['fullName']}
                             width={'200px'}
@@ -79,10 +79,10 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                     </NeoCol>
                 </NeoRow>
                 <NeoRow style={{marginTop: '10px'}}>
-                <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                <NeoCol span={10} style={{alignItems:'initial'}}>
                     <span>{t('shortName')}</span>
                 </NeoCol>
-                <NeoCol span={12}>
+                <NeoCol span={12} style={{alignItems:'initial'}}>
                     <NeoInput
                         value={newNotification['shortName']}
                         width={'200px'}
@@ -94,10 +94,10 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                 </NeoCol>
                 </NeoRow>
                 <NeoRow style={{marginTop: '10px'}}>
-                    <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoCol span={10} style={{alignItems:'initial'}}>
                         <span>{t('weekendReporting')}</span>
                     </NeoCol>
-                    <NeoCol span={12}>
+                    <NeoCol span={12} style={{alignItems:'initial'}}>
                         <NeoInput type={"checkbox"}
                                   defaultChecked={newNotification['weekendReporting']}
                                   onChange={(e: any) => {
@@ -108,11 +108,11 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                 </NeoRow>
                 <NeoRow style={{marginTop: '10px'}}>
 
-                    <NeoRow style={{marginTop: '10px'}}>
-                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                    <NeoRow>
+                        <NeoCol span={10} style={{alignItems:'initial'}}>
                             <span>{t('periodicity')}</span>
                         </NeoCol>
-                        <NeoCol span={12}>
+                        <NeoCol span={12} style={{alignItems:'initial'}}>
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById ('selectButton') as HTMLElement}
                                 value={t(newNotification['periodicity'])}
@@ -137,34 +137,34 @@ class CreateNotification extends React.Component<Props & WithTranslation & any, 
                     </NeoRow>
 
                     <NeoRow style={{marginTop: '10px'}}>
-                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                        <NeoCol span={10} style={{alignItems:'initial'}}>
                             <span>{t('deadlineDay')}</span>
                         </NeoCol>
-                        <NeoCol span={12}>
+                        <NeoCol span={12} style={{alignItems:'initial'}}>
                             <NeoInputNumber
-                                    min={1}
-                                    max={220}
-                                    defaultValue={newNotification['deadlineDay']}
-                                    style={{width: '200px'}}
-                                    onChange={(e: any) => {
-                                        const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e});
-                                        this.handleChange(event)
-                                    }}/>
+                                width={'200px'}
+                                min={1}
+                                max={220}
+                                defaultValue={newNotification['deadlineDay']}
+                                onChange={(e: any) => {
+                                    const event = JSON.stringify({row: 'deadlineDay', value: e === "" ? undefined : e});
+                                    this.handleChange(event)
+                                }}/>
                         </NeoCol>
                     </NeoRow>
 
                     <NeoRow style={{marginTop: '10px'}}>
-                        <NeoCol span={10} style={{marginRight: '10px', textAlign: 'right'}}>
+                        <NeoCol span={10} style={{alignItems:'initial'}}>
                             <span>{t('deadlineTime')}</span>
                         </NeoCol>
-                        <NeoCol span={12}>
+                        <NeoCol span={12} style={{alignItems:'initial'}}>
                             <NeoInputNumber
+                                width={'200px'}
                                 min={0}
                                 max={23}
                                 defaultValue={newNotification['deadlineTime']}
                                 formatter={value => `${value}:00`}
                                 parser={value => value !== undefined ? value.replace(':00', '') : 1}
-                                style={{width: '200px'}}
                                 onChange={(e: any) => {
                                     const event = JSON.stringify({
                                         row: 'deadlineTime',
