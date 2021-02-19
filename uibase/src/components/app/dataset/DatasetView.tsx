@@ -211,7 +211,7 @@ class DatasetView extends React.Component<any, State> {
             aggregatedRows: [],
             isGroovyDataset: false,
             isExportAllTabsVisible: false,
-            isExcelExport: false
+            isExcelExport: false,
         };
     }
 
@@ -1429,6 +1429,7 @@ class DatasetView extends React.Component<any, State> {
             <div style={{padding: "16px"}}>
                 {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
+                    hiddenComponents={this.props.viewObject.get("hiddenPanelActions")}
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}
                     hiddenColumns={this.state.hiddenColumns}
@@ -1601,7 +1602,7 @@ class DatasetView extends React.Component<any, State> {
                 >
                     {
 
-                        this.state.serverFilters && !this.state.isGroovyDataset &&
+                        this.state.serverFilters && !this.state.isGroovyDataset && !this.props.viewObject.get("hiddenPanelActions").includes("filter") &&
                             <ServerFilter
                                 {...this.props}
                                 popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
@@ -1616,7 +1617,7 @@ class DatasetView extends React.Component<any, State> {
                             />
                     }
                     {
-                        this.state.highlights && this.state.allHighlightType &&
+                        this.state.highlights && this.state.allHighlightType && !this.props.viewObject.get("hiddenPanelActions").includes("highlights") &&
                             <Highlight
                                 {...this.props}
                                 popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}

@@ -222,6 +222,8 @@ class DatasetView extends ViewElement, CommandElement {
     boolean hidePaginator
           @NFCore(documentation="Название экспортируемого файла docx/excel")
     String exportFileName
+          @NFCore(documentation="Набор элеменов которые не будут отображаться на панели действий", renderConditions="{'hideActionBar':false}")
+    PanelActions[] hiddenPanelActions
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")
@@ -723,4 +725,19 @@ enum HelpOrientation {
     leftTop,
     left,
     leftBottom
+}
+
+enum PanelActions {
+    filter
+    highlights
+    sort,
+    calculator,
+    aggregations,
+    diagram,
+    groupBy,
+    hiddenColumns,
+    exportDocx,
+    exportExcel,
+    versions,
+    edit
 }
