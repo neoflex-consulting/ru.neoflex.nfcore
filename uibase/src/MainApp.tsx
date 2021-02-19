@@ -423,11 +423,19 @@ export class MainApp extends React.Component<any, State> {
                 const resource = this.state.urlAppModules.find(r=>r.eContents()[0].get('name') === up.appModule);
                 const id = resource?.get('uri');
                 const rev = resource?.rev;
+                const component = <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                    {id && rev ? <Link to={`/developer/data/editor/${id}/${rev}`}>
+                        {up.appModule}
+                    </Link> :  up.appModule}
+                    {(urlParams.length-1-index !== 0) &&<NeoHint title={this.props.t("back")} placement={"right"} onClick={()=>{
+                        this.props.history.go(-(urlParams.length-1-index))
+                    }}>
+                        <NeoIcon icon={"arrow-back"}/>
+                    </NeoHint>}
+                </div>
                 return {
                     key: index,
-                    appModule: up.appModule && id && rev ? <Link to={`/developer/data/editor/${id}/${rev}`}>
-                        {up.appModule}
-                    </Link> : up.appModule,
+                    appModule: component,
                     treeNode: up.tree.length > 0 && up.tree[up.tree.length - 1],
                     useParentReferenceTree: up.useParentReferenceTree ? up.useParentReferenceTree.toString() : "",
                     parameters: up.params && up.params.length > 0 && up.params.map((p, paramIndex)=>{

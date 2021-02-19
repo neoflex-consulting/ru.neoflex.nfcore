@@ -69,7 +69,7 @@ export function encodeAppURL(path?: any[]) {
 
 class EcoreApp extends React.Component<any, State> {
 
-    private docxHandlers: (()=>docxExportObject)[] = [];
+    private docxHandlers: (()=>docxExportObject|undefined)[] = [];
     private excelHandlers: (()=>excelExportObject|undefined)[] = [];
     private eventActions: any[] = [];
     private eventTracker = new EventTracker();
