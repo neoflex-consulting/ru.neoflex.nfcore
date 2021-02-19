@@ -627,6 +627,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ modalResourceVisible: false })
     };
 
+    handleDeleteResourceModalVisible = () => {
+        this.setState({ modalDeleteResourceVisible: !this.state.modalDeleteResourceVisible })
+    };
+
     // Добавалениеб редоктирование, сохранение
 
     scrollToElementWithId = (id?:string) => {
@@ -1050,6 +1054,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             return result
         };
 
+
+
         const generateNodes = (eClass: Ecore.EObject, json: { [key: string]: any }, parentId?: String): Array<any> => {
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, pidx: number) => {
                 const isContainment = Boolean(feature.get('containment'));
@@ -1234,7 +1240,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     <NeoButton
                         className="panel-button"
                         type={'ghost-icon'}
-                        // onClick={this.handleDeleteResourceModalVisible}
+                         onClick={this.handleDeleteResourceModalVisible}
                         title={this.props.t("delete")}
                     >
                         <NeoIcon icon={"delete"}/>

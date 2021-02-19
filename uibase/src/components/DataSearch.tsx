@@ -14,9 +14,11 @@ import {FormInstance} from "antd/lib/form";
 interface Props {
     onSearch: (resources: Ecore.Resource[]) => void;
     specialEClass?: Ecore.EClass | undefined;
+    refresh: boolean;
 }
 
 interface State {
+    refresh: boolean,
     tags: Ecore.EObject[];
     classes: Ecore.EObject[];
     createResModalVisible: boolean;
@@ -29,6 +31,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     formRef = React.createRef<FormInstance>();
 
     state = {
+        refresh: this.props.refresh,
         tags: [],
         classes: [],
         createResModalVisible: false,
@@ -98,6 +101,13 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     componentDidMount(): void {
         this.getEClasses();
         this.getAllTags();
+    }
+
+    componentDidUpdate() {
+        if (this.props.refresh !== this.state.refresh){
+            this.refresh()
+            this.setState({refresh: this.props.refresh})
+        }
     }
 
     checkEClass = () => {

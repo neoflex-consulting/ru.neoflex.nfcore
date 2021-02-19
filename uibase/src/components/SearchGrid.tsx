@@ -19,6 +19,7 @@ interface Props {
 }
 
 interface State {
+    refresh: boolean;
     resources: Ecore.Resource[];
     columns: Array<any>;
     tableData: Array<any>;
@@ -32,10 +33,10 @@ interface State {
 }
 
 class SearchGrid extends React.Component<Props & WithTranslation, State> {
-    private refDataSearchRef: any = React.createRef();
     private grid: React.RefObject<any>;
 
     state = {
+        refresh: false,
         resources: [],
         columns: [],
         tableData: [],
@@ -186,7 +187,7 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
         const ref:string = `${record.resource.get('uri')}?rev=${record.resource.rev}`;
         ref && API.instance().deleteResource(ref).then((response) => {
             if (response.result === "ok") {
-                this.refDataSearchRef.refresh();
+                this.setState({refresh: !this.state.refresh})
             }
         });
         event.preventDefault()
@@ -274,7 +275,7 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                      <DataSearch
                         onSearch={this.handleSearch}
                         specialEClass={this.props.specialEClass}
-                        // wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
+                        refresh={this.state.refresh}
                      />
                  </div>
                  <div>
