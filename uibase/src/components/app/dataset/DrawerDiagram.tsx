@@ -44,37 +44,34 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
     }
 
     handleSubmit = () => {
-        this.props.formRef.current?.validateFields().then((err: any) => {
-            if (!err) {
-                const diagramParam: IDiagram = {
-                    id: this.props.id,
-                    keyColumn: this.props.formRef.current?.getFieldValue("axisXColumnName"),
-                    valueColumn: this.props.formRef.current?.getFieldValue("axisYColumnName"),
-                    diagramName: this.props.formRef.current?.getFieldValue("diagramName"),
-                    diagramLegend: this.props.formRef.current?.getFieldValue("diagramLegend"),
-                   /* legendAnchorPosition: legenedPosition,
-                    axisXPosition: xPosition,*/
-                    axisXLegend: this.props.formRef.current?.getFieldValue("axisXLabel"),
-                   /* axisYPosition: yPosition,*/
-                    axisYLegend: this.props.formRef.current?.getFieldValue("axisYLabel"),
-                    diagramType: this.state.diagramType!,
-                    colorSchema: "accent",
-                    isSingle: true
-                };
-                this.props.saveChanges(this.props.action, diagramParam);
-                if (this.props.action === "add") {
-                    this.resetFields()
-                }
+        this.formRef.current!.validateFields().then((values: any) => {
+
+            const diagramParam: IDiagram = {
+                id: this.props.id,
+                keyColumn: this.formRef.current!.getFieldValue("axisXColumnName"),
+                valueColumn: this.formRef.current!.getFieldValue("axisYColumnName"),
+                diagramName: this.formRef.current!.getFieldValue("diagramName"),
+                diagramLegend: this.formRef.current!.getFieldValue("diagramLegend"),
+                axisXLegend: this.formRef.current!.getFieldValue("axisXLabel"),
+                axisYLegend: this.formRef.current!.getFieldValue("axisYLabel"),
+                diagramType: this.state.diagramType!,
+                colorSchema: "accent",
+                isSingle: true
+            };
+            this.props.saveChanges(this.props.action, diagramParam);
+            if (this.props.action === "add") {
+                this.resetFields()
             }
-            else {
-                //TODO Error in console
-                this.props.context.notification('Diagram notification','Please, correct the mistakes', 'error')
-            }
+
+        }).catch(info => {
+            //TODO Error in console
+            this.props.context.notification('Diagram notification','Please, correct the mistakes', 'error')
+
         });
     };
 
     resetFields = () => {
-        this.props.form.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             axisXColumnName: undefined,
             axisYColumnName: undefined,
             diagramName: undefined,
@@ -89,15 +86,15 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
 
     getColumnSelectOptions(id:string, placeHolder:string) {
         return <div>
-        <Form.Item>
-            {this.props.formRef.current?.getFieldDecorator(id,
-                {
-                    rules: [{
-                        required: true,
-                        message: ' '
-                    }]
-                }
-            )(
+        <Form.Item rules={[
+            {
+                required:
+                    true,
+                message: ' '
+            }
+        ]}
+       name={id}>
+            {
                     placeHolder === "Column for Pie graph" || placeHolder === "Столбец для Кругового графика" ?
                         <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                    placeholder={this.props.t(placeHolder)}>
@@ -135,22 +132,21 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                                 {c.get('headerName')}
                             </Select.Option>)}
                     </NeoSelect>
-            )}
+            }
         </Form.Item>
         </div>
     };
 
     getEnumSelectOptions(id:string, placeHolder:string, selectEnum: Array<EObject>) {
         return  <div>
-        <Form.Item>
-            {this.props.formRef.current?.getFieldDecorator(id,
-                {
-                    rules: [{
-                        required: true,
-                        message: ' '
-                    }]
-                }
-            )(
+        <Form.Item rules={[
+            {
+                required:
+                    true,
+                message: ' '
+            }
+        ]}
+        name={id}>
                 <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {selectEnum!.map((c: any) =>
@@ -161,21 +157,18 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                             {this.props.t(diagramAnchorMap_[c.get('name')])}
                         </Select.Option>)}
                 </NeoSelect>
-            )}
         </Form.Item>
         </div>
     };
 
     getInput(id:string, placeHolder:string, disabled:boolean = false) {
-        return <Form.Item>
-            {this.props.formRef.current?.getFieldDecorator(id,
-                {
-                    rules: [{
-                        required: true,
-                        message: ' '
-                    }]
-                }
-            )(
+        return <Form.Item rules={[
+            {
+                required: true,
+                message: ' '
+            }
+        ]}
+       name={id}>
                 <NeoInput
                     width= 'none'
                     disabled={disabled}
@@ -185,12 +178,11 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                         this.handleSubmit()
                     }}
                 />
-            )}
         </Form.Item>
     };
 
     loadFields() {
-        this.props.form.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             axisXColumnName: this.props.currentDiagram.keyColumn,
             axisYColumnName:this.props.currentDiagram.valueColumn,
             diagramName: this.props.currentDiagram.diagramName,

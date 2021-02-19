@@ -32,6 +32,10 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
+    let mapOfValues = new Map()
+    mapOfValues.set("columnName" + value.index, (value.datasetColumn)?value.translate(value.datasetColumn):undefined)
+    value.setFieldsOnReset(mapOfValues)
+
     return <div className="SortableItem">
         <NeoRow style={{height:'100%', marginBottom:'0'}}>
             <NeoCol span={1}>
@@ -48,17 +52,14 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={20}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
-                        {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined
-                        })(
+                <Form.Item style={{ margin: 'auto' }} initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined} name={"columnName" + value.index}>
                         <NeoSelect
                             width={'525px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('columnname')}
                             showSearch={true}
                             allowClear={true}
+                            value={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
                             onChange={(e: any) => {
                                 const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
                                 value.handleChange(event)
@@ -76,7 +77,6 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </Select.Option>)
                             }
                         </NeoSelect>
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={1}>
@@ -101,7 +101,6 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current?.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{
@@ -112,7 +111,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }} ref={this.props.formRef}>
+            <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
@@ -135,12 +134,13 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     ...serverGroupByColumn,
                                     idDatasetColumn : `${JSON.stringify({index: serverGroupByColumn.index, columnName: 'datasetColumn', value: serverGroupByColumn.datasetColumn})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    formRef: this.formRef,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allAggregates: this.props.allAggregates,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     parametersArray: this.state.parametersArray,
                                     popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>

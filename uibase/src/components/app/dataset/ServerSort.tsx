@@ -6,7 +6,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoRow, NeoSelect, NeoSwitch, NeoTypography} from "neo-design/lib";
-import {NeoIcon} from "neo-icon/lib";
+import {NeoIcon} from 'neo-icon/lib';
 
 interface Props extends ParameterDrawerProps{
     allSorts?: Array<EObject>;
@@ -23,7 +23,13 @@ const SortableList = SortableContainer(({items}:any) => {
     );
 });
 
-const SortableItem = SortableElement(({value}:any) => <div className="SortableItem">
+const SortableItem = SortableElement(({value}:any) => {
+    let mapOfValues = new Map()
+    mapOfValues.set("column" + value.index, (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined)
+    mapOfValues.set("operation" + value.index, value.t(value.operation) || undefined)
+    value.setFieldsOnReset(mapOfValues)
+
+    return <div className="SortableItem">
     <NeoRow style={{height:'100%'}}>
                 <NeoCol span={1}>
                     {value.index}
@@ -39,46 +45,45 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                     </Form.Item>
                 </NeoCol>
                 <NeoCol span={10}>
-                    <Form.Item style={{ margin: 'auto' }}>
-                        {value.getFieldDecorator(`${value.idDatasetColumn}`,
-                            {
-                                initialValue: (value.datasetColumn) ? value.translate(value.datasetColumn) : undefined,
-                                rules: [{
-                                    required:
-                                    value.operation,
-                                    message: ' '
-                                },{
-                                    validator: (rule: any, value: any, callback: any) => {
-                                        let isDuplicate: boolean = false;
-                                        if (value.parametersArray !== undefined) {
-                                            const valueArr = value.parametersArray
-                                                .filter((currentObject: any) => {
-                                                    let currentField: string;
-                                                    try {
-                                                        //Либо объект при валидации отдельного поля
-                                                        currentField = JSON.parse(rule.value).value
-                                                    } catch (e) {
-                                                        //Либо значение этого поля при валидации перед запуском
-                                                        currentField = value
-                                                    }
-                                                    return (currentField) ? currentObject.datasetColumn === currentField : false
-                                                })
-                                                .map(function (currentObject: any) {
-                                                    return currentObject.datasetColumn
-                                                });
-                                            isDuplicate = valueArr.some(function (item: any , idx:number) {
-                                                return valueArr.indexOf(item) !== idx
-                                            });
-                                        }
-                                        if (isDuplicate) {
-                                            callback('Error message');
-                                            return;
-                                        }
-                                        callback();
-                                    },
-                                    message: 'duplicate row',
-                                }]
-                            })(
+                    <Form.Item style={{ margin: 'auto' }}
+                               initialValue={(value.datasetColumn) ? value.translate(value.datasetColumn) : undefined}
+                               name={"column" + value.index}
+                               rules={[
+                                   {
+                                       required: value.operation,
+                                       message: '',
+                                   },{
+                                       validator: (rule: any, values: any, callback: any) => {
+                                           let isDuplicate: boolean = false;
+                                           if (value.parametersArray !== undefined) {
+                                               const valueArr = value.parametersArray
+                                                   .filter((currentObject: any) => {
+                                                       let currentField: string;
+                                                       try {
+                                                           //Либо объект при валидации отдельного поля
+                                                           currentField = JSON.parse(rule.value).value
+                                                       } catch (e) {
+                                                           //Либо значение этого поля при валидации перед запуском
+                                                           currentField = values
+                                                       }
+                                                       return (currentField) ? currentObject.datasetColumn === currentField : false
+                                                   })
+                                                   .map(function (currentObject: any) {
+                                                       return currentObject.datasetColumn
+                                                   });
+                                               isDuplicate = valueArr.some(function (item: any , idx:number) {
+                                                   return valueArr.indexOf(item) !== idx
+                                               });
+                                           }
+                                           if (isDuplicate) {
+                                               callback('Error message');
+                                               return;
+                                           }
+                                           callback();
+                                       },
+                                       message: value.t('duplicateRow')}
+                               ]}
+                    >
                             <NeoSelect
                                 width={'259px'}
                                 getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -102,20 +107,19 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                                             </option>)
                                 }
                             </NeoSelect>
-                        )}
                     </Form.Item>
                 </NeoCol>
                 <NeoCol span={10}>
-                    <Form.Item style={{ margin: 'auto' }}>
-                        {value.getFieldDecorator(`${value.idOperation}`,
-                            {
-                                initialValue: value.t(value.operation) || undefined,
-                                rules: [{
-                                    required:
-                                    value.datasetColumn,
-                                    message: ' '
-                                }]
-                            })(
+                    <Form.Item style={{ margin: 'auto' }}
+                               initialValue={value.t(value.operation) || undefined}
+                               name={"operation" + value.index}
+                               rules={[
+                                   {
+                                       required: value.datasetColumn,
+                                       message: '',
+                                   }
+                               ]}
+                    >
                             <NeoSelect
                                 width={'239px'}
                                 getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -138,8 +142,6 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                                             </option>)
                                 }
                             </NeoSelect>
-
-                        )}
                     </Form.Item>
                 </NeoCol>
                 <NeoCol span={1}>
@@ -155,7 +157,7 @@ const SortableItem = SortableElement(({value}:any) => <div className="SortableIt
                     </Form.Item>
                 </NeoCol>
             </NeoRow>
-</div>);
+</div>});
 
 class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
 
@@ -163,7 +165,6 @@ class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.formRef.current!.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{
@@ -174,7 +175,7 @@ class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }} ref={this.props.formRef}>
+            <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('sorting')}</NeoTypography>
@@ -198,12 +199,13 @@ class ServerSort extends DrawerParameterComponent<Props, DrawerState> {
                                     idDatasetColumn : `${JSON.stringify({index: serverSort.index, columnName: 'datasetColumn', value: serverSort.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: serverSort.index, columnName: 'operation', value: serverSort.operation})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    formRef: this.formRef,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allSorts: this.props.allSorts,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     parametersArray: this.state.parametersArray,
                                     popUpContainerId: this.props.popUpContainerId
                                 }))}

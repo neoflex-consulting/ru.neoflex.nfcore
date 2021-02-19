@@ -10,7 +10,6 @@ import * as crypto from "crypto"
 import {appTypes} from "../../../utils/consts";
 import {NeoButton, NeoCol, NeoColor, NeoInput, NeoRow, NeoSelect, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
-import {FormInstance} from "antd/lib/form";
 
 const inputOperationKey: string = "_inputOperationKey";
 const selectTypeKey: string = "_selectTypeKey";
@@ -157,7 +156,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     componentDidUpdate(prevProps: any, prevState: any, snapshot?: any): void {
         if (JSON.stringify(prevState.currentIndex) !== JSON.stringify(this.state.currentIndex)
             || JSON.stringify(prevState.parametersArray) !== JSON.stringify(this.state.parametersArray)) {
-            this.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
                 [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
                 [selectTypeKey]: this.state.parametersArray![this.state.currentIndex!].type!,
@@ -192,11 +191,11 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
         let newString = "";
         let cursorStartPosition = this.expressionRef.current.resizableTextArea.textArea.selectionStart!;
         const cursorEndPosition = this.expressionRef.current.resizableTextArea.textArea.selectionEnd!;
-        const oldString = (this.getFieldValue(inputOperationKey))?this.getFieldValue(inputOperationKey):"";
+        const oldString = (this.formRef.current!.getFieldValue(inputOperationKey))?this.formRef.current!.getFieldValue(inputOperationKey):"";
         if (cursorStartPosition !== cursorEndPosition) {
             newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.id + oldString.substring(cursorEndPosition);
             this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.id).length;
-            this.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 [inputOperationKey]: newString
             })
         } else {
@@ -207,7 +206,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
             }
             newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.id + oldString.substring(cursorStartPosition);
             this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.id).length;
-            this.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 [inputOperationKey]: newString
             })
         }
@@ -215,22 +214,23 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     };
 
     handleClear = (e: MouseEvent<HTMLElement>) => {
-        this.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             [inputOperationKey]:""
         })
     };
 
+
     createNewRow = () => {
-        if (this.getFieldValue(inputFieldKey)
-            && this.getFieldValue(inputFieldKey) !== "") {
+        if (this.formRef.current!.getFieldValue(inputFieldKey)
+            && this.formRef.current!.getFieldValue(inputFieldKey) !== "") {
             let parametersArray: any = this.state.parametersArray;
             parametersArray.push(
                 {index: parametersArray.length + 1,
                     datasetColumn: undefined,
                     operation: undefined,
                     enable: true,
-                    type: this.getFieldValue(selectTypeKey),
-                    mask: this.getFieldValue(selectMaskKey)});
+                    type: this.formRef.current!.getFieldValue(selectTypeKey),
+                    mask: this.formRef.current!.getFieldValue(selectMaskKey)});
             let currentIndex = parametersArray.length - 1;
             this.setState({parametersArray, currentIndex});
         } else {
@@ -267,19 +267,16 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
 
     handleSubmit = (e: any) => {
         e.preventDefault();
-        this.validateFields((err: any, values: any) => {
-            if (err) {
-                this.props.context.notification('Calculator','Please, correct the mistakes', 'error')
-            } else {
+        this.formRef.current!.validateFields().then((values: any) => {
                 let parametersArray: any = this.state.parametersArray!.map((element)=>{
                     if (element.index-1 === this.state.currentIndex) {
                         return {
                             index: element.index,
-                            datasetColumn: this.getFieldValue(inputFieldKey),
-                            operation: this.getFieldValue(inputOperationKey),
+                            datasetColumn: this.formRef.current!.getFieldValue(inputFieldKey),
+                            operation: this.formRef.current!.getFieldValue(inputOperationKey),
                             enable: true,
-                            type: this.getFieldValue(selectTypeKey),
-                            mask: this.getFieldValue(selectMaskKey)
+                            type: this.formRef.current!.getFieldValue(selectTypeKey),
+                            mask: this.formRef.current!.getFieldValue(selectMaskKey)
                         }
                     } else {
                         return element
@@ -288,35 +285,33 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 this.setState({parametersArray});
                 this.props.onChangeParameters!(parametersArray!, this.props.componentType)
                 this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-            }
-        });
+            }).catch(info => {
+            this.props.context.notification('Calculator','Please, correct the mistakes', 'error')
+        })
     };
 
     reset = () => {
         this.props.onChangeParameters!(undefined, this.props.componentType);
         this.setState({parametersArray:[{index:1}],currentIndex:0});
-        this.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
             [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
-            [inputSelectKey]: null
+            [inputSelectKey]: undefined
         });
     };
 
     render() {
     return (
         <div id={"selectsInCalculator"}>
-            <Form style={{ marginTop: '24px' }}>
+            <Form style={{ marginTop: '24px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom:'15px', lineHeight:'19px'}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>
                             {this.t('calculatableExpressions')}
                         </NeoTypography>
                 </Form.Item>
-                <Form.Item style={{marginBottom:'15px'}}>
                     <NeoCol span={10} style={{justifyContent:'flex-start'}}>
-                        {
-                            this.getFieldDecorator(inputSelectKey,{
-                                initialValue: this.getFieldValue(inputFieldKey)
-                            })(
+                        <Form.Item style={{marginBottom:'15px'}}
+                                   name={inputSelectKey}>
                                 <NeoSelect
                                     width={'310px'}
                                     getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
@@ -335,8 +330,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     })}
 
                                 </NeoSelect>
-                            )
-                        }
+                        </Form.Item>
                     </NeoCol>
                     <NeoCol span={2}>
                         <NeoButton
@@ -349,13 +343,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoButton>
                     </NeoCol>
                     <NeoCol span={12} style={{justifyContent:'flex-end'}}>
-                        {
-                            this.getFieldDecorator(inputFieldKey,{
-                                rules: [{
-                                    required:true,
-                                    message: ' '
-                                }]
-                            })(
+                        <Form.Item style={{marginBottom:'15px'}}
+                                   name={inputFieldKey}>
                                 <NeoInput
                                     width={'310px'}
                                     placeholder={this.t("Enter new column name")}
@@ -363,33 +352,22 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                         e.preventDefault();
                                         this.handleSubmit(e)
                                     }}
+
                                 />
-                            )
-                        }
+                        </Form.Item>
                     </NeoCol>
-                </Form.Item>
-                <Form.Item style={{marginBottom:'32px'}}>
                 <NeoCol span={12} style={{justifyContent:'flex-start'}}>
-                    {
-                        this.getFieldDecorator(selectTypeKey,{
-                            rules: [{
-                            }]
-                        })(
+                    <Form.Item style={{marginBottom:'32px'}} name={selectTypeKey}>
                             <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
                                        getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
                                 {Object.keys(appTypes).map(type => <option key={type} value={type}>
                                     {this.t(type)}
                                 </option>)}
                             </NeoSelect>
-                        )
-                    }
+                    </Form.Item>
                 </NeoCol>
                 <NeoCol span={12} style={{justifyContent:'flex-end'}}>
-                    {
-                        this.getFieldDecorator(selectMaskKey,{
-                            rules: [{
-                            }]
-                        })(
+                    <Form.Item style={{marginBottom:'32px'}} name={selectMaskKey}>
                             <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
                                        getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
                                 {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
@@ -398,35 +376,33 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     {this.t(mask.key)}
                                 </option>) : undefined}
                             </NeoSelect>
-                        )
-                    }
+                    </Form.Item>
                 </NeoCol>
-                </Form.Item>
                 <Form.Item style={{marginBottom:'0px'}}>
                     <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>{this.t('computational expression')}</div>
                     <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>{this.t('create a calculation using column aliases')}</div>
                 </Form.Item>
-                    <Form.Item>
-                    <NeoRow style={{marginBottom: '12px'}}>
+                    <NeoRow style={{marginBottom: '12px'}}
+                    >
                         <NeoCol span={24}>
-                            {
-                                this.getFieldDecorator(inputOperationKey,{
-                                    /*value: this.currentOperation,*/
-                                    initialValue: "",
-                                    rules: [{
-                                        required:true,
-                                        message: ' '
-                                    }]
-                                })(
+                            <Form.Item name={inputOperationKey}
+                                       initialValue={' '}
+                                       rules={[
+                                           {
+                                               required:
+                                                   true,
+                                               message: ' '
+                                           }
+                                       ]}>
                                     <TextArea
                                        ref={this.expressionRef}
                                        placeholder={this.t("Expression")}
                                        style={{height:"112px"}}
                                     />
-                                  )
-                            }
+                            </Form.Item>
                         </NeoCol>
                     </NeoRow>
+                <Form.Item>
                     <NeoRow>
                         <NeoCol span={8} style={{justifyContent: 'flex-start'}}>
                             <div className={'calc-block'}>
