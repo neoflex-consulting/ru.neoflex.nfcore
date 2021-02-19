@@ -64,6 +64,10 @@ height: 8px!important;
   cursor: pointer;
 }
 
+.app-header .col {
+  flex-direction: unset;
+}
+
 @media screen and (max-width: 1100px) {
   .app-logo img {
     display: none;
@@ -416,9 +420,15 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
  /*Authorization*/
 
 
+.backGroundImage .row, .backGroundImage .col {
+  display: block;
+  position: relative;
+  width: unset;
+}
 
 @media screen and (min-width: 1441px) and (max-width: 1920px){
-  .secondColumn {
+  .backGroundImage .secondColumn {
+    display: block;
     background: #ffffff;
     height: 100%!important;
     width: 47.18%!important;
@@ -470,7 +480,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     color: #2A356C;
   }
 
-  .Login {
+  .secondColumn .Login {
     text-align: center;
     margin-right: 330px!important;
     margin-top: 4.2%;
@@ -497,7 +507,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     height: 34px !important;
   }
 
-  .Password {
+  .secondColumn .Password {
     margin-right: 322px!important;
     text-align: center;
     margin-top: 1.5%;
@@ -514,7 +524,8 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     margin-top: 4px;
   }
 
-  .button {
+  .secondColumn .button {
+    display: block;
     border-radius: 4px;
     margin-top: 3.5%
 
@@ -594,7 +605,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 }
 
 @media screen and (min-width: 1281px) and (max-width: 1440px){
-  .secondColumn {
+  .backGroundImage .secondColumn {
     background: #ffffff;
     height: 100%;
     width: 41.7%!important;
@@ -645,7 +656,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     color: #2A356C;
   }
 
-  .Login {
+  .secondColumn .Login {
     margin-right: 283px!important;
     text-align: center;
     margin-top: 2.6%;
@@ -672,7 +683,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     height: 32px !important;
   }
 
-  .Password {
+  .secondColumn .Password {
     margin-right: 280px!important;
     text-align: center;
     margin-top: 12px;
@@ -689,7 +700,8 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     margin-top: 4px;
   }
 
-  .button {
+  .secondColumn .button {
+    display: block;
     border-radius: 4px;
     margin-top: 3.4%;
 
@@ -770,7 +782,8 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 
 
 @media screen and (min-width: 801px) and (max-width: 1280px) {
-  .secondColumn {
+  .backGroundImage .secondColumn {
+    display: block;
     background: #ffffff;
     height: 100%;
     width: 46.8%!important;
@@ -821,7 +834,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     color: #2A356C;
   }
 
-  .Login {
+  .secondColumn .Login {
     margin-top: 3.3%;
     text-align: center;
     margin-right: 259px!important;
@@ -848,7 +861,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     height: 32px !important;
   }
 
-  .Password {
+  .secondColumn .Password {
     text-align: center;
     margin-right: 255px!important;
     margin-top: 1.6%;
@@ -865,7 +878,8 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     margin-top: 4px;
   }
 
-  .button {
+  .secondColumn .button {
+    display: block;
     border-radius: 4px;
     margin-top: 4.4%;
 
@@ -947,8 +961,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 
 @media screen and (max-width: 800px) {
 
-
-  .secondColumn {
+  .backGroundImage .secondColumn {
     background: #ffffff;
     height: 100%!important;
     width: 100%!important;
@@ -997,7 +1010,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     color: #2A356C;
   }
 
-  .Login {
+  .secondColumn .Login {
     text-align: center;
     margin-right: 325px!important;
     margin-top: 4%!important;
@@ -1024,7 +1037,7 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     height: 32px !important;
   }
 
-  .Password {
+  .secondColumn .Password {
     text-align: center;
     margin-right: 325px!important;
     margin-top: 2%!important;
@@ -1041,7 +1054,8 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
     margin-top: 4px;
   }
 
-  .button {
+  .secondColumn .button {
+    display: block;
     border-radius: 4px;
     margin-top: 4.5%;
 
@@ -1818,7 +1832,6 @@ padding: 3px 24px;
 }
 
 .datasearch__filter__drawer tbody td:nth-child(2).open {
-  overflow-wrap: break-spaces;
   white-space: normal;
 }
 

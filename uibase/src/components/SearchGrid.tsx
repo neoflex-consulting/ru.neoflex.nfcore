@@ -16,6 +16,7 @@ interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
     showAction: boolean;
     specialEClass: Ecore.EClass | undefined;
+    id?:string;
 }
 
 interface State {
@@ -286,16 +287,6 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                          this.props.onSelect !== undefined
                              ?
                              <div>
-                                 <div style={{marginBottom:'16px'}}>
-                                     <NeoButton
-                                         type={!hasSelected ? 'disabled' : 'primary'}
-                                         title={t("select")}
-                                         onClick={this.handleSelect}
-                                         style={{width: '100px', fontSize: '17px'}}
-                                     >
-                                         <NeoIcon icon={"big-grid"} color={'white'}/>
-                                    </NeoButton>
-                                 </div>
                                  <NeoTable
                                      scroll={{x: columnsWidth}}
                                      columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
@@ -330,6 +321,30 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                              </>
                      }
                  </div>
+                 {this.props.id== 'toolsDrawer' &&
+                 <div style={{
+                     position: 'absolute',
+                     right: 0,
+                     bottom: '80px',
+                     width: '100%',
+                     borderTop: '1px solid #e9e9e9',
+                     padding: '16px 40px',
+                     background: '#F2F2F2',
+                     textAlign: 'left',
+                 }}>
+                     <NeoButton
+                         type={!hasSelected ? 'disabled' : 'primary'}
+                         onClick={this.handleSelect}
+                         style={{marginRight: '16px'}}
+                     >
+                         {t('select')}
+                     </NeoButton>
+                     <NeoButton
+                         type={"secondary"}
+                     >
+                         {t('clear')}
+                     </NeoButton>
+                 </div>}
              </div>
             );
         }}

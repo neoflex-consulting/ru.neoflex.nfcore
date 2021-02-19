@@ -319,6 +319,8 @@ class DatePicker extends ViewElement, ValueItem, GridComponent {
     String title
         @NFCore(documentation="Положение текста, отображающегося рядом с полем")
     TitleOrientation titleOrientation
+        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
+    String width
 }
 
 @NFCore(documentation="Любой Html контент")

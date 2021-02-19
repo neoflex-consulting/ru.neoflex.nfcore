@@ -115,7 +115,7 @@ class Paginator extends React.Component<Props, any> {
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : En}>
                 <div ref={this.paginatorRef}
                     className={    `paginator ${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
-                    style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
+                    style={{float: "right"}}>
                     {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('first page')}><NeoButton className={"jump-first"} type={"link"} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton></NeoHint> : null}
                     <div className={"page-view-container"}>
                         {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('last page')}><NeoButton className={"jump-last"} type={"link"} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton></NeoHint> : null}

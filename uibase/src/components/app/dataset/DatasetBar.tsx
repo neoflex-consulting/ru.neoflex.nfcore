@@ -548,7 +548,7 @@ class DatasetBar extends React.Component<props, State> {
         this.setState({isExportChecked: !this.state.isExportChecked});
     };
 
-    onExportMenuClick(e:{key:string}) {
+    onExportMenuClick(e:any) {
         switch (e.key) {
             case 'exportToDocx':
                 this.props.onDocExportClick();
@@ -567,7 +567,7 @@ class DatasetBar extends React.Component<props, State> {
     getExportMenu = () => {
         return <Menu
             key='actionMenu'
-            // onClick={this.onExportMenuClick.bind(this)}
+            onClick={e=>this.onExportMenuClick(e)}
             className={"export-menu"}>
             {this.props.barMode === "diagram"
             && this.state.barSize <= barSize.small

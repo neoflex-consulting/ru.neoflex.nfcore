@@ -941,7 +941,8 @@ class DatasetGrid extends React.Component<Props, any> {
                                                             opacity: this.state.isGridReady ? 1 : 0,
                                                             width: "100%", minWidth: minGridWidth,
                                                             backgroundColor: "#E6E6E6",
-                                                            height: "40px"}}>
+                                                            height: "40px",
+                                                            padding: '8px'}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}
