@@ -40,23 +40,23 @@
     padding: 20px 24px 20px 24px !important;
 }
 
-.groovy-expand-editor,
+.expanded-syntax-editor,
 .expand-modal.EditableGroovyArea,
 .expand-modal.EditableGroovyArea > .ant-modal-content > .ant-modal-body {
     height: 100%;
 }
 
-.groovy-expand-editor > #ace-editor:nth-child(2){
+.expanded-syntax-editor > #ace-editor:nth-child(2){
     margin-top: 16px;
     border: 1px solid #d9d9d9;
     border-radius: 4px;
 }
 
-.groovy-expand-editor .groovy-expand-editor-bar > button {
+.expanded-syntax-editor .expanded-syntax-editor-bar > button {
     margin: 16px 0 0 16px;
 }
 
-.groovy-expand-editor .groovy-expand-editor-bar > button:first-child {
+.expanded-syntax-editor .expanded-syntax-editor-bar > button:first-child {
     margin: 16px 0 0 0;
 }
 

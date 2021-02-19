@@ -26,31 +26,67 @@ interface EditableAreaProps {
 
 function EditableSQLArea(props: EditableAreaProps): JSX.Element {
 
-    const { value, ukey, onChange, edit, expanded } = props;
+    const { value, ukey, onChange, edit, expanded, t } = props;
     const [innerValue, setInnerValue] = useState(value);
-
+    const [initialValue, setInitialValue] = useState(value);
+    const onEditorBlur = useCallback(
+        ()=>{
+            onChange && onChange!(innerValue)
+        },[onChange, innerValue]);
+    const onSave = useCallback(
+        ()=>{
+            setInitialValue(innerValue);
+        },[innerValue]);
+    const onCancel = useCallback(
+        ()=>{
+            setInnerValue(initialValue);
+            onChange && onChange(initialValue);
+        },[initialValue, onChange]);
     useEffect(() => {
         setInnerValue(value)
     },[value]);
 
-    return <AceEditor
+    if (!expanded) {
+        return <AceEditor
             readOnly={!edit}
             key={ukey}
             width={"100%"}
             className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
             mode={"sql"}
             theme={"tomorrow"}
-            onChange={(text: string) => {
-                setInnerValue(text)
-            }}
+            onChange={(text: string) => { setInnerValue(text) }}
             editorProps={{$blockScrolling: true}}
             value={innerValue}
-            onBlur={() => { onChange && onChange(innerValue) }}
+            onBlur={onEditorBlur}
             showPrintMargin={false}
             enableBasicAutocompletion={true}
             minLines={3}
             maxLines={!expanded ? 10 : undefined}
         />
+    } else {
+        return <div className={"expanded-syntax-editor"}>
+            <AceEditor
+                readOnly={!edit}
+                key={ukey}
+                width={"100%"}
+                className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+                mode={"sql"}
+                theme={"tomorrow"}
+                onChange={(text: string) => { setInnerValue(text) }}
+                editorProps={{$blockScrolling: true}}
+                value={innerValue}
+                onBlur={onEditorBlur}
+                showPrintMargin={false}
+                enableBasicAutocompletion={true}
+                minLines={3}
+                maxLines={!expanded ? 10 : undefined}
+            />
+            <div className={"expanded-syntax-editor-bar"}>
+                <NeoButton onClick={onSave} type={"primary"}>{t("save")}</NeoButton>
+                <NeoButton onClick={onCancel} type={"primary"}>{t("cancel")}</NeoButton>
+            </div>
+        </div>
+    }
 }
 
 function EditableGroovyArea(props: EditableAreaProps): JSX.Element {
@@ -119,7 +155,7 @@ function EditableGroovyArea(props: EditableAreaProps): JSX.Element {
             maxLines={!expanded ? 10 : undefined}
         />
     } else {
-        return <div className={"groovy-expand-editor"}>
+        return <div className={"expanded-syntax-editor"}>
             <AceEditor
                 readOnly={!edit}
                 key={ukey}
@@ -150,7 +186,7 @@ function EditableGroovyArea(props: EditableAreaProps): JSX.Element {
                 minLines={5}
                 highlightActiveLine={false}
             />
-            <div className={"groovy-expand-editor-bar"}>
+            <div className={"expanded-syntax-editor-bar"}>
                 <NeoButton onClick={onSave} type={"primary"}>{t("save")}</NeoButton>
                 <NeoButton onClick={onRun} type={"primary"}>{t("execute")}</NeoButton>
                 <NeoButton onClick={onCancel} type={"primary"}>{t("cancel")}</NeoButton>
