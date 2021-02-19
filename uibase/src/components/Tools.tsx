@@ -9,7 +9,17 @@ import FilesystemLookup from "./app/filesystem/FilesystemLookup";
 import {Helmet} from "react-helmet";
 // CSS
 import './../styles/Tools.css';
-import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoColor,
+    NeoDrawer,
+    NeoHint,
+    NeoInput,
+    NeoSelect,
+    NeoTabs,
+    NeoTag,
+    NeoTypography
+} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {IMainContext} from "../MainContext";
 
@@ -41,6 +51,9 @@ interface State {
     }
     MDUploadArray: File[],
     filesUploadArray: File[],
+    backUpDb: "models"|"masterdata",
+    backUpFile: string | undefined,
+    backUpFiles: string[]
 }
 
 class Tools extends React.Component<Props & WithTranslation, State> {
@@ -70,11 +83,15 @@ class Tools extends React.Component<Props & WithTranslation, State> {
         },
         MDUploadArray: [],
         filesUploadArray: [],
+        backUpDb: "models",
+        backUpFile: undefined,
+        backUpFiles: []
     };
 
     componentDidMount(): void {
         this.fileSystemLookupRef = React.createRef();
-        this.fetchBranchInfo()
+        this.fetchBranchInfo();
+        this.fetchBackUpList();
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<State>, snapshot?: any): void {
@@ -165,23 +182,21 @@ class Tools extends React.Component<Props & WithTranslation, State> {
         this.setState({drawerResourceVisible: false})
     };
 
-    render() {
-        const {t} = this.props as Props & WithTranslation;
+    renderBranch = () => {
         const branches = this.state.branchInfo.branches.map(branch => ({
             branch,
             key: branch,
             isCurrent: branch === this.state.branchInfo.current,
             isDefault: branch === this.state.branchInfo.default
         }));
-
-        const branchRegion = <div className={"tools-branch-region tools-vertical-center-element"}>
+        return <div className={"tools-branch-region tools-vertical-center-element"}>
             <div>
                 <p className={"tools-header tools-padding-top tools-margin-left"}>
-                    <NeoTypography type={"body_medium"}>{t("branch parameters")}</NeoTypography>
+                    <NeoTypography type={"body_medium"}>{this.props.t("branch parameters")}</NeoTypography>
                 </p>
-                <p className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}><NeoTypography>{t("branch")}</NeoTypography></p>
+                <p className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}><NeoTypography>{this.props.t("branch")}</NeoTypography></p>
                 <NeoSelect
-                    placeholder={t("choose from the list")}
+                    placeholder={this.props.t("choose from the list")}
                     className={"tools-select tools-margin-left"}
                     value={this.state.currentBranch.branch}
                     onChange={(currentValue: string)=>{
@@ -196,7 +211,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
             </div>
             <div className={"tools-select-checkbox-area"}>
                 <p className={"tools-text tools-branch-checkbox-text-margin"}>
-                    <NeoTypography type={"capture_regular"}>{t("is default")}</NeoTypography>
+                    <NeoTypography type={"capture_regular"}>{this.props.t("is default")}</NeoTypography>
                 </p>
                 <NeoInput
                     className={"tools-branch-checkbox"}
@@ -207,7 +222,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
             </div>
             <div className={"tools-select-checkbox-area"}>
                 <p className={"tools-text tools-branch-checkbox-text-margin"}>
-                    <NeoTypography type={"capture_regular"}>{t("is current")}</NeoTypography>
+                    <NeoTypography type={"capture_regular"}>{this.props.t("is current")}</NeoTypography>
                 </p>
                 <NeoInput
                     className={"tools-branch-checkbox"}
@@ -225,7 +240,10 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                     }}/>
             </div>
         </div>;
+    };
 
+    renderExport = () => {
+        const {t} = this.props as Props & WithTranslation;
         const exportAllObjectsRegion = <div
             className={"tools-region-element tools-export-all-objects"}>
             <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
@@ -329,7 +347,6 @@ class Tools extends React.Component<Props & WithTranslation, State> {
             </div>
         </div>;
 
-
         const exportButtonRegion = <div className={"tools-button-region"}>
             <NeoButton
                 className={"tools-button tools-action-button tools-margin-left"}
@@ -353,6 +370,19 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 {t('clear')}
             </NeoButton>
         </div>;
+        return <>
+            <div
+                className={"tools-export-region tools-vertical-center-element"}>
+                {exportAllObjectsRegion}
+                {exportFilesRegion}
+                {exportObjectsRegion}
+            </div>
+            {exportButtonRegion}
+        </>
+    }
+
+    renderImport = () => {
+        const {t} = this.props as Props & WithTranslation;
 
         const importButtonRegion = <div className={"tools-button-region"}>
             <NeoButton
@@ -490,33 +520,140 @@ class Tools extends React.Component<Props & WithTranslation, State> {
             </div>
         </div>;
 
+        return <>
+            <div
+                className={"tools-import-region tools-vertical-center-element"}>
+                {importParametersRegion}
+                {importFilesRegion}
+                {importMasterData}
+            </div>
+            {importButtonRegion}
+        </>
+    }
+
+    createBackUp = () => {
+        API.instance().fetchJson("/system/orientdb/backup?dbName=" + this.state.backUpDb, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(file => {
+            this.fetchBackUpList();
+            this.props.notification!(this.props.t("backup created"), file, "success")
+        });
+    };
+
+    restoreFromBackUp = () => {
+        API.instance().fetchJson("/system/orientdb/restore?fileName=" + this.state.backUpFile, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(file => {
+            this.props.notification!(this.props.t("backup restored"), file, "success")
+        });
+    }
+
+    fetchBackUpList = () => {
+        API.instance().fetchJson("/system/orientdb/backup", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(backupList => {
+            this.setState({backUpFiles:backupList})
+        });
+    };
+
+    vacuumDBs = () => {
+        API.instance().fetchJson("/system/orientdb/vacuum?dbName=masterdata", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(file => {
+            API.instance().fetchJson("/system/orientdb/vacuum?dbName=models", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(file => {
+                this.props.notification!(this.props.t("database vacuum success"), file, "success")
+            });
+        });
+    }
+
+    renderMetaStoreUtils = () => {
+        return <div className={"tools-backup"}>
+                <div className={"tools-backup-header tools-region-element"}>
+                    <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
+                        <NeoTypography type={"body_medium"}>{this.props.t("backup parameters")}</NeoTypography>
+                    </p>
+                    <NeoButton
+                        type={"link"}
+                        className={"tools-href tools-horizontal-center-element tools-margin-right"}
+                        title={this.props.t("vacuum databases description")}
+                        onClick={this.vacuumDBs}>
+                        <NeoTypography type={"body_link"} style={{color:'#B38136'}}>
+                            {this.props.t("vacuum databases")}
+                        </NeoTypography>
+                    </NeoButton>
+                </div>
+                <div className={"tools-backup-create tools-region-element"}>
+                    <NeoTypography type={"body_medium"}>{this.props.t("create backup")}</NeoTypography>
+                    <NeoSelect
+                        className={"tools-backup-select"}
+                        value={this.state.backUpDb}
+                        onChange={(db: "models"|"masterdata")=>{
+                            this.setState({backUpDb:db})
+                        }}>
+                        <option key={"models"}>{"models"} </option>
+                        <option key={"masterdata"}>{"masterdata"} </option>
+                    </NeoSelect>
+                    <NeoButton type={"primary"} onClick={this.createBackUp}>{this.props.t("create backup")}</NeoButton>
+                </div>
+                <div className={"tools-backup-restore tools-region-element"}>
+                    <NeoTypography type={"body_medium"}>{this.props.t("restore from backup")}</NeoTypography>
+                    <NeoSelect
+                        placeholder={this.props.t("select backup")}
+                        width={"320px"}
+                        className={"tools-backup-select"}
+                        value={this.state.backUpFile}
+                        onChange={(db: "models"|"masterdata")=>{
+                            this.setState({backUpFile:db})
+                        }}>
+                        {this.state.backUpFiles.map(f=>{
+                            return <option key={f}>{f}</option>
+                        })}
+                    </NeoSelect>
+                    <NeoHint className={"tools-backup-refresh"} title={this.props.t("refresh backup list")} onClick={this.fetchBackUpList}>
+                        <NeoIcon icon={"repeat"}/>
+                    </NeoHint>
+                    <NeoButton type={"primary"} onClick={this.restoreFromBackUp}>{this.props.t("restore backup")}</NeoButton>
+                </div>
+            </div>
+    }
+
+    render() {
+        const {t} = this.props as Props & WithTranslation;
         return (
             <div id={"tools"}>
                 <Helmet>
                     <title>{this.props.t('tools')}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
                 </Helmet>
-                {branchRegion}
+                {this.renderBranch()}
                 <NeoTabs className={"tools-tabs-region tools-vertical-center-element"}
                     defaultActiveKey={"export"}
                     tabPosition={'top'}>
                     <NeoTabs.NeoTabPane tab={t("export")} key={t("export")}>
-                        <div
-                            className={"tools-export-region tools-vertical-center-element"}>
-                            {exportAllObjectsRegion}
-                            {exportFilesRegion}
-                            {exportObjectsRegion}
-                        </div>
-                        {exportButtonRegion}
+                        {this.renderExport()}
                     </NeoTabs.NeoTabPane>
                     <NeoTabs.NeoTabPane tab={t("import")} key={t("import")} >
-                        <div
-                            className={"tools-import-region tools-vertical-center-element"}>
-                            {importParametersRegion}
-                            {importFilesRegion}
-                            {importMasterData}
-                        </div>
-                        {importButtonRegion}
+                        {this.renderImport()}
+                    </NeoTabs.NeoTabPane>
+                    <NeoTabs.NeoTabPane tab={t("backup")} key={t("backup")} >
+                        {this.renderMetaStoreUtils()}
                     </NeoTabs.NeoTabPane>
                 </NeoTabs>
             </div>

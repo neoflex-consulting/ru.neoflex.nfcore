@@ -315,7 +315,7 @@ public class SysController {
         return Collections.singletonList(provider.getServer().backupDatabase(dbName).getAbsolutePath());
     }
 
-    @GetMapping(value = "/orientdb/buckup", produces = "application/json; charset=utf-8")
+    @GetMapping(value = "/orientdb/backup", produces = "application/json; charset=utf-8")
     public List<String> dbListBackups(@RequestParam(required = false) String dbName) throws Exception {
         return provider.getServer().listBackupNames(dbName);
     }

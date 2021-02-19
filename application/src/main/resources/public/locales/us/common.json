@@ -510,5 +510,18 @@
         "file already exists": "File already exists",
         "execute": "Execute",
         "table view": "Table view",
-        "json view": "JSON view"
+        "json view": "JSON view",
+
+        "backup restored": "Backup restored",
+        "backup created": "Backup created",
+        "database vacuum success": "Database vacuum success",
+        "backup parameters": "Backup parameters",
+        "vacuum databases description": "Shrink database size",
+        "create backup": "Create backup",
+        "restore from backup": "Restore from backup",
+        "select backup": "Select backup",
+        "refresh backup list": "Refresh backup list",
+        "restore backup": "Restore backup",
+        "backup": "Backup",
+        "vacuum databases": "Vacuum databases"
 }

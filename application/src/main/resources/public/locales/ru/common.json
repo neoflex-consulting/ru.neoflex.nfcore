@@ -507,7 +507,20 @@
         "file already exists": "Файл с таким названием уже существует в файловой системе",
         "execute": "Выполнить",
         "table view": "Табличное представление",
-        "json view": "JSON представление"
+        "json view": "JSON представление",
+
+        "backup restored": "Восстановление из резевной копии прошло успешно",
+        "backup created": "Создана резервная копия",
+        "database vacuum success": "Метахранилище успешно сжато",
+        "backup parameters": "Параметры",
+        "vacuum databases description": "Сжать размер хранилища метаданных",
+        "create backup": "Создать резервную копию",
+        "restore from backup": "Восстановить из копии",
+        "select backup": "Выбрать резервную копию",
+        "refresh backup list": "Обновить список копий",
+        "restore backup": "Восстановить из копии",
+        "backup": "Резервные копии",
+        "vacuum databases": "Сжать хранилище метаданных"
 }
 
 
