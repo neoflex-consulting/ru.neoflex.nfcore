@@ -38,7 +38,7 @@
     "i18next-xhr-backend": "3.2.2",
     "immutability-helper": "^3.0.1",
     "m-react-splitters": "^1.2.0",
-    "moment": "2.24.0",
+    "moment": "^2.29.1",
     "neo-design": "2.2.16",
     "neo-icon": "1.0.37",
     "number-format.js": "2.0.9",
