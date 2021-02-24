@@ -85,11 +85,11 @@ const SortableItem = SortableElement(({value}: any) => {
     value.setFieldsOnReset(mapOfValues)
     return <div className="SortableItem">
         <NeoRow style={{height:'100%'}}>
-            <NeoCol span={1}>
+            <NeoCol span={1} align={'center'}>
                 {value.index}
             </NeoCol>
-            <NeoCol  span={2}>
-                <Form.Item style={{ display: 'inline-block', margin: 'auto' }}>
+            <NeoCol span={2}>
+                <Form.Item style={{ margin: 'auto' }}>
                     <NeoSwitch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
@@ -99,7 +99,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
-                <Form.Item style={{ margin: 'auto' }}
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
                            initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
                            name={"column" + value.index}
                            rules={[
@@ -147,7 +147,7 @@ const SortableItem = SortableElement(({value}: any) => {
             </NeoCol>
             <NeoCol span={10}>
                 {
-                    <Form.Item style={{margin: 'auto'}}
+                    <Form.Item style={{margin: 'auto', height:'32px'}}
                     name={"operation" + value.index}
                                initialValue={value.t(value.operation) || undefined}
                                rules={[
@@ -245,7 +245,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 }
             </NeoCol>
             <NeoCol span={1}>
-                <Form.Item style={{ marginTop: '35px' }}>
+                <Form.Item style={{ margin: '0' }}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
@@ -279,10 +279,10 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
         return (
             <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
-                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                    <NeoCol span={12}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={12} align={"flex-end"}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
@@ -331,6 +331,7 @@ class ServerAggregate extends DrawerParameterComponent<Props, State> {
                     padding: '16px 40px',
                     background: '#F2F2F2',
                     textAlign: 'left',
+                    zIndex:1
                 }}>
                     <NeoButton
                         id={'runQueryButton'}

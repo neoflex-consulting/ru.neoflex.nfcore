@@ -164,6 +164,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                     padding: '16px 40px',
                     background: '#F2F2F2',
                     textAlign: 'left',
+                    zIndex:1
                 }}>
                     <NeoButton
                         id={'runQueryButton'}
