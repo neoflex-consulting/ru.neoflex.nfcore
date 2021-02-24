@@ -523,5 +523,11 @@
         "refresh backup list": "Refresh backup list",
         "restore backup": "Restore backup",
         "backup": "Backup",
-        "vacuum databases": "Vacuum databases"
+        "vacuum databases": "Vacuum databases",
+        "restore": "Restore",
+        "please, specify backup file": "Please, specify backup file",
+        "are you sure you want to restore copy?": "Are you sure you want to restore copy?",
+        "restore from copy": "Restore from copy",
+        "vacuum metadata": "Vacuum metadata",
+        "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Warning you about to shrink metadata database, be advised this operation is time-consuming. Please make backup first. Proceed?"
 }

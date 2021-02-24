@@ -14,7 +14,7 @@ import {
     NeoColor,
     NeoDrawer,
     NeoHint,
-    NeoInput,
+    NeoInput, NeoModal,
     NeoSelect,
     NeoTabs,
     NeoTag,
@@ -53,7 +53,9 @@ interface State {
     filesUploadArray: File[],
     backUpDb: "models"|"masterdata",
     backUpFile: string | undefined,
-    backUpFiles: string[]
+    backUpFiles: string[],
+    isModalImportBackupVisible: boolean,
+    isModalVacuumVisible: boolean
 }
 
 class Tools extends React.Component<Props & WithTranslation, State> {
@@ -85,7 +87,9 @@ class Tools extends React.Component<Props & WithTranslation, State> {
         filesUploadArray: [],
         backUpDb: "models",
         backUpFile: undefined,
-        backUpFiles: []
+        backUpFiles: [],
+        isModalImportBackupVisible: false,
+        isModalVacuumVisible: false
     };
 
     componentDidMount(): void {
@@ -544,14 +548,20 @@ class Tools extends React.Component<Props & WithTranslation, State> {
     };
 
     restoreFromBackUp = () => {
-        API.instance().fetchJson("/system/orientdb/restore?fileName=" + this.state.backUpFile, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(file => {
-            this.props.notification!(this.props.t("backup restored"), file, "success")
-        });
+        if (this.state.backUpFile) {
+            API.instance().fetchJson("/system/orientdb/restore?fileName=" + this.state.backUpFile, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(file => {
+                this.props.notification!(this.props.t("backup restored"), file, "success")
+            }).finally(() => {
+                this.handleImportModalVisibility()
+            });
+        } else {
+            this.props.notification!(this.props.t("restore"), this.props.t("please, specify backup file"), "error")
+        }
     }
 
     fetchBackUpList = () => {
@@ -579,9 +589,23 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 }
             }).then(file => {
                 this.props.notification!(this.props.t("database vacuum success"), file, "success")
-            });
+            }).finally(() => {
+                this.handleVacuumModalVisibility()
+            });;
         });
     }
+
+    handleImportModalVisibility = () => {
+        if ((this.state.backUpFile && !this.state.isModalImportBackupVisible) || this.state.isModalImportBackupVisible) {
+            this.setState({isModalImportBackupVisible: !this.state.isModalImportBackupVisible})
+        } else {
+            this.props.notification!(this.props.t("restore"), this.props.t("please, specify backup file"), "error")
+        }
+    };
+
+    handleVacuumModalVisibility = () => {
+        this.setState({isModalVacuumVisible: !this.state.isModalVacuumVisible})
+    };
 
     renderMetaStoreUtils = () => {
         return <div className={"tools-backup"}>
@@ -593,7 +617,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                         type={"link"}
                         className={"tools-href tools-horizontal-center-element tools-margin-right"}
                         title={this.props.t("vacuum databases description")}
-                        onClick={this.vacuumDBs}>
+                        onClick={this.handleVacuumModalVisibility}>
                         <NeoTypography type={"body_link"} style={{color:'#B38136'}}>
                             {this.props.t("vacuum databases")}
                         </NeoTypography>
@@ -629,8 +653,34 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                     <NeoHint className={"tools-backup-refresh"} title={this.props.t("refresh backup list")} onClick={this.fetchBackUpList}>
                         <NeoIcon icon={"repeat"}/>
                     </NeoHint>
-                    <NeoButton type={"primary"} onClick={this.restoreFromBackUp}>{this.props.t("restore backup")}</NeoButton>
+                    <NeoButton type={"primary"} onClick={this.handleImportModalVisibility}>{this.props.t("restore backup")}</NeoButton>
                 </div>
+                <NeoModal
+                    key={"import-backup"}
+                    onCancel={this.handleImportModalVisibility}
+                    closable={true}
+                    type={'edit'}
+                    content={this.props.t("are you sure you want to restore copy?")}
+                    title={this.props.t('restore from copy')}
+                    visible={this.state.isModalImportBackupVisible}
+                    onLeftButtonClick={this.restoreFromBackUp}
+                    onRightButtonClick={this.handleImportModalVisibility}
+                    textOfLeftButton={this.props.t("restore")}
+                    textOfRightButton={this.props.t("cancel")}
+                />
+                <NeoModal
+                    key={"vacuum-db"}
+                    onCancel={this.handleVacuumModalVisibility}
+                    closable={true}
+                    type={'edit'}
+                    content={this.props.t("warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?")}
+                    title={this.props.t('vacuum metadata')}
+                    visible={this.state.isModalVacuumVisible}
+                    onLeftButtonClick={this.vacuumDBs}
+                    onRightButtonClick={this.handleVacuumModalVisibility}
+                    textOfLeftButton={this.props.t("restore")}
+                    textOfRightButton={this.props.t("cancel")}
+                />
             </div>
     }
 
