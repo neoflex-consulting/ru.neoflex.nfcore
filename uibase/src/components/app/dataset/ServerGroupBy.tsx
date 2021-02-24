@@ -37,7 +37,7 @@ const SortableItem = SortableElement(({value}: any) => {
     return <div>
         <div className="SortableItem" style={{borderBottom:'none'}}>
         <NeoRow style={{height:'100%'}}>
-            <NeoCol span={1}>
+            <NeoCol span={1} align={'center'}>
                 {value.index}
             </NeoCol>
             <NeoCol span={2}>
@@ -51,7 +51,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
-                <Form.Item style={{ margin: 'auto' }}
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
                            initialValue={value.t(value.operation) || undefined}
                            name={"operation" + value.index}
                            rules={[
@@ -85,7 +85,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
-                <Form.Item style={{ margin: 'auto' }}
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
                            initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
                            name={"column" + value.index}
                            rules={[
@@ -150,7 +150,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={1}>
-                <Form.Item style={{ marginTop: '35px' }}>
+                <Form.Item style={{ margin: '0' }}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
@@ -171,7 +171,7 @@ const SortableItem = SortableElement(({value}: any) => {
             <NeoCol span={2}>
             </NeoCol>
             <NeoCol span={20}>
-                <Form.Item style={{ margin: 'auto' }}
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
                            initialValue={value.value}
                            name={"columnByName" + value.index}
                            rules={[
