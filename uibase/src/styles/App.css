@@ -426,6 +426,12 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
   width: unset;
 }
 
+.headerDev-menu {
+  display:flex;
+  height: 80px;
+  align-items: center;
+}
+
 @media screen and (min-width: 1441px) and (max-width: 1920px){
   .backGroundImage .secondColumn {
     display: block;
@@ -1688,9 +1694,6 @@ li.ant-dropdown-menu-item.headerMenu.ant-dropdown-menu-item {
   justifyContent: space-between!important;
   width: 100%!important;
   margin-left: 70px!important;
-}
-.HeaderWithNames .col{
-  justify-content: unset!important;
 }
 
 .linksInMoreWord {
