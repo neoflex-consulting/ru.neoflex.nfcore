@@ -34,7 +34,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}:any) =>
     <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
-    <NeoRow style={{height:'100%'}}>
+    <NeoRow style={{height:'100%', alignItems:'center'}}>
         <NeoIcon color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
         <Form.Item style={{margin: 'auto 0 auto 20px'}}>
             <NeoSwitch
@@ -91,7 +91,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                     <div>
             <Form style={{ marginTop: '15px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
-                    <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
+                    <NeoCol span={18} style={{ marginBottom: '6px'}}>
                         <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
                             this.filter = event.currentTarget.value;
                             this.setState({parametersArray: parametersArray!
@@ -103,7 +103,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     })});
                         }}/>
                     </NeoCol>
-                    <NeoCol span={6} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={6} align={'flex-end'}>
                         <NeoButton title={t("back to version") + " " + this.props.datasetComponentVersion}
                                    type={'link'}
                                    id={'resetButton'}
