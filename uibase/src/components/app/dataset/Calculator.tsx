@@ -38,29 +38,29 @@ interface FunctionsEventHandlerProps {
 }
 
 function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandlerProps) {
-    return <NeoCol style={{flexDirection:'column'}}>
-                <NeoRow>
+    return <NeoCol style={{flexDirection:'column', width:'185px'}}>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'1'} onClick={onButtonClick}>1</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'2'} onClick={onButtonClick}>2</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'3'} onClick={onButtonClick}>3</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'4'} onClick={onButtonClick}>4</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'5'} onClick={onButtonClick}>5</NeoButton>
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'6'} onClick={onButtonClick}>6</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'7'} onClick={onButtonClick}>7</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'8'} onClick={onButtonClick}>8</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'9'} onClick={onButtonClick}>9</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'0'} onClick={onButtonClick}>0</NeoButton>
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'('} onClick={onButtonClick}>(</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={')'} onClick={onButtonClick}>)</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'\''} onClick={onButtonClick}>`</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'.'} onClick={onButtonClick}>.</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={','} onClick={onButtonClick}>,</NeoButton>
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'-'} onClick={onButtonClick}>-</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'+'} onClick={onButtonClick}>+</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'*'} onClick={onButtonClick}>*</NeoButton>
@@ -68,16 +68,16 @@ function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandle
                     <NeoButton type={'link'} className={'calc-button'} id={'||'} onClick={onButtonClick}>||</NeoButton>
                     {/*<NeoButton type={'link'} className={'calc-button'} onClick={onClearClick}>c</NeoButton>*/}
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'center'}>
                     <NeoButton type={'link'} style={{width: '175px', height: '24px', marginTop: '5px', border: '1px solid #D9D9D9', color: 'black'}} onClick={onButtonClick} id={' '}>{t("space")}</NeoButton>
                 </NeoRow>
             </NeoCol>
 }
 
 function CreateFunctions({onButtonClick, functions,t}:FunctionsEventHandlerProps) {
-    return (<NeoCol key={"CreateFunctionsCol"} style={{flexDirection:'column'}}>
+    return (<NeoCol key={"CreateFunctionsCol"}>
         {functions ? functions.map(func => {
-            return <NeoRow key={func.get("literal") + "row"}>
+            return <NeoRow key={func.get("literal") + "row"} justify={'center'}>
                 <NeoButton
                     type={'link'}
                     key={func.get("literal")}
@@ -304,16 +304,17 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     return (
         <div id={"selectsInCalculator"}>
             <Form style={{ marginTop: '24px' }} ref={this.formRef}>
-                <Form.Item style={{marginTop: '-28px', marginBottom:'15px', lineHeight:'19px'}}>
+                <Form.Item style={{marginTop: '-35px', marginBottom:'10px', lineHeight:'19px'}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>
                             {this.t('calculatableExpressions')}
                         </NeoTypography>
                 </Form.Item>
-                    <NeoCol span={10} style={{justifyContent:'flex-start'}}>
+                <NeoRow>
+                    <NeoCol span={10}>
                         <Form.Item style={{marginBottom:'15px'}}
                                    name={inputSelectKey}>
                                 <NeoSelect
-                                    width={'310px'}
+                                    width={'100%'}
                                     getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                     placeholder={this.t("Select calculated column")}
                                     onChange={(e: any) => {
@@ -339,10 +340,10 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             id={'createNewRowButton'}
                             onClick={this.createNewRow}
                         >
-                            <NeoIcon icon={"plus"} color={NeoColor.violete_6} style={{margin:'auto 5px auto auto'}}/>
+                            <NeoIcon icon={"plus"} color={NeoColor.violete_6} />
                         </NeoButton>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent:'flex-end'}}>
+                    <NeoCol span={12} align={'flex-end'}>
                         <Form.Item style={{marginBottom:'15px'}}
                                    name={inputFieldKey}>
                                 <NeoInput
@@ -356,36 +357,42 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                 />
                         </Form.Item>
                     </NeoCol>
-                <NeoCol span={12} style={{justifyContent:'flex-start'}}>
-                    <Form.Item style={{marginBottom:'32px'}} name={selectTypeKey}>
-                            <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
-                                       getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
-                                {Object.keys(appTypes).map(type => <option key={type} value={type}>
-                                    {this.t(type)}
-                                </option>)}
-                            </NeoSelect>
-                    </Form.Item>
-                </NeoCol>
-                <NeoCol span={12} style={{justifyContent:'flex-end'}}>
-                    <Form.Item style={{marginBottom:'32px'}} name={selectMaskKey}>
-                            <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
-                                       getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
-                                {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
-                                    key={mask.key}
-                                    value={mask.value}>
-                                    {this.t(mask.key)}
-                                </option>) : undefined}
-                            </NeoSelect>
-                    </Form.Item>
-                </NeoCol>
+                </NeoRow>
+                <NeoRow>
+                    <NeoCol span={12}>
+                        <Form.Item style={{marginBottom:'32px'}} name={selectTypeKey}>
+                                <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
+                                           getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
+                                    {Object.keys(appTypes).map(type => <option key={type} value={type}>
+                                        {this.t(type)}
+                                    </option>)}
+                                </NeoSelect>
+                        </Form.Item>
+                    </NeoCol>
+                    <NeoCol span={12} align={'flex-end'}>
+                        <Form.Item style={{marginBottom:'32px'}} name={selectMaskKey}>
+                                <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
+                                           getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
+                                    {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
+                                        key={mask.key}
+                                        value={mask.value}>
+                                        {this.t(mask.key)}
+                                    </option>) : undefined}
+                                </NeoSelect>
+                        </Form.Item>
+                    </NeoCol>
+                </NeoRow>
                 <Form.Item style={{marginBottom:'0px'}}>
-                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>{this.t('computational expression')}</div>
-                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>{this.t('create a calculation using column aliases')}</div>
+                    <NeoCol>
+                        <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>{this.t('computational expression')}</div>
+                        <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>{this.t('create a calculation using column aliases')}</div>
+                    </NeoCol>
                 </Form.Item>
                     <NeoRow style={{marginBottom: '12px'}}
                     >
                         <NeoCol span={24}>
                             <Form.Item name={inputOperationKey}
+                                       style={{marginBottom:'0px'}}
                                        initialValue={' '}
                                        rules={[
                                            {
@@ -394,7 +401,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                                message: ' '
                                            }
                                        ]}>
-                                    <TextArea
+                                    <NeoInput type={"textArea"}
+                                              width={'100%'}
                                        ref={this.expressionRef}
                                        placeholder={this.t("Expression")}
                                        style={{height:"112px"}}
@@ -404,7 +412,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                     </NeoRow>
                 <Form.Item>
                     <NeoRow>
-                        <NeoCol span={8} style={{justifyContent: 'flex-start'}}>
+                        <NeoCol span={8} align={"flex-start"}>
                             <div className={'calc-block'}>
                                 <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
                                     {this.t("columns")}
@@ -416,8 +424,8 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                 </div>
                             </div>
                         </NeoCol>
-                        <NeoCol span={8}>
-                            <div className={'calc-block'}>
+                        <NeoCol span={8} align={'center'}>
+                            <div className={'calc-block'} style={{alignItems:'center'}}>
                                 <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
                                     {this.t("keypad")}
                                 </NeoTypography>
@@ -427,7 +435,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     t={this.t}/>
                             </div>
                         </NeoCol>
-                        <NeoCol span={8} style={{justifyContent: 'flex-end'}}>
+                        <NeoCol span={8} align={'flex-end'}>
                             <div className={'calc-block'}>
                                 <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px', marginBottom:'10px'}}>
                                     {this.t("functions/operators")}
