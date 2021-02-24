@@ -27,3 +27,12 @@
     width: fit-content !important;
 }
 
+.modal-add-inner-ref .ant-modal-footer {
+    display: flex;
+}
+
+.modal-add-inner-ref .ant-modal-footer .ant-btn-icon-only.ant-btn-lg {
+    width: 32px;
+    height: 32px;
+    background-color: #424D78;
+}

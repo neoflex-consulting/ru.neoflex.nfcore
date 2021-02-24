@@ -129,7 +129,7 @@ class EcoreApp extends React.Component<any, State> {
     };
 
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        if (nextProps.location.pathname.includes("app")) {
+        if (nextProps.location.pathname.includes("/app/")) {
             const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
             return {
                 pathFull: pathFull,

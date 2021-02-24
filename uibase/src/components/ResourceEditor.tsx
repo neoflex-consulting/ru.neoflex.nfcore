@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Button, Col, Input, Layout, Menu, Row, Table, Tree} from 'antd';
-import Ecore, {EObject, Resource, ResourceSet} from "ecore";
+import {Button, Col, Dropdown, Input, Layout, Menu, Row, Table, Tree} from 'antd';
+import Ecore, {EClass, EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
@@ -59,7 +59,7 @@ interface State {
     addRefPropertyName: String,
     isSaving: Boolean,
     addRefPossibleTypes: Array<string>,
-    classes: Ecore.EObject[],
+    classes: EClass[],
     selectedKeys: Array<string>,
     selectedRefUries: Array<string>,
     searchResources: String,
@@ -75,8 +75,8 @@ interface State {
     selectTags: number,
     selectCount: number,
     selectedTree: any,
+    addRefMenuItems: EClass[]
 }
-
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
     children.filter((ch:any)=>ch !== null).forEach((c:any)=> {
@@ -169,6 +169,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectTags: 3,
         selectCount: 0,
         selectedTree:{},
+        addRefMenuItems: []
     };
 
     refresh = (refresh: boolean): void => {
@@ -211,7 +212,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     generateEObject(): void {
-        const { selectedEClass, name } = this.props.location.state;
+        const selectedEClass = this.props.location.state?.selectedEClass ? this.props.location.state.selectedEClass : this.props.match.params.ref;
+        const name = this.props.location.state?.name ? this.props.location.state.name : "";
         const targetEClass: { [key: string]: any } | undefined = this.state.classes.find((eclass: Ecore.EClass) => `${eclass.eContainer.get('name')}.${eclass.get('name')}` === selectedEClass);
         const resourceSet = Ecore.ResourceSet.create();
         const newResourceJSON: { [key: string]: any } = {};
@@ -602,7 +604,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({
             modalRefVisible: true,
             addRefPropertyName: EObject.get('name'),
-            addRefPossibleTypes: addRefPossibleTypes
+            addRefPossibleTypes: addRefPossibleTypes,
+            addRefMenuItems: this.getAddElementsList(addRefPossibleTypes)
         })
     };
 
@@ -1335,6 +1338,46 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
+    handleAddElement = () => {
+        const eClass:EClass = this.state.addRefMenuItems[0];
+        if (eClass) {
+            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
+        }
+    };
+
+    renderMenu = () => {
+        return <Menu>
+            {(this.state.addRefMenuItems as EClass[]).map((eClass, index) => {
+                return <Menu.Item key={index}>
+                    <a target="_blank" rel="noopener noreferrer" href={`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`}>
+                        {eClass.eContainer.get('name')+'.'+eClass.get('name')}
+                    </a>
+                </Menu.Item>
+            })}
+        </Menu>
+
+    };
+
+    getAddElementsList = (addRefPossibleTypes: string[]) => {
+        let classes:EClass[] = [];
+        (this.state.classes as EClass[]).forEach(c=>{
+            if (c.eContents().find(f=>f.get("eType")?.get("name") === "QName")) {
+                if (addRefPossibleTypes.includes(c.get("name") as never)) {
+                    classes = classes.concat(c.get('eAllSubTypes'));
+                    if (!c.get('abstract')) {
+                        classes.push(c);
+                    }
+                }
+            }
+        });
+        const nonAbstract = (this.state.classes as EClass[])
+            .filter(c=>addRefPossibleTypes.includes(c.get("name") as never)
+                && !c.get('abstract'));
+        return classes.length === nonAbstract.length
+            ? classes //all classes are global
+            : []
+    };
+
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
@@ -1472,7 +1515,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={<NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>OK</NeoButton>}
+                    footer={
+                        <>
+                            <NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>
+                                OK
+                            </NeoButton>
+                            {this.state.addRefMenuItems.length > 1
+                                ? <Dropdown overlay={this.renderMenu()}>
+                                      <Button title={t('add element')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} size="large"/>
+                                  </Dropdown>
+                                : this.state.addRefMenuItems.length === 1
+                                    ? <Button title={t('add element')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} size="large" onClick={this.handleAddElement}/>
+                                    : null
+                            }
+                        </>
+                    }
                 >
                     <NeoSelect
                         className={'select_option_tag'}
