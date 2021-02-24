@@ -526,7 +526,8 @@
         "are you sure you want to restore copy?": "Вы действительно хотите восстановить из копии?",
         "restore from copy": "Восстановление из резервной копии",
         "vacuum metadata": "Сжать хранилище метаданных",
-        "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Внимание, вы собираетесь сжать хранилище метаданных. Операция сжатия выполняется долго, крайне рекомендуется заранее сделать бэкап баз. Продолжить?"
+        "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Внимание, вы собираетесь сжать хранилище метаданных. Операция сжатия выполняется долго, крайне рекомендуется заранее сделать бэкап баз. Продолжить?",
+        "back to appmodule": "Назад к AppModule"
 
 }
 

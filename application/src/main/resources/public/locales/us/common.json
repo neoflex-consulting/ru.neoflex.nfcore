@@ -529,5 +529,6 @@
         "are you sure you want to restore copy?": "Are you sure you want to restore copy?",
         "restore from copy": "Restore from copy",
         "vacuum metadata": "Vacuum metadata",
-        "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Warning you about to shrink metadata database, be advised this operation is time-consuming. Please make backup first. Proceed?"
+        "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Warning you about to shrink metadata database, be advised this operation is time-consuming. Please make backup first. Proceed?",
+        "back to appmodule": "Back to AppModule"
 }

@@ -427,7 +427,7 @@ export class MainApp extends React.Component<any, State> {
                     {id && rev ? <Link to={`/developer/data/editor/${id}/${rev}`}>
                         {up.appModule}
                     </Link> :  up.appModule}
-                    {(urlParams.length-1-index !== 0) &&<NeoHint title={this.props.t("back")} placement={"right"} onClick={()=>{
+                    {(urlParams.length-1-index !== 0) &&<NeoHint title={this.props.t("back to appmodule")} placement={"right"} onClick={()=>{
                         this.props.history.go(-(urlParams.length-1-index))
                     }}>
                         <NeoIcon icon={"arrow-back"}/>
