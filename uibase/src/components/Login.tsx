@@ -65,7 +65,7 @@ export class Login extends React.Component<any, State> {
                 <FetchSpinner/>
                 :
                 <div className={"backGroundImage"}>
-                    <NeoCol className={"firstColumn"} justify={'start'}>
+                    <NeoCol className={"firstColumn"}>
                         <div className={"comfort"}><span className={"comfortWord"}>Удобная</span> система</div>
                         <div className={"secondLine"}>Налогового мониторинга</div>
                         <div className={"yellowLineColumn1"}/>
