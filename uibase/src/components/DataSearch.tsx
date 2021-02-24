@@ -285,7 +285,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                                 this.formRef.current!.setFieldsValue({ json_field: { value: json_field } });
                                             }}
                                             editorProps={{ $blockScrolling: true }}
-                                            /*value={this.formRef.current !== null ? this.formRef.current!.getFieldValue('json_field') : undefined}*/
                                             defaultValue={JSON.stringify({
                                                 contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
                                             }, null, 4)}

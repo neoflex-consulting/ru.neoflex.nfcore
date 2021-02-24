@@ -178,25 +178,26 @@ export default function Operations(props: Props): JSX.Element {
     }
 
     function renderMenu(){
-        const menu = () => {
-            return <Menu onClick={onMenuSelect}> 
+        const menu = (
+            <Menu onClick={onMenuSelect}>
                 {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
-                    return <Menu.Item key={oper.get('name')}>
+                   return <Menu.Item key={oper.get('name')}>
                         <NeoHint placement={"right"} title={getFieldAnnotationByKey(oper.get('eAnnotations'), "documentation")}>{t(oper.get('name'))}</NeoHint>
                     </Menu.Item>
                 })}
-            </Menu>
-        };
+            </Menu>)
 
         return <Dropdown placement="bottomCenter" overlay={menu}>
-            <NeoButton
-                className="panel-button"
-                type={"ghost-icon"}
-                title={t("operations")}
-            >
-                <NeoIcon icon={"success"}/>
-            </NeoButton>
-        </Dropdown>
+            <div>
+                <NeoButton
+                    className="panel-button"
+                    type={"ghost-icon"}
+                    title={t("operations")}
+             >
+                    <NeoIcon icon={"lightbulbt"}/>
+                </NeoButton>
+            </div>
+            </Dropdown>
     }
 
     return (
