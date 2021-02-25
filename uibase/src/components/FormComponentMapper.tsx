@@ -176,21 +176,21 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
         {elements}
         {eObject.get('eType').get('name') === 'EClass' ?
             <NeoButton
-                style={{ display: "inline-block" }} 
+                style={{ display: "inline-block", padding:'9px 12px' }}
                 key={ukey + "_" + idx} 
                 onClick={() => {
                     props.onEClassBrowse && props.onEClassBrowse!(eObject)
                 }}
-                type={!edit ? 'disabled' : 'primary'}
+                type={!edit ? 'disabled' : 'secondary'}
             >...</NeoButton>
             :
             <NeoButton
-                style={{ display: "inline-block" }} 
+                style={{ display: "inline-block", padding:'9px 12px' }}
                 key={ukey + "_" + idx} 
                 onClick={() => {
                     props.onBrowse && props.onBrowse!(eObject)
                 }}
-                type={!edit ? 'disabled' : 'primary'}
+                type={!edit ? 'disabled' : 'secondary'}
             >...</NeoButton>
         }
     </React.Fragment>
