@@ -414,7 +414,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                     <NeoRow>
                         <NeoCol span={8} align={"flex-start"}>
                             <div className={'calc-block'}>
-                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
+                                <NeoTypography type={'capture_medium'} style={{textAlign:'center', marginTop:'12px'}}>
                                     {this.t("columns")}
                                 </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto"}}>
@@ -426,7 +426,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoCol>
                         <NeoCol span={8} align={'center'}>
                             <div className={'calc-block'} style={{alignItems:'center'}}>
-                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
+                                <NeoTypography type={'capture_medium'} style={{textAlign:'center', marginTop:'12px'}}>
                                     {this.t("keypad")}
                                 </NeoTypography>
                                 <CreateCalculator
@@ -437,7 +437,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoCol>
                         <NeoCol span={8} align={'flex-end'}>
                             <div className={'calc-block'}>
-                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px', marginBottom:'10px'}}>
+                                <NeoTypography type={'capture_medium'} style={{textAlign:'center', marginTop:'12px', marginBottom:'10px'}}>
                                     {this.t("functions/operators")}
                                 </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto" }}>
