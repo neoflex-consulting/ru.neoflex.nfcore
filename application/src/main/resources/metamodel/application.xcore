@@ -341,11 +341,11 @@ class Input extends ViewElement, ValueItem, GridComponent,InputElement {
         @NFCore(documentation="Формат данных. Варианты: InputNumber, InputString")
     InputType inputType = "InputString"
         @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
-    String minValue = "1"
+    String minValue
         @NFCore(documentation="Максимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
-    String maxValue = "99"
+    String maxValue
         @NFCore(documentation="Шаг значений, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
-    String step = "1"
+    String step
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")

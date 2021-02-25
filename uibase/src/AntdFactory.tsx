@@ -1161,9 +1161,9 @@ export class Input_ extends ViewContainer {
                         className={cssClass}
                         width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         disabled={isReadOnly}
-                        min={this.viewObject.get('minValue') || 1}
-                        max={this.viewObject.get('maxValue') || 99}
-                        step={this.viewObject.get('step') || 1}
+                        min={this.viewObject.get('minValue') || undefined}
+                        max={this.viewObject.get('maxValue') || undefined}
+                        step={this.viewObject.get('step') || undefined}
                         placeholder={this.viewObject.get('placeholder')}
                         defaultValue={Number(this.viewObject.get('value') || this.viewObject.get('minValue') || 1)}
                         onChange={(currentValue: any) => {
