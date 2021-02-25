@@ -500,5 +500,5 @@
 
 /*z-index higher than Drawer standard 1000 to display debug content*/
 .horizontal-splitter .pane.horizontal {
-    z-index: 10000;
+    z-index: 1010;
 }
