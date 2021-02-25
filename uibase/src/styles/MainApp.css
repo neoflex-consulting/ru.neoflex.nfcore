@@ -499,6 +499,7 @@
 }
 
 /*z-index higher than Drawer standard 1000 to display debug content*/
+.horizontal-splitter .handle-bar.horizontal,
 .horizontal-splitter .pane.horizontal {
     z-index: 1010;
 }
