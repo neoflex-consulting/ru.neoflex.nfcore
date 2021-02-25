@@ -1611,7 +1611,7 @@ class Drawer_ extends ViewContainer {
         return (
             <Drawer
                 className={cssClass}
-                style={{transform:""}} //отключаем, т.к. на вложенных drawer'ах родитель работает не корректно
+                style={{transform:"", position:"absolute"}} //отключаем, т.к. на вложенных drawer'ах родитель работает не корректно
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
