@@ -356,6 +356,16 @@ export class MainApp extends React.Component<any, State> {
             `width: ${width}; min-width: ${minWidth}; max-width: ${maxWidth}`);
     };
 
+    updateLogContent = () => {
+        API.instance().fetchLog().then(log=>{
+            this.setState({log:log}, ()=>{
+                if (this.debugRef.current) {
+                    this.debugRef.current.scrollIntoView({ behavior: "smooth" , block: "end" })
+                }
+            })
+        })
+    }
+
     renderFooter = () => {
         return (
             <div className={"application-footer"}>
@@ -366,13 +376,7 @@ export class MainApp extends React.Component<any, State> {
                         title={this.state.hideLog ? this.props.t("show log") : this.props.t("hide log")}
                         onClick={()=>{
                             this.setState({hideLog:!this.state.hideLog, hideURL: true, activeTab: this.state.activeTab === "log" ? "" : "log"});
-                            API.instance().fetchLog().then(log=>{
-                                this.setState({log:log}, ()=>{
-                                    if (this.debugRef.current) {
-                                        this.debugRef.current.scrollIntoView({ behavior: "smooth" , block: "end" })
-                                    }
-                                })
-                            })
+                            this.updateLogContent()
                         }}
                         type={"link"}>
                         <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("Logs")}
@@ -413,6 +417,7 @@ export class MainApp extends React.Component<any, State> {
             content = <div id={"debugContainer"}>
                 <div id={"debugInnerBar"}>
                     <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({hideLog:true, activeTab:""})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
+                    <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.updateLogContent()}><NeoIcon color={NeoColor.violete_4} icon={"repeat"}/></NeoButton>
                     <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({log:""})}><NeoIcon color={NeoColor.violete_4} icon={"rubbish"}/></NeoButton>
                 </div>
                 {children}
