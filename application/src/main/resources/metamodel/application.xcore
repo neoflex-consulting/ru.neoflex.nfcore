@@ -289,7 +289,7 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     SelectMode mode = "Default"
         @NFCore(documentation="Значения для списка берутся из 'dataset'")
     boolean isDynamic
-         @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'", renderConditions="{'isDynamic':false}")
+         @NFCore(documentation="Постоянные значения в выпадающем списке. Например: Округленная:1000;Точная:1", renderConditions="{'isDynamic':false}")
     String staticValues
         @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика", renderConditions="{'isDynamic':true}")
     refers Dataset dataset
