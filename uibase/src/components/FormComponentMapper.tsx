@@ -1,10 +1,10 @@
 import React, {Fragment, useEffect, useState} from 'react';
 import Ecore from 'ecore';
-import {DatePicker, Input, Select} from 'antd';
+import {Input} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
-import {NeoButton, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
@@ -201,14 +201,14 @@ interface BooleanSelectProps {
     value: any,
     onChange?: Function,
     idx?: number,
-    ukey?: string,
+  ukey?: string,
     edit?: boolean
 }
 
 function BooleanSelect(props: BooleanSelectProps): JSX.Element {
     const { value, idx, ukey, onChange, edit } = props
 
-    return <Select
+    return <NeoSelect
         value={convertPrimitiveToString(value)}
         key={`boolsel_${ukey}${idx}`}
         style={{ width: "300px" }}
@@ -218,8 +218,8 @@ function BooleanSelect(props: BooleanSelectProps): JSX.Element {
         disabled={!edit}
     >
         {Object.keys(boolSelectionOption).map((value: any) =>
-            value !== "undefined" && value !== "null" && <Select.Option key={ukey + "_" + value + "_" + idx} value={value}>{value}</Select.Option>)}
-    </Select>
+            value !== "undefined" && value !== "null" && <NeoOption key={ukey + "_" + value + "_" + idx} value={value}>{value}</NeoOption>)}
+    </NeoSelect>
 }
 
 interface DatePickerComponentProps {
@@ -234,7 +234,7 @@ function DatePickerComponent(props: DatePickerComponentProps): JSX.Element {
     const { value, idx, ukey, onChange, edit } = props
 
     return (
-        <DatePicker
+        <NeoDatePicker
             showTime
             key={ukey + "_date_" + idx}
             defaultValue={moment(value)}
@@ -305,7 +305,7 @@ function TagComponent(props: TagComponentProps): JSX.Element {
     const { eType, value, idx, ukey, onChange, id, edit } = props;
 
     return (
-        <Select
+        <NeoSelect
             mode={"tags"}
             value={value}
             key={ukey + "_" + idx}
@@ -318,8 +318,8 @@ function TagComponent(props: TagComponentProps): JSX.Element {
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
                 .map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
-        </Select>
+                <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</NeoOption>)}
+        </NeoSelect>
     )
 }
 
