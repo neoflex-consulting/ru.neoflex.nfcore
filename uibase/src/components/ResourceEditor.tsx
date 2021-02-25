@@ -56,6 +56,7 @@ interface State {
     rightMenuPosition: Object,
     uniqKey: String,
     treeRightClickNode: { [key: string]: any },
+    treeLeftClickNode: { [key: string]: any },
     addRefPropertyName: String,
     isSaving: Boolean,
     addRefPossibleTypes: Array<string>,
@@ -75,7 +76,8 @@ interface State {
     selectTags: number,
     selectCount: number,
     selectedTree: any,
-    addRefMenuItems: EClass[]
+    addRefMenuItems: EClass[],
+    isTableInFocus: boolean
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -149,6 +151,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
         treeRightClickNode: {} as { [key: string]: any },
+        treeLeftClickNode: {} as { [key: string]: any },
         addRefPropertyName: "",
         isSaving: false,
         addRefPossibleTypes: [],
@@ -169,7 +172,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectTags: 3,
         selectCount: 0,
         selectedTree:{},
-        addRefMenuItems: []
+        addRefMenuItems: [],
+        isTableInFocus: false
     };
 
     refresh = (refresh: boolean): void => {
@@ -436,6 +440,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     onTreeSelect = (selectedKeys: Array<string>, e: any, imitateClick: boolean = false) => {
+        /*this.onTreeFocus();*/
         if (selectedKeys[0] && e.node.props.targetObject.eClass) {
             const targetObject = e.node.props.targetObject;
             const uniqKey = e.node.props.eventKey;
@@ -446,6 +451,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 uniqKey: uniqKey,
                 selectedKeys: selectedKeys,
                 treeRightClickNode: e.node.props,
+                treeLeftClickNode: e.node.props,
                 selectedTree: {
                     key: 'delete',
                     keyPath: ['delete']
@@ -456,7 +462,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 tableData: [],
                 targetObject: { eClass: "" },
                 currentNode: {},
-                selectedKeys: selectedKeys
+                selectedKeys: selectedKeys,
+                treeLeftClickNode: e.node.props,
             })
         }
     };
@@ -1332,8 +1339,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     private deleteOnDel = (event: any) => {
-        if (Object.keys(this.state.selectedTree).length !== 0 && event.code === 'Delete') {
-            this.handleRightMenuSelect(this.state.selectedTree)
+        //this.state.edit && !node.isArray && !node.headline
+        const node: { [key: string]: any } = this.state.treeLeftClickNode;
+        if (!node.eClass) {
+            return null
+        }
+        if (this.state.edit
+            && !this.state.isTableInFocus
+            && this.state.edit && !node.isArray && !node.headline //проверка аналгична delete при нажатии ПКМ
+            && Object.keys(this.state.selectedTree).length !== 0
+            && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree);
             event.preventDefault();
         }
     };
@@ -1376,6 +1392,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         return classes.length === nonAbstract.length
             ? classes //all classes are global
             : []
+    };
+
+    onTreeFocus = () => {
+        this.setState({isTableInFocus: false})
+    };
+
+    onTableFocus = () => {
+        this.setState({isTableInFocus: true})
     };
 
     render() {
@@ -1488,7 +1512,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 </Col>
                             </Row>
                         </div>
-                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
+                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }} onBlur={this.onTreeFocus} onFocus={this.onTableFocus}>
                             <Table
                                 bordered
                                 size="small"
