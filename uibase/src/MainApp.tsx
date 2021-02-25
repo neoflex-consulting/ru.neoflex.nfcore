@@ -650,6 +650,7 @@ export class MainApp extends React.Component<any, State> {
                         <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
                             <Splitter
                                 ref={this.toolsSplitterRef}
+                                className={"horizontal-splitter"}
                                 position="horizontal"
                                 primaryPaneMaxHeight="100%"
                                 primaryPaneMinHeight="0%"
