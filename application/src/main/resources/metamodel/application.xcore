@@ -449,6 +449,8 @@ class EventHandler {
 class Drawer extends ViewContainer {
         @NFCore(documentation="Расположение Панели: сверху, снизу, справа, слева")
     TabPosition position
+        @NFCore(documentation="CSS селектор для определения родительского контейнера")
+    String containerSelector
 }
 
 @NFCore(documentation="Адрес документа, на который следует перейти")

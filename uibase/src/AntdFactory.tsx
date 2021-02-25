@@ -341,7 +341,7 @@ class Row_ extends ViewContainer {
             isDisabled: this.viewObject.get('disabled') || false,
         };
     }
-    
+
     componentDidMount(): void {
         mountComponent.bind(this)(false);
     }
@@ -1611,17 +1611,16 @@ class Drawer_ extends ViewContainer {
         return (
             <Drawer
                 className={cssClass}
+                style={{transform:""}} //отключаем, т.к. на вложенных drawer'ах родитель работает не корректно
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
                 visible={!this.state.isHidden && !this.props.isParentHidden}
                 onClose={()=>{this.setState({isHidden:true})}}
+                /*forceRender={true}*/ //TODO после перехода на 4ю версию раскомментировать, в getContainer выставить default = 'body' по аналогии с antd
+                //сейчас false т.к. это единственный способ заставить antd рендерить невидимый компонент, нужно для регистрации eventHandler'ов
                 mask={false}
-                maskClosable={false}
-                getContainer={false}
-                style={{
-                    position: 'absolute',
-                }}
+                getContainer={this.viewObject.get('containerSelector') || false}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden, true)}
             </Drawer>
