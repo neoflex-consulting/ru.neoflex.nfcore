@@ -1358,6 +1358,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const eClass:EClass = this.state.addRefMenuItems[0];
         if (eClass) {
             window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
+            this.setState({modalRefVisible: false, modalResourceVisible: true})
         }
     };
 
