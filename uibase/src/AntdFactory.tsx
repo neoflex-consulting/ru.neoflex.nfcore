@@ -1663,7 +1663,7 @@ export class RadioGroup_ extends ViewContainer {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
             currentValue: value,
-            gridBoxes: agValue
+            gridBoxes: this.getGridBoxes(this.viewObject.get('radioBoxes') || agValue),
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -1672,6 +1672,25 @@ export class RadioGroup_ extends ViewContainer {
             })
         }
     }
+
+    getGridBoxes = (boxes: string[]|string) => {
+        function mapToBoxes(arr: string[]) {
+            return arr.map((box:string) => {
+                let tmp = box.split(":");
+                const key = tmp[0];
+                const value =  tmp.length > 1 ? tmp[1] : tmp[0];
+                return {
+                    key: key,
+                    value: value
+                }
+            })
+        }
+        if (Array.isArray(boxes)) {
+            return mapToBoxes(boxes)
+        } else {
+            return mapToBoxes(boxes.split(","))
+        }
+    };
 
     componentDidMount(): void {
         mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value) => {
@@ -1700,6 +1719,11 @@ export class RadioGroup_ extends ViewContainer {
         handleClick.bind(this)(currentValue)
     };
 
+    onChangeHandler = (event:any) => {
+        const found = this.state.gridBoxes.find((box:{key:string, value: string}) => box.key === event.nativeEvent.target.labels[0].outerText)
+        this.onChange(found.value)
+    };
+
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
@@ -1707,33 +1731,28 @@ export class RadioGroup_ extends ViewContainer {
         return (<div style={{display: "flex", flexDirection: this.viewObject.get('isVerticalGroup') ? "column" : "row"}}
                      hidden={this.state.isHidden || this.props.isParentHidden}>
                 {this.props.isAgComponent
-                    ? this.state.gridBoxes && this.state.gridBoxes.split(',').map((box:string, index:number)=>{
+                    ? this.state.gridBoxes.map((box:{key:string, value: string}, index:number)=>{
                         return <NeoInput
-                            key={`${this.viewObject.eURI()}${box}${index}`}
-
+                            key={`${this.viewObject.eURI()}${box.key}${index}`}
                             disabled={isReadOnly}
-                            checked={contextValue && contextValue.parameterValue === box}
+                            checked={contextValue && contextValue.parameterValue === box.value}
                             className={cssClass}
                             type={"radio"}
                             name={this.viewObject.get('name')}
-                            onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                                this.onChange(event.currentTarget.labels[0].outerText)
-                            }}
-                        >{box}
+                            onChange={isReadOnly ? undefined : this.onChangeHandler}
+                        >{box.key}
                         </NeoInput>
                     })
-                    : this.viewObject.get('radioBoxes').map((box:string, index:number)=>{
+                    : this.state.gridBoxes.map((box:{key:string, value: string}, index:number)=>{
                     return <NeoInput
-                        key={`${this.viewObject.eURI()}${box}${index}`}
+                        key={`${this.viewObject.eURI()}${box.key}${index}`}
                         disabled={isReadOnly}
-                        checked={this.state.currentValue === box}
+                        checked={this.state.currentValue === box.value}
                         className={cssClass}
                         type={"radio"}
                         name={this.viewObject.get('name')}
-                        onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                            this.onChange(event.currentTarget.labels[0].outerText)
-                        }}
-                    >{box}
+                        onChange={isReadOnly ? undefined : this.onChangeHandler}
+                    >{box.key}
                     </NeoInput>
                 })}
             </div>
