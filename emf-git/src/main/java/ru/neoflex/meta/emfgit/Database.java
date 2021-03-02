@@ -48,7 +48,7 @@ public class Database implements Closeable {
     private Map<String, Index> indexes = new HashMap<>();
     private Events events = new Events();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
-    private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
+    private Function<EClass, EAttribute> qualifiedNameDelegate;
     private Map<EClass, List<EClass>> descendants = new HashMap<>();
     private String repoName;
     private XMLParserPool xmlParserPool = new XMLParserPoolImpl();
@@ -623,11 +623,11 @@ public class Database implements Closeable {
         return events;
     }
 
-    public Function<EClass, EStructuralFeature> getQualifiedNameDelegate() {
+    public Function<EClass, EAttribute> getQualifiedNameDelegate() {
         return qualifiedNameDelegate;
     }
 
-    public void setQualifiedNameDelegate(Function<EClass, EStructuralFeature> qualifiedNameDelegate) {
+    public void setQualifiedNameDelegate(Function<EClass, EAttribute> qualifiedNameDelegate) {
         this.qualifiedNameDelegate = qualifiedNameDelegate;
     }
 
