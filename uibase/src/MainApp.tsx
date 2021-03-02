@@ -325,7 +325,11 @@ export class MainApp extends React.Component<any, State> {
         if (!this.state.hideURL
             && this.state.urlAppModules.length !== this.props.pathFull.length) { //initial load on click
             if (this.state.eClassAppModule !== undefined) {
-                const modules = (this.props.pathFull as ConfigUrlElement[]).map(e=>e.appModule).reduce((p,c)=>p+"|"+c);
+                const modules = (this.props.pathFull as ConfigUrlElement[])
+                    .map(e=>e.appModule).reduce((p,c)=>p+"|"+c)
+                    ?.split("(").join("\\(")
+                    ?.split(")").join("\\)")
+                ;
                 API.instance().findByKindAndRegexp(this.state.eClassAppModule, modules, 999).then(resources => {
                     this.setState({urlAppModules:resources})
                 })
