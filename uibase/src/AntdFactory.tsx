@@ -322,10 +322,10 @@ class TabsViewReport_ extends ViewContainer {
                     className={cssClass}
                     activeKey={this.state.activeKey}
                     tabPosition={this.viewObject.get('tabPosition') ? this.viewObject.get('tabPosition').toLowerCase() : 'top'}
-                    // onTabClick={(newKey: string, e?: MouseEvent) => {
-                    //     if (!e) return false; //if keyboard pressed
-                    //     this.setState({activeKey: newKey})
-                    // }}
+                    onTabClick={(newKey: string, e?: MouseEvent) => {
+                        if (!e) return false; //if keyboard pressed
+                        this.setState({activeKey: newKey})
+                    }}
                 >
                     {
                         children.map((c: Ecore.EObject) =>
@@ -873,6 +873,7 @@ export class DatePicker_ extends ViewContainer {
                         required={this.viewObject.get('required')}
                         title={this.viewObject.get('title')}
                         titleOrientation={this.viewObject.get('titleOrientation')}
+                        width={this.viewObject.get('width')}
                     />
                 </ConfigProvider>
             </div>

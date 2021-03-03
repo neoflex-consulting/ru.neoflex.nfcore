@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Col, Input, Layout, Menu, Row, Tree} from 'antd';
+import {Layout, Menu, Tree} from 'antd';
 import Ecore, {EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 

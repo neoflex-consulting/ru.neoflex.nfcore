@@ -98,7 +98,7 @@ async function handleExportDocx(this: any, handlers: any[], withTable: boolean, 
                         children: [
                             new TextRun({
                                 text: docxData.textData,
-                                bold: docxData.font!.bold
+                                bold: docxData.font?.bold
                             })
                         ]
                     }))

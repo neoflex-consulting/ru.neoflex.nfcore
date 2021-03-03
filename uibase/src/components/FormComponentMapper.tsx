@@ -1,10 +1,10 @@
 import React, {Fragment, useEffect, useState} from 'react';
 import Ecore from 'ecore';
-import {DatePicker, Input, Select} from 'antd';
+import {Input} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
-import {NeoButton, NeoModal, NeoTag} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
@@ -149,9 +149,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             value.map((el: { [key: string]: any }, idx: number) =>
                 <NeoTag
                     className={`${!edit ? "disabled" : undefined} select-ref-object`}
-                    // onClose={(e: any) => {
-                    //     props.handleDeleteRef && props.handleDeleteRef!(el, eObject.get('name'))
-                    // }}
+                    onClose={() => {
+                        props.handleDeleteRef && props.handleDeleteRef!(el, eObject.get('name'))
+                    }}
                     closable={edit}
                     key={el["$ref"]}
                 >
@@ -161,9 +161,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             :
             <NeoTag
                 className={`${!edit ? "disabled" : undefined} select-ref-object`}
-                // onClose={(e: any) => {
-                //     props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, eObject.get('name'))
-                // }}
+                onClose={() => {
+                    props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, eObject.get('name'))
+                }}
                 closable={edit}
                 key={value["$ref"]}
             >
@@ -176,21 +176,21 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
         {elements}
         {eObject.get('eType').get('name') === 'EClass' ?
             <NeoButton
-                style={{ display: "inline-block" }} 
+                style={{ display: "inline-block", padding:'9px 12px' }}
                 key={ukey + "_" + idx} 
                 onClick={() => {
                     props.onEClassBrowse && props.onEClassBrowse!(eObject)
                 }}
-                type={!edit ? 'disabled' : 'primary'}
+                type={!edit ? 'disabled' : 'secondary'}
             >...</NeoButton>
             :
             <NeoButton
-                style={{ display: "inline-block" }} 
+                style={{ display: "inline-block", padding:'9px 12px' }}
                 key={ukey + "_" + idx} 
                 onClick={() => {
                     props.onBrowse && props.onBrowse!(eObject)
                 }}
-                type={!edit ? 'disabled' : 'primary'}
+                type={!edit ? 'disabled' : 'secondary'}
             >...</NeoButton>
         }
     </React.Fragment>
@@ -201,14 +201,14 @@ interface BooleanSelectProps {
     value: any,
     onChange?: Function,
     idx?: number,
-    ukey?: string,
+  ukey?: string,
     edit?: boolean
 }
 
 function BooleanSelect(props: BooleanSelectProps): JSX.Element {
     const { value, idx, ukey, onChange, edit } = props
 
-    return <Select
+    return <NeoSelect
         value={convertPrimitiveToString(value)}
         key={`boolsel_${ukey}${idx}`}
         style={{ width: "300px" }}
@@ -218,8 +218,8 @@ function BooleanSelect(props: BooleanSelectProps): JSX.Element {
         disabled={!edit}
     >
         {Object.keys(boolSelectionOption).map((value: any) =>
-            value !== "undefined" && value !== "null" && <Select.Option key={ukey + "_" + value + "_" + idx} value={value}>{value}</Select.Option>)}
-    </Select>
+            value !== "undefined" && value !== "null" && <NeoOption key={ukey + "_" + value + "_" + idx} value={value}>{value}</NeoOption>)}
+    </NeoSelect>
 }
 
 interface DatePickerComponentProps {
@@ -234,10 +234,10 @@ function DatePickerComponent(props: DatePickerComponentProps): JSX.Element {
     const { value, idx, ukey, onChange, edit } = props
 
     return (
-        <DatePicker
+        <NeoDatePicker
             showTime
             key={ukey + "_date_" + idx}
-            // defaultValue={moment(value)}
+            defaultValue={moment(value)}
             onChange={(newValue: any) => {
                 onChange && onChange!(newValue)
             }}
@@ -263,9 +263,9 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
     const { eType, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
 
     return (
-        <Select
+        <NeoSelect
             className={"select-component"}
-            // mode={upperBound === -1 ? "multiple" : "default"}
+            mode={upperBound === -1 ? "multiple" : undefined}
             value={value}
             key={ukey + "_" + idx}
             style={{ width: "300px" }}
@@ -282,10 +282,10 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
                     return 0;
                 })
                 .map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
+                <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
                     <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
-                </Select.Option>)}
-        </Select>
+                </NeoOption>)}
+        </NeoSelect>
     )
 }
 
@@ -305,7 +305,7 @@ function TagComponent(props: TagComponentProps): JSX.Element {
     const { eType, value, idx, ukey, onChange, id, edit } = props;
 
     return (
-        <Select
+        <NeoSelect
             mode={"tags"}
             value={value}
             key={ukey + "_" + idx}
@@ -318,8 +318,8 @@ function TagComponent(props: TagComponentProps): JSX.Element {
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
                 .map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
-        </Select>
+                <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</NeoOption>)}
+        </NeoSelect>
     )
 }
 

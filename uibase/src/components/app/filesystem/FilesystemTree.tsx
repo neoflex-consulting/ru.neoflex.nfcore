@@ -362,7 +362,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         )
         return (
             <div style={{flexGrow: 1, height: '100%'}}>
-                <NeoRow hidden={!!this.props.onCheck} className={"tree-button-bar"}>
+                <NeoRow hidden={!!this.props.onCheck} className={"tree-button-bar"} style={{alignItems: 'center'}}>
                     <NeoButton
                         className={`tree-button ${!this.state.isLeaf !== true ? "disabled" : "link"}`}
                         title={t('refresh')}

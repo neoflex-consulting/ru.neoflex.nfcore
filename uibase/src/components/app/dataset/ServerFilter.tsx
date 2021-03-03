@@ -37,7 +37,7 @@ const SortableItem = SortableElement(({value}: any) => {
 
     return <div className="SortableItem">
         <NeoRow style={{height:'100%'}}>
-            <NeoCol span={1}>
+            <NeoCol span={1} align={'center'}>
                 <span>{value.index}</span>
             </NeoCol>
             <NeoCol span={2}>
@@ -56,7 +56,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 <Form.Item
                     name={"column" + value.index}
                     initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
-                    style={{ margin: 'auto' }}
+                    style={{ margin: 'auto', height:'32px' }}
                     rules={[
                         {
                             required:
@@ -91,7 +91,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={8}>
-                <Form.Item style={{ margin: 'auto' }}
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
                            initialValue={value.t(value.operation) || undefined}
                            name={"operation" + value.index}
                            rules={[
@@ -133,7 +133,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={4}>
-                <Form.Item style={{  margin: 'auto' }}
+                <Form.Item style={{  margin: 'auto', height:'32px' }}
                            initialValue={value.value}
                            name={"value" + value.index}
                            rules={[
@@ -164,7 +164,7 @@ const SortableItem = SortableElement(({value}: any) => {
             </NeoCol>
 
             <NeoCol span={1}>
-                <Form.Item style={{ display: 'inline-block' , marginTop: '35px'}}>
+                <Form.Item style={{ display: 'inline-block' , margin: '0'}}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
@@ -200,7 +200,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('sysfilters')}</NeoTypography>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={12} align={'flex-end'}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
@@ -253,6 +253,7 @@ class ServerFilter extends DrawerParameterComponent<Props, DrawerState> {
                         padding: '16px 40px',
                         background: '#F2F2F2',
                         textAlign: 'left',
+                        zIndex: 1
                     }}>
                         <NeoButton
                             id={'runQueryButton'}

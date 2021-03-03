@@ -38,7 +38,7 @@ const SortableItem = SortableElement(({value}: any) => {
 
     return <div className="SortableItem">
         <NeoRow style={{height:'100%', marginBottom:'0'}}>
-            <NeoCol span={1}>
+            <NeoCol span={1} align={'center'}>
                 {value.index}
             </NeoCol>
             <NeoCol span={2}>
@@ -52,7 +52,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={20}>
-                <Form.Item style={{ margin: 'auto' }} initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined} name={"columnName" + value.index}>
+                <Form.Item style={{ margin: 'auto', height:'32px' }} initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined} name={"columnName" + value.index}>
                         <NeoSelect
                             width={'525px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -80,7 +80,7 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={1}>
-                <Form.Item style={{ marginTop: '35px' }}>
+                <Form.Item style={{ margin: '0' }}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
@@ -113,10 +113,10 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
         return (
             <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
-                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                    <NeoCol span={12}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={12} align={"flex-end"}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
@@ -164,6 +164,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                     padding: '16px 40px',
                     background: '#F2F2F2',
                     textAlign: 'left',
+                    zIndex:1
                 }}>
                     <NeoButton
                         id={'runQueryButton'}

@@ -73,20 +73,20 @@ export class Login extends React.Component<any, State> {
 
                     <NeoCol className={"secondColumn"}>
                         {this.state.languages.length !== 0 &&
-                            <div className="lang-login">
-                                <NeoButton onClick={()=>setLang(storeLangValue==='ru' ? 'en' : 'ru')} type={"link"} className="lang-label">
-                                    {storeLangValue.toUpperCase()}
-                                </NeoButton>
-                            </div>
+                        <div className="lang-login">
+                            <NeoButton onClick={()=>setLang(storeLangValue==='ru' ? 'en' : 'ru')} type={"link"} className="lang-label">
+                                {storeLangValue.toUpperCase()}
+                            </NeoButton>
+                        </div>
                         }
-                        <NeoRow justify={"center"} className={'nameOfApp'}>
-                                Neoflex Reporting
+                        <NeoRow>
+                            <div className={"nameOfApp"}>Neoflex Reporting</div>
                         </NeoRow>
 
-                        <NeoRow justify={"center"} className={"authorizing"}>
-                                {t('authorization')}
+                        <NeoRow>
+                            <div className={"authorizing"}>{t('authorization')}</div>
                         </NeoRow>
-                        <NeoRow className={"Login"} justify={"center"}>
+                        <NeoRow className={"Login"}>
                             {t('login')}
                         </NeoRow>
                         <div className={"inputLogin"}>
@@ -100,7 +100,7 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                         </div>
-                        <NeoRow className={"Password"} justify={"center"}>
+                        <NeoRow className={"Password"}>
                             {t('password')}
                         </NeoRow>
                         <div className={"inputPassword"}>
@@ -114,7 +114,7 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                         </div>
-                        <NeoRow className={"button"} justify={"center"} style={{textAlign: "center"}}>
+                        <NeoRow className={"button"} style={{textAlign: "center"}}>
                             <NeoButton key="conbutton" className={"loginButton"}
                                        onClick={this.authenticate}>
                                 {t('login')}
