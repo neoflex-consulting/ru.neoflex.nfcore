@@ -18,6 +18,7 @@ import ru.neoflex.nfcore.application.ValueItem
 import ru.neoflex.nfcore.application.ValueHolder
 
 annotation "ru.neoflex.nfcore" as NFCore
+annotation "http://orientdb.com/meta" as OrientDB
 
 /*JdbcDriver*/
 @NFCore(documentation="Jdbc драйвер")
@@ -177,6 +178,7 @@ class DMLQuery {
 @NFCore(documentation="")
 class DatasetColumn {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
     String rdbmsDataType
     DataType convertDataType
@@ -185,6 +187,7 @@ class DatasetColumn {
 @NFCore(documentation="Столбцы")
 abstract class DatasetColumnView extends ServerSideCondition {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
         @NFCore(documentation="Название заголовка в таблице")
     String columnName

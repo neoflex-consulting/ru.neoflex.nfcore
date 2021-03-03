@@ -27,7 +27,7 @@ public abstract class SessionFactory {
     private static final Logger logger = LoggerFactory.getLogger(SessionFactory.class);
     public final static String QNAME = "qName";
 
-    private Function<EClass, EStructuralFeature> qualifiedNameDelegate;
+    private Function<EClass, EAttribute> qualifiedNameDelegate;
     private final String dbName;
     protected final List<EPackage> packages;
     Map<String, URI> oClassToUriMap = new HashMap<>();
@@ -182,19 +182,19 @@ public abstract class SessionFactory {
         return resourceSet;
     }
 
-    public EStructuralFeature getQNameFeature(EClass eClass) {
+    public EAttribute getQNameFeature(EClass eClass) {
         if (qualifiedNameDelegate != null) {
             return qualifiedNameDelegate.apply(eClass);
         }
-        return eClass.getEStructuralFeature(QNAME);
+        return (EAttribute) eClass.getEStructuralFeature(QNAME);
     }
 
 
-    public Function<EClass, EStructuralFeature> getQualifiedNameDelegate() {
+    public Function<EClass, EAttribute> getQualifiedNameDelegate() {
         return qualifiedNameDelegate;
     }
 
-    public void setQualifiedNameDelegate(Function<EClass, EStructuralFeature> qualifiedNameDelegate) {
+    public void setQualifiedNameDelegate(Function<EClass, EAttribute> qualifiedNameDelegate) {
         this.qualifiedNameDelegate = qualifiedNameDelegate;
     }
 
