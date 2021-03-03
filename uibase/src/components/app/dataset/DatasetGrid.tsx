@@ -9,11 +9,7 @@ import {excelElementExportType, excelExportObject} from "../../../utils/excelExp
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
 import Paginator from "./Paginator";
-import {
-    agGridColumnTypes,
-    appTypes,
-    dmlOperation, grantType,
-} from "../../../utils/consts";
+import {agGridColumnTypes, appTypes, dmlOperation, grantType,} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -27,7 +23,8 @@ import {
     ColumnResizedEvent,
     DisplayedColumnsChangedEvent,
     GridOptions,
-    GridReadyEvent, SuppressKeyboardEventParams,
+    GridReadyEvent,
+    SuppressKeyboardEventParams,
     ValueFormatterParams
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";

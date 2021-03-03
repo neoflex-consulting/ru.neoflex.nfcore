@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Radio} from 'antd';
 import {IServerQueryParam} from "../../../MainContext";
@@ -12,12 +12,12 @@ import {
     NeoCol,
     NeoHint,
     NeoInput,
+    NeoModal,
+    NeoOption,
     NeoRow,
     NeoSelect,
     NeoSwitch,
-    NeoTypography,
-    NeoModal,
-    NeoOption
+    NeoTypography
 } from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 

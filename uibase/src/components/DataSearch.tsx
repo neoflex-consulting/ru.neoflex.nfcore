@@ -132,7 +132,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
 
     render() {
-        const { TabPane } = Tabs;
         const { t } = this.props;
         return (
             <React.Fragment>
