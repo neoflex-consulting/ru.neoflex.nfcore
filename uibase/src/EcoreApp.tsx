@@ -195,7 +195,7 @@ class EcoreApp extends React.Component<any, State> {
 
     notification = (title: string, description: string, notificationType: string) => {
         const {t} = this.props;
-        let btnCloseAll = (<Button type="link" size="small" onClick={() => notification.destroy()}>
+        let btnCloseAll = (<Button type="link" key="closeAllNotifications" size="small" onClick={() => notification.destroy()}>
             {t("closeall")}
         </Button>);
         let key = title + description;

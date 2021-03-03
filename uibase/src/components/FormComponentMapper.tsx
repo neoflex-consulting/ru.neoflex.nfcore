@@ -247,7 +247,6 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                     value={value}
                     style={{
                         whiteSpace: 'pre',
-                        overflow: 'auto',
                         resize: 'none'
                     }}
                 />}
