@@ -344,14 +344,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
             const allSubTypes = eClassObject.get('eAllSubTypes');
 
-
-            const parent = findObjectById(this.state.resourceJSON, dropParentKey);
-            const parentEClass = Ecore.ResourceSet.create().getEObject(parent.eClass);
-            const foundInSubTypes = parentEClass.getEStructuralFeature(nodePropertyName)
-                ? parentEClass.getEStructuralFeature(nodePropertyName).get('eType').get('eAllSubTypes')
-                    .find((c:EClass)=>c.eURI() === event.dragNode.props.eClass) ||
+            let foundInSubTypes = true;
+            if (dropParentKey) {
+                const parent = findObjectById(this.state.resourceJSON, dropParentKey);
+                const parentEClass = Ecore.ResourceSet.create().getEObject(parent.eClass);
+                foundInSubTypes = parentEClass.getEStructuralFeature(nodePropertyName)
+                    ? parentEClass.getEStructuralFeature(nodePropertyName).get('eType').get('eAllSubTypes')
+                        .find((c:EClass)=>c.eURI() === event.dragNode.props.eClass) ||
                     parentEClass.getEStructuralFeature(nodePropertyName).get('eType').eURI() === event.dragNode.props.eClass
-                : true;
+                    : true;
+            }
 
             const containNodePropertyName = eClassObject.get('eAllStructuralFeatures')
                 .find((e:EObject)=> e.get('name') === nodePropertyName);
