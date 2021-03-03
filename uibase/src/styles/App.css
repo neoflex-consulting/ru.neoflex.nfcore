@@ -44,6 +44,11 @@ height: 8px!important;
   cursor: pointer;
 }
 
+.app-logo-settings > svg,
+.app-logo > svg {
+  vertical-align: middle;
+}
+
 .ant-collapse-content-box {
   padding: unset!important;
 }

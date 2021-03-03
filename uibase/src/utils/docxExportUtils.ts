@@ -6,8 +6,8 @@ export enum docxElementExportType {
     text
 }
 
-export interface docxExportObject {
-    hidden: boolean;
+export type docxExportObject = {
+    hidden?: boolean;
     skipExport?: boolean;
     docxComponentType: docxElementExportType;
     diagramData?: {
@@ -26,7 +26,7 @@ export interface docxExportObject {
         bold?: boolean
     }
 }
-async function handleExportDocx(this: any, handlers: any[], withTable: boolean, isDownloadFromDiagramPanel: boolean, ignoreSkipped = true) {
+async function handleExportDocx(this: any, handlers: (()=>docxExportObject)[], withTable: boolean, isDownloadFromDiagramPanel: boolean, ignoreSkipped = true) {
     const doc: Document = new Document();
     let paragraphs: (Paragraph|Table)[] = [];
 
@@ -35,7 +35,7 @@ async function handleExportDocx(this: any, handlers: any[], withTable: boolean, 
 
         const docxData: docxExportObject = handlers[i]();
 
-        if (!docxData.hidden && (!docxData.skipExport || ignoreSkipped)) {
+        if (docxData && !docxData.hidden && (!docxData.skipExport || ignoreSkipped)) {
             if (docxData.docxComponentType === docxElementExportType.diagram
                 && docxData.diagramData !== undefined
                 && withTable

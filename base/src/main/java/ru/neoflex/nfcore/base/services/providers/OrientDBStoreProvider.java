@@ -25,6 +25,8 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
     String home;
     @Value("${orientdb.dbname:models}")
     String dbName;
+    @Value("${orientdb.numOfProtectedBackups:0}")
+    Integer numOfProtectedBackups;
     @Autowired
     PackageRegistry registry;
 
@@ -35,6 +37,7 @@ public class OrientDBStoreProvider extends AbstractStoreSPI {
     public void init() throws Exception {
         server = new Server(home, dbName, registry.getEPackages());
         server.setQualifiedNameDelegate(Store.qualifiedNameDelegate);
+        server.setNumOfProtectedBackups(numOfProtectedBackups);
         server.open();
         oetlPlugin = new OETLPlugin();
         oetlPlugin.config(server.getOServer(), null);

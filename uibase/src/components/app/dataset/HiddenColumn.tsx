@@ -7,7 +7,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
 import {NeoButton, NeoCol, NeoColor, NeoInput, NeoRow, NeoSwitch} from "neo-design/lib";
-import NeoIcon from "neo-icon/lib/icon";
+import {NeoIcon} from "neo-icon/lib";
 import arrayMove from "array-move";
 
 const { Paragraph } = Typography;

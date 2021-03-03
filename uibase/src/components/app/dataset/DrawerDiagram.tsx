@@ -63,7 +63,7 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                 this.resetFields()
             }
 
-        }).catch(info => {
+        }).catch(() => {
             //TODO Error in console
             this.props.context.notification('Diagram notification','Please, correct the mistakes', 'error')
 
@@ -254,47 +254,73 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                 <NeoRow className={'Selects'} style={{marginBottom:'16px'}}>
                     {this.getInput("diagramName",this.props.t("diagram name"))}
                 </NeoRow>
-                    {(this.state.diagramType==="Line")?
-                <NeoRow className={'Selects'} style={{marginBottom:'16px'}}>
-                    {this.getInput("diagramLegend",this.props.t("diagram legend"))}
-                </NeoRow>
-                        :
-                        ""}
+
+
+                    <NeoRow className={'Selects'}>
+                        {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
+                    </NeoRow>
                     {(this.state.diagramType==="Pie") ?
-                <NeoRow
-                    // gutter={16}
-                    className={'Selects'}
-                        style={{marginBottom:'16px'}}
-                >
-                    <NeoCol className={'Selectss'} span={24}
-                            // style={{padding:'unset'}}
-                    >
-                        {(this.state.diagramType==="Pie")?
-                            this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie"))
-                            :
-                            this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
-                    </NeoCol>
-                </NeoRow>
+                        <NeoRow gutter={16} className={'Selects'}>
+                            <NeoCol className={'Selectss'} span={24}>
+                                {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
+                            </NeoCol>
+                        </NeoRow>
                         :
-                <NeoRow
-                    // gutter={16}
-                    className={'Selects'}
-                        style={{marginBottom:'16px'}}
-                >
-                    <NeoCol span={12} className={'Selectss'}
-                            style={{paddingRight:'8px'}}
-                    >
-                        {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
-                    </NeoCol>
-                    <NeoCol className={'Selectss'} span={12}
-                            style={{paddingLeft:'8px'}}
-                    >
-                        {(this.state.diagramType==="Pie")?
-                            this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie"))
-                            :
-                            this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
-                    </NeoCol>
-                </NeoRow>}
+                        <NeoRow gutter={16} className={'Selects'}>
+                            <NeoCol span={12} className={'Selectss'}>
+                                {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
+                            </NeoCol>
+                            <NeoCol className={'Selectss'} span={12}>
+                                {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
+                            </NeoCol>
+                        </NeoRow>}
+
+
+                {/*        */}
+                {/*    {(this.state.diagramType==="Line")?*/}
+                {/*<NeoRow className={'Selects'} style={{marginBottom:'16px'}}>*/}
+                {/*    {this.getInput("diagramLegend",this.props.t("diagram legend"))}*/}
+                {/*</NeoRow>*/}
+                {/*        :*/}
+                {/*        ""}*/}
+                {/*    {(this.state.diagramType==="Pie") ?*/}
+                {/*<NeoRow*/}
+                {/*    gutter={16}*/}
+                {/*    className={'Selects'}*/}
+                {/*        // style={{marginBottom:'16px'}}*/}
+                {/*>*/}
+                {/*    <NeoCol className={'Selectss'} span={24}*/}
+                {/*            // style={{padding:'unset'}}*/}
+                {/*    >*/}
+                {/*        {(this.state.diagramType==="Pie")?*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie"))*/}
+                {/*            :*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}*/}
+                {/*    </NeoCol>*/}
+                {/*</NeoRow>*/}
+                {/*        :*/}
+                {/*<NeoRow*/}
+                {/*    // gutter={16}*/}
+                {/*    className={'Selects'}*/}
+                {/*        style={{marginBottom:'16px'}}*/}
+                {/*>*/}
+                {/*    <NeoCol span={12} className={'Selectss'}*/}
+                {/*            style={{paddingRight:'8px'}}*/}
+                {/*    >*/}
+                {/*        {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}*/}
+                {/*    </NeoCol>*/}
+                {/*    <NeoCol className={'Selectss'} span={12}*/}
+                {/*            style={{paddingLeft:'8px'}}*/}
+                {/*    >*/}
+                {/*        {(this.state.diagramType==="Pie")?*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie"))*/}
+                {/*            :*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}*/}
+                {/*    </NeoCol>*/}
+                {/*</NeoRow>}*/}
+
+
+
                 {/*Временно отключено, пока через фильтры в datasetView*/}
                 {/*<Row>
                     <Col span={12}>

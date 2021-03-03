@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from 'react';
+import React, {Fragment, useCallback, useEffect, useState} from 'react';
 import Ecore from 'ecore';
 import {Input} from 'antd';
 import moment from 'moment';
@@ -10,50 +10,189 @@ import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
-import {neoIconMap} from "../utils/consts";
+import {neoIconMap, NeoIconTypeArray} from "../utils/consts";
 import {SvgName} from "neo-icon/lib/icon/icon";
+import {API} from "../modules/api";
+import {WithTranslation} from "react-i18next";
 
-interface EditableSQLAreaProps {
+interface EditableAreaProps {
     value: string,
     onChange?: Function,
     ukey?: string,
     edit?: boolean,
-    syntax: "sql"|"groovy",
-    expanded?: boolean
+    expanded?: boolean,
+    t: any
 }
 
-function EditableSyntaxArea(props: EditableSQLAreaProps): JSX.Element {
+function EditableSQLArea(props: EditableAreaProps): JSX.Element {
 
-    const { value, ukey, onChange, edit, syntax, expanded } = props;
+    const { value, ukey, onChange, edit, expanded, t } = props;
     const [innerValue, setInnerValue] = useState(value);
-
+    const [initialValue, setInitialValue] = useState(value);
+    const onEditorBlur = useCallback(
+        ()=>{
+            onChange && onChange!(innerValue)
+        },[onChange, innerValue]);
+    const onSave = useCallback(
+        ()=>{
+            setInitialValue(innerValue);
+        },[innerValue]);
+    const onCancel = useCallback(
+        ()=>{
+            setInnerValue(initialValue);
+            onChange && onChange(initialValue);
+        },[initialValue, onChange]);
     useEffect(() => {
         setInnerValue(value)
     },[value]);
 
-    return (
-        <AceEditor
+    if (!expanded) {
+        return <AceEditor
             readOnly={!edit}
             key={ukey}
             width={"100%"}
             className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
-            mode={syntax}
+            mode={"sql"}
             theme={"tomorrow"}
-            onChange={(text: string) => {
-                setInnerValue(text)
-            }}
+            onChange={(text: string) => { setInnerValue(text) }}
             editorProps={{$blockScrolling: true}}
             value={innerValue}
-            onBlur={() => {
-                onChange && onChange!(innerValue)
-            }}
+            onBlur={onEditorBlur}
             showPrintMargin={false}
             enableBasicAutocompletion={true}
             minLines={3}
             maxLines={!expanded ? 10 : undefined}
         />
-    )
+    } else {
+        return <div className={"expanded-syntax-editor"}>
+            <AceEditor
+                readOnly={!edit}
+                key={ukey}
+                width={"100%"}
+                className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+                mode={"sql"}
+                theme={"tomorrow"}
+                onChange={(text: string) => { setInnerValue(text) }}
+                editorProps={{$blockScrolling: true}}
+                value={innerValue}
+                onBlur={onEditorBlur}
+                showPrintMargin={false}
+                enableBasicAutocompletion={true}
+                minLines={3}
+                maxLines={!expanded ? 10 : undefined}
+            />
+            <div className={"expanded-syntax-editor-bar"}>
+                <NeoButton onClick={onSave} type={"primary"}>{t("save")}</NeoButton>
+                <NeoButton onClick={onCancel} type={"primary"}>{t("cancel")}</NeoButton>
+            </div>
+        </div>
+    }
+}
 
+function EditableGroovyArea(props: EditableAreaProps): JSX.Element {
+
+    const { value, ukey, onChange, edit, expanded, t } = props;
+    const [initialValue, setInitialValue] = useState(value);
+    const [innerValue, setInnerValue] = useState(value);
+    const [executionResult, setExecutionResult] = useState("");
+    const onEditorChange = useCallback(
+        (text: string) => {
+            setInnerValue(text)
+        },[setInnerValue]);
+    const onEditorBlur = useCallback(
+        ()=>{
+            onChange && onChange!(innerValue)
+        },[onChange, innerValue]);
+    const onSave = useCallback(
+        ()=>{
+            setInitialValue(innerValue);
+        },[innerValue]);
+    const onCancel = useCallback(
+        ()=>{
+            setInnerValue(initialValue);
+            onChange && onChange(initialValue);
+        },[initialValue, onChange]);
+    const onRun = useCallback(
+        ()=>{
+            API.instance().fetchJson(`/script/evaluate?name=""`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: innerValue
+            }).then(ret => {
+                let result = ""
+                if (ret.out) {
+                    result = result + ret.out + "\n"
+                }
+                if (ret.result && ret.result !== "null") {
+                    result = result + ">> " + ret.result
+                }
+                setExecutionResult(result)
+            })
+        },[innerValue]);
+
+
+    useEffect(() => {
+        setInnerValue(value)
+    },[value]);
+
+    if (!expanded) {
+        return <AceEditor
+            readOnly={!edit}
+            key={ukey}
+            width={"100%"}
+            className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+            mode={"groovy"}
+            theme={"tomorrow"}
+            onChange={(text: string) => { setInnerValue(text) }}
+            editorProps={{$blockScrolling: true}}
+            value={innerValue}
+            onBlur={onEditorBlur}
+            showPrintMargin={false}
+            enableBasicAutocompletion={true}
+            minLines={3}
+            maxLines={!expanded ? 10 : undefined}
+        />
+    } else {
+        return <div className={"expanded-syntax-editor"}>
+            <AceEditor
+                readOnly={!edit}
+                key={ukey}
+                height={"70%"}
+                width={"100%"}
+                className={`${!edit ? "disabled" : undefined} editable-syntax-area`}
+                mode={"groovy"}
+                theme={"tomorrow"}
+                onChange={onEditorChange}
+                editorProps={{$blockScrolling: true}}
+                value={innerValue}
+                onBlur={onEditorBlur}
+                showPrintMargin={false}
+                enableBasicAutocompletion={true}
+                minLines={3}
+                maxLines={!expanded ? 10 : undefined}
+            />
+            <AceEditor
+                mode={'text'}
+                height={"20%"}
+                width={"100%"}
+                theme={'tomorrow'}
+                value={executionResult}
+                debounceChangePeriod={0}
+                showPrintMargin={false}
+                focus={false}
+                readOnly={true}
+                minLines={5}
+                highlightActiveLine={false}
+            />
+            <div className={"expanded-syntax-editor-bar"}>
+                <NeoButton onClick={onSave} type={"primary"}>{t("save")}</NeoButton>
+                <NeoButton onClick={onRun} type={"primary"}>{t("execute")}</NeoButton>
+                <NeoButton onClick={onCancel} type={"primary"}>{t("cancel")}</NeoButton>
+            </div>
+        </div>
+    }
 }
 
 interface EditableTextAreaProps {
@@ -131,10 +270,11 @@ interface SelectRefObjectProps {
     onBrowse?: Function,
     upperBound: number,
     edit?: boolean
+    goToObject?:(id:string, obj: Ecore.EObject| null)=>void
 }
 
 function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
-    const { eObject, upperBound, value, mainEObject, idx, ukey, edit } = props
+    const { eObject, upperBound, value, mainEObject, idx, ukey, edit, goToObject } = props
 
     const getRelatedResourceByRef = (reference: string) => {
         const refObject = (mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
@@ -154,6 +294,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                     }}
                     closable={edit}
                     key={el["$ref"]}
+                    onClick={()=>{
+                        goToObject && goToObject(el.$ref, getRelatedResourceByRef(el.$ref));
+                    }}
                 >
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.get('name')}&nbsp;
                     {getRelatedResourceByRef(el.$ref) && getRelatedResourceByRef(el.$ref)!.eClass.get('name')}&nbsp;
@@ -166,6 +309,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 }}
                 closable={edit}
                 key={value["$ref"]}
+                onClick={()=>{
+                    goToObject && goToObject(value.$ref, relatedResource);
+                }}
             >
                 {(relatedResource && relatedResource.get('name')) || (value.$ref && value.$ref.split('//')[1])}&nbsp;
                 {(relatedResource && relatedResource.eClass.get('name')) || (value.eClass && value.eClass.split('//')[2])}&nbsp;
@@ -201,7 +347,7 @@ interface BooleanSelectProps {
     value: any,
     onChange?: Function,
     idx?: number,
-  ukey?: string,
+    ukey?: string,
     edit?: boolean
 }
 
@@ -265,7 +411,7 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
     return (
         <NeoSelect
             className={"select-component"}
-            mode={upperBound === -1 ? "multiple" : undefined}
+            mode={upperBound === -1 ? "multiple" : "default"}
             value={value}
             key={ukey + "_" + idx}
             style={{ width: "300px" }}
@@ -289,6 +435,48 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
     )
 }
 
+interface SelectComponentPropsForhightLight {
+    value: any,
+    onChange?: Function,
+    idx?: number,
+    ukey?: string,
+    mainObject: any,
+    upperBound: number,
+    id: string,
+    edit?: boolean,
+    showIcon?: boolean
+}
+
+function SelectComponentForhightLight(props: SelectComponentPropsForhightLight): JSX.Element {
+
+    const { mainObject, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
+
+    return (
+        <Select
+            className={"select-component"}
+            mode={upperBound === -1 ? "multiple" : "default"}
+            value={value}
+            key={ukey + "_" + idx}
+            style={{ width: "300px" }}
+            onChange={(newValue: any) => {
+                onChange && onChange!(newValue)
+            }}
+            disabled={!edit}
+        >
+            {mainObject.values.column._internal
+                .filter((obj: any) => obj.values.hide !== true)
+                .sort(function(a : any, b : any) {
+                    if(a.values.name.toLowerCase() < b.values.name.toLowerCase()) return -1;
+                    if(a.values.name.toLowerCase() > b.values.name.toLowerCase()) return 1;
+                    return 0;
+                })
+                .map((obj: any) =>
+                    <Select.Option key={ukey + "_opt_" + obj.values.name + "_" + id} value={obj.values.name}>
+                        <div style={{display:"flex", alignItems: "center"}}>{showIcon && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.values.name] as SvgName}/>}{obj.values.name}</div>
+                    </Select.Option>)}
+        </Select>
+    )
+}
 
 interface TagComponentProps {
     value: any,
@@ -340,7 +528,7 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
         {expanded && <NeoModal
             type={'edit'}
             width={'1000px'}
-            className={"expand-modal"}
+            className={"expand-modal " + React.Children.map(children, (c:any)=>c.type.name).reduce((c,n)=>c + " "+ n)}
             key={`ExpandModal`}
             visible={expanded}
             footer={null}
@@ -352,6 +540,7 @@ function ExpandComponent(props: ExpandComponentProps): JSX.Element {
 }
 
 interface Props {
+    componentType?: "SyntaxArea"|"SelectRef"|"BooleanSelect"|"TimePicker"|"DatePicker"|"TextArea"|"Select"|"SelectHighlight"|"Tag"
     value: any,
     targetObject?: { [key: string]: any },
     eObject: Ecore.EObject,
@@ -365,9 +554,10 @@ interface Props {
     expanded?: boolean,
     syntax?: string,
     showIcon?: boolean,
+    goToObject?: (id?:string)=>void,
 }
 
-export default class ComponentMapper extends React.Component<Props, any> {
+export default class ComponentMapper extends React.Component<Props & WithTranslation, any> {
 
     static getComponentWrapper(props: {type:"expand", wrappedComponent: JSX.Element, expandedComponent:JSX.Element}) {
         const { type, wrappedComponent, expandedComponent} = props;
@@ -380,20 +570,29 @@ export default class ComponentMapper extends React.Component<Props, any> {
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon } = props;
-        const targetValue = value || props.eObject.get('defaultValueLiteral');
-        if (syntax) {
-            return <EditableSyntaxArea
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, t } = props;
+        const targetValue = value || props.eObject?.get('defaultValueLiteral');
+        if (syntax === "sql") {
+            return <EditableSQLArea
+                t={t}
                 ukey={ukey}
                 value={targetValue||""}
                 edit={edit}
-                syntax={syntax}
+                expanded={expanded}
+                onChange={(text: string) => props.onChange && props.onChange!(text, 'EditableTextArea', targetObject, props.eObject)}
+            />
+        } else if (syntax === "groovy") {
+            return <EditableGroovyArea
+                t={t}
+                ukey={ukey}
+                value={targetValue||""}
+                edit={edit}
                 expanded={expanded}
                 onChange={(text: string) => props.onChange && props.onChange!(text, 'EditableTextArea', targetObject, props.eObject)}
             />
         }
 
-        if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass')) {
+        if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass') || componentType === "SelectRef") {
             return <SelectRefObject
                 idx={idx}
                 ukey={ukey}
@@ -406,8 +605,9 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 onBrowse={props.onBrowse}
                 upperBound={props.upperBound}
                 edit={edit}
+                goToObject={goToObject}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === "EBoolean") || componentType === "BooleanSelect") {
             return <BooleanSelect
                 idx={idx}
                 ukey={ukey}
@@ -417,7 +617,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 }}
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === "Timestamp") || componentType === "TimePicker") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
@@ -425,7 +625,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 onChange={(newValue: any) => props.onChange && props.onChange!(newValue && newValue.format('YYYY-MM-DDTHH:mm:ss.SSSZZ'), 'DatePickerComponent', targetObject, props.eObject)}
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === "Date") || componentType === "DatePicker") {
             return <DatePickerComponent
                 idx={idx}
                 ukey={ukey}
@@ -442,7 +642,7 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 type="password"
                 edit={edit}
             />
-        } else if (eType && eType.isKindOf('EEnum')) {
+        } else if ((eType && eType.isKindOf('EEnum')) || componentType === "Select") {
             return <SelectComponent
                 idx={idx}
                 ukey={ukey}
@@ -457,7 +657,22 @@ export default class ComponentMapper extends React.Component<Props, any> {
                 edit={edit}
                 showIcon={showIcon}
             />
-        } else if (eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) {
+        } else if ((props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) || componentType === "SelectHighlight") {
+            return <SelectComponentForhightLight
+                idx={idx}
+                ukey={ukey}
+                value={targetValue || (eType.eContents()[0] && eType.eContents()
+                    .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")[0].get('name'))}
+                mainObject={props.mainEObject}
+                id={props.id}
+                onChange={(newValue: any) => {
+                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
+                }}
+                upperBound={props.upperBound}
+                edit={edit}
+                showIcon={showIcon}/>
+        }
+        else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) || componentType === "Tag") {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}

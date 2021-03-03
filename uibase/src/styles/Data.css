@@ -11,3 +11,14 @@ tr:hover > td {
 .ant-table table {
     border-collapse: collapse;
 }
+
+.developer_table .ant-table-row .ant-select {
+    width: 100% !important;
+}
+
+.json-search-pane {
+    margin: 0 35px 0 35px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1);
+}

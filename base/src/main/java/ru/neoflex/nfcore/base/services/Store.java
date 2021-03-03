@@ -9,7 +9,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
@@ -45,7 +44,7 @@ public class Store implements EventsRegistration {
     @Autowired
     public SimpMessageSendingOperations messagingTemplate;
 
-    public final static Function<EClass, EStructuralFeature> qualifiedNameDelegate = eClass -> {
+    public final static Function<EClass, EAttribute> qualifiedNameDelegate = eClass -> {
         for (EAttribute eAttribute: eClass.getEAllAttributes()) {
             if (eAttribute.getEAttributeType() == TypesPackage.Literals.QNAME) {
                 return eAttribute;

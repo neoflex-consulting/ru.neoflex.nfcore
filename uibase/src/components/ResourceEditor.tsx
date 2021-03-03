@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Layout, Menu, Tree} from 'antd';
-import Ecore, {EObject, Resource, ResourceSet} from "ecore";
+import {Button, Col, Dropdown, Input, Layout, Menu, Row, Table, Tree} from 'antd';
+import Ecore, {EClass, EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
@@ -79,10 +79,11 @@ interface State {
     rightMenuPosition: Object,
     uniqKey: String,
     treeRightClickNode: { [key: string]: any },
+    treeLeftClickNode: { [key: string]: any },
     addRefPropertyName: String,
     isSaving: Boolean,
     addRefPossibleTypes: Array<string>,
-    classes: Ecore.EObject[],
+    classes: EClass[],
     selectedKeys: React.Key[],
     selectedRefUries: Array<string>,
     searchResources: String,
@@ -98,6 +99,8 @@ interface State {
     selectTags: number,
     selectCount: number,
     selectedTree: any,
+    addRefMenuItems: EClass[],
+    isTableInFocus: boolean
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -148,6 +151,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     treeRef: React.RefObject<any>;
     eventHandlerClass = "ru.neoflex.nfcore.application#//EventHandler";
     dynamicActionElementClass = "ru.neoflex.nfcore.application#//DynamicActionElement";
+    redirectChecked = false;
 
     constructor(props: any) {
         super(props);
@@ -170,6 +174,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         rightMenuPosition: { x: 100, y: 100 },
         uniqKey: "",
         treeRightClickNode: {} as { [key: string]: any },
+        treeLeftClickNode: {} as { [key: string]: any },
         addRefPropertyName: "",
         isSaving: false,
         addRefPossibleTypes: [],
@@ -189,7 +194,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectDropdownVisible: false,
         selectTags: 3,
         selectCount: 0,
-        selectedTree:{}
+        selectedTree:{},
+        addRefMenuItems: [],
+        isTableInFocus: false
     };
 
     componentDidMount(): void {
@@ -408,7 +415,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     generateEObject(): void {
-        const { selectedEClass, name } = this.props.location.state;
+        const selectedEClass = this.props.location.state?.selectedEClass ? this.props.location.state.selectedEClass : this.props.match.params.ref;
+        const name = this.props.location.state?.name ? this.props.location.state.name : "";
         const targetEClass: { [key: string]: any } | undefined = this.state.classes.find((eclass: Ecore.EClass) => `${eclass.eContainer.get('name')}.${eclass.get('name')}` === selectedEClass);
         const resourceSet = Ecore.ResourceSet.create();
         const newResourceJSON: { [key: string]: any } = {};
@@ -422,7 +430,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         const mainEObject = resource.eResource().eContents()[0];
         const json = mainEObject.eResource().to();
-        const nestedJSON = nestUpdaters(json, null);
+        const nestedJSON = {
+            ...nestUpdaters(json, null),
+            _id: '/'
+        };
 
         this.setState({
             mainEObject: mainEObject,
@@ -531,7 +542,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     edit: this.state.edit && !isDisabled,
                     showIcon: isNeoIconSelect,
                     syntax,
-                    goToObject: this.goToObject
+                    goToObject: this.goToObject,
+                    t: this.props.t
                 };
                 let value = FormComponentMapper.getComponent(props);
                 value = isExpandable ? FormComponentMapper.getComponentWrapper({
@@ -637,7 +649,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({
             modalRefVisible: true,
             addRefPropertyName: EObject.get('name'),
-            addRefPossibleTypes: addRefPossibleTypes
+            addRefPossibleTypes: addRefPossibleTypes,
+            addRefMenuItems: this.getAddElementsList(addRefPossibleTypes)
         })
     };
 
@@ -760,8 +773,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     }
 
-
-
     handleRightMenuSelect = (e: any) => {
         const targetObject = this.state.targetObject;
         const node: { [key: string]: any } = this.state.treeRightClickNode;
@@ -790,7 +801,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 isModified: true,
                 expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))],
             }, this.scrollToElementWithId)
@@ -812,7 +823,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -836,7 +847,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -894,7 +905,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState((state, props) => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 isModified: true,
             }), this.scrollToElementWithId)
         }
@@ -1402,6 +1413,71 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     }
 
+    private deleteOnDel = (event: any) => {
+        //this.state.edit && !node.isArray && !node.headline
+        const node: { [key: string]: any } = this.state.treeLeftClickNode;
+        if (!node.eClass) {
+            return null
+        }
+        if (this.state.edit
+            && !this.state.isTableInFocus
+            && this.state.edit && !node.isArray && !node.headline //проверка аналгична delete при нажатии ПКМ
+            && Object.keys(this.state.selectedTree).length !== 0
+            && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree);
+            event.preventDefault();
+        }
+    };
+
+    handleAddElement = () => {
+        const eClass:EClass = this.state.addRefMenuItems[0];
+        if (eClass) {
+            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
+            this.setState({modalRefVisible: false, modalResourceVisible: true})
+        }
+    };
+
+    renderMenu = () => {
+        return <Menu>
+            {(this.state.addRefMenuItems as EClass[]).map((eClass, index) => {
+                return <Menu.Item key={index}>
+                    <a target="_blank" rel="noopener noreferrer" href={`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`}>
+                        {eClass.eContainer.get('name')+'.'+eClass.get('name')}
+                    </a>
+                </Menu.Item>
+            })}
+        </Menu>
+
+    };
+
+    getAddElementsList = (addRefPossibleTypes: string[]) => {
+        let classes:EClass[] = [];
+        (this.state.classes as EClass[]).forEach(c=>{
+            if (c.eContents().find(f=>f.get("eType")?.get("name") === "QName")) {
+                if (addRefPossibleTypes.includes(c.get("name") as never)) {
+                    classes = classes.concat(c.get('eAllSubTypes'));
+                    if (!c.get('abstract')) {
+                        classes.push(c);
+                    }
+                }
+            }
+        });
+        const nonAbstract = (this.state.classes as EClass[])
+            .filter(c=>addRefPossibleTypes.includes(c.get("name") as never)
+                && !c.get('abstract'));
+        return classes.length === nonAbstract.length
+            ? classes //all classes are global
+            : []
+    };
+
+    onTreeFocus = () => {
+        this.setState({isTableInFocus: false})
+    };
+
+    onTableFocus = () => {
+        this.setState({isTableInFocus: true})
+    };
+
     render() {
 
         const { t } = this.props as Props & WithTranslation;
@@ -1563,7 +1639,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 </NeoCol>
                             </NeoRow>
                         </div>
-                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
+                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }} onBlur={this.onTreeFocus} onFocus={this.onTableFocus}>
                             <NeoTable
                                 bordered
                                 size="small"
@@ -1590,12 +1666,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={<NeoButton
-                                type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"}
-                                onClick={this.handleAddNewRef}
-                            >
-                                    OK
-                             </NeoButton>}
+                    footer={
+                        <>
+                            <NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>
+                                OK
+                            </NeoButton>
+                            {this.state.addRefMenuItems.length > 1
+                                ? <Dropdown overlay={this.renderMenu()}>
+                                      <Button title={t('add element')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} size="large"/>
+                                  </Dropdown>
+                                : this.state.addRefMenuItems.length === 1
+                                    ? <Button title={t('add element')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} size="large" onClick={this.handleAddElement}/>
+                                    : null
+                            }
+                        </>
+                    }
                 >
                     <NeoSelect
                         className={'select_option_tag'}
@@ -1641,13 +1726,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
+                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>
@@ -1656,10 +1742,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>

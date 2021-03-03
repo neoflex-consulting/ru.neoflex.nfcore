@@ -37,7 +37,7 @@
         <org.eclipse.text.version>3.5.101</org.eclipse.text.version>
         <org.eclipse.core.resources.version>3.7.100</org.eclipse.core.resources.version>
         <commons-lang3.version>3.10</commons-lang3.version>
-        <orientdb.version>3.1.5</orientdb.version>
+        <orientdb.version>3.1.7</orientdb.version>
         <epsilon-core.version>1.5.1</epsilon-core.version>
         <org.eclipse.jgit.http.server.version>5.9.0.202009080501-r</org.eclipse.jgit.http.server.version>
         <ssh-shell-spring-boot-starter.version>1.5.3</ssh-shell-spring-boot-starter.version>

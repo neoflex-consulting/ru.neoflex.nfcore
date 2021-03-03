@@ -1,6 +1,6 @@
 import * as React from "react";
 import Ecore from "ecore";
-import {API} from "../modules/api";
+import {API, QueryResult} from "../modules/api";
 import {Form, Tabs} from "antd";
 import AceEditor from "react-ace";
 import 'brace/theme/tomorrow';
@@ -12,7 +12,9 @@ import {NeoIcon} from "neo-icon/lib";
 import {FormInstance} from "antd/lib/form";
 
 interface Props {
+    onJSONSearch: (results: QueryResult) => void;
     onSearch: (resources: Ecore.Resource[]) => void;
+    onReset: () => void;
     specialEClass?: Ecore.EClass | undefined;
     refresh: boolean;
 }
@@ -21,10 +23,12 @@ interface State {
     refresh: boolean,
     tags: Ecore.EObject[];
     classes: Ecore.EObject[];
+    indicatorError: boolean;
     createResModalVisible: boolean;
     selectTags: number;
     selectCount: number;
     selectDropdownVisible: boolean;
+    isJSONResult: boolean;
 }
 
 class DataSearch extends React.Component<Props & WithTranslation, State> {
@@ -34,10 +38,12 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
         refresh: this.props.refresh,
         tags: [],
         classes: [],
+        indicatorError: false,
         createResModalVisible: false,
         selectTags: 6,
         selectCount: 0,
-        selectDropdownVisible: false
+        selectDropdownVisible: false,
+        isJSONResult: false
     };
 
     handleSubmit = (e: any) => {
@@ -45,7 +51,12 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
         this.refresh();
     };
 
+    handleSubmitFailed = () => {
+        this.setState({ indicatorError: true })
+    };
+
     refresh = () => {
+        this.setState({ indicatorError: false });
         const values = this.formRef.current!.getFieldsValue();
         let selectedClassObject: Ecore.EClass | undefined;
         if (this.props.specialEClass === undefined) {
@@ -53,6 +64,11 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
          } else {
              selectedClassObject = this.props.specialEClass
          }
+        if (this.state.isJSONResult) {
+            API.instance().find(JSON.parse(values.json_field)).then(results=>{
+                this.props.onJSONSearch(results)
+            })
+        }
          if (values.key.value === "json_search") {
              API.instance().find(JSON.parse(values.json_field.value)).then(results => {
                  this.props.onSearch(results.resources)
@@ -130,6 +146,13 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
         return !(selectedClassObject && checkRecursive(selectedClassObject as Ecore.EClass));
     };
 
+    onSearchClick = () => {
+        this.setState({isJSONResult: false}, ()=>this.handleSubmit)
+    };
+
+    onJSONSearchClick = () => {
+        this.setState({isJSONResult: true}, ()=>this.handleSubmit)
+    };
 
     render() {
         const { t } = this.props;
@@ -148,7 +171,9 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                     name={"dataSearch"}
                     initialValues={{ key: 'data_search' }}
                     onFinish={this.handleSubmit}
-                    style={{padding: '0 36px'}}
+                    onFinishFailed={this.handleSubmitFailed}
+                    style={{width:'100%', padding:'10px 36px'}}
+                    className={'datasearch'}
                 >
                     <Form.Item
                         name={"key"}
@@ -156,6 +181,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                         <NeoTabs
                             onChange={(key: string) => {
                                 this.formRef.current!.setFieldsValue({ key: { value: key } })
+                                this.setState({isJSONResult: false}, ()=> this.props.onReset())
                             }}
                         >
                             <NeoTabs.TabPane
@@ -193,7 +219,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                         }
                                     </NeoSelect>
                                 </Form.Item>
-
 
                                 <Form.Item
                                     style={{display:'block'}}
@@ -298,10 +323,19 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
                                 <Form.Item style={{marginBottom:'20px'}}>
                                     <NeoButton
-                                        title={t("searchsimple")}
-                                        onClick={this.handleSubmit}
+                                        title={t("table view")}
+                                        onClick={this.onSearchClick}
                                     >
-                                        {t('searchsimple')}
+                                        {t('table view')}
+                                    </NeoButton>
+
+                                    <NeoButton
+                                        style={{marginLeft:"16px"}}
+                                        type={"secondary"}
+                                        title={t("json view")}
+                                        onClick={this.onJSONSearchClick}
+                                    >
+                                        {t('json view')}
                                     </NeoButton>
                                 </Form.Item>
 
@@ -309,6 +343,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                             <NeoButton
                                 title={t("createitem")}
                                 type="primary"
+                                size="large"
                                 style={{ display: 'block', backgroundColor:'#424D78', position:'absolute', right:'0', top: '0', zIndex:1, padding: '8px', width: '32px'}}
                                 onClick={ () => this.setModalVisible(true) }
                             >

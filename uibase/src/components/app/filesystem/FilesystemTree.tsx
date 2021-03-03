@@ -84,6 +84,10 @@ const prepareNodes = (json: any[]): any[] => {
     })
 }
 
+function isUniqueKey (keys: {key: string}[], newKey: string) {
+    return !keys.find(c=>c.key === newKey)
+}
+
 class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     folderName = "";
     fileName = "";
@@ -192,17 +196,22 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
             console.log(newCatalog)
             const {key, treeData} = this.state
             const newKey = ["", ...key.split("/").filter(p=>!!p), newCatalog].join("/")
-            const children = [...this.getChildren(treeData, key),
-                {key: newKey, title: newCatalog, isLeaf: false, icon: getTreeIcon}]
-            this.setState({
-                treeData: this.updateTreeData(treeData, key, children),
-                selectedKeys: [newKey],
-                key: newKey,
-                isLeaf: false,
-                folderModalVisible: false
-            })
-            if (this.props.onSelect) {
-                this.props.onSelect(newKey, false)
+            const childrenKeys = this.getChildren(treeData, key)
+            if (isUniqueKey(childrenKeys, newKey)) {
+                const children = [...childrenKeys,
+                    {key: newKey, title: newCatalog, isLeaf: false, icon: getTreeIcon}]
+                this.setState({
+                    treeData: this.updateTreeData(treeData, key, children),
+                    selectedKeys: [newKey],
+                    key: newKey,
+                    isLeaf: false,
+                    folderModalVisible: false
+                })
+                if (this.props.onSelect) {
+                    this.props.onSelect(newKey, false)
+                }
+            } else {
+                this.props.notification!(this.props.t('notification'), this.props.t('folder already exists'), "error");
             }
         } else {
             this.props.notification!(this.props.t('notification'), this.props.t('folder name is empty'), "error");
@@ -216,17 +225,22 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
             console.log(newFile)
             const {key, treeData} = this.state
             const newKey = ["", ...key.split("/").filter(p=>!!p), newFile].join("/")
-            const children = [...this.getChildren(treeData, key),
-                {key: newKey, title: newFile, isLeaf: true, icon: getTreeIcon}]
-            this.setState({
-                treeData: this.updateTreeData(treeData, key, children),
-                selectedKeys: [newKey],
-                key: newKey,
-                isLeaf: true,
-                fileModalVisible: false
-            })
-            if (this.props.onSelect) {
-                this.props.onSelect(newKey, true)
+            const childrenKeys = this.getChildren(treeData, key)
+            if (isUniqueKey(childrenKeys, newKey)) {
+                const children = [...childrenKeys,
+                    {key: newKey, title: newFile, isLeaf: true, icon: getTreeIcon}]
+                this.setState({
+                    treeData: this.updateTreeData(treeData, key, children),
+                    selectedKeys: [newKey],
+                    key: newKey,
+                    isLeaf: true,
+                    fileModalVisible: false
+                })
+                if (this.props.onSelect) {
+                    this.props.onSelect(newKey, true)
+                }
+            } else {
+                this.props.notification!(this.props.t('notification'), this.props.t('file already exists'), "error");
             }
         } else {
             this.props.notification!(this.props.t('notification'), this.props.t('folder name is empty'), "error");
@@ -376,13 +390,13 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         width: '1px'
                     }}/>
                     <NeoButton
-                        className={`tree-button ${!this.state.isLeaf !== true ? "disabled" : "link"}`}
+                        className={`tree-button ${!this.state.isLeaf === true ? "disabled" : "link"}`}
                         title={t('download')}
                         type={"link"}
-                        onClick={!(!this.state.isLeaf !== true) ? this.downloadFile : undefined}>
+                        onClick={!(!this.state.isLeaf === true) ? this.downloadFile : undefined}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6.21967 7.71967C5.92678 8.01256 5.92678 8.48744 6.21967 8.78033C6.51256 9.07322 6.98744 9.07322 7.28033 8.78033L11.25 4.81066V16.5C11.25 16.9142 11.5858 17.25 12 17.25C12.4142 17.25 12.75 16.9142 12.75 16.5V4.81066L16.7197 8.78033C17.0126 9.07322 17.4874 9.07322 17.7803 8.78033C18.0732 8.48744 18.0732 8.01256 17.7803 7.71967L12.5303 2.46967C12.2374 2.17678 11.7626 2.17678 11.4697 2.46967L6.21967 7.71967Z" fill={!this.state.isLeaf !== true ? disabled : enabled}/>
-                            <path d="M3 18V21C3 21.4142 3.33579 21.75 3.75 21.75H20.25C20.6642 21.75 21 21.4142 21 21V18C21 17.5858 20.6642 17.25 20.25 17.25C19.8358 17.25 19.5 17.5858 19.5 18V20.25H4.5V18C4.5 17.5858 4.16421 17.25 3.75 17.25C3.33579 17.25 3 17.5858 3 18Z" fill={!this.state.isLeaf !== true ? disabled : enabled}/>
+                            <path d="M6.21967 7.71967C5.92678 8.01256 5.92678 8.48744 6.21967 8.78033C6.51256 9.07322 6.98744 9.07322 7.28033 8.78033L11.25 4.81066V16.5C11.25 16.9142 11.5858 17.25 12 17.25C12.4142 17.25 12.75 16.9142 12.75 16.5V4.81066L16.7197 8.78033C17.0126 9.07322 17.4874 9.07322 17.7803 8.78033C18.0732 8.48744 18.0732 8.01256 17.7803 7.71967L12.5303 2.46967C12.2374 2.17678 11.7626 2.17678 11.4697 2.46967L6.21967 7.71967Z" fill={!this.state.isLeaf === true ? disabled : enabled}/>
+                            <path d="M3 18V21C3 21.4142 3.33579 21.75 3.75 21.75H20.25C20.6642 21.75 21 21.4142 21 21V18C21 17.5858 20.6642 17.25 20.25 17.25C19.8358 17.25 19.5 17.5858 19.5 18V20.25H4.5V18C4.5 17.5858 4.16421 17.25 3.75 17.25C3.33579 17.25 3 17.5858 3 18Z" fill={!this.state.isLeaf === true ? disabled : enabled}/>
                         </svg>
                     </NeoButton>
                     <NeoButton

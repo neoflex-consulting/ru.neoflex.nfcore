@@ -21,6 +21,7 @@ import ru.neoflex.nfcore.masterdata.EntityType
 import ru.neoflex.nfcore.base.auth.GrantType
 
 annotation "ru.neoflex.nfcore" as NFCore
+annotation "http://orientdb.com/meta" as OrientDB
 
 /* Components */
 abstract class Component extends Tagged {
@@ -30,6 +31,18 @@ abstract class Component extends Tagged {
 
 @NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в EventAction или EventHandler")
 abstract class DynamicActionElement {
+}
+
+@NFCore(documentation="Элемент ввода")
+abstract class InputElement {
+        @NFCore(documentation="Заголовок элемента")
+    String title
+        @NFCore(documentation="Положение заголовка")
+    TitleOrientation titleOrientation
+        @NFCore(documentation="Текст указанный в подсказке")
+    String helpText
+        @NFCore(documentation="Положение выпадающей подсказки")
+    HelpOrientation helpOrientation
 }
 
 @NFCore(documentation="Интерфейс, которым помечаются классы, доступные для использования в таблицах, в строках с данными")
@@ -97,6 +110,7 @@ class Application extends AppModule {
 @Ecore(constraints="IsValid")
 abstract class ViewElement extends DynamicActionElement {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
 	String name
 	    @NFCore(documentation="Контейнер для элементов визуального интрфеса, доступных в меню 'view' в Application и AppModule")
 	container ViewContainer parent opposite children
@@ -122,7 +136,14 @@ abstract class ViewContainer extends ViewElement {
 abstract class Icon extends ViewElement {	
 }
 
+@NFCore(documentation="Таблица справочников")
+class MasterdataView extends ViewElement {
+        @NFCore(documentation="Тип сущности из мастерданных")
+    refers EntityType entityType
+}
+
 @NFCore(documentation="Календарь, как элемент визуального интерфейса")
+@Ecore(constraints="IsValid")
 class Calendar extends ViewElement {
         @NFCore(documentation="Массив уведомлений, который отображаются в календаре")
     refers Notification[] notifications
@@ -136,6 +157,8 @@ class Calendar extends ViewElement {
     op JSON getNotificationInstances(String dateFrom, String dateTo)
         @NFCore(documentation="Функция запроса к БД для создания нового уведомления")
     op JSON createNotification(JSON newNotification)
+        @NFCore(documentation="Название параметра передаваемого в url при переходе в отчёт")
+    String urlDateParameterName = "reportDate"
 }
 
 @NFCore(documentation="Область которую можно свернуть/развернуть")
@@ -207,11 +230,14 @@ class DatasetView extends ViewElement, CommandElement {
     boolean hidePaginator
           @NFCore(documentation="Название экспортируемого файла docx/excel")
     String exportFileName
+          @NFCore(documentation="Набор элеменов которые не будут отображаться на панели действий", renderConditions="{'hideActionBar':false}")
+    PanelActions[] hiddenPanelActions
 }
 
 @NFCore(documentation="Исполняемый код, написанный на groovy")
 class GroovyCommand extends DynamicActionElement, CommandElement {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
         @NFCore(documentation="Значения, передаваемые в groovy код. Например: {} или {'testSetId': ':testSetId','reportDate': ':reportDate','branch': ':branch'}",expandable="true")
     Text command
@@ -232,6 +258,7 @@ class GroovyCommand extends DynamicActionElement, CommandElement {
 @NFCore(documentation="Переменная, используемая в модуле")
 class ValueHolder extends DynamicActionElement, ValueItem {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
 	String name
         @NFCore(documentation="Тип значения")
 	ValueType valueType
@@ -282,7 +309,7 @@ class Typography extends ViewElement {
 }
 
 @NFCore(documentation="Выпадающий список")
-class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
+class Select extends ViewElement, ValueItem, CommandElement, GridComponent, InputElement {
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
         @NFCore(documentation="Режим отображения опций внутри выпадающего списка: Default, Multiple, Tags")
@@ -299,14 +326,10 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent {
     refers DatasetColumn datasetValueColumn
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
-        @NFCore(documentation="Текст, отображающийся рядом с полем")
-    String title
-        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
-    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Компонента для выбора дат")
-class DatePicker extends ViewElement, ValueItem, GridComponent {
+class DatePicker extends ViewElement, ValueItem, GridComponent, InputElement {
         @NFCore(documentation="Показывать кнопку очистки поля")
     boolean allowClear
         @NFCore(documentation="Формат отображения поля. Имеет первый приоритет.")
@@ -330,25 +353,21 @@ class HtmlContent extends ViewElement, CommandElement, GridComponent {
 }
 
 @NFCore(documentation="Текстовое поле")
-class Input extends ViewElement, ValueItem, GridComponent {
+class Input extends ViewElement, ValueItem, GridComponent,InputElement {
         @NFCore(documentation="Формат данных. Варианты: InputNumber, InputString")
     InputType inputType = "InputString"
         @NFCore(documentation="Минимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
-    String minValue = "1"
+    String minValue
         @NFCore(documentation="Максимальное вводимое значение, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
-    String maxValue = "99"
+    String maxValue
         @NFCore(documentation="Шаг значений, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
-    String step = "1"
+    String step
         @NFCore(documentation="Ширина поля")
     String width
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
-        @NFCore(documentation="Текст, отображающийся рядом с полем")
-    String title
-        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
-    TitleOrientation titleOrientation
 }
 
 @NFCore(documentation="Компонента с флагом")
@@ -385,6 +404,7 @@ class CssClass extends Tagged {
 @Ecore(constraints="IsValid")
 abstract class TreeNode {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
         @NFCore(documentation="Проверка прав. Если true, то, при начитке объекта, бэк анализирует роль пользователя и его пара доступа,а после выставляет значение поля grantType")
 	boolean checkRights
@@ -431,6 +451,7 @@ class EventAction {
 @NFCore(documentation="Обработчик события")
 class EventHandler {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
         @NFCore(documentation="Событие. Возможные значения: click, change, componentLoad")
     Event event
@@ -448,6 +469,8 @@ class EventHandler {
 class Drawer extends ViewContainer {
         @NFCore(documentation="Расположение Панели: сверху, снизу, справа, слева")
     TabPosition position
+        @NFCore(documentation="CSS селектор для определения родительского контейнера")
+    String containerSelector
 }
 
 @NFCore(documentation="Адрес документа, на который следует перейти")
@@ -484,6 +507,18 @@ class StyleSheet {
     QName name
         @NFCore(documentation="Наполнение стиля в формате .css файла", expandable="true")
     String sheetContent
+}
+
+@NFCore(documentation="Лента изменений")
+class ChangeLog extends ViewElement {
+        @NFCore(documentation="Ссылка на dataset")
+    refers Dataset dataset
+        @NFCore(documentation="Поле в dataset указывающее автора изменений")
+    refers DatasetColumn author
+        @NFCore(documentation="Поле в dataset указывающее дату и время изменений")
+    refers DatasetColumn dateTime
+        @NFCore(documentation="Поле в dataset содержащее текст отображаемого сообщения")
+    refers DatasetColumn message
 }
 
 @NFCore(documentation="Выравнивание поля")
@@ -697,4 +732,34 @@ enum ButtonSize {
     normal
     medium
     large
+}
+
+enum HelpOrientation {
+    bottomLeft,
+    bottom,
+    bottomRight,
+    rightBottom,
+    right,
+    rightTop,
+    topRight,
+    top,
+    topLeft,
+    leftTop,
+    left,
+    leftBottom
+}
+
+enum PanelActions {
+    filter
+    highlights
+    sort,
+    calculator,
+    aggregations,
+    diagram,
+    groupBy,
+    hiddenColumns,
+    exportDocx,
+    exportExcel,
+    versions,
+    edit
 }

@@ -12,7 +12,11 @@ export interface ILogEntry {
 }
 
 interface Props {
-    logEntries: ILogEntry[]
+    logEntries: ILogEntry[],
+    className?: string,
+    hidden?: boolean,
+    disabled?: boolean,
+    style?: {[key:string]: string|number}
 }
 
 interface State {
@@ -40,7 +44,7 @@ function splitEntriesByDays(logEntries: ILogEntry[]): {date: Moment, entries: IL
 class ChangeLogView extends React.Component<Props & WithTranslation, State> {
     render() {
         return (
-            <div className={"change-log"}>
+            <div className={`change-log ${this.props.className}`} hidden={this.props.hidden} aria-disabled={this.props.disabled} style={this.props.style}>
                 <div className={"change-log-header"}>
                     <NeoParagraph type={"h3_medium"} style={{color:NeoColor.violete_5}}>{this.props.t('change log')}</NeoParagraph>
                 </div>

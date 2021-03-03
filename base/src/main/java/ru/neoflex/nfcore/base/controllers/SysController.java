@@ -21,13 +21,11 @@ import ru.neoflex.nfcore.base.services.Context;
 import ru.neoflex.nfcore.base.services.DeploySupply;
 import ru.neoflex.nfcore.base.services.Store;
 import ru.neoflex.nfcore.base.services.Workspace;
+import ru.neoflex.nfcore.base.services.providers.OrientDBStoreProvider;
 import ru.neoflex.nfcore.base.util.DocFinder;
 import ru.neoflex.nfcore.base.util.Exporter;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,6 +47,8 @@ public class SysController {
     Context context;
     @Autowired
     DeploySupply deploySupply;
+    @Autowired
+    OrientDBStoreProvider provider;
 
     @GetMapping(value = "/user", produces = "application/json; charset=utf-8")
     public Principal getUser(Principal principal) {
@@ -309,4 +309,40 @@ public class SysController {
             return listPath(tx, parent.toString());
         });
     }
+
+    @PostMapping(value = "/orientdb/backup", produces = "application/json; charset=utf-8")
+    public List<String> dbBackup(@RequestParam(required = false) String dbName) throws Exception {
+        return Collections.singletonList(provider.getServer().backupDatabase(dbName).getAbsolutePath());
+    }
+
+    @GetMapping(value = "/orientdb/backup", produces = "application/json; charset=utf-8")
+    public List<String> dbListBackups(@RequestParam(required = false) String dbName) throws Exception {
+        return provider.getServer().listBackupNames(dbName);
+    }
+
+    @PostMapping(value = "/orientdb/restore", produces = "application/json; charset=utf-8")
+    public List<String> dbRestore(@RequestParam String fileName) throws Exception {
+        return Collections.singletonList(provider.getServer().restoreDatabase(fileName));
+    }
+
+    @PostMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
+    public List<String> dbExport(@RequestParam(required = false) String dbName) throws Exception {
+        return Collections.singletonList(provider.getServer().exportDatabase(dbName).getAbsolutePath());
+    }
+
+    @GetMapping(value = "/orientdb/export", produces = "application/json; charset=utf-8")
+    public List<String> dbListExports(@RequestParam(required = false) String dbName) throws Exception {
+        return provider.getServer().listExportNames(dbName);
+    }
+
+    @PostMapping(value = "/orientdb/import", produces = "application/json; charset=utf-8")
+    public List<String> dbImport(@RequestParam String fileName) throws Exception {
+        return Collections.singletonList(provider.getServer().importDatabase(fileName));
+    }
+
+    @PostMapping(value = "/orientdb/vacuum", produces = "application/json; charset=utf-8")
+    public List<String> dbVacuum(@RequestParam(required = false) String dbName) throws Exception {
+        return Collections.singletonList(provider.getServer().vacuum(dbName));
+    }
+
 }

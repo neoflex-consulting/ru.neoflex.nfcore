@@ -75,10 +75,14 @@ public class Context {
         return inContextWithClassLoaderInTransaction(false, f);
     }
 
+    public <R> R inContextWithClassLoader(Callable<R> f) throws Exception {
+        return inContext(() -> workspace.withClassLoader(f));
+    }
+
     public <R> R inContextWithClassLoaderInTransaction(boolean readOnly, Callable<R> f) throws Exception {
-        return inContext(() -> workspace.withClassLoader(() -> store.inTransaction(readOnly, tx -> {
+        return inContextWithClassLoader(() -> store.inTransaction(readOnly, tx -> {
             return f.call();
-        })));
+        }));
     }
 
     public <R> R transact(String message, Callable<R> f) throws Exception {
