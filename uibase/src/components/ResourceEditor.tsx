@@ -445,7 +445,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     onTreeSelect = (selectedKeys: React.Key[], e: any) => {
         if (selectedKeys[0] && e.node.data.targetObject.eClass) {
             const targetObject = e.node.data.targetObject;
-            const uniqKey = e.node.data.eventKey;
+            const uniqKey = e.node.data.key;
             this.setState({
                 tableData: this.prepareTableData(targetObject, this.state.mainEObject, uniqKey),
                 targetObject: targetObject,
