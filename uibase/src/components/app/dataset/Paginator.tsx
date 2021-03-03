@@ -1,5 +1,5 @@
 import React from "react";
-import {Pagination, ConfigProvider} from "antd";
+import {ConfigProvider, Pagination} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';

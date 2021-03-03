@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {MouseEvent} from 'react';
+import {withTranslation} from 'react-i18next';
 import {Form, List} from 'antd';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
-import {MouseEvent} from "react";
 import {API} from "../../../modules/api";
 import Ecore, {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";

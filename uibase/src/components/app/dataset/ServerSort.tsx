@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
-import { Form } from 'antd';
+import {Form} from 'antd';
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';

@@ -1,5 +1,5 @@
 import React, {Fragment, useState} from 'react';
-import {Dropdown, Menu, Modal, Select} from 'antd'
+import {Button, Dropdown, Menu, Modal, Select} from 'antd'
 import Ecore from 'ecore';
 
 import {API} from '../modules/api'
@@ -7,7 +7,7 @@ import FormComponentMapper from './FormComponentMapper';
 import {TFunction} from 'i18next';
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import {NeoButton, NeoHint, NeoSelect} from "neo-design/lib";
-import {IMainContext, IServerNamedParam, IServerQueryParam} from "../MainContext";
+import {IMainContext} from "../MainContext";
 import {NeoIcon} from "neo-icon/lib";
 
 interface Props {
@@ -99,7 +99,7 @@ export default function Operations(props: Props): JSX.Element {
     function handleAddNewRef() {
         const resources: any = [];
         let refsArray: Array<Object> = [];
-        props.mainEObject.eContents().map((res: { [key: string]: any }) => {
+        props.mainEObject.eContents().forEach((res: { [key: string]: any }) => {
             const isFound = selectedRefUries.indexOf(res.eURI() as never);
             isFound !== -1 && resources.push(res)
         });
@@ -207,16 +207,18 @@ export default function Operations(props: Props): JSX.Element {
                     </Menu.Item>
                 })}
             </Menu>)
-
         return <Dropdown placement="bottomCenter" overlay={menu}>
-        <a>
-                <NeoButton className="panel-button"
-                    type={"ghost-icon"}
-                    title={t("operations")}
-             >
-                    <NeoIcon icon={"lightbulbt"}/>
-                </NeoButton>
-        </a>
+            <Button className="panel-button" title={t("operations")}>
+                <NeoIcon icon={"lightbulbt"}/>
+            </Button>
+                    {/*<a>*/}
+                    {/*    <NeoButton className="panel-button"*/}
+                    {/*        type={"ghost-icon"}*/}
+                    {/*        title={t("operations")}*/}
+                    {/* >*/}
+                    {/*        <NeoIcon icon={"lightbulbt"}/>*/}
+                    {/*    </NeoButton>*/}
+                    {/*</a>*/}
             </Dropdown>
     }
 

@@ -322,7 +322,7 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                              </>
                      }
                  </div>
-                 {this.props.id== 'toolsDrawer' &&
+                 {this.props.id === 'toolsDrawer' &&
                  <div style={{
                      position: 'absolute',
                      right: 0,

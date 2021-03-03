@@ -14,7 +14,7 @@ import Fullscreen from "react-full-screen";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
 import moment from "moment";
 import format from "number-format.js";
-import {replaceAllCollisionless, hash, encode} from "../../../utils/replacer";
+import {encode, hash, replaceAllCollisionless} from "../../../utils/replacer";
 import {
     actionType,
     appTypes,

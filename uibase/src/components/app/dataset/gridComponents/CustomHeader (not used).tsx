@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {IHeaderParams} from "ag-grid-community";
 import {IHeaderReactComp} from "ag-grid-react";
 import {ViewRegistry} from "../../../../ViewRegistry";

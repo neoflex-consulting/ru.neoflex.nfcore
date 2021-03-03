@@ -1,5 +1,4 @@
-import {IEventHandler} from "./MainContext";
-import {IEvent} from "./MainContext";
+import {IEvent, IEventHandler} from "./MainContext";
 
 export default class EventTracker {
     private handlers: IEventHandler[] = [];
