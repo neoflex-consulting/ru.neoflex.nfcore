@@ -434,7 +434,15 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         expandedKeys: [...expanded]
                     })}}
             >
-                <Tree.TreeNode headline={true} style={{ fontWeight: '600' }} eClass={this.state.mainEObject.eClass.eURI()} targetObject={this.state.resourceJSON} icon={<NeoIcon icon={"clipboard"} style={{ color: "#2484fe" }} />} title={this.state.mainEObject.eClass.get('name')} key={"/"}>
+                <Tree.TreeNode
+                    headline={true}
+                    style={{ fontWeight: '600' }}
+                    eClass={this.state.mainEObject.eClass.eURI()}
+                    targetObject={this.state.resourceJSON}
+                    icon={<NeoIcon icon={"clipboard"}
+                    style={{ color: "#2484fe" }} />}
+                    title={`${this.state.mainEObject.eClass.get('name')} ${this.state.mainEObject.get('name') ? '(' + this.state.mainEObject.get('name') + ')': ''}`}
+                    key={"/"}>
                     {generateNodes(this.state.mainEObject.eClass, this.state.resourceJSON)}
                 </Tree.TreeNode>
             </Tree>
