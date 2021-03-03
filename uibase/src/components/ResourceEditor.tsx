@@ -286,6 +286,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         return <Tree.TreeNode
                             key={parentKey}
                             className={!isVisible ? "hidden-leaf" : ""}
+                            parentId={json._id}
                             parentUpdater={json.updater}
                             upperBound={upperBound}
                             isArray={true}
@@ -303,6 +304,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 return <Tree.TreeNode
                                     key={`${parentKey}.${cidx}`}
                                     featureUpperBound={upperBound}
+                                    parentId={json._id}
                                     parentUpdater={json.updater}
                                     eClass={object.eClass ? object.eClass : feature.get('eType').eURI()}
                                     propertyName={feature.get('name')}
@@ -324,6 +326,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const {t} = this.props;
             const dragKey = event.dragNode.props.targetObject._id;
             const dropKey = event.node.props.targetObject._id;
+            const dropParentKey = event.node.props.parentId;
 
             const dragPos = event.dragNode.props.pos.split('-');
             const dropPos = event.node.props.pos.split('-');
@@ -341,46 +344,59 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
             const allSubTypes = eClassObject.get('eAllSubTypes');
 
+
+            const parent = findObjectById(this.state.resourceJSON, dropParentKey);
+            const parentEClass = Ecore.ResourceSet.create().getEObject(parent.eClass);
+            const foundInSubTypes = parentEClass.getEStructuralFeature(nodePropertyName)
+                ? parentEClass.getEStructuralFeature(nodePropertyName).get('eType').get('eAllSubTypes')
+                    .find((c:EClass)=>c.eURI() === event.dragNode.props.eClass) ||
+                    parentEClass.getEStructuralFeature(nodePropertyName).get('eType').eURI() === event.dragNode.props.eClass
+                : true;
+
+            const containNodePropertyName = eClassObject.get('eAllStructuralFeatures')
+                .find((e:EObject)=> e.get('name') === nodePropertyName);
             let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
 
             if (!this.state.edit) {
                 this.props.notification(t('notification'), t('editing is not available'), "info");
             }
             else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
-                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+                this.props.notification(t('notification'), t('operation blocked'), "info");
             }
-            else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
+            else if ((event.node.props.upperBound === undefined && !event.dropToGap && !containNodePropertyName) ||
                 (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
-                (dropKey === 'null' && event.node.props.arrayLength !== 0)
+                (dropKey === 'null' && event.node.props.arrayLength !== 0) ||
+                !foundInSubTypes ||
+                (!dropKey && event.dropToGap)
             ) {
-                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+                this.props.notification(t('notification'), t('operation blocked'), "info");
             }
             else {
                 let updatedJSON = this.state.resourceJSON;
                 let dragObj = findObjectById(updatedJSON, dragKey);
+                //TODO нужно генерировать новый _id чтобы не ловить OVertex not found?
+                //Но тогда нужно обновлять все ссылки по всей базе
 
                 //Delete dragObj from updatedJSON
                 updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
 
                 // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
                 if (!event.dropToGap) {
-                    let item: any;
-                    findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
-                        item = dropObj
-                    });
-                    let upperBound = event.node.props.upperBound
-                    if (upperBound === 1) {
-                        item[nodePropertyName] = dragObj
-                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
-
-                    } else if (upperBound === -1) {
-                        item = Array.isArray(item) ?  item[item.length - 1] : item;
+                    if (dropKey) {
+                        let item: any;
+                        findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                            item = dropObj
+                        });
                         if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
                             item[nodePropertyName] = []
                         }
                         item[nodePropertyName].push(dragObj)
-                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+                    } else {
+                        let nestedJSON = nestUpdaters(updatedJSON, null);
+                        const obj = findObjectById(nestedJSON, event.node.props.parentId)
+                        updatedJSON = obj.updater(dragObj, undefined, nodePropertyName, { operation: "push" })
                     }
+                    this.props.notification(t('notification'), dragObj.eClass + ':'+ t('object move successful'), "info");
                 }
                 else {
                     let ar: any;
@@ -736,7 +752,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1}).length > 0
                     && allSuperTypes.find((t:EObject)=>t.eURI() === this.dynamicActionElementClass)
                     && node.upperBound !== -1
-                    && !eClassObject.get('abstract') 
+                    && !eClassObject.get('abstract')
                     && <Menu.Item key="createEventHandler">{this.props.t("create event handler")}</Menu.Item>}
                 </Menu>
             </div>
