@@ -817,7 +817,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const newObject = {
                 eClass: foundEClass.eURI(),
                 _id: id,
-                name: e.key+` ${id}`
+                name: foundEClass.get('eAllStructuralFeatures').find((f:EObject)=>f.get('name') === "name") ? e.key+` ${id}` : undefined
             };
             let updatedJSON;
             if (node.upperBound === -1) {
