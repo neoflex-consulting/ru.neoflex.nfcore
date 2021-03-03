@@ -373,6 +373,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
 
                     } else if (upperBound === -1) {
+                        item = Array.isArray(item) ?  item[item.length - 1] : item;
                         if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
                             item[nodePropertyName] = []
                         }
@@ -388,7 +389,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     if (ar !== undefined) {
                         if (dropPosition === -1) {
                             ar.splice(nodePos, 0, dragObj);
-                        } else if (nodePos < dragNodePos) {
+                        } else if (nodePos <= dragNodePos) {
                             ar.splice(nodePos + 1, 0, dragObj);
                         } else if (nodePos > dragNodePos) {
                             ar.splice(nodePos, 0, dragObj);
