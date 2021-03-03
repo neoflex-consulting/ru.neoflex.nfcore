@@ -44,7 +44,12 @@ public class ApplicationValidatorExt extends ApplicationValidator {
 
     @Override
     public boolean validateDatasetView(DatasetView datasetView, DiagnosticChain diagnostics, Map<Object, Object> context) {
-        return false;
+        if (datasetView.getDatasetComponent() == null) {
+            return validate(datasetView, diagnostics, context, datasetView.getName() + ": DatasetComponent - must be set");
+        }
+        else {
+            return false;
+        }
     }
 
     @Override
