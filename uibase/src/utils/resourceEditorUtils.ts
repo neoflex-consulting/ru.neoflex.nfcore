@@ -123,7 +123,7 @@ function findObjectById(data: any, id: String): any {
         if (result) return result
     };
 
-    if (data._id === id) return data;
+    if (data._id === id && data._id) return data;
 
     if (Array.isArray(data)) {
         return walkThroughArray(data)
