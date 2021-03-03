@@ -373,6 +373,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
 
                     } else if (upperBound === -1) {
+                        item = Array.isArray(item) ?  item[item.length - 1] : item;
                         if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
                             item[nodePropertyName] = []
                         }
@@ -388,7 +389,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     if (ar !== undefined) {
                         if (dropPosition === -1) {
                             ar.splice(nodePos, 0, dragObj);
-                        } else if (nodePos < dragNodePos) {
+                        } else if (nodePos <= dragNodePos) {
                             ar.splice(nodePos + 1, 0, dragObj);
                         } else if (nodePos > dragNodePos) {
                             ar.splice(nodePos, 0, dragObj);
@@ -830,7 +831,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 isModified: true,
                 expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
             }, this.scrollToElementWithId)
@@ -852,7 +853,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -876,7 +877,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -934,7 +935,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState((state, props) => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 isModified: true,
             }), this.scrollToElementWithId)
         }
@@ -976,7 +977,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 this.setState({
                     resourceJSON: nestedJSON,
                     targetObject: updatedTargetObject,
-                    mainEObject: resource.eContents()[0],
+                    mainEObject: resource.eContents()[resource.eContents().length - 1],
                     isModified: true,
                     expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
                 }, this.scrollToElementWithId)
