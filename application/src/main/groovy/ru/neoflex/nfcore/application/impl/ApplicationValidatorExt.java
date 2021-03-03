@@ -16,7 +16,7 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     @Override
     public boolean validateAppModule_IsValid(AppModule appModule, DiagnosticChain diagnostics, Map<Object, Object> context) {
         if (appModule.isUseParentReferenceTree() && appModule.getReferenceTree() != null) {
-            return validate(appModule, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
+            return validate(appModule, diagnostics, context, "field useParentReferenceTree - must be set 'false' or referenceTree - should be empty");
         }
         else {
             return false;
@@ -27,7 +27,7 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     public boolean validateApplication_IsValid(Application application, DiagnosticChain diagnostics, Map<Object, Object> context) {
         boolean testResult = false;
         if (application.isUseParentReferenceTree() && application.getReferenceTree() != null) {
-            return validate(application, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
+            return validate(application, diagnostics, context, "field useParentReferenceTree - must be set 'false' or referenceTree - should be empty");
         }
         return testResult;
     }
