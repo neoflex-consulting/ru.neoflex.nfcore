@@ -96,7 +96,7 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
 function findObjectById(data: any, id: String): any {
     const walkThroughArray = (array: Array<any>): any => {
         for (var el of array) {
-            if (el._id && el._id === id) {
+            if (el !== undefined && el._id === id) {
                 return el
             } else {
                 const result = findObjectById(el, id);

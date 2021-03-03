@@ -86,6 +86,7 @@ interface State {
     selectDropdownVisible: boolean,
     selectTags: number,
     selectCount: number,
+    selectedTree: any,
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -177,19 +178,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectDropdownVisible: false,
         selectTags: 3,
         selectCount: 0,
+        selectedTree:{}
     };
 
     componentDidMount(): void {
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS);
-        /*window.addEventListener("keydown", this.deleteOnDel);
+        window.addEventListener("keydown", this.deleteOnDel);
         API.instance().findClass("application","EventHandler").then(eClass=>{
             this.eventHandlerClass = eClass.eURI()
         })
         API.instance().findClass("application","DynamicActionElement").then(eClass=>{
             this.dynamicActionElementClass = eClass.eURI()
-        })*/
+        })
     }
 
     componentWillUnmount() {
@@ -198,12 +200,19 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
         window.removeEventListener("click", this.hideRightClickMenu);
         window.removeEventListener("keydown", this.saveOnCtrlS)
-        /*window.removeEventListener("keydown", this.deleteOnDel)*/
+        window.removeEventListener("keydown", this.deleteOnDel)
     }
 
     private saveOnCtrlS = (event: any) => {
         if (event.ctrlKey && event.code === 'KeyS') {
             this.save(false, false);
+            event.preventDefault();
+        }
+    };
+
+    private deleteOnDel = (event: any) => {
+        if (Object.keys(this.state.selectedTree).length !== 0 && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree)
             event.preventDefault();
         }
     };
@@ -442,7 +451,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: targetObject,
                 currentNode: e.node,
                 uniqKey: uniqKey,
-                selectedKeys: selectedKeys
+                selectedKeys: selectedKeys,
+                selectedTree: {
+                    key: 'delete',
+                    keyPath: ['delete']
+                }
             })
         } else {
             this.setState({
@@ -727,15 +740,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     // Добавалениеб редоктирование, сохранение
 
     scrollToElementWithId = (id?:string) => {
-        /*const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
+        const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
-            node.selectHandle.scrollIntoView({
-                behavior: "smooth",
-                block: 'center',
-                inline: 'center'
-            });
-        }*/
+            this.setState({
+                selectedKeys: [node.key],
+                uniqKey: node.key,
+            })
+        }
     }
+
+
 
     handleRightMenuSelect = (e: any) => {
         const targetObject = this.state.targetObject;
@@ -747,7 +761,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const allSubTypes = eClassObject.get('eAllSubTypes');
             node.data.isArray && eClassObject && allSubTypes.push(eClassObject);
             const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName);
-            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+            const id = `ui_generated_${node.pos}//${node.data.propertyName}.${node.data.arrayLength}`;
             const newObject = {
                 eClass: foundEClass.eURI(),
                 _id: id,
@@ -767,20 +781,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 isModified: true,
-                expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))]
+                expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))],
             }, this.scrollToElementWithId)
         }
 
         if (e.key === "moveUp" || e.key === "moveDown") {
             let updatedJSON;
-            if (node.featureUpperBound === -1) {
+            if (node.data.featureUpperBound === -1) {
                 if (e.key === "moveUp") {
-                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
-                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
+                    const index = node.data.pos ? node.data.pos.split('-')[node.data.pos.split('-').length - 1] : undefined;
+                    updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
                 }
                 if (e.key === "moveDown") {
-                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
-                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
+                    const index = node.data.pos ? node.data.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                    updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
                 }
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
@@ -858,10 +872,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     obj[key] = (obj[key] as string).replace(pattern,id)
                 }
             });
-            if (node.upperBound === -1) {
-                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
+            if (node.data.upperBound === -1) {
+                updatedJSON = node.data.parentUpdater(newObject, undefined, node.data.propertyName, { operation: "push" })
             } else {
-                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
+                updatedJSON = node.data.parentUpdater(newObject, undefined, node.data.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = findObjectById(nestedJSON, id);
@@ -890,20 +904,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 //Найти класс eventHandler
                 const eClass = this.eventHandlerClass;
                 const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
-                const node = nodes[0].props;
-                const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+                const node = nodes[0];
+                const id = `ui_generated_${node.pos}//${node.node.data.propertyName}.${node.node.data.arrayLength}`;
                 //Создать пустышку класса
                 const newObject = {
                     eClass: eClassObject.eURI(),
                     _id: id,
-                    name: `${node.propertyName}_${id}`,
+                    name: `${node.node.data.propertyName}_${id}`,
                     //В пустышку прописать listenItem объект на node
                     listenItem: [{
                         $ref: this.state.treeRightClickNode.data.targetObject._id,
                         eClass: this.state.treeRightClickNode.data.eClass
                     }]
                 };
-                let updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" });
+                let updatedJSON = node.node.data.parentUpdater(newObject, undefined, node.node.data.propertyName, { operation: "push" });
                 const nestedJSON = nestUpdaters(updatedJSON, null);
                 const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
                 const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
