@@ -115,6 +115,9 @@ public abstract class SessionFactory {
     }
 
     public Stream<ORID> getORIDs(String idl) {
+        if (idl == null) {
+            return Stream.empty();
+        }
         return Arrays.stream(idl.split(",")).map(id -> {
             String[] ids = id.split("_", 2);
             if (ids.length != 2) {
