@@ -830,7 +830,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 isModified: true,
                 expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
             }, this.scrollToElementWithId)
@@ -852,7 +852,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -876,7 +876,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -934,7 +934,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState((state, props) => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[0],
+                mainEObject: resource.eContents()[resource.eContents().length - 1],
                 isModified: true,
             }), this.scrollToElementWithId)
         }
@@ -976,7 +976,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 this.setState({
                     resourceJSON: nestedJSON,
                     targetObject: updatedTargetObject,
-                    mainEObject: resource.eContents()[0],
+                    mainEObject: resource.eContents()[resource.eContents().length - 1],
                     isModified: true,
                     expandedKeys: [...new Set([node.eventKey].concat(this.state.expandedKeys))]
                 }, this.scrollToElementWithId)
