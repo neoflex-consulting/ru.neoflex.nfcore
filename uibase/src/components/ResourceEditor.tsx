@@ -5,13 +5,7 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {
-    findObjectById,
-    findObjectByIdCallback,
-    getPrimitiveType,
-    nestUpdaters,
-    traverseEObject
-} from '../utils/resourceEditorUtils'
+import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -23,7 +17,18 @@ import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
-import {NeoButton, NeoCol, NeoColor, NeoHint, NeoInput, NeoModal, NeoOption, NeoRow, NeoSelect, NeoTable} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoCol,
+    NeoColor,
+    NeoHint,
+    NeoInput,
+    NeoModal,
+    NeoOption,
+    NeoRow,
+    NeoSelect,
+    NeoTable
+} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
 
 
@@ -1361,7 +1366,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 ref={this.treeRef}
                 key="mainTree"
                 draggable
-                onDrop={onDrop}
+                // onDrop={onDrop}
                  blockNode
                  switcherIcon={<NeoIcon icon={"download"}/>}
                 showIcon
