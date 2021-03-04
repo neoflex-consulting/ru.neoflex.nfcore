@@ -705,8 +705,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 lineHeight: 2,
                 zIndex: 100
             }}>
-                <Menu onClick={this.handleRightMenuSelect} style={{ width: 150, border: "none" }} mode="vertical">
+                <Menu
+                    onClick={this.handleRightMenuSelect}
+                    style={{ width: 150, border: "none"}}
+                    mode="vertical">
                     {this.state.edit && allSubTypes.length > 0 && (node.upperBound === 1 && node.arrayLength > 0 ? false : true) && <Menu.SubMenu
+                        popupClassName={allSubTypes.length >= 10 ? "add-element-sub-menu" : undefined}
                         key="add"
                         title={this.props.t("add child")}
                     >
@@ -717,10 +721,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                     undefined
                                     :
                                     <Menu.Item
-                                        style={{
-                                            marginTop: idx === 0 && allSubTypes.length > 5
-                                                ? '80px' : allSubTypes.length > 5 ? '-20px' : '0px'
-                                        }}
                                         key={type.get('name')}
                                     >
                                         {type.get('name')}
