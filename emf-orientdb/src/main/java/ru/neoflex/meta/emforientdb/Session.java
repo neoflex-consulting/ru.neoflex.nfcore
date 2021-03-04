@@ -332,7 +332,7 @@ public class Session implements Closeable {
             Object value = objectToOObject(eIDAttribute.getEAttributeType(), eObject.eGet(eIDAttribute));
             OVertex oVertex = (OVertex) queryElement("select from " + className +
                     " where " + eIDAttribute.getName() + "=?", value);
-            if (oVertex != null) {
+            if (oVertex == null) {
                 throw new IllegalArgumentException(String.format("OVertex not found: %s[%s=%s]",
                         className, eIDAttribute.getName(), value));
             }
