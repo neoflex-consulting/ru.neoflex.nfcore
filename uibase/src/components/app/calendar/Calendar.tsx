@@ -141,6 +141,10 @@ class Calendar extends React.Component<any, any> {
                     .then((result) => {
                         this.props.context.updateContext(({viewObject: result[0].eContents()[0].get('view')}))
                     })
+                API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
+                    let notificationInstancesDTO = JSON.parse(result).resources;
+                    this.setState({notificationInstancesDTO});
+                });
             } else if (!updateViewObject) {
                 API.instance().call(ref, methodName, [dateFrom, dateTo]).then((result: any) => {
                     let notificationInstancesDTO = JSON.parse(result).resources;
@@ -393,7 +397,6 @@ class Calendar extends React.Component<any, any> {
                 this.updateViewObject();
                 this.getAllNotificationInstances(this.state.currentMonth, false)
             } else {
-
                 this.getAllNotificationInstances(this.state.currentMonth, true)
             }
         }
