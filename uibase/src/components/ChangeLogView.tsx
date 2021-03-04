@@ -2,7 +2,7 @@ import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
 import './../styles/ChangeLogView.css'
 import moment, {Moment} from "moment";
-import {defaultDateFormat } from "../utils/consts";
+import {defaultDateFormat} from "../utils/consts";
 import {NeoColor, NeoParagraph} from "neo-design/lib";
 
 export interface ILogEntry {

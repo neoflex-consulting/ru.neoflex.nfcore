@@ -1,4 +1,3 @@
-
 import AntdFactory from './AntdFactory'
 import {ViewFactory} from './View'
 

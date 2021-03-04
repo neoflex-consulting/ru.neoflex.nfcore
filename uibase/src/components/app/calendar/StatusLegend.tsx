@@ -1,6 +1,6 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {NeoRow, NeoCol, NeoButton, NeoInput} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 interface Props {

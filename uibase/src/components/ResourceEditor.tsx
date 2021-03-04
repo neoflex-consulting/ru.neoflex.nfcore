@@ -17,7 +17,18 @@ import {copyToClipboard, getClipboardContents} from "../utils/clipboard";
 import {getFieldAnnotationByKey} from "../utils/eCoreUtil";
 import './../styles/ResouceEditor.css'
 import {NeoIcon} from "neo-icon/lib";
-import {NeoButton, NeoCol, NeoColor, NeoHint, NeoInput, NeoModal, NeoOption, NeoRow, NeoSelect, NeoTable} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoCol,
+    NeoColor,
+    NeoHint,
+    NeoInput,
+    NeoModal,
+    NeoOption,
+    NeoRow,
+    NeoSelect,
+    NeoTable
+} from "neo-design/lib";
 import {IMainContext} from "../MainContext";
 
 
@@ -86,6 +97,7 @@ interface State {
     selectDropdownVisible: boolean,
     selectTags: number,
     selectCount: number,
+    selectedTree: any,
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -177,19 +189,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectDropdownVisible: false,
         selectTags: 3,
         selectCount: 0,
+        selectedTree:{}
     };
 
     componentDidMount(): void {
         this.getEClasses();
         window.addEventListener("click", this.hideRightClickMenu);
         window.addEventListener("keydown", this.saveOnCtrlS);
-        /*window.addEventListener("keydown", this.deleteOnDel);
+        window.addEventListener("keydown", this.deleteOnDel);
         API.instance().findClass("application","EventHandler").then(eClass=>{
             this.eventHandlerClass = eClass.eURI()
         })
         API.instance().findClass("application","DynamicActionElement").then(eClass=>{
             this.dynamicActionElementClass = eClass.eURI()
-        })*/
+        })
     }
 
     componentWillUnmount() {
@@ -198,12 +211,19 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
         window.removeEventListener("click", this.hideRightClickMenu);
         window.removeEventListener("keydown", this.saveOnCtrlS)
-        /*window.removeEventListener("keydown", this.deleteOnDel)*/
+        window.removeEventListener("keydown", this.deleteOnDel)
     }
 
     private saveOnCtrlS = (event: any) => {
         if (event.ctrlKey && event.code === 'KeyS') {
             this.save(false, false);
+            event.preventDefault();
+        }
+    };
+
+    private deleteOnDel = (event: any) => {
+        if (Object.keys(this.state.selectedTree).length !== 0 && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree)
             event.preventDefault();
         }
     };
@@ -234,8 +254,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const node = this.findTreeNodeById(this.state.targetObject?._id);
             if (node) {
                 this.setState({
-                    selectedKeys: [node.eventKey],
-                    uniqKey: node.eventKey,
+                    selectedKeys: [node.key],
+                    uniqKey: node.key,
                 })
             }
         }
@@ -263,8 +283,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resource: resource,
                 selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
                 targetObject: targetObject ? targetObject : { eClass: "" },
-                tableData: tableData ? tableData : [],
-                edit: this.state.edit || (this.props.match.params.edit === 'true')
+                tableData: tableData ? tableData : []
             }));
         })
     }
@@ -300,6 +319,78 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     hideRightClickMenu = (e: any) => {
         this.state.rightClickMenuVisible && this.setState({ rightClickMenuVisible: false })
+    };
+
+    handleResourceModalCancel = () => {
+        this.setState({ modalResourceVisible: false })
+    };
+
+    handleRefModalCancel = () => {
+        this.setState({ modalRefVisible: false })
+    };
+
+    handleAddNewRef = () => {
+        let eObjects: Ecore.EObject[] = [];
+        (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements().forEach((eObject: Ecore.EObject) => {
+            const isFound = this.state.selectedRefUries.indexOf(eObject.eURI() as never);
+            isFound !== -1 && eObjects.push(eObject)
+        });
+        this.addRef(eObjects)
+    };
+
+    handleAddNewResource = (resources: Ecore.Resource[]): void => {
+        const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources');
+        resources.forEach(r=>{
+            if (!resourceList.find(rl=>r.eContents()[0].eURI() === rl.eContents()[0].eURI())) {
+                resourceList.add(r)
+            }
+        });
+        this.setState({ modalResourceVisible: false })
+    };
+
+    addRef = (eObjects: Ecore.EObject[]): void => {
+        const targetObject: { [key: string]: any } = this.state.targetObject;
+        const { addRefPropertyName } = this.state;
+        let updatedJSON: Object = {};
+        let refsArray: Array<Object>;
+        let upperBound;
+        const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
+        contents(this.state.mainEObject).forEach(eObject => {
+            const feature = eObject.eClass.get('eAllStructuralFeatures').find((f: any)=> f.get('name') === addRefPropertyName);
+            if (feature !== undefined) {
+                upperBound = feature.get('upperBound')
+            }
+        });
+        if (upperBound === -1) {
+            refsArray = targetObject[addRefPropertyName] ? [...targetObject[addRefPropertyName]] : [];
+            eObjects.forEach((eObject) => {
+                refsArray.push({
+                    $ref: eObject.eURI(),
+                    eClass: eObject.eClass.eURI()
+                })
+            });
+            updatedJSON = targetObject.updater({ [addRefPropertyName]: refsArray })
+        } else {
+            const firstEObject = eObjects.find((eObject: Ecore.EObject) => eObject.eURI() === this.state.selectedRefUries[0]);
+            //if a user choose several resources for the adding, but upperBound === 1, we put only first resource
+            if (firstEObject !== undefined) {
+                updatedJSON = targetObject.updater({
+                    [addRefPropertyName]: {
+                        $ref: firstEObject.eURI(),
+                        eClass: firstEObject.eClass.eURI()
+                    },
+                    column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent'
+                    && firstEObject.eURI() !== targetObject.dataset?.$ref ? [] : targetObject.column
+                })
+            }
+        }
+        const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
+        this.setState({
+            modalRefVisible: false,
+            resourceJSON: updatedJSON,
+            targetObject: updatedTargetObject,
+            selectedRefUries: []
+        })
     };
 
     getEClasses(): void {
@@ -365,13 +456,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     onTreeSelect = (selectedKeys: React.Key[], e: any) => {
         if (selectedKeys[0] && e.node.data.targetObject.eClass) {
             const targetObject = e.node.data.targetObject;
-            const uniqKey = e.node.data.eventKey;
+            const uniqKey = e.node.data.key;
             this.setState({
                 tableData: this.prepareTableData(targetObject, this.state.mainEObject, uniqKey),
                 targetObject: targetObject,
                 currentNode: e.node,
                 uniqKey: uniqKey,
-                selectedKeys: selectedKeys
+                selectedKeys: selectedKeys,
+                selectedTree: {
+                    key: 'delete',
+                    keyPath: ['delete']
+                }
             })
         } else {
             this.setState({
@@ -435,7 +530,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     mainEObject: mainEObject,
                     edit: this.state.edit && !isDisabled,
                     showIcon: isNeoIconSelect,
-                    syntax
+                    syntax,
+                    goToObject: this.goToObject
                 };
                 let value = FormComponentMapper.getComponent(props);
                 value = isExpandable ? FormComponentMapper.getComponentWrapper({
@@ -502,6 +598,27 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+    };
+
+    delete = (): void => {
+        if (this.state.resource.rev) {
+            const ref: string = `${this.state.resource.get('uri')}?rev=${this.state.resource.rev}`;
+            this.setState({removalProcess: true});
+            this.changeEdit(false, true);
+            API.instance().deleteResource(ref).then(() => {
+                this.props.history.push('/developer/data')
+            })
+        } else {
+            this.props.history.push('/developer/data');
+        }
+    };
+
+    run = () => {
+        if (this.state.isModified) {
+            this.setState({modalApplyChangesVisible: true})
+        } else {
+            this.redirect()
+        }
     };
 
     onEClassBrowse = (EObject: Ecore.EObject) => {
@@ -627,18 +744,23 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ modalResourceVisible: false })
     };
 
+    handleDeleteResourceModalVisible = () => {
+        this.setState({ modalDeleteResourceVisible: !this.state.modalDeleteResourceVisible })
+    };
+
     // Добавалениеб редоктирование, сохранение
 
     scrollToElementWithId = (id?:string) => {
-        /*const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
+        const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
-            node.selectHandle.scrollIntoView({
-                behavior: "smooth",
-                block: 'center',
-                inline: 'center'
-            });
-        }*/
+            this.setState({
+                selectedKeys: [node.key],
+                uniqKey: node.key,
+            })
+        }
     }
+
+
 
     handleRightMenuSelect = (e: any) => {
         const targetObject = this.state.targetObject;
@@ -650,7 +772,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const allSubTypes = eClassObject.get('eAllSubTypes');
             node.data.isArray && eClassObject && allSubTypes.push(eClassObject);
             const foundEClass = allSubTypes.find((subType: Ecore.EObject) => subType.get('name') === subTypeName);
-            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+            const id = `ui_generated_${node.pos}//${node.data.propertyName}.${node.data.arrayLength}`;
             const newObject = {
                 eClass: foundEClass.eURI(),
                 _id: id,
@@ -670,20 +792,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
                 isModified: true,
-                expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))]
+                expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))],
             }, this.scrollToElementWithId)
         }
 
         if (e.key === "moveUp" || e.key === "moveDown") {
             let updatedJSON;
-            if (node.featureUpperBound === -1) {
+            if (node.data.featureUpperBound === -1) {
                 if (e.key === "moveUp") {
                     const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
-                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
+                    updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
                 }
                 if (e.key === "moveDown") {
                     const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
-                    updatedJSON = node.parentUpdater(null, undefined, node.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
+                    updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
                 }
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
@@ -761,10 +883,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     obj[key] = (obj[key] as string).replace(pattern,id)
                 }
             });
-            if (node.upperBound === -1) {
-                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" })
+            if (node.data.upperBound === -1) {
+                updatedJSON = node.data.parentUpdater(newObject, undefined, node.data.propertyName, { operation: "push" })
             } else {
-                updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "set" })
+                updatedJSON = node.data.parentUpdater(newObject, undefined, node.data.propertyName, { operation: "set" })
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = findObjectById(nestedJSON, id);
@@ -793,20 +915,20 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 //Найти класс eventHandler
                 const eClass = this.eventHandlerClass;
                 const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
-                const node = nodes[0].props;
-                const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+                const node = nodes[0];
+                const id = `ui_generated_${node.pos}//${node.node.data.propertyName}.${node.node.data.arrayLength}`;
                 //Создать пустышку класса
                 const newObject = {
                     eClass: eClassObject.eURI(),
                     _id: id,
-                    name: `${node.propertyName}_${id}`,
+                    name: `${node.node.data.propertyName}_${id}`,
                     //В пустышку прописать listenItem объект на node
                     listenItem: [{
                         $ref: this.state.treeRightClickNode.data.targetObject._id,
                         eClass: this.state.treeRightClickNode.data.eClass
                     }]
                 };
-                let updatedJSON = node.parentUpdater(newObject, undefined, node.propertyName, { operation: "push" });
+                let updatedJSON = node.node.data.parentUpdater(newObject, undefined, node.node.data.propertyName, { operation: "push" });
                 const nestedJSON = nestUpdaters(updatedJSON, null);
                 const updatedTargetObject = findObjectById(updatedJSON, newObject._id);
                 const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
@@ -998,6 +1120,28 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
     };
 
+    handleApplyChangesModalCancel = () => {
+        this.setState({ modalApplyChangesVisible: false })
+    };
+
+    goToObject = (id:string, obj:EObject|null) => {
+        const json = this.state.mainEObject.eResource().to();
+        const nestedJSON = nestUpdaters(json, null);
+        const targetObject = findObjectById(nestedJSON, id);
+        if (targetObject) {
+            this.setState({
+                targetObject: targetObject,
+                tableData: this.prepareTableData(targetObject, this.state.mainEObject, id),
+                expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children]),
+            }, ()=> {this.scrollToElementWithId(id)})
+        } else if (obj) {
+            API.instance().checkLock(obj.eResource().get('uri')).then(locked=>{
+                window.open(`/developer/data/editor/${obj.eResource().get('uri')}/${obj.eResource().rev}/${locked}/${obj._id}`);
+            })
+        }
+    }
+
+
     changeEdit = (redirect: boolean, removalProcess?: boolean) => {
         if (removalProcess) {
             if (this.state.edit) {
@@ -1049,6 +1193,103 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return result
         };
+/*
+        const onDrop = (event: any) => {
+            const {t} = this.props;
+            const dragKey = event.dragNode.props.targetObject._id;
+            const dropKey = event.node.props.targetObject._id;
+
+            const dragPos = event.dragNode.props.pos.split('-');
+            const dropPos = event.node.props.pos.split('-');
+
+            const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePos = Number(dragPos[dragPos.length - 1]);
+
+            const nodePos = Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePropertyName = event.dragNode.props.propertyName
+            const nodePropertyName = event.node.props.propertyName
+
+            const eClass = event.node.props.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
+
+            let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
+
+            if (!this.state.edit) {
+                this.props.notification(t('notification'), t('editing is not available'), "info");
+            }
+            else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+            }
+            else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
+                (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
+                (dropKey === 'null' && event.node.props.arrayLength !== 0)
+            ) {
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+            }
+            else {
+                let updatedJSON = this.state.resourceJSON;
+                let dragObj = findObjectById(updatedJSON, dragKey);
+
+                //Delete dragObj from updatedJSON
+                updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
+
+                // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
+                if (!event.dropToGap) {
+                    let item: any;
+                    findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                        item = dropObj
+                    });
+                    let upperBound = event.node.props.upperBound
+                    if (upperBound === 1) {
+                        item[nodePropertyName] = dragObj
+                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+
+                    } else if (upperBound === -1) {
+                        item = Array.isArray(item) ?  item[item.length - 1] : item;
+                        if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
+                            item[nodePropertyName] = []
+                        }
+                        item[nodePropertyName].push(dragObj)
+                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+                    }
+                }
+                else {
+                    let ar: any;
+                    findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
+                        ar = data;
+                    });
+                    if (ar !== undefined) {
+                        if (dropPosition === -1) {
+                            ar.splice(nodePos, 0, dragObj);
+                        } else if (nodePos <= dragNodePos) {
+                            ar.splice(nodePos + 1, 0, dragObj);
+                        } else if (nodePos > dragNodePos) {
+                            ar.splice(nodePos, 0, dragObj);
+                        }
+                    }
+                }
+                const node: { [key: string]: any } = event.node.props;
+                const targetObject: { [key: string]: any } = this.state.targetObject;
+                let nestedJSON = nestUpdaters(updatedJSON, null);
+                let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                this.state.mainEObject.eResource().clear();
+                let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                this.setState((state, props) => ({
+                    mainEObject: resource.eContents()[0],
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+                    tableData: updatedTargetObject ? state.tableData : [],
+                    selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                    isModified: true
+                }))
+
+            }
+        };*/
+
+
 
         const generateNodes = (eClass: Ecore.EObject, json: { [key: string]: any }, parentId?: String): Array<any> => {
             return eClass.get('eAllStructuralFeatures') && eClass.get('eAllStructuralFeatures').map((feature: Ecore.EObject, pidx: number) => {
@@ -1124,11 +1365,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             <Tree
                 ref={this.treeRef}
                 key="mainTree"
-                // draggable
+                draggable
                 // onDrop={onDrop}
-                // blockNode
-                // switcherIcon={<NeoIcon icon={"download"}/>}
-                // showIcon
+                 blockNode
+                 switcherIcon={<NeoIcon icon={"download"}/>}
+                showIcon
                 showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
 
@@ -1207,20 +1448,18 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     <NeoButton
                         className="panel-button"
                         type={"ghost-icon"}
-                        // onClick={ ()=> this.refresh(true)}
-                        title={this.props.t("refresh")}
+                        onClick={ ()=> this.refresh(true)}
+                        title={this.props.t("rollback")}
                     >
-                        <NeoIcon icon={"download"}/>
+                        <NeoIcon icon={"block"}/>
                     </NeoButton>
                     {this.state.resource.get && this.state.resource.get('uri') &&
                     <Operations
                         translate={t}
-                        save={()=>{}}
-                        // save={this.save}
+                        save={this.save}
                         edit={this.state.edit}
                         mainEObject={this.state.mainEObject}
-                        refresh={()=>{}}
-                        // refresh={this.refresh}
+                        refresh={this.refresh}
                         notification={this.props.notification}
                     />}
                     <NeoButton
@@ -1234,10 +1473,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     <NeoButton
                         className="panel-button"
                         type={'ghost-icon'}
-                        // onClick={this.handleDeleteResourceModalVisible}
+                        onClick={this.handleDeleteResourceModalVisible}
                         title={this.props.t("delete")}
                     >
-                        <NeoIcon icon={"delete"}/>
+                        <NeoIcon icon={"rubbish"}/>
                     </NeoButton>
                     {this.state.mainEObject
                     && this.state.mainEObject.eClass
@@ -1247,7 +1486,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             className="panel-button"
                             type={"ghost-icon"}
                             title={this.props.t("preview")}
-                            // onClick={this.run}
+                            onClick={this.run}
                         >
                             <NeoIcon icon={"play"}/>
                         </NeoButton>
@@ -1350,10 +1589,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     className={"modal-add-inner-ref"}
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
-                    // onCancel={this.handleRefModalCancel}
+                    onCancel={this.handleRefModalCancel}
                     footer={<NeoButton
                                 type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"}
-                                // onClick={this.handleAddNewRef}
+                                onClick={this.handleAddNewRef}
                             >
                                     OK
                              </NeoButton>}
@@ -1435,12 +1674,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     title={t('addresources')}
                     visible={this.state.modalResourceVisible}
                     footer={null}
-                    // onCancel={this.handleResourceModalCancel}
+                    onCancel={this.handleResourceModalCancel}
                 >
                     <SearchGrid
                         key="search_grid_resource"
-                        onSelect={()=>{}}
-                        // onSelect={this.handleAddNewResource}
+                        onSelect={this.handleAddNewResource}
                         showAction={false}
                         specialEClass={undefined}
                     />
@@ -1448,28 +1686,28 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 </NeoModal>}
                 <NeoModal
                     key={"delete_resource_modal"}
-                    // onCancel={this.handleDeleteResourceModalVisible}
+                    onCancel={this.handleDeleteResourceModalVisible}
                     closable={true}
                     type={'edit'}
                     content={t("are you sure want to delete resource?")}
                     title={t('deleteResource')}
                     visible={this.state.modalDeleteResourceVisible}
-                    // onLeftButtonClick={this.delete}
-                    // onRightButtonClick={this.handleDeleteResourceModalVisible}
+                    onLeftButtonClick={this.delete}
+                    onRightButtonClick={this.handleDeleteResourceModalVisible}
                     textOfLeftButton={t("delete")}
                     textOfRightButton={t("cancel")}>
                 </NeoModal>
                 <NeoModal
                     key={"apply_changes_modal"}
                     className={"modal-apply-changes"}
-                    // onCancel={this.handleApplyChangesModalCancel}
+                    onCancel={this.handleApplyChangesModalCancel}
                     closable={true}
                     type={'edit'}
                     content={t("unresolved changes left")}
                     title={t('apply changes')}
                     visible={this.state.modalApplyChangesVisible}
-                    // onLeftButtonClick={()=>this.save(true, false)}
-                    // onRightButtonClick={this.handleApplyChangesModalCancel}
+                    onLeftButtonClick={()=>this.save(true, false)}
+                    onRightButtonClick={this.handleApplyChangesModalCancel}
                     textOfLeftButton={t("apply and run")}
                     textOfRightButton={t("back to edit")}>
                 </NeoModal>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {Form, Typography} from 'antd';
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";

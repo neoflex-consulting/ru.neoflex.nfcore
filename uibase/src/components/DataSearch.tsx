@@ -14,9 +14,11 @@ import {FormInstance} from "antd/lib/form";
 interface Props {
     onSearch: (resources: Ecore.Resource[]) => void;
     specialEClass?: Ecore.EClass | undefined;
+    refresh: boolean;
 }
 
 interface State {
+    refresh: boolean,
     tags: Ecore.EObject[];
     classes: Ecore.EObject[];
     createResModalVisible: boolean;
@@ -29,6 +31,7 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     formRef = React.createRef<FormInstance>();
 
     state = {
+        refresh: this.props.refresh,
         tags: [],
         classes: [],
         createResModalVisible: false,
@@ -100,6 +103,13 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
         this.getAllTags();
     }
 
+    componentDidUpdate() {
+        if (this.props.refresh !== this.state.refresh){
+            this.refresh()
+            this.setState({refresh: this.props.refresh})
+        }
+    }
+
     checkEClass = () => {
         const checkRecursive = (cls:Ecore.EClass ) => {
             let retVal = false;
@@ -122,7 +132,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
 
 
     render() {
-        const { TabPane } = Tabs;
         const { t } = this.props;
         return (
             <React.Fragment>
@@ -275,7 +284,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                                 this.formRef.current!.setFieldsValue({ json_field: { value: json_field } });
                                             }}
                                             editorProps={{ $blockScrolling: true }}
-                                            /*value={this.formRef.current !== null ? this.formRef.current!.getFieldValue('json_field') : undefined}*/
                                             defaultValue={JSON.stringify({
                                                 contents: { eClass: !!this.props.specialEClass ? this.props.specialEClass.eURI() : "ru.neoflex.nfcore.base.auth#//User" }
                                             }, null, 4)}

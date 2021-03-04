@@ -274,7 +274,7 @@ class Form_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const cssClass = createCssClass(this.viewObject);
+        // const cssClass = createCssClass(this.viewObject);
         return (
             <Form
                 // style={{marginBottom: marginBottom}}

@@ -74,6 +74,7 @@
         "operationsettings": "Operation settings",
         "password": "Password",
         "query": "Query",
+        "rollback": "Rollback",
         "refresh": "Refresh",
         "regularexpression": "Regular expression",
         "reportdate": "Report Date",

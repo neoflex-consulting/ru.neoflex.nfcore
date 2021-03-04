@@ -12,7 +12,6 @@ import './../styles/Tools.css';
 import {NeoButton, NeoColor, NeoDrawer, NeoInput, NeoSelect, NeoTabs, NeoTag, NeoTypography} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {IMainContext} from "../MainContext";
-import {Tabs} from "antd";
 
 interface Props {
     notification: IMainContext['notification']

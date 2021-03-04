@@ -1,12 +1,10 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
 import {Dropdown, Input, Menu, Popconfirm, Tree} from 'antd';
-import {
-    AntTreeNode,
-} from "antd/lib/tree/Tree";
+import {AntTreeNode} from "antd/lib/tree/Tree";
 import {API} from "../../../modules/api";
 import '../../../styles/FilesystemTree.css'
-import { NeoButton } from 'neo-design';
+import {NeoButton} from 'neo-design';
 import {NeoInput, NeoModal, NeoRow} from "neo-design/lib";
 import {IMainContext} from "../../../MainContext";
 

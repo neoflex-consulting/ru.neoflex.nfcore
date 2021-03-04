@@ -4,10 +4,10 @@ import {Axis, ResponsiveBar} from "@nivo/bar";
 import {ResponsiveLine} from "@nivo/line";
 import {ResponsivePie} from "@nivo/pie";
 import {AxisProps} from "@nivo/axes"
-import {Resizable } from "re-resizable";
+import {Resizable} from "re-resizable";
 import domtoimage from 'dom-to-image';
-import {docxExportObject, docxElementExportType} from "../../../utils/docxExportUtils";
-import {excelExportObject, excelElementExportType} from "../../../utils/excelExportUtils";
+import {docxElementExportType, docxExportObject} from "../../../utils/docxExportUtils";
+import {excelElementExportType, excelExportObject} from "../../../utils/excelExportUtils";
 import * as _ from 'lodash';
 import {diagramAnchorMap} from "../../../utils/consts";
 

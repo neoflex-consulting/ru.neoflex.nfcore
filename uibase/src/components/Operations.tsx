@@ -1,5 +1,5 @@
 import React, {Fragment, useState} from 'react';
-import {Dropdown, Menu, Modal, Select} from 'antd'
+import {Button, Dropdown, Menu, Modal, Select} from 'antd'
 import Ecore from 'ecore';
 
 import {API} from '../modules/api'
@@ -18,6 +18,7 @@ interface Props {
     refresh: (refresh: boolean) => void;
     notification: IMainContext['notification'];
 }
+
 
 export default function Operations(props: Props): JSX.Element {
 
@@ -98,7 +99,7 @@ export default function Operations(props: Props): JSX.Element {
     function handleAddNewRef() {
         const resources: any = [];
         let refsArray: Array<Object> = [];
-        props.mainEObject.eResource().eContainer.get('resources').each((res: { [key: string]: any }) => {
+        props.mainEObject.eContents().forEach((res: { [key: string]: any }) => {
             const isFound = selectedRefUries.indexOf(res.eURI() as never);
             isFound !== -1 && resources.push(res)
         });
@@ -121,8 +122,8 @@ export default function Operations(props: Props): JSX.Element {
                 setParameters({
                     ...parameters, 
                     [addRefProperty]: {
-                        $ref: firstResource!.eContents()[0].eURI(),
-                        eClass: firstResource!.eContents()[0].eClass.eURI()
+                        $ref: firstResource!.eURI(),
+                        eClass: firstResource!.eClass.eURI()
                     } 
                 })
             }
@@ -132,10 +133,30 @@ export default function Operations(props: Props): JSX.Element {
 
     function onBrowse(EObject: Ecore.EObject){
         const addRefPossibleTypes = [];
-        addRefPossibleTypes.push(EObject.get('eType').get('name'));
-        EObject.get('eType').get('eAllSubTypes').forEach((subType: Ecore.EObject) =>
+        if (EObject.get('name') === "parameters"){
+            addRefPossibleTypes.push("//QueryParameter");
+        }
+        else if (EObject.get('name') === "filters"){
+            addRefPossibleTypes.push("//QueryFilter");
+        }
+        else if (EObject.get('name') === "aggregations"){
+            addRefPossibleTypes.push("//QueryAggregate");
+        }
+        else if (EObject.get('name') === "sorts"){
+            addRefPossibleTypes.push("//QuerySort");
+        }
+        else if (EObject.get('name') === "groupBy"){
+            addRefPossibleTypes.push("//QueryGroupBy");
+        }
+        else if (EObject.get('name') === "CalculatedExpression"){
+            addRefPossibleTypes.push("//QueryCalculatedExpression");
+        }
+        else if (EObject.get('name') === "groupByColumn"){
+            addRefPossibleTypes.push("//QueryGroupByColumn");
+        }
+        /*EObject.get('eType').get('eAllSubTypes').forEach((subType: Ecore.EObject) =>
             addRefPossibleTypes.push(subType.get('name'))
-        );
+        );*/
         setRefModalVisible(true);
         setAddRefProperty(EObject.get('name'));
         setAddRefPossibleTypes(addRefPossibleTypes)
@@ -178,25 +199,27 @@ export default function Operations(props: Props): JSX.Element {
     }
 
     function renderMenu(){
-        const menu = () => {
-            return <Menu onClick={onMenuSelect}> 
+        const menu = (
+            <Menu onClick={onMenuSelect}>
                 {eAllOperations(props.mainEObject.eClass).map((oper: Ecore.EObject)=>{
-                    return <Menu.Item key={oper.get('name')}>
+                   return <Menu.Item key={oper.get('name')}>
                         <NeoHint placement={"right"} title={getFieldAnnotationByKey(oper.get('eAnnotations'), "documentation")}>{t(oper.get('name'))}</NeoHint>
                     </Menu.Item>
                 })}
-            </Menu>
-        };
-
+            </Menu>)
         return <Dropdown placement="bottomCenter" overlay={menu}>
-            <NeoButton
-                className="panel-button"
-                type={"ghost-icon"}
-                title={t("operations")}
-            >
-                <NeoIcon icon={"success"}/>
-            </NeoButton>
-        </Dropdown>
+            <Button className="panel-button" title={t("operations")}>
+                <NeoIcon icon={"lightbulbt"}/>
+            </Button>
+                    {/*<a>*/}
+                    {/*    <NeoButton className="panel-button"*/}
+                    {/*        type={"ghost-icon"}*/}
+                    {/*        title={t("operations")}*/}
+                    {/* >*/}
+                    {/*        <NeoIcon icon={"lightbulbt"}/>*/}
+                    {/*    </NeoButton>*/}
+                    {/*</a>*/}
+            </Dropdown>
     }
 
     return (
@@ -233,24 +256,24 @@ export default function Operations(props: Props): JSX.Element {
                             setSelectedRefUries(uriArray)
                         }}
                     >
-                        {props.mainEObject.eClass && props.mainEObject.eResource().eContainer.get('resources').map((res: { [key: string]: any }, index: number) => {
+                        {props.mainEObject.eClass && props.mainEObject.eContents().map((res: { [key: string]: any }, index: number) => {
                             const possibleTypes: Array<string> = addRefPossibleTypes;
                             const isEObjectType: boolean = possibleTypes[0] === 'EObject';
                             return isEObjectType ?
                                 <Select.Option key={index} value={res.eURI()}>
                                     {<b>
-                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                        {`${res.eClass.get('name')}`}
                                     </b>}
                                     &nbsp;
-                                    {`${res.eContents()[0].get('name')}`}
+                                    {`${res.eClass.get('name')}`}
                                 </Select.Option>
                                 :
-                                possibleTypes.includes(res.eContents()[0].eClass.get('name')) && <Select.Option key={index} value={res.eURI()}>
+                                possibleTypes.includes(res.eClass._id) && <Select.Option key={index} value={res.eURI()}>
                                     {<b>
-                                        {`${res.eContents()[0].eClass.get('name')}`}
+                                        {`${res.eClass.get('name')}`}
                                     </b>}
                                     &nbsp;
-                                    {`${res.eContents()[0].get('name')}`}
+                                    {`${res.eClass.get('name')}`}
                                 </Select.Option>
                         })}
                     </NeoSelect>

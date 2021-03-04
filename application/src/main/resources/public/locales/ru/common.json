@@ -74,6 +74,7 @@
         "operationsettings": "Настройки операции",
         "password": "Пароль",
         "query": "Запрос",
+        "rollback": "Отменить Изменения",
         "refresh": "Обновить",
         "regularexpression": "Регулярное выражение",
         "reportdate": "Дата отчета",
