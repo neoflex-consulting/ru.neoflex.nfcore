@@ -531,5 +531,7 @@
         "vacuum metadata": "Vacuum metadata",
         "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Warning you about to shrink metadata database, be advised this operation is time-consuming. Please make backup first. Proceed?",
         "back to appmodule": "Back to AppModule",
-        "add element": "Create new element"
+        "add element": "Create new element",
+        "object move successful": "Object move successful",
+        "operation blocked": "Operation blocked"
 }

@@ -27,6 +27,7 @@ interface State {
 
 interface IApplicationData {
     name: JSX.Element,
+    strName: string,
     modules: number,
     changeDate?: Moment,
     status?: string,
@@ -38,6 +39,7 @@ interface IApplicationData {
 
 interface IModuleData {
     name: JSX.Element,
+    strName: string,
     changeDate?: Moment,
     status?: string,
     author?: string,
@@ -71,9 +73,13 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     }
 
     getModules = (modules: Ecore.EObject[]): IModuleData[] => {
-        return modules.map((m,index)=>{
+        return modules
+            //deduplicate
+            .filter((v,i,a)=>a.findIndex(t=>(t.get('name') === v.get('name')))===i)
+            .map((m,index)=>{
             return {
                 key: `module${index}`,
+                strName: m.get('name'),
                 name: <a style={{color:NeoColor.grey_9, textDecoration:"underline"}}
                          href={`/developer/data/editor/${API.parseRef(m.eURI()).id}/${m.eResource().rev}`}>{m.get('name')}</a>,
                 changeDate: undefined,
@@ -91,15 +97,17 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
             const refObjs = r.eContents()[0].get('referenceTree')
                 ? getReferencedObjects(r.eContents()[0].get('referenceTree'))
                 : [];
+            const modules = this.getModules(refObjs.concat(r.eContents()[0]))
             return {
                 key: `section${index}`,
+                strName: r.eContents()[0].get('name'),
                 name: refObjs.length !== 0
-                    ? <NeoButton style={{color:NeoColor.grey_9, textDecoration:"underline"}} type={"link"} onClick={()=>{
-                        this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: this.getModules(refObjs.concat(r.eContents()[0]))}, filter:""})
+                    ? <NeoButton style={{height:"auto", color:NeoColor.grey_9, textDecoration:"underline"}} type={"link"} onClick={()=>{
+                        this.setState({currentSection: {name: r.eContents()[0].get('name'), modules: modules}, filter:""})
                     }}>{r.eContents()[0].get('name')}</NeoButton>
                     : <a style={{color:NeoColor.grey_9, textDecoration:"underline"}}
                          href={`/developer/data/editor/${API.parseRef(r.eURI()).id}/${r.eResource().rev}`}>{r.eContents()[0].get('name')}</a>,
-                modules: refObjs.length > 0 ? refObjs.length + 1 : 0,
+                modules: refObjs.length > 0 ? modules.length : 0,
                 changeDate: undefined,
                 status: undefined,
                 author: undefined,
@@ -144,7 +152,8 @@ class DeveloperMain extends React.Component<Props & WithTranslation, State> {
     getDataSource = () => {
         return this.state.currentSection
             ? this.state.currentSection.modules
-            : this.state.applications.filter(a=> a.modules !== 0 || a.class === "Application")
+            : this.state.applications
+                .filter(a=> a.modules !== 0 || a.class === "Application")
     };
 
     getLogEntries = () => {
