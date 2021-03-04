@@ -1849,7 +1849,7 @@ class DatasetView extends React.Component<any, State> {
                 <div id={`delete_menuButton${this.props.viewObject.eURI()}`}>
                     <NeoModal
                         type={"edit"}
-                        // getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                        getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="delete_menu"
                         className={'dataset__delete_menu'}
 
@@ -1872,6 +1872,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id={`edit_applyChangesButton${this.props.viewObject.eURI()}`}>
                     <NeoModal
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         onCancel={()=>{
                         this.setState({
                             isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
@@ -1906,7 +1907,7 @@ class DatasetView extends React.Component<any, State> {
                     </NeoModal>
                     <NeoModal
                         type={'edit'}
-                        // getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="save_menu"
                         className={'dataset__save_menu'}
                         width={'500px'}
@@ -1928,6 +1929,7 @@ class DatasetView extends React.Component<any, State> {
                         />
                     </NeoModal>
                     <NeoModal
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         onCancel={()=>{
                             this.setState({
                                 isExportAllTabsVisible:!this.state.isExportAllTabsVisible
