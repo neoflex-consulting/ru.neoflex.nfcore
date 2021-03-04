@@ -376,8 +376,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             else {
                 let updatedJSON = this.state.resourceJSON;
                 let dragObj = findObjectById(updatedJSON, dragKey);
-                //TODO нужно генерировать новый _id чтобы не ловить OVertex not found?
-                //Но тогда нужно обновлять все ссылки по всей базе
 
                 //Delete dragObj from updatedJSON
                 updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
