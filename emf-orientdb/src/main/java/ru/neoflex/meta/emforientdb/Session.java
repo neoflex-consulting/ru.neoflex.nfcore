@@ -311,12 +311,9 @@ public class Session implements Closeable {
 
     private OVertex loadElement(EObject eObject, Set<OEdge> edges, EReference eReference) {
         String id = ((OrientDBResource) eObject.eResource()).getID(eObject);
-        if (factory.getORID(id) != null) {
-            OVertex oVertex = edges.stream()
-                    .filter(oEdge -> Objects.equals(oEdge.getProperty("feature"), eReference.getName()))
-                    .map(OEdge::getTo)
-                    .filter(oVertex1 -> id.equals(factory.getId(oVertex1.getIdentity())))
-                    .findFirst().orElse(null);
+        ORID orid = factory.getORID(id);
+        if (orid != null) {
+            OVertex oVertex = db.getRecord(orid);
             if (oVertex == null) {
                 throw new IllegalArgumentException("OVertex not found: " + id);
             }
@@ -330,21 +327,19 @@ public class Session implements Closeable {
                 eIDAttribute = function.apply(eClass);
             }
         }
-        if (eIDAttribute == null && eObject instanceof ENamedElement) {
-            eIDAttribute = EcorePackage.Literals.ENAMED_ELEMENT__NAME;
-        }
         if (eIDAttribute != null) {
-            EAttribute eAttribute = eIDAttribute;
-            OVertex oVertex = edges.stream()
-                    .filter(oEdge -> Objects.equals(oEdge.getProperty("feature"), eReference.getName()))
-                    .map(OEdge::getTo)
-                    .filter(oVertex1 -> Objects.equals(oVertex1.getProperty(eAttribute.getName()), objectToOObject(eAttribute.getEAttributeType(), eObject.eGet(eAttribute))))
-                    .findFirst().orElse(null);
-            if (oVertex != null) {
-                return oVertex;
+            String className = getOClassName(eClass);
+            Object value = objectToOObject(eIDAttribute.getEAttributeType(), eObject.eGet(eIDAttribute));
+            OVertex oVertex = (OVertex) queryElement("select from " + className +
+                    " where " + eIDAttribute.getName() + "=?", value);
+            if (oVertex == null) {
+                throw new IllegalArgumentException(String.format("OVertex not found: %s[%s=%s]",
+                        className, eIDAttribute.getName(), value));
             }
+            return oVertex;
         }
         List<EAttribute> eAttributes = !eReference.getEKeys().isEmpty() ? eReference.getEKeys() :
+                eObject instanceof ENamedElement ? Collections.singletonList(EcorePackage.Literals.ENAMED_ELEMENT__NAME) :
                 eClass.getEAllAttributes().stream()
                         .filter(eAttribute -> "true".equals(getAnnotation(eAttribute, "key", "false")))
                         .collect(Collectors.toList());
