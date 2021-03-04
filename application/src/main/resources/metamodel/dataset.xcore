@@ -221,6 +221,8 @@ class RdbmsColumn extends DatasetColumnView {
     contains GridComponent component
         @NFCore(documentation="Ссылка на соответствующую колонку из 'dataset'")
     refers DatasetColumn datasetColumn
+        @NFCore(documentation="Индекс")
+    String index
 }
 
 @NFCore(documentation="Группа колонок. Название отображается отдельной строкой над обычными колонками")
