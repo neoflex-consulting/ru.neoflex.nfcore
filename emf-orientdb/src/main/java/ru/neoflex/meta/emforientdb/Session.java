@@ -311,12 +311,9 @@ public class Session implements Closeable {
 
     private OVertex loadElement(EObject eObject, Set<OEdge> edges, EReference eReference) {
         String id = ((OrientDBResource) eObject.eResource()).getID(eObject);
-        if (factory.getORID(id) != null) {
-            OVertex oVertex = edges.stream()
-                    .filter(oEdge -> Objects.equals(oEdge.getProperty("feature"), eReference.getName()))
-                    .map(OEdge::getTo)
-                    .filter(oVertex1 -> id.equals(factory.getId(oVertex1.getIdentity())))
-                    .findFirst().orElse(null);
+        ORID orid = factory.getORID(id);
+        if (orid != null) {
+            OVertex oVertex = db.getRecord(orid);
             if (oVertex == null) {
                 throw new IllegalArgumentException("OVertex not found: " + id);
             }
