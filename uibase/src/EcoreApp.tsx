@@ -546,11 +546,15 @@ class EcoreApp extends React.Component<any, State> {
             i18n.changeLanguage(lng)
         };
 
-        const devMenu = (<Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+        const devMenu = (<Menu className="header-menu" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'main'}>
+                    <Link to={`/developer/main`}>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/main') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('main page')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'metadata'}>
                     <Link to={`/developer/metadata`}>
-
-                                                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('metadata')}</NeoTypography>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('metadata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'data'}>
@@ -558,31 +562,17 @@ class EcoreApp extends React.Component<any, State> {
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/data') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('data')}</NeoTypography>
                     </Link>
                 </Menu.Item>
-                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'query'}>
-                    <Link to={`/developer/query`}>
-                                                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('query')}</NeoTypography>
-                    </Link>
-                </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'tools'}>
                     <Link to={`/developer/tools`}>
-
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/tools') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('tools')}</NeoTypography>
-                    </Link>
-                </Menu.Item>
-                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'masterdata'}>
-                    <Link to={`/developer/masterdata`}>
-
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/masterdata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('masterdata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'filesystem'}>
                     <Link to={`/developer/filesystem`}>
-
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/filesystem') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('filesystem')}</NeoTypography>
                     </Link>
                 </Menu.Item>
             </Menu>
-
         )
 
 

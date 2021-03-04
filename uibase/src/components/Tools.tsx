@@ -195,10 +195,8 @@ class Tools extends React.Component<Props & WithTranslation, State> {
         }));
         return <div className={"tools-branch-region tools-vertical-center-element"}>
             <div>
-                <p className={"tools-header tools-padding-top tools-margin-left"}>
-                    <NeoTypography type={"body_medium"}>{this.props.t("branch parameters")}</NeoTypography>
-                </p>
-                <p className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}><NeoTypography>{this.props.t("branch")}</NeoTypography></p>
+                <NeoTypography className={"tools-header tools-padding-top tools-margin-left"} type={"body_medium"}>{this.props.t("branch parameters")}</NeoTypography>
+                <NeoTypography className={"tools-text tools-margin-left"} style={{marginBottom:'4px'}}>{this.props.t("branch")}</NeoTypography>
                 <NeoSelect
                     placeholder={this.props.t("choose from the list")}
                     className={"tools-select tools-margin-left"}
@@ -214,9 +212,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 </NeoSelect>
             </div>
             <div className={"tools-select-checkbox-area"}>
-                <p className={"tools-text tools-branch-checkbox-text-margin"}>
-                    <NeoTypography type={"capture_regular"}>{this.props.t("is default")}</NeoTypography>
-                </p>
+                <NeoTypography className={"tools-text tools-branch-checkbox-text-margin"} type={"capture_regular"}>{this.props.t("is default")}</NeoTypography>
                 <NeoInput
                     className={"tools-branch-checkbox"}
                     type={"checkbox"}
@@ -225,9 +221,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 />
             </div>
             <div className={"tools-select-checkbox-area"}>
-                <p className={"tools-text tools-branch-checkbox-text-margin"}>
-                    <NeoTypography type={"capture_regular"}>{this.props.t("is current")}</NeoTypography>
-                </p>
+                <NeoTypography className={"tools-text tools-branch-checkbox-text-margin"} type={"capture_regular"}>{this.props.t("is current")}</NeoTypography>
                 <NeoInput
                     className={"tools-branch-checkbox"}
                     type={"checkbox"}
@@ -250,9 +244,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
         const {t} = this.props as Props & WithTranslation;
         const exportAllObjectsRegion = <div
             className={"tools-region-element tools-export-all-objects"}>
-            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
-                <NeoTypography type={"body_medium"}>{t("export parameters")}</NeoTypography>
-            </p>
+            <NeoTypography className={"tools-header tools-margin-left tools-horizontal-center-element"} type={"body_medium"}>{t("export parameters")}</NeoTypography>
             <NeoButton
                 type={'link'}
                 title={t("export all objects")}
@@ -290,12 +282,8 @@ class Tools extends React.Component<Props & WithTranslation, State> {
 
         const exportObjectsRegion = <div
             className={"tools-export-objects-region"}>
-            <p className={"tools-sub-header tools-margin-top tools-margin-left"} style={{marginBottom:'12px'}}>
-                <NeoTypography type={"body_regular"}>{t("export metadata")}</NeoTypography>
-            </p>
-            <p className={"tools-text tools-margin-left"} style={{marginBottom:'13px'}}>
-                <NeoTypography type={"capture_regular"}>{t("select metadata parameters")}</NeoTypography>
-            </p>
+            <NeoTypography className={"tools-sub-header tools-margin-top tools-margin-left"} style={{marginBottom:'12px'}} type={"body_regular"}>{t("export metadata")}</NeoTypography>
+            <NeoTypography className={"tools-text tools-margin-left"} style={{marginBottom:'13px'}} type={"capture_regular"}>{t("select metadata parameters")}</NeoTypography>
             <NeoInput type={"checkbox"}
                       className={"tools-checkbox tools-margin-left"}
                       checked={this.state.withReferences}
@@ -415,9 +403,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
         </div>;
 
         const importParametersRegion = <div className={"tools-import-parameters tools-region-element"}>
-            <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
-                <NeoTypography type={"body_medium"}>{t("import parameters")}</NeoTypography>
-            </p>
+            <NeoTypography className={"tools-header tools-margin-left tools-horizontal-center-element"} type={"body_medium"}>{t("import parameters")}</NeoTypography>
             <NeoButton
                 type={'link'}
                 title={t("import supply archive and copy it to server")}
@@ -610,9 +596,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
     renderMetaStoreUtils = () => {
         return <div className={"tools-backup"}>
                 <div className={"tools-backup-header tools-region-element"}>
-                    <p className={"tools-header tools-margin-left tools-horizontal-center-element"}>
-                        <NeoTypography type={"body_medium"}>{this.props.t("backup parameters")}</NeoTypography>
-                    </p>
+                    <NeoTypography className={"tools-header tools-margin-left tools-horizontal-center-element"} type={"body_medium"}>{this.props.t("backup parameters")}</NeoTypography>
                     <NeoButton
                         type={"link"}
                         className={"tools-href tools-horizontal-center-element tools-margin-right"}
