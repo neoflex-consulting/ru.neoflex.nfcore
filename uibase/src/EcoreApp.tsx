@@ -657,17 +657,6 @@ class EcoreApp extends React.Component<any, State> {
                                                         </span>
                                                 </Link>
                                             </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
-                                                <Link to={`/developer/masterdata`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/masterdata') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
                                             <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'filesystem'}>
                                                 <Link to={`/developer/filesystem`}>
                                                      <span>
