@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
 import {Dropdown, Input, Menu, Popconfirm, Tree} from 'antd';
-import {AntTreeNode, AntTreeNodeCheckedEvent, AntTreeNodeSelectedEvent} from "antd/lib/tree/Tree";
+import {AntTreeNode} from "antd/lib/tree/Tree";
 import {API} from "../../../modules/api";
 import '../../../styles/FilesystemTree.css'
 import {NeoButton} from 'neo-design';
@@ -14,7 +14,7 @@ const disabled = "#B3B3B3";
 const enabled = "#5E6785";
 
 interface Props {
-    onSelect?: (path?: string, isLeaf?: boolean) => void;
+    onSelect?: (path?: string, isLeaf?: boolean)=>void;
     onCheck?: (keys: string[]) => void;
     checked?: string[],
     notification: IMainContext['notification']
@@ -150,7 +150,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
 
     isSelectedLoaded = () => true
 
-    onSelect = (selectedKeys: string[], e: AntTreeNodeSelectedEvent) => {
+    onSelect = (selectedKeys: any, e: { event: "select"; selected: boolean; node: any; selectedNodes: any; nativeEvent: MouseEvent }) => {
         console.log('Trigger Select', selectedKeys, e);
         const key = e.node ? e.node.props.eventKey || "/" : "/"
         const isLeaf = e.node ? e.node.props.isLeaf === true : false
@@ -160,20 +160,17 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         }
     };
 
-    onCheck = (checkedKeys: string[] | {
-        checked: string[];
-        halfChecked: string[];
-    }, e: AntTreeNodeCheckedEvent) => {
-        console.log('Trigger Check', checkedKeys, e);
+    onCheck = (checked: any )  => {
+        console.log('Trigger Check', checked, checked.checked);
         if (this.props.onCheck) {
-            this.props.onCheck(Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked)
+            this.props.onCheck(Array.isArray(checked) ? checked : checked.checked)
         }
     };
 
-    onDeleteCheck = (checkedKeys: string[] | {
-        checked: string[];
-        halfChecked: string[];
-    }, e: AntTreeNodeCheckedEvent) => {
+    onDeleteCheck = (checkedKeys: any | {
+        checked: any;
+        halfChecked: any;
+    }, e: any) => {
         this.setState({deleteKeys: Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked})
     };
 
@@ -181,7 +178,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         this.reloadKey(this.state.key || "")
     }
 
-    onLoad = (loadedKeys: string[]) => {
+    onLoad = (loadedKeys: any, info: { event: "load"; node: any; }) => {
         this.setState({loadedKeys})
     }
 
@@ -467,9 +464,9 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                         checkedKeys={!this.state.isDeleteMode ? this.props.checked : this.state.deleteKeys}
                         multiple={false}
                         defaultExpandAll={false}
-                        // onCheck={!this.state.isDeleteMode ? this.onCheck : this.onDeleteCheck}
-                        // onSelect={this.onSelect}
-                        // onLoad={this.onLoad}
+                        onCheck={!this.state.isDeleteMode ? this.onCheck : this.onDeleteCheck}
+                        onSelect={this.onSelect}
+                        onLoad={this.onLoad}
                         treeData={this.state.treeData}
                         //loadData={this.loadData}
                         onRightClick={options => {

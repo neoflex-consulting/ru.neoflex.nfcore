@@ -371,6 +371,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('valueFormatter', this.valueFormatter);
                 rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
                 rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
+                rowData.set('index', c.get('index'));
                 //передаётся в DatasetGrid для подключения typography к заголоку грида
                 /*rowData.set('customHeader',c.get('headerName'));*/
                 columnDefs.push(rowData);
@@ -737,6 +738,13 @@ class DatasetView extends React.Component<any, State> {
         }
         if (prevProps.isParentHidden !== this.props.isParentHidden || prevState.isHidden !== this.state.isHidden) {
             window.dispatchEvent(new Event("appAdaptiveResize"));
+        }
+        for(let i=0; i<this.state.columnDefs.length; i++){
+            for(let j=0; j<this.state.hiddenColumns.length; j++){
+                if(this.state.columnDefs[i].get('field') === this.state.hiddenColumns[j]['datasetColumn']) {
+                    this.state.columnDefs[i].set('index', this.state.hiddenColumns[j]['index'])
+                }
+            }
         }
     }
 
@@ -1572,8 +1580,12 @@ class DatasetView extends React.Component<any, State> {
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
                     rowData = {this.state.rowData}
-                    columnDefs = {this.state.columnDefs}
-                    leafColumnDefs = {this.state.leafColumnDefs}
+                    columnDefs = {
+                        Array.from(this.state.columnDefs)
+                            .sort((a, b) => Number.parseInt(a.get('index')) - Number.parseInt(b.get('index')))
+                    }
+                    leafColumnDefs = {Array.from(this.state.leafColumnDefs)
+                        .sort((a, b) => Number.parseInt(a.get('index')) - Number.parseInt(b.get('index')))}
                     isEditMode = {this.state.isEditMode}
                     showEditDeleteButton = {this.state.isDeleteAllowed}
                     showMenuCopyButton = {this.state.isInsertAllowed}
