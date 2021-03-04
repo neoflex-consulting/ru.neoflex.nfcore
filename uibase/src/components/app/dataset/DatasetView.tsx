@@ -372,6 +372,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('valueFormatter', this.valueFormatter);
                 rowData.set('tooltipField', (c.get('showTooltipField')&&c.get('datasetColumnTooltip')) ? c.get('datasetColumnTooltip') : undefined);
                 rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
+                rowData.set('index', c.get('index'));
                 //передаётся в DatasetGrid для подключения typography к заголоку грида
                 /*rowData.set('customHeader',c.get('headerName'));*/
                 columnDefs.push(rowData);
@@ -738,6 +739,13 @@ class DatasetView extends React.Component<any, State> {
         }
         if (prevProps.isParentHidden !== this.props.isParentHidden || prevState.isHidden !== this.state.isHidden) {
             window.dispatchEvent(new Event("appAdaptiveResize"));
+        }
+        for(let i=0; i<this.state.columnDefs.length; i++){
+            for(let j=0; j<this.state.hiddenColumns.length; j++){
+                if(this.state.columnDefs[i].get('field') === this.state.hiddenColumns[j]['datasetColumn']) {
+                    this.state.columnDefs[i].set('index', this.state.hiddenColumns[j]['index'])
+                }
+            }
         }
     }
 
@@ -1569,8 +1577,12 @@ class DatasetView extends React.Component<any, State> {
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
                     rowData = {this.state.rowData}
-                    columnDefs = {this.state.columnDefs}
-                    leafColumnDefs = {this.state.leafColumnDefs}
+                    columnDefs = {
+                        Array.from(this.state.columnDefs)
+                            .sort((a, b) => Number.parseInt(a.get('index')) - Number.parseInt(b.get('index')))
+                    }
+                    leafColumnDefs = {Array.from(this.state.leafColumnDefs)
+                        .sort((a, b) => Number.parseInt(a.get('index')) - Number.parseInt(b.get('index')))}
                     isEditMode = {this.state.isEditMode}
                     showEditDeleteButton = {this.state.isDeleteAllowed}
                     showMenuCopyButton = {this.state.isInsertAllowed}
@@ -1846,7 +1858,7 @@ class DatasetView extends React.Component<any, State> {
                 <div id={`delete_menuButton${this.props.viewObject.eURI()}`}>
                     <NeoModal
                         type={"edit"}
-                        // getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                        getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="delete_menu"
                         className={'dataset__delete_menu'}
 
@@ -1869,6 +1881,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id={`edit_applyChangesButton${this.props.viewObject.eURI()}`}>
                     <NeoModal
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         onCancel={()=>{
                         this.setState({
                             isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
@@ -1897,7 +1910,7 @@ class DatasetView extends React.Component<any, State> {
                     </NeoModal>
                     <NeoModal
                         type={'edit'}
-                        // getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="save_menu"
                         className={'dataset__save_menu'}
                         width={'500px'}
@@ -1919,6 +1932,7 @@ class DatasetView extends React.Component<any, State> {
                         />
                     </NeoModal>
                     <NeoModal
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         onCancel={()=>{
                             this.setState({
                                 isExportAllTabsVisible:!this.state.isExportAllTabsVisible
