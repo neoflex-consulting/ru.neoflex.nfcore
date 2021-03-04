@@ -136,12 +136,6 @@ abstract class ViewContainer extends ViewElement {
 abstract class Icon extends ViewElement {	
 }
 
-@NFCore(documentation="Таблица справочников")
-class MasterdataView extends ViewElement {
-        @NFCore(documentation="Тип сущности из мастерданных")
-    refers EntityType entityType
-}
-
 @NFCore(documentation="Календарь, как элемент визуального интерфейса")
 @Ecore(constraints="IsValid")
 class Calendar extends ViewElement {
@@ -338,10 +332,6 @@ class DatePicker extends ViewElement, ValueItem, GridComponent, InputElement {
     boolean showTime
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
-        @NFCore(documentation="Текст, отображающийся рядом с полем")
-    String title
-        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
-    TitleOrientation titleOrientation
         @NFCore(documentation="Положение текста, отображающегося рядом с полем")
     String width
 }

@@ -703,7 +703,7 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                     <NeoTabs.TabPane tab={t("import")} key={`${t("import")}`} >
                         {this.renderImport()}
                     </NeoTabs.TabPane>
-                    <NeoTabs.TabPane tab={t("backup")} key={t("backup")} >
+                    <NeoTabs.TabPane tab={t("backup")} key={`t("backup")`} >
                         {this.renderMetaStoreUtils()}
                     </NeoTabs.TabPane>
                 </NeoTabs>

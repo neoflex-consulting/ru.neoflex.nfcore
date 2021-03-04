@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Col, Dropdown, Input, Layout, Menu, Row, Table, Tree} from 'antd';
+import {Layout, Menu, Tree} from 'antd';
 import Ecore, {EClass, EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -45,8 +45,7 @@ interface DataNode {
     isArray?: boolean,
     arrayLength?: number,
     propertyName?: string,
-    featureUpperBound?: any,
-
+    featureUpperBound?: any
 }
 
 interface ITargetObject {
@@ -83,7 +82,7 @@ interface State {
     addRefPropertyName: String,
     isSaving: Boolean,
     addRefPossibleTypes: Array<string>,
-    classes: EClass[],
+    classes: Ecore.EObject[],
     selectedKeys: React.Key[],
     selectedRefUries: Array<string>,
     searchResources: String,
@@ -104,7 +103,7 @@ interface State {
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
-    children.filter((ch:any)=>ch).forEach((c:any)=> {
+    children.filter((ch:any)=>ch !== null).forEach((c:any)=> {
         if (c !== undefined && c.props.children.filter((ch:any)=>ch !== null).length !== 0) {
             expandedKeys.push(c.key);
             getAllChildrenKeys(c.props.children, expandedKeys)
@@ -229,8 +228,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     };
 
     private deleteOnDel = (event: any) => {
-        if (Object.keys(this.state.selectedTree).length !== 0 && event.code === 'Delete') {
-            this.handleRightMenuSelect(this.state.selectedTree)
+        //this.state.edit && !node.isArray && !node.headline
+        const node: { [key: string]: any } = this.state.treeLeftClickNode;
+        if (!node.eClass) {
+            return null
+        }
+        if (this.state.edit
+            && !this.state.isTableInFocus
+            && this.state.edit && !node.isArray && !node.headline //проверка аналгична delete при нажатии ПКМ
+            && Object.keys(this.state.selectedTree).length !== 0
+            && event.code === 'Delete') {
+            this.handleRightMenuSelect(this.state.selectedTree);
             event.preventDefault();
         }
     };
@@ -273,6 +281,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.state.mainEObject.eResource().rev < this.props.location.pathname.split("/")[5]) {
             this.refresh(true);
         }
+        if (this.state.edit !== prevState.edit) {
+            this.setState({tableData: this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey)})
+        }
     }
 
     fetchEObject(id: string, rev: string, resourceSet: ResourceSet, targetObjectId?: string ): void {
@@ -300,23 +311,17 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             .then((result: EObject) => {
                 if (paramName === 'currentLockPattern') {
                     API.instance().findByKind(result,  {contents: {eClass: result.eURI()}})
-                        .then((result: Ecore.Resource[]) => {
-                            if (result.length !== 0) {
-                                let currentLockFile = result
-                                    .filter( (r: EObject) =>
-                                        (r.eContents()[0].get('name') === this.state.mainEObject._id &&
-                                            r.eContents()[0].get('audit').get('createdBy') === this.props.principal.name)
-                                    );
-                                if (currentLockFile.length !== 0) {
-                                    this.setState({edit: true});
-                                } else {
-                                    if (this.props.match.params.edit) {
-                                        this.changeEdit(false)
-                                    }
-                                }
+                        .then((locks: Ecore.Resource[]) => {
+                            const currentLockFile = locks.find( (r: EObject) =>
+                                (r.eContents()[0].get('name') === this.state.mainEObject._id &&
+                                    r.eContents()[0].get('audit').get('createdBy') === this.props.principal.name)
+                            );
+                            if (currentLockFile) {
+                                this.setState({edit: true });
                             } else {
-                                if (this.props.match.params.edit) {
-                                    this.changeEdit(false)
+                                if (this.props.match.params.edit && !this.redirectChecked) {
+                                    this.redirectChecked = true;
+                                    this.changeEdit(false);
                                 }
                             }
                         })
@@ -654,6 +659,59 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         })
     };
 
+    getAddElementsList = (addRefPossibleTypes: string[]) => {
+        let classes:EClass[] = [];
+        (this.state.classes as EClass[]).forEach(c=>{
+            if (c.eContents().find(f=>f.get("eType")?.get("name") === "QName")) {
+                if (addRefPossibleTypes.includes(c.get("name") as never)) {
+                    classes = classes.concat(c.get('eAllSubTypes'));
+                    if (!c.get('abstract')) {
+                        classes.push(c);
+                    }
+                }
+            }
+        });
+        const nonAbstract = (this.state.classes as EClass[])
+            .filter(c=>addRefPossibleTypes.includes(c.get("name") as never)
+                && !c.get('abstract'));
+        return classes.length === nonAbstract.length
+            ? classes //all classes are global
+            : []
+    };
+
+    handleAddElement = () => {
+        const eClass:EClass = this.state.addRefMenuItems[0];
+        if (eClass) {
+            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
+            this.setState({modalRefVisible: false, modalResourceVisible: true})
+        }
+    };
+
+    renderMenu = () => {
+        return <Menu>
+            {(this.state.addRefMenuItems as EClass[]).map((eClass, index) => {
+                return <Menu.Item key={index}>
+                    <a target="_blank" rel="noopener noreferrer" href={`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`}>
+                        {eClass.eContainer.get('name')+'.'+eClass.get('name')}
+                    </a>
+                </Menu.Item>
+            })}
+        </Menu>
+
+    };
+
+    onTreeFocus = () => {
+        this.setState({isTableInFocus: false})
+    };
+
+    onTableFocus = () => {
+        this.setState({isTableInFocus: true})
+    };
+
+    setSelectEClassVisible = (visible: boolean) => {
+        this.setState({ modalSelectEClassVisible: visible })
+    };
+
     cloneResource = () => {
         const clone  = (resource: Resource) => {
             if (resource && this.props.match.params.id !== 'new') {
@@ -801,7 +859,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[resource.eContents().length - 1],
+                mainEObject: resource.eContents()[0],
                 isModified: true,
                 expandedKeys: [...new Set([node.data.Key].concat(this.state.expandedKeys))],
             }, this.scrollToElementWithId)
@@ -823,7 +881,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[resource.eContents().length - 1],
+                mainEObject: resource.eContents()[0],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -847,7 +905,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
             this.setState((state, props) => ({
-                mainEObject: resource.eContents()[resource.eContents().length - 1],
+                mainEObject: resource.eContents()[0],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
                 tableData: updatedTargetObject ? state.tableData : [],
@@ -905,7 +963,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState((state, props) => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
-                mainEObject: resource.eContents()[resource.eContents().length - 1],
+                mainEObject: resource.eContents()[0],
                 isModified: true,
             }), this.scrollToElementWithId)
         }
@@ -993,7 +1051,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key="add"
                         title={this.props.t("add child")}
                     >
-                            {allSubTypes
+                        {allSubTypes
                             .sort((a: any, b: any) => this.sortEClasses(a, b))
                             .map((type: Ecore.EObject, idx: Number) =>
                                 type.get('abstract') ?
@@ -1204,101 +1262,101 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return result
         };
-/*
-        const onDrop = (event: any) => {
-            const {t} = this.props;
-            const dragKey = event.dragNode.props.targetObject._id;
-            const dropKey = event.node.props.targetObject._id;
+        /*
+                const onDrop = (event: any) => {
+                    const {t} = this.props;
+                    const dragKey = event.dragNode.props.targetObject._id;
+                    const dropKey = event.node.props.targetObject._id;
 
-            const dragPos = event.dragNode.props.pos.split('-');
-            const dropPos = event.node.props.pos.split('-');
+                    const dragPos = event.dragNode.props.pos.split('-');
+                    const dropPos = event.node.props.pos.split('-');
 
-            const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+                    const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
 
-            const dragNodePos = Number(dragPos[dragPos.length - 1]);
+                    const dragNodePos = Number(dragPos[dragPos.length - 1]);
 
-            const nodePos = Number(dropPos[dropPos.length - 1]);
+                    const nodePos = Number(dropPos[dropPos.length - 1]);
 
-            const dragNodePropertyName = event.dragNode.props.propertyName
-            const nodePropertyName = event.node.props.propertyName
+                    const dragNodePropertyName = event.dragNode.props.propertyName
+                    const nodePropertyName = event.node.props.propertyName
 
-            const eClass = event.node.props.eClass;
-            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
-            const allSubTypes = eClassObject.get('eAllSubTypes');
+                    const eClass = event.node.props.eClass;
+                    const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+                    const allSubTypes = eClassObject.get('eAllSubTypes');
 
-            let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
+                    let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
 
-            if (!this.state.edit) {
-                this.props.notification(t('notification'), t('editing is not available'), "info");
-            }
-            else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
-                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
-            }
-            else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
-                (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
-                (dropKey === 'null' && event.node.props.arrayLength !== 0)
-            ) {
-                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
-            }
-            else {
-                let updatedJSON = this.state.resourceJSON;
-                let dragObj = findObjectById(updatedJSON, dragKey);
-
-                //Delete dragObj from updatedJSON
-                updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
-
-                // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
-                if (!event.dropToGap) {
-                    let item: any;
-                    findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
-                        item = dropObj
-                    });
-                    let upperBound = event.node.props.upperBound
-                    if (upperBound === 1) {
-                        item[nodePropertyName] = dragObj
-                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
-
-                    } else if (upperBound === -1) {
-                        item = Array.isArray(item) ?  item[item.length - 1] : item;
-                        if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
-                            item[nodePropertyName] = []
-                        }
-                        item[nodePropertyName].push(dragObj)
-                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+                    if (!this.state.edit) {
+                        this.props.notification(t('notification'), t('editing is not available'), "info");
                     }
-                }
-                else {
-                    let ar: any;
-                    findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
-                        ar = data;
-                    });
-                    if (ar !== undefined) {
-                        if (dropPosition === -1) {
-                            ar.splice(nodePos, 0, dragObj);
-                        } else if (nodePos <= dragNodePos) {
-                            ar.splice(nodePos + 1, 0, dragObj);
-                        } else if (nodePos > dragNodePos) {
-                            ar.splice(nodePos, 0, dragObj);
-                        }
+                    else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
+                        this.props.notification(t('notification'), 'Опрация заблокирована', "info");
                     }
-                }
-                const node: { [key: string]: any } = event.node.props;
-                const targetObject: { [key: string]: any } = this.state.targetObject;
-                let nestedJSON = nestUpdaters(updatedJSON, null);
-                let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-                this.state.mainEObject.eResource().clear();
-                let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-                this.setState((state, props) => ({
-                    mainEObject: resource.eContents()[0],
-                    resourceJSON: nestedJSON,
-                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
-                    tableData: updatedTargetObject ? state.tableData : [],
-                    selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
-                    isModified: true
-                }))
+                    else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
+                        (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
+                        (dropKey === 'null' && event.node.props.arrayLength !== 0)
+                    ) {
+                        this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+                    }
+                    else {
+                        let updatedJSON = this.state.resourceJSON;
+                        let dragObj = findObjectById(updatedJSON, dragKey);
 
-            }
-        };*/
+                        //Delete dragObj from updatedJSON
+                        updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
+
+                        // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
+                        if (!event.dropToGap) {
+                            let item: any;
+                            findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                                item = dropObj
+                            });
+                            let upperBound = event.node.props.upperBound
+                            if (upperBound === 1) {
+                                item[nodePropertyName] = dragObj
+                                this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+
+                            } else if (upperBound === -1) {
+                                item = Array.isArray(item) ?  item[item.length - 1] : item;
+                                if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
+                                    item[nodePropertyName] = []
+                                }
+                                item[nodePropertyName].push(dragObj)
+                                this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+                            }
+                        }
+                        else {
+                            let ar: any;
+                            findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
+                                ar = data;
+                            });
+                            if (ar !== undefined) {
+                                if (dropPosition === -1) {
+                                    ar.splice(nodePos, 0, dragObj);
+                                } else if (nodePos <= dragNodePos) {
+                                    ar.splice(nodePos + 1, 0, dragObj);
+                                } else if (nodePos > dragNodePos) {
+                                    ar.splice(nodePos, 0, dragObj);
+                                }
+                            }
+                        }
+                        const node: { [key: string]: any } = event.node.props;
+                        const targetObject: { [key: string]: any } = this.state.targetObject;
+                        let nestedJSON = nestUpdaters(updatedJSON, null);
+                        let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                        this.state.mainEObject.eResource().clear();
+                        let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                        this.setState((state, props) => ({
+                            mainEObject: resource.eContents()[0],
+                            resourceJSON: nestedJSON,
+                            targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+                            tableData: updatedTargetObject ? state.tableData : [],
+                            selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                            isModified: true
+                        }))
+
+                    }
+                };*/
 
 
 
@@ -1335,7 +1393,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                             targetObject.length !== 0 ?
                                 <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
-                            <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>}
+                                <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>}
                     >
                         {targetObject.map((object: { [key: string]: any }, cidx: number) => {
                             const res = Ecore.ResourceSet.create();
@@ -1378,8 +1436,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 key="mainTree"
                 draggable
                 // onDrop={onDrop}
-                 blockNode
-                 switcherIcon={<NeoIcon icon={"download"}/>}
+                blockNode
+                switcherIcon={<NeoIcon icon={"download"}/>}
                 showIcon
                 showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
@@ -1412,71 +1470,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         )
 
     }
-
-    private deleteOnDel = (event: any) => {
-        //this.state.edit && !node.isArray && !node.headline
-        const node: { [key: string]: any } = this.state.treeLeftClickNode;
-        if (!node.eClass) {
-            return null
-        }
-        if (this.state.edit
-            && !this.state.isTableInFocus
-            && this.state.edit && !node.isArray && !node.headline //проверка аналгична delete при нажатии ПКМ
-            && Object.keys(this.state.selectedTree).length !== 0
-            && event.code === 'Delete') {
-            this.handleRightMenuSelect(this.state.selectedTree);
-            event.preventDefault();
-        }
-    };
-
-    handleAddElement = () => {
-        const eClass:EClass = this.state.addRefMenuItems[0];
-        if (eClass) {
-            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
-            this.setState({modalRefVisible: false, modalResourceVisible: true})
-        }
-    };
-
-    renderMenu = () => {
-        return <Menu>
-            {(this.state.addRefMenuItems as EClass[]).map((eClass, index) => {
-                return <Menu.Item key={index}>
-                    <a target="_blank" rel="noopener noreferrer" href={`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`}>
-                        {eClass.eContainer.get('name')+'.'+eClass.get('name')}
-                    </a>
-                </Menu.Item>
-            })}
-        </Menu>
-
-    };
-
-    getAddElementsList = (addRefPossibleTypes: string[]) => {
-        let classes:EClass[] = [];
-        (this.state.classes as EClass[]).forEach(c=>{
-            if (c.eContents().find(f=>f.get("eType")?.get("name") === "QName")) {
-                if (addRefPossibleTypes.includes(c.get("name") as never)) {
-                    classes = classes.concat(c.get('eAllSubTypes'));
-                    if (!c.get('abstract')) {
-                        classes.push(c);
-                    }
-                }
-            }
-        });
-        const nonAbstract = (this.state.classes as EClass[])
-            .filter(c=>addRefPossibleTypes.includes(c.get("name") as never)
-                && !c.get('abstract'));
-        return classes.length === nonAbstract.length
-            ? classes //all classes are global
-            : []
-    };
-
-    onTreeFocus = () => {
-        this.setState({isTableInFocus: false})
-    };
-
-    onTableFocus = () => {
-        this.setState({isTableInFocus: true})
-    };
 
     render() {
 
@@ -1619,7 +1612,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                 >
                                                     <div style={{width:'100%'}}>
                                                         <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer"
-                                                        style={{justifyContent:'center'}}>
+                                                           style={{justifyContent:'center'}}>
                                                             <span
                                                                 title={`Id: ${res.get('uri')}${res.rev?`\nRev: ${res.rev}`:''}\nName: ${res.eContents()[0].get('name')}\neClass: ${res.eContents()[0].eClass.get('name')}`}
                                                                 className="item-title"
@@ -1639,7 +1632,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 </NeoCol>
                             </NeoRow>
                         </div>
-                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }} onBlur={this.onTreeFocus} onFocus={this.onTableFocus}>
+                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
                             <NeoTable
                                 bordered
                                 size="small"
@@ -1666,21 +1659,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={
-                        <>
-                            <NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>
-                                OK
-                            </NeoButton>
-                            {this.state.addRefMenuItems.length > 1
-                                ? <Dropdown overlay={this.renderMenu()}>
-                                      <Button title={t('add element')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} size="large"/>
-                                  </Dropdown>
-                                : this.state.addRefMenuItems.length === 1
-                                    ? <Button title={t('add element')} icon="plus" type="primary" style={{ display: 'block', margin: '0px 0px 10px auto' }} size="large" onClick={this.handleAddElement}/>
-                                    : null
-                            }
-                        </>
-                    }
+                    footer={<NeoButton
+                        type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"}
+                        onClick={this.handleAddNewRef}
+                    >
+                        OK
+                    </NeoButton>}
                 >
                     <NeoSelect
                         className={'select_option_tag'}
@@ -1726,14 +1710,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
-                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
+                                                eObject.eClass.get('name') + eObject.get('name')
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
+                                                    {eObject.eClass.get('name') + eObject.get('name')}
                                                 </NeoHint>
                                             }
                                         </NeoOption>
@@ -1742,10 +1725,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
+                                                eObject.eClass.get('name') + eObject.get('name')
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
+                                                    {eObject.eClass.get('name') + eObject.get('name')}
                                                 </NeoHint>
                                             }
                                         </NeoOption>
