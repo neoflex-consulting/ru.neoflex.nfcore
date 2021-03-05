@@ -36,3 +36,14 @@
     height: 32px;
     background-color: #424D78;
 }
+
+.add-element-sub-menu {
+    top: 80px !important;
+}
+
+.add-element-sub-menu li {
+    height: 20px !important;
+    line-height: 20px !important;
+}
+
+

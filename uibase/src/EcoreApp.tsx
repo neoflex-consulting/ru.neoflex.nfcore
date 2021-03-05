@@ -192,7 +192,10 @@ class EcoreApp extends React.Component<any, State> {
 
     notification = (title: string, description: string, notificationType: string) => {
         const {t} = this.props;
-        let btnCloseAll = (<NeoButton type={'link'} onClick={() => notification.destroy()}>
+        let btnCloseAll = (<NeoButton
+            type={'link'}
+            key="closeAllNotifications"
+            onClick={() => notification.destroy()}>
             {t("closeall")}
         </NeoButton>);
         let key = title + description;
@@ -543,7 +546,12 @@ class EcoreApp extends React.Component<any, State> {
             i18n.changeLanguage(lng)
         };
 
-        const devMenu = <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+        const devMenu = (<Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'main'}>
+                    <Link to={`/developer/main`}>
+                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/main') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('main page')}</NeoTypography>
+                    </Link>
+                </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'metadata'}>
                     <Link to={`/developer/metadata`}>
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/metadata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('metadata')}</NeoTypography>
@@ -554,19 +562,9 @@ class EcoreApp extends React.Component<any, State> {
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/data') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('data')}</NeoTypography>
                     </Link>
                 </Menu.Item>
-                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'query'}>
-                    <Link to={`/developer/query`}>
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/query') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('query')}</NeoTypography>
-                    </Link>
-                </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'tools'}>
                     <Link to={`/developer/tools`}>
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/tools') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('tools')}</NeoTypography>
-                    </Link>
-                </Menu.Item>
-                <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'masterdata'}>
-                    <Link to={`/developer/masterdata`}>
-                        <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/masterdata') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('masterdata')}</NeoTypography>
                     </Link>
                 </Menu.Item>
                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px"}} key={'filesystem'}>
@@ -574,7 +572,8 @@ class EcoreApp extends React.Component<any, State> {
                         <NeoTypography className='appNameInMenu' style={{color: this.props.location.pathname.includes('/developer/filesystem') ? "#2A356C"  : "#8C8C8C"}} type={'capture_regular'}>{t('filesystem')}</NeoTypography>
                     </Link>
                 </Menu.Item>
-            </Menu>;
+            </Menu>
+        )
 
 
         return (
@@ -650,17 +649,6 @@ class EcoreApp extends React.Component<any, State> {
                                                             <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('tools')}</NeoTypography>
                                                             :
                                                             <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('tools')}</NeoTypography>
-                                                        }
-                                                        </span>
-                                                </Link>
-                                            </Menu.Item>
-                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
-                                                <Link to={`/developer/masterdata`}>
-                                                     <span>
-                                                        {this.props.location.pathname.includes('/developer/masterdata') ?
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
-                                                            :
-                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
                                                         }
                                                         </span>
                                                 </Link>
@@ -774,7 +762,7 @@ class EcoreApp extends React.Component<any, State> {
                     <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
                     <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
                 </Switch>
-                    </Layout>
+            </Layout>
         )
     };
 
@@ -949,8 +937,8 @@ class EcoreApp extends React.Component<any, State> {
                     {this.state.principal === undefined ?
                         <Login onLoginSucceed={this.setPrincipal}/>
                         :
-                      this.renderDev(this.props)
-                     }
+                        this.renderDev(this.props)
+                    }
                 </Layout>
             </MainContext.Provider>
         )

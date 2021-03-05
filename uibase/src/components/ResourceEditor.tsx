@@ -82,7 +82,7 @@ interface State {
     addRefPropertyName: String,
     isSaving: Boolean,
     addRefPossibleTypes: Array<string>,
-    classes: Ecore.EObject[],
+    classes: EClass[],
     selectedKeys: React.Key[],
     selectedRefUries: Array<string>,
     searchResources: String,
@@ -301,7 +301,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 resource: resource,
                 selectedKeys: this.state.selectedKeys?.length > 0 ? this.state.selectedKeys : [],
                 targetObject: targetObject ? targetObject : { eClass: "" },
-                tableData: tableData ? tableData : []
+                tableData: tableData ? tableData : [],
+                isModified: false
             }));
         })
     }
@@ -845,7 +846,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const newObject = {
                 eClass: foundEClass.eURI(),
                 _id: id,
-                name: e.key+` ${id}`
+                name: foundEClass.get('eAllStructuralFeatures').find((f:EObject)=>f.get('name') === "name") ? e.key+` ${id}` : undefined
             };
             let updatedJSON;
             if (node.data.upperBound === -1) {
@@ -1702,7 +1703,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         maxTagPlaceholder={`Еще...`}
                         onChange={(uriArray: string[], option: any) => {
                             const opt = option.map((o: any) => o.key);
-                            this.setState({ selectedRefUries: opt })
+                            this.setState({ selectedRefUries: opt, isModified: true })
                         }}
                         filterOption={(input:any, option:any) => {
                             function toString(el: any): string {

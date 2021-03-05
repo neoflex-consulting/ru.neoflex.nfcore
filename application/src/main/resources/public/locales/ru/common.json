@@ -530,7 +530,9 @@
         "vacuum metadata": "Сжать хранилище метаданных",
         "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Внимание, вы собираетесь сжать хранилище метаданных. Операция сжатия выполняется долго, крайне рекомендуется заранее сделать бэкап баз. Продолжить?",
         "back to appmodule": "Назад к AppModule",
-        "add element": "Создать новый элемент"
+        "add element": "Создать новый элемент",
+        "object move successful": "Объект перемещен успешно",
+        "operation blocked": "Операция заблокирована"
 
 }
 
