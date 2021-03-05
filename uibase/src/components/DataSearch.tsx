@@ -220,23 +220,23 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                                         }}
                                         placeholder={t('choose from the list')}
                                         maxTagTextLength={7}
-                                        maxTagCount={this.state.selectTags}
+                                        maxTagCount={'responsive'}
                                         maxTagPlaceholder={`Еще ${this.state.selectCount-this.state.selectTags}`}
                                         onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
                                     >
                                         {
                                             this.state.tags.map((tag: Ecore.EObject) =>
-                                                    <NeoOption key={tag.get('name')}
-                                                               value={tag.get('name')}>
-                                                        {this.state.selectDropdownVisible ?
-                                                            tag.get('name')
-                                                            :
-                                                            <NeoHint title={tag.get('name')}>
+                                                <NeoOption key={tag.get('name')}
+                                                           value={tag.get('name')}>
+                                                    {this.state.selectDropdownVisible ?
+                                                        tag.get('name')
+                                                        :
+                                                        <NeoHint title={tag.get('name')}>
                                                             {tag.get('name')}
-                                                            </NeoHint>
-                                                        }
-                                                    </NeoOption>
-                                                )
+                                                        </NeoHint>
+                                                    }
+                                                </NeoOption>
+                                            )
                                         }
                                      </NeoSelect>
                                 </Form.Item>

@@ -1605,7 +1605,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         width={'100%'}
                         defaultValue={[]}
                         showSearch={true}
-                        maxTagCount={this.state.selectTags}
+                        maxTagCount={'responsive'}
                         maxTagTextLength={7}
                         maxTagPlaceholder={`Еще...`}
                         onChange={(uriArray: string[], option: any) => {
