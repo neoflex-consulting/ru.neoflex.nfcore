@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Layout, Menu, Tree} from 'antd';
+import {Button, Dropdown, Layout, Menu, Tree} from 'antd';
 import Ecore, {EClass, EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -1084,12 +1084,11 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     {!node.data.isArray && !node.data.headline && <Menu.Item key="copy">{this.props.t("copy")}</Menu.Item>}
                     {(node.children && node.children.filter((c:any)=>c).length>0)
                     //exists expandable elements
-                    && !(this.state.expandedKeys.filter(e=>allChildren.includes(e)).length ===
-                        allChildren.length)
+                    && !(this.state.expandedKeys.filter(e=>allChildren.includes(e)).length === allChildren.length)
                     && <Menu.Item key="expandAll">{this.props.t("expand all")}</Menu.Item>}
                     {(node.children && node.children.filter((c:any)=>c).length>0)
                     //exists collapsible elements
-                    && this.state.expandedKeys.filter(e=>allChildren.includes(e)).length > 0
+                    && (this.state.expandedKeys.filter(e=>allChildren.includes(e)).length === allChildren.length)
                     && <Menu.Item key="collapseAll">{this.props.t("collapse all")}</Menu.Item>}
                     {//contains eventHandlers
                         this.findTreeNodesBySelector({title: "eventHandlers", propertyName: "eventHandlers", upperBound: -1}).length > 0
@@ -1472,7 +1471,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     render() {
-
         const { t } = this.props as Props & WithTranslation;
         return (
             <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
@@ -1577,12 +1575,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             localStorage.setItem('resource_splitter_pos', size)
                         }}
                     >
-                        <div style={{marginLeft: '20px', marginTop: '20px'}}>
+                        <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'auto' }}>
                             <NeoRow justify={"space-around"} style={{alignItems:'unset'}}>
-                                <NeoCol span={18} style={{alignItems:'unset'}}>
+                                <NeoCol span={19}>
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </NeoCol>
-                                <NeoCol span={5} style={{alignItems:'unset'}}>
+                                <NeoCol span={5} style={{ position: 'sticky', top: '0' }}>
                                     <NeoButton
                                         title={t('additem')}
                                         type={"circle"}
@@ -1610,7 +1608,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <div style={{width:'100%'}}>
+                                                    <div style={{width:'85%'}}>
                                                         <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer"
                                                            style={{justifyContent:'center'}}>
                                                             <span
@@ -1632,7 +1630,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 </NeoCol>
                             </NeoRow>
                         </div>
-                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
+                        <div style={{ height: '100%', width: '100%', overflow: 'auto', backgroundColor: '#fff' }} onBlur={this.onTreeFocus} onFocus={this.onTableFocus}>
                             <NeoTable
                                 bordered
                                 size="small"
@@ -1659,12 +1657,37 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     title={t('addreference')}
                     visible={this.state.modalRefVisible}
                     onCancel={this.handleRefModalCancel}
-                    footer={<NeoButton
-                        type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"}
-                        onClick={this.handleAddNewRef}
-                    >
-                        OK
-                    </NeoButton>}
+                    //Тут в Dropdown мы не можем заменить Button на NeoButton пока что, так как тогда Dropdown не работает. Косяк в нашей NeoButton.
+                    footer={
+                        <>
+                            <NeoButton type={this.state.selectedRefUries.length === 0 ? "disabled" : "primary"} onClick={this.handleAddNewRef}>
+                                OK
+                            </NeoButton>
+                            {this.state.addRefMenuItems.length > 1
+                                ? <Dropdown overlay={this.renderMenu()}>
+                                    <Button
+                                        title={t('add element')}
+                                        type="primary"
+                                        style={{ display: 'block', margin: '0px 0px 10px auto' }}
+                                        size="large"
+                                    >
+                                        <NeoIcon icon={"plus"}/>
+                                    </Button>
+                                </Dropdown>
+                                : this.state.addRefMenuItems.length === 1
+                                    ? <Button
+                                        title={t('add element')}
+                                        type="primary"
+                                        style={{ display: 'block', margin: '0px 0px 10px auto' }}
+                                        size="large"
+                                        onClick={this.handleAddElement}
+                                    >
+                                        <NeoIcon icon={"plus"}/>
+                                    </Button>
+                                    : null
+                            }
+                        </>
+                    }
                 >
                     <NeoSelect
                         className={'select_option_tag'}
@@ -1710,13 +1733,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
+                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return isEObjectType ?
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>
@@ -1725,10 +1749,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         !isExcluded &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + eObject.get('name')
+                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
                                                 :
                                                 <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + eObject.get('name')}
+                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
                                                 </NeoHint>
                                             }
                                         </NeoOption>
@@ -1784,8 +1808,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     key="eclass_selection"
                     translate={t}
                     modalSelectEClassVisible={this.state.modalSelectEClassVisible}
-                    setSelectEClassVisible={()=>{}}
-                    // setSelectEClassVisible={this.setSelectEClassVisible}
+                    setSelectEClassVisible={this.setSelectEClassVisible}
                     onOk={(EClassObject: any) => {
                         const targetObject: { [key: string]: any } = this.state.targetObject;
                         const updatedJSON = targetObject.updater({
