@@ -18,6 +18,7 @@ import ru.neoflex.nfcore.application.ValueItem
 import ru.neoflex.nfcore.application.ValueHolder
 
 annotation "ru.neoflex.nfcore" as NFCore
+annotation "http://orientdb.com/meta" as OrientDB
 
 /*JdbcDriver*/
 @NFCore(documentation="Jdbc драйвер")
@@ -169,7 +170,7 @@ class DatasetComponent extends Tagged {
 
 @NFCore(documentation="")
 class DMLQuery {
-        @NFCore(expandable="true")
+        @NFCore(expandable="true", syntax="sql")
     String queryText
     boolean generateFromModel
 }
@@ -177,6 +178,7 @@ class DMLQuery {
 @NFCore(documentation="")
 class DatasetColumn {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
     String rdbmsDataType
     DataType convertDataType
@@ -185,6 +187,7 @@ class DatasetColumn {
 @NFCore(documentation="Столбцы")
 abstract class DatasetColumnView extends ServerSideCondition {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
+        @OrientDB(name="true")
     String name
         @NFCore(documentation="Название заголовка в таблице")
     String columnName
@@ -192,8 +195,10 @@ abstract class DatasetColumnView extends ServerSideCondition {
     boolean hide
         @NFCore(documentation="Текст, отображаемый при наведении мыши на заголовок колонки")
     String headerTooltip
-        @NFCore(documentation="Отображать текст из 'headerTooltip'")
+        @NFCore(documentation="Отображать текст 'Tooltip'")
     boolean showTooltipField
+        @NFCore(documentation="Текст 'headerTooltip'", renderConditions="{'showTooltipField':true}")
+    String datasetColumnTooltip
         @NFCore(documentation="Закрепить столбец. Варианты: Undefined, Left, Right")
     Pinned pinned
         @NFCore(documentation="Возможность изменения ширины колонки пользователем")
@@ -329,7 +334,7 @@ class Highlight {
 
     @NFCore(documentation="Условные выражения для отображения компоненты")
 abstract class ServerSideCondition {
-        @NFCore(documentation="Тип вычисляемого выражения")
+        @NFCore(documentation="Тип вычисляемого выражения, для отображения столбца")
     ConditionType conditionType
         @NFCore(documentation="Ссылка на датасет", renderConditions="{'conditionType':['RowsReturned','NoRowReturned']}")
     refers Dataset serverSideConditionDataset

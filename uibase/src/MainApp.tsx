@@ -4,16 +4,17 @@ import Splitter from './components/CustomSplitter'
 import {Layout, Menu} from "antd";
 import './styles/MainApp.css'
 import {API} from "./modules/api";
-import Ecore from "ecore"
+import Ecore, {Resource} from "ecore"
 import {ViewRegistry} from './ViewRegistry'
 import FetchSpinner from "./components/FetchSpinner";
 import {grantType} from "./utils/consts";
 import SubMenu from "antd/es/menu/SubMenu";
-import {adaptiveElementSize, breakPointsSizePx, getAdaptiveSize} from "./utils/adaptiveResizeUtils";
-import {NeoButton, NeoColor, NeoParagraph, NeoTable, NeoTabs} from "neo-design/lib";
+import {breakPointsSizePx} from "./utils/adaptiveResizeUtils";
+import {NeoButton, NeoColor, NeoHint, NeoParagraph, NeoTable, NeoTabs} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import ConfigUrlElement from "./ConfigUrlElement";
 import _ from "lodash";
+import {Link} from "react-router-dom";
 
 interface State {
     pathBreadcrumb: string[];
@@ -27,6 +28,7 @@ interface State {
     log: string;
     activeTab: string;
     urlTableHeight: number;
+    urlAppModules: Resource[];
 }
 
 
@@ -34,7 +36,7 @@ const FooterHeight = '40px';
 const backgroundColor = "#fdfdfd";
 const defaultVerticalSplitterSize = "300px";
 const defaultHorizontalSplitterSize = "400px";
-const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[0]}px`;
+const verticalSplitterShortSize = `${breakPointsSizePx.referenceMenu[1]}px`;
 
 function getVerticalStoredSize() {
     return localStorage.getItem('mainapp_refsplitter_pos') || defaultVerticalSplitterSize;
@@ -120,7 +122,8 @@ export class MainApp extends React.Component<any, State> {
             hideURL: true,
             log: "",
             activeTab: "",
-            urlTableHeight: 0
+            urlTableHeight: 0,
+            urlAppModules: []
         }
     }
 
@@ -323,20 +326,23 @@ export class MainApp extends React.Component<any, State> {
             //in case we change url outside appModule reference tree
             unmountStyleSheets(prevProps.context.styleSheetsList)
         }
-    }
-
-
-    handleResize = () => {
-        const hideReferences = getAdaptiveSize(this.refSplitterRef.current.panePrimary.div.offsetWidth ? this.refSplitterRef.current.panePrimary.div.offsetWidth : 0, "referenceMenu") <= adaptiveElementSize.extraSmall;
-        if (hideReferences !== this.state.hideReferences && this.refSplitterRef.current.panePrimary.div.offsetWidth) {
-            this.setState({hideReferences})
+        if (!this.state.hideURL
+            && this.state.urlAppModules.length !== this.props.pathFull.length) { //initial load on click
+            if (this.state.eClassAppModule !== undefined) {
+                const modules = (this.props.pathFull as ConfigUrlElement[])
+                    .map(e=>e.appModule).reduce((p,c)=>p+"|"+c)
+                    ?.split("(").join("\\(")
+                    ?.split(")").join("\\)")
+                ;
+                API.instance().findByKindAndRegexp(this.state.eClassAppModule, modules, 999).then(resources => {
+                    this.setState({urlAppModules:resources})
+                })
+            }
         }
-    };
+    }
 
     componentDidMount(): void {
         this.getEClassAppModule();
-        window.addEventListener("appAdaptiveResize", this.handleResize);
-        window.addEventListener("resize", this.handleResize);
         const currentAppModule = this.props.pathFull[this.props.pathFull.length - 1];
         this.setState({openKeys: currentAppModule.tree && currentAppModule.tree.length > 0
                 ? currentAppModule.tree
@@ -348,8 +354,6 @@ export class MainApp extends React.Component<any, State> {
     componentWillUnmount() {
         //in case we change url outside appModule reference tree
         unmountStyleSheets(this.props.context.styleSheetsList);
-        window.removeEventListener("appAdaptiveResize", this.handleResize);
-        window.removeEventListener("resize", this.handleResize);
     }
 
     setVerticalSplitterWidth = (width:string, minWidth?:string, maxWidth: string = "50%") => {
@@ -359,6 +363,16 @@ export class MainApp extends React.Component<any, State> {
         this.refSplitterRef.current.panePrimary.div.setAttribute("style",
             `width: ${width}; min-width: ${minWidth}; max-width: ${maxWidth}`);
     };
+
+    updateLogContent = () => {
+        API.instance().fetchLog().then(log=>{
+            this.setState({log:log}, ()=>{
+                if (this.debugRef.current) {
+                    this.debugRef.current.scrollIntoView({ behavior: "smooth" , block: "end" })
+                }
+            })
+        })
+    }
 
     renderFooter = () => {
         return (
@@ -370,13 +384,7 @@ export class MainApp extends React.Component<any, State> {
                         title={this.state.hideLog ? this.props.t("show log") : this.props.t("hide log")}
                         onClick={()=>{
                             this.setState({hideLog:!this.state.hideLog, hideURL: true, activeTab: this.state.activeTab === "log" ? "" : "log"});
-                            API.instance().fetchLog().then(log=>{
-                                this.setState({log:log}, ()=>{
-                                    if (this.debugRef.current) {
-                                        this.debugRef.current.scrollIntoView({ behavior: "smooth" , block: "end" })
-                                    }
-                                })
-                            })
+                            this.updateLogContent()
                         }}
                         type={"link"}>
                         <NeoIcon color={this.state.hideLog ? NeoColor.violete_4 : NeoColor.violete_6} icon={"code"} />{this.props.t("Logs")}
@@ -417,6 +425,7 @@ export class MainApp extends React.Component<any, State> {
             content = <div id={"debugContainer"}>
                 <div id={"debugInnerBar"}>
                     <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({hideLog:true, activeTab:""})}><NeoIcon color={NeoColor.violete_4} icon={"close"}/></NeoButton>
+                    <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.updateLogContent()}><NeoIcon color={NeoColor.violete_4} icon={"repeat"}/></NeoButton>
                     <NeoButton type={"link"} onClick={()=>!this.state.hideLog && this.setState({log:""})}><NeoIcon color={NeoColor.violete_4} icon={"rubbish"}/></NeoButton>
                 </div>
                 {children}
@@ -424,9 +433,22 @@ export class MainApp extends React.Component<any, State> {
         } else if (!this.state.hideURL) {
             const urlParams:ConfigUrlElement[] = this.props.context.getFullPath();
             const dataSource = urlParams.map((up,index)=>{
+                const resource = this.state.urlAppModules.find(r=>r.eContents()[0].get('name') === up.appModule);
+                const id = resource?.get('uri');
+                const rev = resource?.rev;
+                const component = <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                    {id && rev ? <Link to={`/developer/data/editor/${id}/${rev}`}>
+                        {up.appModule}
+                    </Link> :  up.appModule}
+                    {(urlParams.length-1-index !== 0) &&<NeoHint title={this.props.t("back to appmodule")} placement={"right"} onClick={()=>{
+                        this.props.history.go(-(urlParams.length-1-index))
+                    }}>
+                        <NeoIcon icon={"arrow-back"}/>
+                    </NeoHint>}
+                </div>
                 return {
                     key: index,
-                    appModule: up.appModule ? up.appModule : "null",
+                    appModule: component,
                     treeNode: up.tree.length > 0 && up.tree[up.tree.length - 1],
                     useParentReferenceTree: up.useParentReferenceTree ? up.useParentReferenceTree.toString() : "",
                     parameters: up.params && up.params.length > 0 && up.params.map((p, paramIndex)=>{
@@ -508,10 +530,13 @@ export class MainApp extends React.Component<any, State> {
 
     renderTreeNode = (eObject: Ecore.EObject, cbs: Map<string, () => void>, parentKey?: string, isShortSize = false) => {
         const code = eObject.get('name');
+        //TODO добавит mouseEnterDelay в neo-desing после перехода на antd4 + заменить цвет на NeoColor.grey_7
+        // @ts-ignore
+        const hint = <NeoHint mouseEnterDelay={1} style={{backgroundColor: NeoColor.grey_7}} placement={"right"} title={code}>{code}</NeoHint>;
         const key = parentKey ? parentKey + '/' + code : code;
         // eslint-disable-next-line
         const icon = eObject.get('icon') && this.viewFactory.createView(eObject.get('icon'), this.props);
-        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{code}</span></div>;
+        const content = isShortSize ? <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}</div> : <div className={`menu-content ${icon && "menu-with-icon"}`}>{icon}<span>{hint}</span></div>;
         let children = [];
         if (eObject.get('children')) {
             children = eObject.get('children')
@@ -573,15 +598,16 @@ export class MainApp extends React.Component<any, State> {
     }
 
     hideReferenceTree = () => {
-        if (this.state.hideReferences) {
-            const size = getVerticalStoredSize();
-            this.setVerticalSplitterWidth(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
-            setVerticalStoredSize(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
-        } else {
-            this.setVerticalSplitterWidth(this.refSplitterRef.current.panePrimary.props.style.minWidth);
-            setVerticalStoredSize(this.refSplitterRef.current.panePrimary.props.style.minWidth);
-        }
-        this.setState({hideReferences: !this.state.hideReferences})
+        this.setState({hideReferences: !this.state.hideReferences}, ()=> {
+            if (!this.state.hideReferences) {
+                const size = getVerticalStoredSize();
+                this.setVerticalSplitterWidth(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
+                setVerticalStoredSize(size && (parseInt(size) < parseInt(defaultVerticalSplitterSize)) ? defaultVerticalSplitterSize : size!);
+            } else {
+                this.setVerticalSplitterWidth(`${breakPointsSizePx.referenceMenu[0]}px`);
+                setVerticalStoredSize(`${breakPointsSizePx.referenceMenu[0]}px`);
+            }
+        })
     };
 
     render = () => {
@@ -602,9 +628,13 @@ export class MainApp extends React.Component<any, State> {
                     ref={this.refSplitterRef}
                     position="vertical"
                     primaryPaneMaxWidth="50%"
-                    primaryPaneMinWidth={hasIcons ? verticalSplitterShortSize : "0px"}
+                    primaryPaneMinWidth={hasIcons && this.state.hideReferences
+                        ? breakPointsSizePx.referenceMenu[0]
+                        : this.state.hideReferences
+                            ? "0px"
+                            : breakPointsSizePx.referenceMenu[1]}
                     primaryPaneWidth={hasIcons && this.state.hideReferences
-                        ? verticalSplitterShortSize
+                        ? breakPointsSizePx.referenceMenu[0]
                         : this.state.hideReferences
                             ? 0
                             : getVerticalStoredSize()}
@@ -634,6 +664,7 @@ export class MainApp extends React.Component<any, State> {
                         <div style={{height: `calc(100% - ${FooterHeight})`, width: '100%', overflow: 'hidden'}}>
                             <Splitter
                                 ref={this.toolsSplitterRef}
+                                className={"horizontal-splitter"}
                                 position="horizontal"
                                 primaryPaneMaxHeight="100%"
                                 primaryPaneMinHeight="0%"

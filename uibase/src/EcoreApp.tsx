@@ -6,7 +6,6 @@ import {API, Error, IErrorHandler} from './modules/api'
 import MetaBrowser from "./components/MetaBrowser";
 import ResourceEditor from "./components/ResourceEditor"
 import {Link, Route, Switch} from "react-router-dom";
-import QueryRunner from "./components/QueryRunner";
 import Login from "./components/Login";
 import {DataBrowser} from "./components/DataBrowser";
 import {MainApp} from "./MainApp";
@@ -19,7 +18,7 @@ import ConfigUrlElement from "./ConfigUrlElement";
 import HeaderMenu from "./components/HeaderMenu";
 import EventTracker from "./EventTracker";
 import FilesystemBrowser from "./components/app/filesystem/FilesystemBrowser";
-import AppLogo from './icons/logo.svg';
+import {ReactComponent as AppLogo} from './icons/logo.svg';
 import FetchSpinner from "./components/FetchSpinner";
 import {dmlOperation, grantType} from "./utils/consts";
 import 'neo-design/dist/neoDesign.css';
@@ -27,8 +26,11 @@ import {NeoButton, NeoCol, NeoHint, NeoRow, NeoTypography} from "neo-design/lib"
 import {NeoIcon} from "neo-icon/lib";
 import {Prohibited} from "./components/Prohibited";
 import DeveloperMain from "./components/DeveloperMain";
+import {excelExportObject} from "./utils/excelExportUtils";
+import {docxExportObject} from "./utils/docxExportUtils";
 
 const backgroundColor = "#2a356c";
+const userProfileUpdateDebounceInterval = 1000;
 
 const { Header } = Layout;
 
@@ -64,10 +66,11 @@ export function encodeAppURL(path?: any[]) {
 
 class EcoreApp extends React.Component<any, State> {
 
-    private docxHandlers: any[] = [];
-    private excelHandlers: any[] = [];
+    private docxHandlers: (()=>docxExportObject|undefined)[] = [];
+    private excelHandlers: (()=>excelExportObject|undefined)[] = [];
     private eventActions: any[] = [];
     private eventTracker = new EventTracker();
+    private userProfileTimer: NodeJS.Timeout;
 
     constructor(props: any) {
         super(props);
@@ -123,7 +126,7 @@ class EcoreApp extends React.Component<any, State> {
 
     /*Run in start Application*/
     static getDerivedStateFromProps(nextProps: any, prevState: State) {
-        if (nextProps.location.pathname.includes("app")) {
+        if (nextProps.location.pathname.includes("/app/")) {
             const pathFull = JSON.parse(decodeURIComponent(atob(nextProps.location.pathname.split("/app/")[1])));
             return {
                 pathFull: pathFull,
@@ -178,8 +181,11 @@ class EcoreApp extends React.Component<any, State> {
                         updatedUserProfile.get('params').addAll(updatedObject[0] !== undefined ? updatedObject[0] : updatedObject)
                     }
                 }
-                const prom =  API.instance().saveResource(updatedUserProfile.eResource(), 99999);
-                this.state.context.updateContext!(({userProfilePromise: prom}))
+                clearTimeout(this.userProfileTimer);
+                this.userProfileTimer = setTimeout(()=>{
+                    const prom =  API.instance().saveResource(updatedUserProfile.eResource(), 99999);
+                    this.state.context.updateContext!(({userProfilePromise: prom}))
+                }, userProfileUpdateDebounceInterval)
             }
         })
     };
@@ -581,7 +587,8 @@ class EcoreApp extends React.Component<any, State> {
                                 '') ? "app-logo-settings" : "app-logo"}
                                  onClick={this.renderDashboard}
                             >
-                                <img src={AppLogo} alt="App Logo"/>
+                                {/*<img src={AppLogo} alt="App Logo"/>*/}
+                                <AppLogo/>
                             </div>
                         </NeoCol>
                         <NeoCol span={14} style={{textAlign: 'center', alignItems: 'center', height: 'inherit'}}>
@@ -623,73 +630,64 @@ class EcoreApp extends React.Component<any, State> {
                                                                 <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('metadata')}</NeoTypography>
                                                             }
                                                         </span>
-                                                    </Link>
-                                                </Menu.Item>
-                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'data'}>
-                                                    <Link to={`/developer/data`}>
-                                                        <span>
-                                                            {this.props.location.pathname.includes('/developer/data') ?
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('data')}</NeoTypography>
-                                                                :
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('data')}</NeoTypography>
-                                                            }
-                                                            </span>
-                                                    </Link>
-                                                </Menu.Item>
-                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'query'}>
-                                                    <Link to={`/developer/query`}>
-                                                         <span>
-                                                            {this.props.location.pathname.includes('/developer/query') ?
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('query')}</NeoTypography>
-                                                                :
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('query')}</NeoTypography>
-                                                            }
-                                                            </span>
-                                                    </Link>
-                                                </Menu.Item>
-                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'tools'}>
-                                                    <Link to={`/developer/tools`}>
-                                                         <span>
-                                                            {this.props.location.pathname.includes('/developer/tools') ?
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('tools')}</NeoTypography>
-                                                                :
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('tools')}</NeoTypography>
-                                                            }
-                                                            </span>
-                                                    </Link>
-                                                </Menu.Item>
-                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
-                                                    <Link to={`/developer/masterdata`}>
-                                                         <span>
-                                                            {this.props.location.pathname.includes('/developer/masterdata') ?
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
-                                                                :
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
-                                                            }
-                                                            </span>
-                                                    </Link>
-                                                </Menu.Item>
-                                                <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'filesystem'}>
-                                                    <Link to={`/developer/filesystem`}>
-                                                         <span>
-                                                            {this.props.location.pathname.includes('/developer/filesystem') ?
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('filesystem')}</NeoTypography>
-                                                                :
-                                                                <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('filesystem')}</NeoTypography>
-                                                            }
-                                                            </span>
-                                                    </Link>
-                                                </Menu.Item>
-                                            </Menu>
-                                        </div>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'data'}>
+                                                <Link to={`/developer/data`}>
+                                                    <span>
+                                                        {this.props.location.pathname.includes('/developer/data') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('data')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('data')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'tools'}>
+                                                <Link to={`/developer/tools`}>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/tools') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('tools')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('tools')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'masterdata'}>
+                                                <Link to={`/developer/masterdata`}>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/masterdata') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('masterdata')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('masterdata')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
+                                            <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px"   }} key={'filesystem'}>
+                                                <Link to={`/developer/filesystem`}>
+                                                     <span>
+                                                        {this.props.location.pathname.includes('/developer/filesystem') ?
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#FFFFFF"}} type={'h4_regular'}>{t('filesystem')}</NeoTypography>
+                                                            :
+                                                            <NeoTypography className={'namesOfDevMenu'} style={{color: "#B3B3B3"}} type={'h4_light'}>{t('filesystem')}</NeoTypography>
+                                                        }
+                                                        </span>
+                                                </Link>
+                                            </Menu.Item>
+                                        </Menu>
                                     </div>
-                                    <div className={'devMenuSmallWidth'}>
-                                        <Dropdown overlay={devMenu} placement="bottomCenter">
-                                            <div style={{float: "left"}}>
-                                                <NeoIcon color={'white'} icon={"table"} size={'m'}/>
+
+
                                             </div>
-                                        </Dropdown>
-                                    </div>
+                                 <div className={'devMenuSmallWidth'}>
+                                    <Dropdown overlay={devMenu} placement="bottomCenter">
+                                        <div style={{float: "left"}}>
+                                            <NeoIcon color={'white'} icon={"table"} size={'m'}/>
+                                        </div>
+                                    </Dropdown>
+                                </div>
                                 </div>
                             }
                         </NeoCol>
@@ -770,10 +768,9 @@ class EcoreApp extends React.Component<any, State> {
                 <Switch>
                     <Route path='/app/:appModuleName' component={this.renderApplication}/>
                     <Route path='/developer/metadata' component={this.isDeveloper() ? MetaBrowser : Prohibited}/>
-                    <Route path='/developer/query' component={this.isDeveloper() ? QueryRunner : Prohibited}/>
                     <Route path='/developer/main' component={this.isDeveloper() ? DeveloperMain : Prohibited}/>
                     <Route exact={true} path='/developer/data' component={this.isDeveloper() ? DataBrowser : Prohibited}/>
-                    <Route path='/developer/data/editor/:id/:ref/:edit?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
+                    <Route path='/developer/data/editor/:id/:ref/:edit?/:targetId?' render={(props:any) => this.isDeveloper() ? <ResourceEditor applications={this.state.applications} notification={this.notification} principal={this.state.principal} {...props}/> : Prohibited}/>
                     <Route path='/developer/tools' render={(props:any) => this.isDeveloper() ? <Tools notification={this.notification} {...props}/> : Prohibited}/>
                     <Route path='/developer/filesystem' render={(props:any) => this.isDeveloper() ? <FilesystemBrowser notification={this.notification} {...props}/> : Prohibited}/>
                 </Switch>

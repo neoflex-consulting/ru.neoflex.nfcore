@@ -64,7 +64,6 @@ public class Groovy {
     public Object eval(String scriptName, String code, Map<String, Object> args) throws Exception {
         Binding b = new Binding(args);
         GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
-        logger.info(String.format("evaluate groovy script %s;args=%s", code, args.toString()));
         Object result =  sh.evaluate(code, scriptName);
         return result;
     }

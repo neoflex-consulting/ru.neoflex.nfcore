@@ -53,36 +53,6 @@ public class LuceneTests extends TestBase {
         Assert.assertEquals("[IT-86029] Trivento (Cathedral) [I-Trivento]", placemark.getDescription());
     }
 
-    //@Test
-    public void testLoadCountries() throws Exception {
-        InputStream is;
-        try {
-            is = new FileInputStream("C:/Users/arch7/Downloads/geodata/gadm36_0.json.gz");
-        }
-        catch (Throwable e) {
-            return;
-        }
-        try (GZIPInputStream gis = new GZIPInputStream(is)) {
-            loadCountries(gis);
-        }
-        finally {
-            is.close();
-        }
-        try {
-            is = new FileInputStream("C:/Users/arch7/Downloads/geodata/Palaces and castles.json.gz");
-        }
-        catch (Throwable e) {
-            return;
-        }
-        try (GZIPInputStream gis = new GZIPInputStream(is)) {
-            loadPlaces(gis);
-        }
-        finally {
-            is.close();
-        }
-        server.exportDatabase();
-    }
-
     public void loadCountries(InputStream is) throws Exception {
         try(BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"))) {
             for(String line; (line = br.readLine()) != null; ) {

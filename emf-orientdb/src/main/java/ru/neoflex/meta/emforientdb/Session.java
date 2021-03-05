@@ -4,11 +4,15 @@ import com.orientechnologies.lucene.OLuceneIndexFactory;
 import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.*;
+import com.orientechnologies.orient.core.record.ODirection;
+import com.orientechnologies.orient.core.record.OEdge;
+import com.orientechnologies.orient.core.record.OElement;
+import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
@@ -24,6 +28,7 @@ import java.io.Closeable;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +56,11 @@ public class Session implements Closeable {
 
     @Override
     public void close() {
-        db.close();
+        try {
+            db.close();
+        }
+        catch (ODatabaseException e) {
+        }
         if (currentDB != null) {
             ODatabaseRecordThreadLocal.instance().set(currentDB);
         }
@@ -303,17 +312,64 @@ public class Session implements Closeable {
         }
     }
 
-    private OVertex loadElement(EObject eObject) {
+    private OVertex loadElement(EObject eObject, Set<OEdge> edges, EReference eReference) {
+        String id = ((OrientDBResource)eObject.eResource()).getID(eObject);
+        if (id != null) {
+            OVertex oVertex = edges.stream()
+                    .filter(oEdge -> Objects.equals(oEdge.getProperty("feature"), eReference.getName()))
+                    .map(OEdge::getTo)
+                    .filter(oVertex1 -> id.equals(oVertex1.getIdentity().toString()))
+                    .findFirst().orElse(null);
+            if (oVertex != null) {
+                return oVertex;
+            }
+        }
         EClass eClass = eObject.eClass();
         EAttribute eIDAttribute = eClass.getEIDAttribute();
-        if (eIDAttribute != null) {
-            return (OVertex) queryElement(
-                    "select from " + getOClassName(eClass) +
-                            " where " + eIDAttribute.getName() + "=?",
-                    objectToOObject(eIDAttribute.getEAttributeType(), eObject.eGet(eIDAttribute)));
+        if (eIDAttribute == null) {
+            Function<EClass, EAttribute> function = getFactory().getQualifiedNameDelegate();
+            if (function != null) {
+                eIDAttribute = function.apply(eClass);
+            }
         }
-        URI uri = EcoreUtil.getURI(eObject);
-        return loadElement(uri);
+        if (eIDAttribute == null && eObject instanceof ENamedElement) {
+            eIDAttribute = EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+        }
+        if (eIDAttribute == null) {
+            eIDAttribute = eClass.getEAllAttributes().stream()
+                    .filter(eAttribute -> "true".equals(getAnnotation(eAttribute, "name", "false")))
+                    .findFirst().orElse(null);
+        }
+        if (eIDAttribute != null) {
+            EAttribute eAttribute = eIDAttribute;
+            OVertex oVertex = edges.stream()
+                    .filter(oEdge -> Objects.equals(oEdge.getProperty("feature"), eReference.getName()))
+                    .map(OEdge::getTo)
+                    .filter(oVertex1 -> Objects.equals(oVertex1.getProperty(eAttribute.getName()), objectToOObject(eAttribute.getEAttributeType(), eObject.eGet(eAttribute))))
+                    .findFirst().orElse(null);
+            if (oVertex != null) {
+                return oVertex;
+            }
+        }
+        List<EAttribute> eAttributes = eReference.getEKeys();
+        if (!eAttributes.isEmpty()) {
+            for (OEdge oEdge: edges.stream()
+                    .filter(oEdge -> Objects.equals(oEdge.getProperty("feature"), eReference.getName())).collect(Collectors.toList())) {
+                OVertex oVertex = oEdge.getTo();
+                boolean found = true;
+                for (EAttribute eAttribute: eAttributes) {
+                    if (Objects.equals(oVertex.getProperty(eAttribute.getName()), objectToOObject(eAttribute.getEAttributeType(), eObject.eGet(eAttribute)))) {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) {
+                    return oVertex;
+                }
+            }
+
+        }
+        return null;
     }
 
     private OVertex loadElement(URI uri) {
@@ -380,7 +436,7 @@ public class Session implements Closeable {
                         List<OElement> embedded = new ArrayList<>();
                         for (int index = 0; index < eObjects.size(); ++index) {
                             EObject cObject = eObjects.get(index);
-                            OElement cElement = loadElement(cObject);
+                            OElement cElement = loadElement(cObject, references, (EReference) sf);
                             if (cElement == null) {
                                 if (isEmbedded((EReference) sf)) {
                                     cElement = createOElement(cObject);

@@ -70,7 +70,8 @@ interface props {
     isFullScreenOn: boolean,
     isInsertRowHidden: boolean,
     isDeleteRowsHidden: boolean,
-    isCopySelectedHidden: boolean
+    isCopySelectedHidden: boolean,
+    hiddenComponents: ("filter"|"highlights"|"sort"|"calculator"|"aggregations"|"diagram"|"groupBy"|"hiddenColumns"|"exportDocx"|"exportExcel"|"versions"|"edit")[]
 }
 
 interface State {
@@ -218,43 +219,68 @@ class DatasetBar extends React.Component<props, State> {
     }
 
     getAdaptiveMenu = () => {
-        return <Menu onClick={(e: any) => this.onAdaptiveMenuClick(e)}>
-            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden &&
-            <Menu.Item className={"action-menu-item"} key={paramType.filter}>
+        const filter = !(this.props.hiddenComponents.includes("filter")
+            && this.props.hiddenComponents.includes("highlights"))
+            && this.state.barSize <= barSize.small
+            && !this.props.isServerFunctionsHidden
+            && <Menu.Item className={"action-menu-item"} key={paramType.filter}>
                 <NeoIcon icon={'filter'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("filters")}
-            </Menu.Item>}
-            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden &&
-            <Menu.Item className={"action-menu-item"} key={paramType.sort}>
+            </Menu.Item>;
+        const sort = !this.props.hiddenComponents.includes("sort")
+            && this.state.barSize <= barSize.small
+            && !this.props.isServerFunctionsHidden
+            && <Menu.Item className={"action-menu-item"} key={paramType.sort}>
                 <NeoIcon icon={'sort'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("sorts")}
-            </Menu.Item>}
-            {this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden && <div className={"menu-horizontal-line"}/>}
-            {!this.props.isServerFunctionsHidden &&
-            <Menu.Item className={"action-menu-item"} key={paramType.calculations}>
+            </Menu.Item>;
+        const calculator = !this.props.hiddenComponents.includes("calculator")
+            && !this.props.isServerFunctionsHidden
+            && <Menu.Item className={"action-menu-item"} key={paramType.calculations}>
                 <NeoIcon icon={'calculator'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("calculator")}
-            </Menu.Item>}
-            {!this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.aggregate}>
-                <NeoIcon icon={'plusBlock'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("aggregations")}
-            </Menu.Item>}
-            <Menu.Item className={"action-menu-item"} key={'diagram'}>
-                <NeoIcon icon={'barChart'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("diagram")}
-            </Menu.Item>
-            {!this.props.isServerFunctionsHidden && <Menu.Item className={"action-menu-item"} key={paramType.group}>
-                <NeoIcon icon={'add'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("grouping")}
-            </Menu.Item>}
-            <Menu.Item className={"action-menu-item"} key={paramType.hiddenColumns}>
-                <NeoIcon icon={'hide'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("hiddencolumns")}
-            </Menu.Item>
-            <div className={"menu-horizontal-line"}/>
-            <Menu.Item className={"action-menu-item"} key='save'>
-                <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("save")}
-            </Menu.Item>
-            {this.props.isDeleteButtonVisible && <Menu.Item className={"action-menu-item"} key='delete'>
+            </Menu.Item>;
+        const aggregations = !this.props.hiddenComponents.includes("aggregations")
+            && !this.props.isServerFunctionsHidden
+            && <Menu.Item className={"action-menu-item"} key={paramType.aggregate}>
+            <NeoIcon icon={'plusBlock'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("aggregations")}
+        </Menu.Item>;
+        const diagram = !this.props.hiddenComponents.includes("diagram")
+            && <Menu.Item className={"action-menu-item"} key={'diagram'}>
+            <NeoIcon icon={'barChart'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("diagram")}
+        </Menu.Item>;
+        const groupBy = !this.props.hiddenComponents.includes("groupBy")
+            && !this.props.isServerFunctionsHidden
+            && <Menu.Item className={"action-menu-item"} key={paramType.group}>
+            <NeoIcon icon={'add'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("grouping")}
+        </Menu.Item>;
+        const hiddenColumns = !this.props.hiddenComponents.includes("hiddenColumns")
+            && <Menu.Item className={"action-menu-item"} key={paramType.hiddenColumns}>
+            <NeoIcon icon={'hide'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("hiddencolumns")}
+        </Menu.Item>;
+        const save = !this.props.hiddenComponents.includes("versions")
+            && <Menu.Item className={"action-menu-item"} key='save'>
+            <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("save")}
+        </Menu.Item>;
+        const deleteItem = !this.props.hiddenComponents.includes("versions")
+            && this.props.isDeleteButtonVisible && <Menu.Item className={"action-menu-item"} key='delete'>
                 <NeoIcon icon={'rubbish'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("delete")}
-            </Menu.Item>}
-            {this.props.isEditButtonVisible && <div className={"menu-horizontal-line"}/>}
-            {this.props.isEditButtonVisible && <Menu.Item className={"action-menu-item"} key='edit'>
-                <NeoIcon icon={'edit'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("edit")}
-            </Menu.Item>}
+            </Menu.Item>;
+        const edit = !this.props.hiddenComponents.includes("edit")
+            && this.props.isEditButtonVisible && <Menu.Item className={"action-menu-item"} key='edit'>
+            <NeoIcon icon={'edit'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("edit")}
+        </Menu.Item>
+        return <Menu onClick={(e: any) => this.onAdaptiveMenuClick(e)}>
+            {filter}
+            {sort}
+            {(calculator || aggregations || diagram || groupBy || hiddenColumns) && this.state.barSize <= barSize.small && !this.props.isServerFunctionsHidden && <div className={"menu-horizontal-line"}/>}
+            {calculator}
+            {aggregations}
+            {diagram}
+            {groupBy}
+            {hiddenColumns}
+            {(save || deleteItem) && <div className={"menu-horizontal-line"}/>}
+            {save}
+            {deleteItem}
+            {(edit) && this.props.isEditButtonVisible && <div className={"menu-horizontal-line"}/>}
+            {edit}
         </Menu>
     };
 
@@ -352,193 +378,122 @@ class DatasetBar extends React.Component<props, State> {
     };
 
     getActionButtons = () => {
-        let isFilter, isSort, isCalculator, serverAggregates, isDiagramms, serverGroupBy, isHiddenColumns: boolean = false;
-        this.props.serverFilters.forEach(element => {
-            if (element.datasetColumn !== undefined && element.enable){
-                isFilter = true;
-            }
-        });
-        this.props.highlights.forEach(element => {
-            if (element.datasetColumn !== undefined && element.enable){
-                isFilter = true;
-            }
-        });
-        this.props.hiddenColumns.forEach(element => {
-            if (element.enable === false){
-                isHiddenColumns = true;
-            }
-        });
-        this.props.serverSorts.forEach(element => {
-            if (element.datasetColumn !== undefined && element.enable){
-                isSort = true;
-            }
-        });
-        this.props.serverCalculatedExpression.forEach(element => {
-            if (element.datasetColumn !== undefined  && element.operation !== undefined){
-                isCalculator = true;
-            }
-        });
-        this.props.serverAggregates.forEach(element => {
-            if (element.datasetColumn !== undefined && element.enable){
-                serverAggregates = true;
-            }
-        });
-        if (this.props.diagrams.length > 0){
-            isDiagramms = true
+        function renderIcon(arr: IServerQueryParam[]) : boolean {
+            return !!arr.find(e=>e.datasetColumn && e.enable)
         }
-        this.props.serverGroupBy.forEach(element => {
-            if (element.datasetColumn !== undefined && element.enable) {
-                serverGroupBy = true;
-            }
-        });
-        this.props.groupByColumn.forEach(element => {
-            if (element.datasetColumn !== undefined && element.enable) {
-                serverGroupBy = true;
-            }
-        });
-
+        this.props.hiddenColumns.find(e=>e.enable === false)
+        const filterButton = !(this.props.hiddenComponents.includes("filter")
+            && this.props.hiddenComponents.includes("highlights"))
+            && <NeoHint  title={this.props.t('filters')}>
+                <NeoButton type={'link'} className={"bar-button--margin-medium"}
+                           onClick={this.props.onFiltersClick}>
+                    <NeoIcon icon={renderIcon(this.props.serverFilters) || renderIcon(this.props.highlights) ? 'filterCheck' : 'filter'} color={NeoColor.violete_4} size={'m'}/>
+                </NeoButton>
+            </NeoHint>;
+        const sortButton = !this.props.hiddenComponents.includes("sort") && <NeoHint  title={this.props.t('sorts')}>
+            <NeoButton type={'link'} className={"bar-button--margin-small"}
+                       onClick={this.props.onSortsClick}>
+                <NeoIcon icon={renderIcon(this.props.serverSorts) ? 'sortCheck' : 'sort'} color={NeoColor.violete_4} size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const calculatorButton = !this.props.hiddenComponents.includes("calculator") && <NeoHint  title={this.props.t('calculator')}>
+            <NeoButton type={'link'}
+                       className={"bar-button--margin-medium"}
+                       onClick={this.props.onCalculatorClick}>
+                <NeoIcon icon={!!this.props.serverCalculatedExpression.find(e=>e.datasetColumn && e.operation) ? 'calculatorCheck' : 'calculator'} color={NeoColor.violete_4}
+                         size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const aggregationButton = !this.props.hiddenComponents.includes("aggregations") && <NeoHint  title={this.props.t('aggregations')}>
+            <NeoButton type={'link'}
+                       className={"bar-button--margin-small"}
+                       onClick={this.props.onAggregationsClick}>
+                <NeoIcon icon={renderIcon(this.props.serverAggregates) ? 'plusBlockCheck' : 'plusBlock'} color={NeoColor.violete_4}
+                         size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const diagramButton = !this.props.hiddenComponents.includes("diagram") && <NeoHint  title={this.props.t('diagram')}>
+            <NeoButton type={'link'}
+                       className={"bar-button--margin-small"}
+                       onClick={this.props.onDiagramsClick}>
+                <NeoIcon icon={this.props.diagrams.length > 0 ? 'barChartCheck' : 'barChart'} color={NeoColor.violete_4}
+                         size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const groupByButton = !this.props.hiddenComponents.includes("groupBy") && <NeoHint  title={this.props.t('grouping')}>
+            <NeoButton type={'link'}
+                       className={"bar-button--margin-small"}
+                       onClick={this.props.onGroupingClick}>
+                <NeoIcon icon={renderIcon(this.props.serverGroupBy) || renderIcon(this.props.groupByColumn) ? 'addCheck' : 'add'} color={NeoColor.violete_4} size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const hiddenColumnButton = !this.props.hiddenComponents.includes("hiddenColumns") && <NeoHint  title={this.props.t('hiddencolumns')}>
+            <NeoButton type={'link'}
+                       className={"bar-button--margin-small"}
+                       onClick={this.props.onHiddenClick}>
+                <NeoIcon icon={!!this.props.hiddenColumns.find(e=>e.enable === false) ? 'hideCheck' : 'hide'} color={NeoColor.violete_4} size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const saveButton = !this.props.hiddenComponents.includes("versions") && <NeoHint title={this.props.t('save')}>
+            <NeoButton type={'link'}
+                       className={"bar-button--margin-medium"}
+                       onClick={this.props.onSaveClick}>
+                <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>
+            </NeoButton>
+        </NeoHint>;
+        const deleteButton = !this.props.hiddenComponents.includes("versions") && this.props.isDeleteButtonVisible &&
+            <div>
+                <NeoHint  title={this.props.t('delete')}>
+                    <NeoButton type={'link'}
+                               className={"bar-button--margin-small"}
+                               onClick={this.props.onDeleteClick}>
+                        <NeoIcon icon={"rubbish"} size={"m"} color={NeoColor.violete_4}/>
+                    </NeoButton>
+                </NeoHint>
+            </div>;
+        const editButton = !this.props.hiddenComponents.includes("edit") && this.props.isEditButtonVisible &&
+            <NeoHint  title={this.props.t('edit')}>
+                <NeoButton
+                    type={'link'}
+                    className={"bar-button--margin-medium"}
+                    onClick={this.props.onEditClick}>
+                    <NeoIcon icon={"edit"} color={NeoColor.violete_4} size={'m'}/>
+                </NeoButton>
+            </NeoHint>
         return !this.props.isServerFunctionsHidden
             ?
             <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                 <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                     <div className='vertical-line'/>
-                    <NeoHint  title={this.props.t('filters')}>
-                    <NeoButton type={'link'} className={"bar-button--margin-medium"}
-                               onClick={this.props.onFiltersClick}>
-                        <NeoIcon icon={isFilter ? 'filterCheck' : 'filter'} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <NeoHint  title={this.props.t('sorts')}>
-                        <NeoButton type={'link'} className={"bar-button--margin-small"}
-                                   onClick={this.props.onSortsClick}>
-                            <NeoIcon icon={isSort ? 'sortCheck' : 'sort'} color={NeoColor.violete_4} size={'m'}/>
-                        </NeoButton>
-                    </NeoHint>
-                    <div className='vertical-line'/>
+                    {filterButton}
+                    {sortButton}
+                    {(filterButton || sortButton) && <div className='vertical-line'/>}
                 </div>
                 <div className={this.state.barSize <= barSize.medium ? 'adaptive-bar-hidden' : 'flex-bar-item'}>
-                    <NeoHint  title={this.props.t('calculator')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-medium"}
-                               onClick={this.props.onCalculatorClick}>
-                        <NeoIcon icon={isCalculator ? 'calculatorCheck' : 'calculator'} color={NeoColor.violete_4}
-                                 size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <NeoHint  title={this.props.t('aggregations')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-small"}
-                               onClick={this.props.onAggregationsClick}>
-                        <NeoIcon icon={serverAggregates ? 'plusBlockCheck' : 'plusBlock'} color={NeoColor.violete_4}
-                                 size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <NeoHint  title={this.props.t('diagram')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-small"}
-                               onClick={this.props.onDiagramsClick}>
-                        <NeoIcon icon={isDiagramms ? 'barChartCheck' : 'barChart'} color={NeoColor.violete_4}
-                                 size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <NeoHint  title={this.props.t('grouping')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-small"}
-                               onClick={this.props.onGroupingClick}>
-                        <NeoIcon icon={serverGroupBy ? 'addCheck' : 'add'} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <NeoHint  title={this.props.t('hiddencolumns')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-small"}
-                               onClick={this.props.onHiddenClick}>
-                        <NeoIcon icon={isHiddenColumns ? 'hideCheck' : 'hide'} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <div className='vertical-line'/>
-                    <NeoHint  title={this.props.t('save')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-medium"}
-                               onClick={this.props.onSaveClick}>
-                        <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    {
-                        this.props.isDeleteButtonVisible &&
-                        <div>
-                            <NeoHint  title={this.props.t('delete')}>
-                            <NeoButton type={'link'}
-                                       className={"bar-button--margin-small"}
-                                       onClick={this.props.onDeleteClick}>
-                                <NeoIcon icon={"rubbish"} size={"m"} color={NeoColor.violete_4}/>
-                            </NeoButton>
-                            </NeoHint>
-                        </div>
-                    }
-                    <div className='vertical-line'/>
-                    {
-                        this.props.isEditButtonVisible &&
-                        <NeoHint  title={this.props.t('edit')}>
-                        <NeoButton
-                            type={'link'}
-                            className={"bar-button--margin-medium"}
-                            onClick={this.props.onEditClick}>
-                            <NeoIcon icon={"edit"} color={NeoColor.violete_4} size={'m'}/>
-                        </NeoButton>
-                        </NeoHint>
-                    }
+                    {calculatorButton}
+                    {aggregationButton}
+                    {diagramButton}
+                    {groupByButton}
+                    {hiddenColumnButton}
+                    {(calculatorButton || aggregationButton || diagramButton || groupByButton || hiddenColumnButton)
+                        && <div className='vertical-line'/>}
+                    {saveButton}
+                    {deleteButton}
+                    {(saveButton || deleteButton) && <div className='vertical-line'/>}
+                    {editButton}
                 </div>
             </div>
             :
             <div className={this.state.barSize <= barSize.small ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                 <div className={this.state.barSize < barSize.large ? "adaptive-bar-hidden"  : "flex-bar-item"}>
                     <div className='vertical-line'/>
-                    <NeoHint  title={this.props.t('diagram')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-medium"}
-                               onClick={this.props.onDiagramsClick}>
-                        <NeoIcon icon={'barChart'} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <NeoHint  title={this.props.t('hiddencolumns')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-small"}
-                               onClick={this.props.onHiddenClick}>
-                        <NeoIcon icon={"hide"} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    <div className='vertical-line'/>
-                    <NeoHint  title={this.props.t('save')}>
-                    <NeoButton type={'link'}
-                               className={"bar-button--margin-medium"}
-                               onClick={this.props.onSaveClick}>
-                        <NeoIcon icon={'mark'} color={NeoColor.violete_4} size={'m'}/>
-                    </NeoButton>
-                    </NeoHint>
-                    {
-                        this.props.isDeleteButtonVisible &&
-                        <div>
-                            <NeoHint  title={this.props.t('delete')}>
-                            <NeoButton type={'link'}
-                                       className={"bar-button--margin-small"}
-                                       onClick={this.props.onDeleteClick}>
-                                <NeoIcon icon={"rubbish"} size={"m"} color={NeoColor.violete_4}/>
-                            </NeoButton>
-                            </NeoHint>
-                        </div>
-                    }
-                    <div className='vertical-line'/>
-                    {
-                        this.props.isEditButtonVisible &&
-                        <NeoHint  title={this.props.t('edit')}>
-                        <NeoButton
-                            type={'link'}
-                            className={"bar-button--margin-medium"}
-                            onClick={this.props.onEditClick}>
-                            <NeoIcon icon={"edit"} color={NeoColor.violete_4} size={'m'}/>
-                        </NeoButton>
-                        </NeoHint>
-                    }
+                    {diagramButton}
+                    {hiddenColumnButton}
+                    {(diagramButton || hiddenColumnButton) && <div className='vertical-line'/>}
+                    {saveButton}
+                    {deleteButton}
+                    {(saveButton || deleteButton) && <div className='vertical-line'/>}
+                    {editButton}
                 </div>
             </div>
     };
@@ -581,24 +536,26 @@ class DatasetBar extends React.Component<props, State> {
             {this.props.barMode === "diagram"
             && this.state.barSize <= barSize.small
             && <div className={"menu-horizontal-line"}/>}
-            <Menu.Item className={"action-menu-item"} key='exportToDocx'>
+            {!this.props.hiddenComponents.includes("exportDocx") && <Menu.Item className={"action-menu-item"} key='exportToDocx'>
                 <NeoIcon icon={'fileWord'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("export to docx")}
-            </Menu.Item>
-            <Menu.Item className={"action-menu-item"} key='exportToExcel'>
+            </Menu.Item>}
+            {!this.props.hiddenComponents.includes("exportExcel") && <Menu.Item className={"action-menu-item"} key='exportToExcel'>
                 <NeoIcon icon={'fileExcel'} color={NeoColor.violete_4} size={'m'}/>{this.props.t("export to excel")}
-            </Menu.Item>
+            </Menu.Item>}
         </Menu>
     };
 
     getExportButtons = () => {
         return <div className={"flex-bar-item"}>
             <div className='vertical-line'/>
-            <Dropdown overlay={this.getExportMenu()} placement="bottomRight">
+            {!(this.props.hiddenComponents.includes("exportDocx")
+            && this.props.hiddenComponents.includes("exportExcel"))
+            && <Dropdown overlay={this.getExportMenu()} placement="bottomRight">
                 <div>
                     <NeoIcon icon={"download"} size={"m"} color={NeoColor.violete_4}
                              className={"export-download-icon"}/>
                 </div>
-            </Dropdown>
+            </Dropdown>}
             <NeoHint title={this.props.t('fullscreen')}>
                 <NeoButton
                     type={'link'} className={"full-screen-icon"}
@@ -615,14 +572,26 @@ class DatasetBar extends React.Component<props, State> {
     };
 
     getGridPanel = () => {
-        const {t} = this.props
+        const {t} = this.props;
+        const adaptiveActionMenuVisible = !(
+            (this.props.hiddenComponents.includes("filter") || !(this.state.barSize <= barSize.small)) &&
+            (this.props.hiddenComponents.includes("highlights") || !(this.state.barSize <= barSize.small)) &&
+            (this.props.hiddenComponents.includes("sort") || !(this.state.barSize <= barSize.small)) &&
+            this.props.hiddenComponents.includes("calculator") &&
+            this.props.hiddenComponents.includes("aggregations") &&
+            this.props.hiddenComponents.includes("diagram") &&
+            this.props.hiddenComponents.includes("groupBy") &&
+            this.props.hiddenComponents.includes("hiddenColumns") &&
+            this.props.hiddenComponents.includes("versions") &&
+            (this.props.hiddenComponents.includes("edit") || !this.props.isEditButtonVisible)
+        );
         return <div
             ref={this.barRef}
             className={this.state.barSize <= barSize.extraSmall ? "functionalBar__header adaptive-bar-column-flex"  : "functionalBar__header"}>
             <div className={"block flex-bar-item " + (this.state.barSize !== adaptiveElementSize.extraSmall && "fill-space")}>
                 {this.getSearch()}
-                {!this.state.isQuickSearchExpanded && <div className={this.state.barSize <= barSize.medium ? "vertical-line" : "adaptive-bar-hidden"}/>}
-                {!this.state.isQuickSearchExpanded && <Dropdown
+                {!this.state.isQuickSearchExpanded && adaptiveActionMenuVisible && <div className={this.state.barSize <= barSize.medium ? "vertical-line" : "adaptive-bar-hidden"}/>}
+                {!this.state.isQuickSearchExpanded && adaptiveActionMenuVisible && <Dropdown
                     className={"adaptive-dropdown"}
                     overlay={this.getAdaptiveMenu()} placement="bottomRight">
                     <div

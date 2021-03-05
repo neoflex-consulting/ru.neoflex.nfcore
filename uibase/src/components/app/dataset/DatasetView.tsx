@@ -211,7 +211,7 @@ class DatasetView extends React.Component<any, State> {
             aggregatedRows: [],
             isGroovyDataset: false,
             isExportAllTabsVisible: false,
-            isExcelExport: false
+            isExcelExport: false,
         };
     }
 
@@ -323,13 +323,14 @@ class DatasetView extends React.Component<any, State> {
         return mask;
     }
 
-    async getChildrenColumns(column: Ecore.EList, resource: Ecore.Resource) {
+    async getChildrenColumns(column: Ecore.EList, resource: Ecore.Resource, isParentHidden: boolean = false) {
         let columnDefs:any[] = [];
         for (const c of column.array()) {
             if (c.get('column')) {
                 let rowData = new Map();
                 rowData.set('headerName', c.get('columnName'));
-                rowData.set('children', await this.getChildrenColumns(c.get('column'), resource));
+                rowData.set('children', await this.getChildrenColumns(c.get('column'), resource, !!c.get('hide') || isParentHidden));
+                rowData.set('hide', c.get('hide'));
                 columnDefs.push(rowData);
             } else {
                 let rowData = new Map();
@@ -339,7 +340,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('headerName', c.get('columnName'));
                 rowData.set('headerTooltip', c.get('headerTooltip'));
                 const serverSideCondition = await checkServerSideCondition(c.get('conditionType'), c.get('serverSideConditionValueItems'), c.get('serverSideConditionDataset'), c.get('expression'), this.props.context)
-                rowData.set('hide', !serverSideCondition || c.get('hide'));
+                rowData.set('hide', !serverSideCondition || c.get('hide') || isParentHidden);
                 rowData.set('pinned', c.get('pinned'));
                 rowData.set('filter', c.get('filter'));
                 rowData.set('sort', c.get('sort'));
@@ -369,7 +370,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
                 rowData.set('valueFormatter', this.valueFormatter);
-                rowData.set('tooltipField', c.get('showTooltipField') ? c.get('name') : undefined);
+                rowData.set('tooltipField', (c.get('showTooltipField')&&c.get('datasetColumnTooltip')) ? c.get('datasetColumnTooltip') : undefined);
                 rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
                 rowData.set('index', c.get('index'));
                 //передаётся в DatasetGrid для подключения typography к заголоку грида
@@ -1045,6 +1046,12 @@ class DatasetView extends React.Component<any, State> {
         return rowData.slice(rowData.length - numAggRows, rowData.length)
     }
 
+    changeEditMode(): void {
+        this.setState({isEditMode:!this.state.isEditMode},()=>{
+            this.gridRef.current.onEdit()
+        })
+    }
+
     refresh(resetGrouping:boolean = false): void {
         if (this.state.currentDatasetComponent.eResource && !resetGrouping) {
             this.prepParamsAndRun(this.state.currentDatasetComponent.eResource(),
@@ -1056,9 +1063,7 @@ class DatasetView extends React.Component<any, State> {
                 this.state.groupByColumn,
                 ()=>{
                     if (this.state.isEditMode)
-                        this.setState({isEditMode:!this.state.isEditMode},()=>{
-                            this.gridRef.current.onEdit()
-                        })
+                        this.changeEditMode()
                 }
             );
         } else if (this.state.currentDatasetComponent.eResource) {
@@ -1070,10 +1075,8 @@ class DatasetView extends React.Component<any, State> {
                 [],
                 [],
                 ()=>{
-                    if (!this.state.isEditMode)
-                        this.setState({isEditMode:!this.state.isEditMode},()=>{
-                            this.gridRef.current.onEdit()
-                        })
+                    if (this.state.isEditMode)
+                        this.changeEditMode()
                 })
         }
     }
@@ -1146,7 +1149,6 @@ class DatasetView extends React.Component<any, State> {
 
         this.setState({currentDatasetComponent: currentDatasetComponent[0]}, () => this.saveDatasetComponentToUrl(datasetComponentName));
         this.state.rowData.length !== 0 && this.findColumnDefs(currentDatasetComponent[0]);
-
     }
 
 
@@ -1396,10 +1398,7 @@ class DatasetView extends React.Component<any, State> {
                     }
                 });
             const params = primaryKey.concat(values);
-            this.props.context.executeDMLOperation(this.state.currentDatasetComponent, d.operationMark__, params).then(()=>{
-
-                }
-            ).catch(()=>{
+            this.props.context.executeDMLOperation(this.state.currentDatasetComponent, d.operationMark__, params).catch(()=>{
                     //Выходим из редактора, чтобы не ловить ошибки ag-grid
                     this.setState({isEditMode:false},() => {
                         //Восстанавливаем значение в случае ошибки
@@ -1435,9 +1434,10 @@ class DatasetView extends React.Component<any, State> {
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
-            <div style={{margin:'16px'}}>
+            <div style={{padding: "16px"}}>
                 {this.renderEList(this.props.viewObject.get('datasetComponent').get('valueHolders'))}
                 {!this.props.viewObject.get('hideActionBar') && <DatasetBar
+                    hiddenComponents={this.props.viewObject.get("hiddenPanelActions")}
                     datasetComponentId={`${this.props.viewObject.eURI()}`}
                     serverFilters={this.state.serverFilters}
                     hiddenColumns={this.state.hiddenColumns}
@@ -1468,9 +1468,7 @@ class DatasetView extends React.Component<any, State> {
                             || this.state.serverCalculatedExpression.filter(c => c.enable && c.datasetColumn).length > 0) {
                             this.refresh(true);
                         } else {
-                            this.setState({isEditMode: !this.state.isEditMode}, () => {
-                                this.gridRef.current.onEdit()
-                            })
+                            this.changeEditMode()
                         }
                     }}
                     onChangeDatasetComponent={(e: string) => {
@@ -1506,7 +1504,9 @@ class DatasetView extends React.Component<any, State> {
                     diagrams={this.state.diagrams}
                     currentDiagram={this.state.currentDiagram}
                     onBackFromEditClick={() => {
-                        if (this.state.isEditMode && this.gridRef.current.getBuffer().length > 0) {
+                        if (this.gridRef.current.whichEdited().length !== 0) {
+                            this.gridRef.current.stopEditing()
+                        } else if (this.state.isEditMode && this.gridRef.current.getBuffer().length > 0) {
                             this.setState({isCheckEditBufferVisible: true})
                         } else if (this.state.groupByColumn.filter(c=>c.enable && c.datasetColumn).length > 0
                             || this.state.serverGroupBy.filter(c=>c.enable && c.datasetColumn).length > 0
@@ -1514,11 +1514,7 @@ class DatasetView extends React.Component<any, State> {
                             || this.state.serverCalculatedExpression.filter(c=>c.enable && c.datasetColumn).length > 0) {
                             this.refresh()
                         } else if (this.gridRef.current.whichEdited().length === 0) {
-                            this.setState({isEditMode:!this.state.isEditMode},()=>{
-                                this.gridRef.current.onEdit()
-                            });
-                        } else {
-                            this.gridRef.current.stopEditing()
+                            this.changeEditMode()
                         }
                     }}
                     onInsertRowClick={() => this.gridRef.current.onInsert()}
@@ -1573,7 +1569,8 @@ class DatasetView extends React.Component<any, State> {
                 />
                 <DatasetGrid
                     gridKey={this.props.viewObject.eURI().split('#')[0]}
-                    hidden={!!this.state.currentDiagram}
+                    hidden={!!this.state.currentDiagram || this.state.isHidden || this.props.isParentHidden}
+                    isExportSuppressed={this.props.isExportSuppressed}
                     skipExport={!this.props.isTabActive}
                     hidePagination={this.props.viewObject.get('hidePaginator')}
                     ref={this.gridRef}
@@ -1617,7 +1614,7 @@ class DatasetView extends React.Component<any, State> {
                 >
                     {
 
-                        this.state.serverFilters && !this.state.isGroovyDataset &&
+                        this.state.serverFilters && !this.state.isGroovyDataset && !this.props.viewObject.get("hiddenPanelActions").includes("filter") &&
                             <ServerFilter
                                 {...this.props}
                                 popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
@@ -1632,7 +1629,7 @@ class DatasetView extends React.Component<any, State> {
                             />
                     }
                     {
-                        this.state.highlights && this.state.allHighlightType &&
+                        this.state.highlights && this.state.allHighlightType && !this.props.viewObject.get("hiddenPanelActions").includes("highlights") &&
                             <Highlight
                                 {...this.props}
                                 popUpContainerId={`filterButton${this.props.viewObject.eURI()}`}
@@ -1897,21 +1894,15 @@ class DatasetView extends React.Component<any, State> {
                         visible={this.state.isCheckEditBufferVisible}
                         onLeftButtonClick={()=>{
                             this.gridRef.current.resetBuffer();
-                            this.setState({isEditMode:false
-                            , isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible},()=>{
-                            this.gridRef.current.onEdit();
-                            this.refresh()
-                        })
+                            this.refresh();
+                            this.setState({isCheckEditBufferVisible: !this.state.isCheckEditBufferVisible});
                     }}
                        onRightButtonClick={()=>{
                            this.gridRef.current.removeRowsFromGrid();
                            this.onApplyEditChanges(this.gridRef.current.getBuffer());
                            this.setState({
-                               isEditMode:!this.state.isEditMode,
                                isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
-                           },()=>{
-                               this.gridRef.current.onEdit();
-                           })
+                           });
                        }}
                        textOfLeftButton={t("delete")}
                        textOfRightButton={t("save")}

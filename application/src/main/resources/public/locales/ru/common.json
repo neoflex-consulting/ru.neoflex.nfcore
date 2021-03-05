@@ -7,6 +7,7 @@
         "aggregations": "Рассчитать итоги",
         "apply": "Применить",
         "appname": "Neoflex Reporting",
+        "column for pie": "Столбец для Кругового графика",
         "axis X column name": "Ось x",
         "axis Y column name": "Ось y",
         "axis X label": "Подпись оси x",
@@ -502,7 +503,35 @@
         "export all tabs": "Выгрузить все вкладки",
         "export all tabs or current tab": "Выгрузить все вкладки или открытую вкладку?",
         "all": "Все",
-        "current": "Открытую"
+        "current": "Открытую",
+        "create event handler": "Добавить обработчик",
+        "folder already exists": "Каталог с таким названием уже существует в файловой системе",
+        "file already exists": "Файл с таким названием уже существует в файловой системе",
+        "execute": "Выполнить",
+        "table view": "Табличное представление",
+        "json view": "JSON представление",
+
+        "backup restored": "Восстановление из резевной копии прошло успешно",
+        "backup created": "Создана резервная копия",
+        "database vacuum success": "Хранилище метаданных успешно сжато",
+        "backup parameters": "Параметры",
+        "vacuum databases description": "Сжать размер хранилища метаданных",
+        "create backup": "Создать резервную копию",
+        "restore from backup": "Восстановить из копии",
+        "select backup": "Выбрать резервную копию",
+        "refresh backup list": "Обновить список копий",
+        "restore backup": "Восстановить из копии",
+        "backup": "Резервные копии",
+        "vacuum databases": "Сжать хранилище метаданных",
+        "restore": "Восстановить",
+        "please, specify backup file": "Пожалуйста, укажите файл",
+        "are you sure you want to restore copy?": "Вы действительно хотите восстановить из копии?",
+        "restore from copy": "Восстановление из резервной копии",
+        "vacuum metadata": "Сжать хранилище метаданных",
+        "warning you about to shrink metadata database be advised this operation is time-consuming please make backup first proceed?": "Внимание, вы собираетесь сжать хранилище метаданных. Операция сжатия выполняется долго, крайне рекомендуется заранее сделать бэкап баз. Продолжить?",
+        "back to appmodule": "Назад к AppModule",
+        "add element": "Создать новый элемент"
+
 }
 
 

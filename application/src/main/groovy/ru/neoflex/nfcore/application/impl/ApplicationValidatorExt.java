@@ -26,17 +26,6 @@ public class ApplicationValidatorExt extends ApplicationValidator {
     @Override
     public boolean validateApplication_IsValid(Application application, DiagnosticChain diagnostics, Map<Object, Object> context) {
         boolean testResult = false;
-        // Delete after Merge Branch
-        /*EList<Resource> allApplications = (EList<Resource>) Utils.findAllEClass(ApplicationPackage.Literals.APPLICATION);
-        for (Resource resource : allApplications) {
-            EList<Application> apps = (EList<Application>) (EList<?>) resource.getContents();
-            if (application.getHeaderOrder() != null
-                    && apps.get(0).getHeaderOrder() != null
-                    && !apps.get(0).getName().equals(application.getName())
-                    && apps.get(0).getHeaderOrder().equals(application.getHeaderOrder())) {
-                testResult = validate(application, diagnostics, context, "two applications cant have same headerOrder application " + apps.get(0).getName() + " and " + application.getName());
-            }
-        }*/
         if (application.isUseParentReferenceTree() && application.getReferenceTree() != null) {
             return validate(application, diagnostics, context, "field useParentReferenceTree - must be set 'false'");
         }
@@ -79,6 +68,14 @@ public class ApplicationValidatorExt extends ApplicationValidator {
         else {
             return false;
         }
+    }
+
+    @Override
+    public boolean validateCalendar_IsValid(Calendar calendar, DiagnosticChain diagnostics, Map<Object, Object> context) {
+        if (calendar.getUrlDateParameterName() == null || calendar.getUrlDateParameterName().equals("")) {
+            return validate(calendar, diagnostics, context, String.format("Calendar '%s'. Parameter urlDateParameterName - must be non-empty string", calendar.getName()) );
+        }
+        return false;
     }
 
     private boolean validate(EObject validateEObject, DiagnosticChain diagnostics, Map<Object, Object> context, String message) {

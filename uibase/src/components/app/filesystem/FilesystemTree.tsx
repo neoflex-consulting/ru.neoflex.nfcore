@@ -84,6 +84,10 @@ const prepareNodes = (json: any[]): any[] => {
     })
 }
 
+function isUniqueKey (keys: {key: string}[], newKey: string) {
+    return !keys.find(c=>c.key === newKey)
+}
+
 class FilesystemTree extends React.Component<Props & WithTranslation, State> {
     folderName = "";
     fileName = "";
@@ -189,17 +193,22 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
             console.log(newCatalog)
             const {key, treeData} = this.state
             const newKey = ["", ...key.split("/").filter(p=>!!p), newCatalog].join("/")
-            const children = [...this.getChildren(treeData, key),
-                {key: newKey, title: newCatalog, isLeaf: false, icon: getTreeIcon}]
-            this.setState({
-                treeData: this.updateTreeData(treeData, key, children),
-                selectedKeys: [newKey],
-                key: newKey,
-                isLeaf: false,
-                folderModalVisible: false
-            })
-            if (this.props.onSelect) {
-                this.props.onSelect(newKey, false)
+            const childrenKeys = this.getChildren(treeData, key)
+            if (isUniqueKey(childrenKeys, newKey)) {
+                const children = [...childrenKeys,
+                    {key: newKey, title: newCatalog, isLeaf: false, icon: getTreeIcon}]
+                this.setState({
+                    treeData: this.updateTreeData(treeData, key, children),
+                    selectedKeys: [newKey],
+                    key: newKey,
+                    isLeaf: false,
+                    folderModalVisible: false
+                })
+                if (this.props.onSelect) {
+                    this.props.onSelect(newKey, false)
+                }
+            } else {
+                this.props.notification!(this.props.t('notification'), this.props.t('folder already exists'), "error");
             }
         } else {
             this.props.notification!(this.props.t('notification'), this.props.t('folder name is empty'), "error");
@@ -213,17 +222,22 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
             console.log(newFile)
             const {key, treeData} = this.state
             const newKey = ["", ...key.split("/").filter(p=>!!p), newFile].join("/")
-            const children = [...this.getChildren(treeData, key),
-                {key: newKey, title: newFile, isLeaf: true, icon: getTreeIcon}]
-            this.setState({
-                treeData: this.updateTreeData(treeData, key, children),
-                selectedKeys: [newKey],
-                key: newKey,
-                isLeaf: true,
-                fileModalVisible: false
-            })
-            if (this.props.onSelect) {
-                this.props.onSelect(newKey, true)
+            const childrenKeys = this.getChildren(treeData, key)
+            if (isUniqueKey(childrenKeys, newKey)) {
+                const children = [...childrenKeys,
+                    {key: newKey, title: newFile, isLeaf: true, icon: getTreeIcon}]
+                this.setState({
+                    treeData: this.updateTreeData(treeData, key, children),
+                    selectedKeys: [newKey],
+                    key: newKey,
+                    isLeaf: true,
+                    fileModalVisible: false
+                })
+                if (this.props.onSelect) {
+                    this.props.onSelect(newKey, true)
+                }
+            } else {
+                this.props.notification!(this.props.t('notification'), this.props.t('file already exists'), "error");
             }
         } else {
             this.props.notification!(this.props.t('notification'), this.props.t('folder name is empty'), "error");

@@ -1,6 +1,6 @@
 import * as React from "react";
-import Ecore from "ecore";
-import {API} from "../modules/api";
+import Ecore, {EObject, EStructuralFeature, Resource} from "ecore";
+import {API, QueryResult} from "../modules/api";
 import {Link} from "react-router-dom";
 import forEach from "lodash/forEach"
 import DataSearch from "./DataSearch";
@@ -11,6 +11,8 @@ import './../styles/Data.css'
 import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import Paginator from "./app/dataset/Paginator";
+import FormComponentMapper from "./FormComponentMapper";
+import AceEditor from "react-ace";
 
 interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
@@ -23,7 +25,7 @@ interface State {
     refresh: boolean;
     resources: Ecore.Resource[];
     columns: Array<any>;
-    tableData: Array<any>;
+    tableData: { resource: EObject, name: string, [key:string]: any}[];
     tableDataFilter: Array<any>;
     notFoundActivator: boolean;
     result: string;
@@ -31,10 +33,26 @@ interface State {
     filterMenuVisible:any;
     paginationPageSize?: number;
     currentPage?: number;
+    possibleTags: Ecore.EObject[];
+
+}
+
+function containsPassword(obj: EObject, key: string) : boolean {
+    if (obj.eClass.get('eAllStructuralFeatures').find((f:EStructuralFeature) => f.get('name') === key && f.get('eType').get('name') === "Password")) {
+        return true
+    } else if (obj.get(key)?.array) {
+        //При необходимости расширить на большую глубину
+        const contents = obj.get(key).array()
+        for (const c of contents) {
+            if (c.eClass.get('eAllStructuralFeatures').find((f:EStructuralFeature) => f.get('eType').get('name') === "Password")) {
+                return true
+            }
+        }
+    }
+    return false
 }
 
 class SearchGrid extends React.Component<Props & WithTranslation, State> {
-    private grid: React.RefObject<any>;
 
     state = {
         refresh: false,
@@ -48,17 +66,71 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
         filterMenuVisible:false,
         paginationPageSize: 10,
         currentPage: 1,
+        possibleTags: [] as Ecore.EObject[],
  }
 
-    handleSearch = (resources : Ecore.Resource[]): void => {
-        this.setState({selectedRowKeys: []});
-        const tableData:Array<any> = this.prepareTableData(resources);
-        this.setState({ tableData: tableData });
-        const columns:Array<Ecore.EStructuralFeature> = resources.length > 0 ? this.prepareColumns(resources): [];
-        this.setState({ resources: resources, columns: columns});
-        this.setState({notFoundActivator: true});
-        this.setState({tableDataFilter: []});
+    componentDidMount(): void {
+        API.instance().findClass("tag","Tag").then(tag => {
+            API.instance().findByClass(tag, {contents: {eClass: tag.eURI()}}).then(possibleTags => {
+                this.setState({
+                    possibleTags: possibleTags
+                })
+            })
+        })
+    }
 
+    onTagChange = (newTags:string[], objectName: string) => {
+        const newEObjectTags = this.state.possibleTags.filter((td:any) => newTags.includes(td.eContents()[0].get('name')));
+        const tableData = this.state.tableData.find((td: any) => td.name === objectName) as never as { resource:Resource, name: string, [key:string]: any};
+        if (tableData) {
+            const changeEObject:EObject = tableData.resource.eContents()[0];
+            if (changeEObject) {
+                const resource = tableData.resource;
+                const resourceList: Ecore.EList = resource.eResource().eContainer.get('resources');
+                resource.eContents()[0].get('tags').clear();
+                newEObjectTags.forEach(r=>{
+                    if (!resourceList.find(rl=>rl.eContents()[0].eURI() === r.eURI())) {
+                        resourceList.add(r);
+                        const last = resourceList.last();
+                        const json = last.eResource().to()
+                        last.eResource().clear()
+                        last.eResource().parse(json)
+                        resource.eContents()[0].get('tags').add(last.eContents()[0])
+                    }
+                });
+                API.instance().saveResource(resource).then(result=>{
+                    tableData!.resource = result;
+                    this.setState({tableData: this.state.tableData})
+                })
+            }
+        }
+    }
+
+    handleSearch = (resources : Ecore.Resource[]): void => {
+        const tableData:Array<any> = this.prepareTableData(resources);
+        const columns:Array<Ecore.EStructuralFeature> = resources.length > 0 ? this.prepareColumns(resources): [];
+        this.setState({
+            selectedRowKeys: [],
+            tableData: tableData,
+            resources: resources,
+            columns: columns,
+            notFoundActivator: true,
+            tableDataFilter: [],
+            result: ""
+        })
+    };
+
+    handleJSONSearch = (results : QueryResult): void => {
+        const {executionStats, resources, bookmark, warning} = results;
+        const objects = resources.map((r:Resource)=>
+            Object.assign(r.to(), {$ref: `${r.get('uri')}?rev=${r.rev}`})
+        );
+        this.setState({
+            notFoundActivator: false,
+            resources: [],
+            tableData: [],
+            tableDataFilter: [],
+            result: JSON.stringify({objects, executionStats, bookmark, warning}, null, 4)});
     };
 
     prepareColumns(resources:Ecore.Resource[]):Array<Ecore.EStructuralFeature>{
@@ -88,23 +160,35 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
         }];
 
         for (let column of AllFeatures){
-            if(column.get('name')==='tags') continue
             let name: string = "";
             let title: string = "";
+            //exclude password fields
+            if (column.get('eType').get('name') === "Password") { continue }
             column.get('name') === "children" ? name = "_children" :
                 name = column.get('name');
             title = column.get('name')/*column.eContainer.eContainer.get('name') + ".eClasses." + column.eContainer.get('name') + ".eStructuralFeatures." + column.get('name') + ".caption"*/
             const type: string = !!column.get('eType') && column.get('eType').eClass.get('name') === 'EDataType' ? this.getDataType(column.get('eType').get('name')) : "stringType";
             AllColumns.push({title: title, dataIndex: name, key: name, type: type,
-                sorter: (a: any, b: any) => this.sortColumns(a, b, name, type),
+                sorter: !(column.eContainer.get('name') === 'Tagged') ? (a: any, b: any) => this.sortColumns(a, b, name, type) : undefined,
                 render: (text: any) => {
-                if (text !== undefined && !!column.get('eType') && column.get('eType').eClass.get('name') !== 'EDataType') {
+                if (column.eContainer.get('name') === 'Tagged' && text.tags) {
+                    return FormComponentMapper.getComponent({
+                        componentType: "Tag",
+                        value: text && text.resource.eContents()[0].get('tags') && text.resource.eContents()[0].get('tags').map((v:EObject)=>v.get('name')),
+                        eType: Ecore.ResourceSet.create().create({ uri:"/"}).addAll(this.state.possibleTags.map(tag=>tag.eContents()[0])),
+                        idx: "idx",
+                        ukey: "key",
+                        onChange: (tags:string[])=>this.onTagChange(tags, text.name),
+                        edit: true
+                    })
+                }
+                else if (text !== undefined && !!column.get('eType') && column.get('eType').eClass.get('name') !== 'EDataType') {
                         const maxJsonLength = text.indexOf('#') + 1;
                         return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, maxJsonLength) + "..."}</NeoHint> }
                 else if (text !== undefined && text.length > 100) {return "..."}
                 else if (text !== undefined && text.length > 40) {return <NeoHint placement={'right'} width={'700px'} title={text}>{text.slice(0, 40) + "..."}</NeoHint>}
                 else {return text}},
-                ...this.getColumnSearchProps(name, title),
+                ...this.getColumnSearchProps(name, title, column.eContainer.get('name') === 'Tagged'),
                 filterIcon: (filtered: any) => (
                     <NeoIcon icon={"search"} style={{ color: filtered ? "#1890ff" : undefined }} />
                 ),
@@ -123,7 +207,11 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
         const prepared: Array<Ecore.EStructuralFeature> = [];
         resources.forEach((res: Ecore.Resource) => {
             if (res.to().length === undefined) {
-                const row = {...res.to(), resource: res};
+                const row = {
+                    tags: res.eContents()[0].eClass.get('eAllSuperTypes').find((c:EObject) => c.get('name') === 'Tagged') ? [] : undefined,
+                    ...res.to(),
+                    resource: res,
+                };
                 if (row.hasOwnProperty("children")) {
                     row["_children"] = row["children"];
                     delete row["children"]
@@ -134,8 +222,13 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
         prepared.map((res:any, idx) => {
             res["key"] = idx;
             forEach(res, (val,key)=>{
-                if (typeof val === "object" && key !== "resource") {
+                const isPasswordField = containsPassword(res.resource.eContents()[0], key);
+                if (typeof val === "object" && key !== "resource" && key !== "tags" && !isPasswordField) {
                     res[key] = JSON.stringify(val)
+                } else if (key === "tags" && !isPasswordField) {
+                    res[key] = res
+                } else if (isPasswordField) {
+                    res[key] = undefined
                 }
             });
             return res
@@ -207,7 +300,7 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
     };
 
     //for FilterMenu
-    getColumnSearchProps = (name: any, title: any) => ({
+    getColumnSearchProps = (name: any, title: any, isTag?: boolean) => (!isTag && {
         filterDropdown: () =>
             <NeoDrawer
                 className={'datasearch__filter__drawer'}
@@ -227,6 +320,15 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
 
     onPageChange = (page: number) => {
         this.setState({currentPage: page === 0 ? 1 : page})
+    }
+
+    handleReset = () => {
+        this.setState({
+            notFoundActivator: false,
+            resources: [],
+            tableData: [],
+            result: ""
+        })
     }
 
     render() {
@@ -275,12 +377,30 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                  <div>
                      <DataSearch
                         onSearch={this.handleSearch}
+                        onJSONSearch={this.handleJSONSearch}
+                        onReset={this.handleReset}
                         specialEClass={this.props.specialEClass}
                         refresh={this.state.refresh}
                      />
                  </div>
                  <div>
-
+                     {this.state.result !== "" &&
+                         <AceEditor
+                             className={"json-search-pane"}
+                             ref={"console"}
+                             mode={'json'}
+                             width={''}
+                             height={'500px'}
+                             theme={'tomorrow'}
+                             editorProps={{ $blockScrolling: Infinity }}
+                             value={this.state.result}
+                             showPrintMargin={false}
+                             focus={false}
+                             readOnly={true}
+                             minLines={5}
+                             highlightActiveLine={false}
+                         />
+                     }
                      {this.state.resources.length === 0
                          ?
                          !this.state.notFoundActivator ? '' : t('notfound')
@@ -299,17 +419,18 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                              </div>
                              :
                              <>
-                             <NeoTable
-                                 className={'developer_table'}
-                                 scroll={{x: columnsWidth}}
-                                 columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
-                                 dataSource={this.filteredData()}
-                                 bordered={true}
-                                 style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
-                                 pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
-                             />
-                             <div className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
-                             <Paginator
+                                 <NeoTable
+                                     className={'developer_table'}
+                                     scroll={{x: columnsWidth}}
+                                     columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
+                                     dataSource={this.filteredData()}
+                                     bordered={true}
+                                     style={{whiteSpace: "pre", padding:'6px 35px 0px'}}
+                                     pagination={{current: this.state.currentPage, pageSize: this.state.paginationPageSize}}
+                                 />
+                                 <div
+                                  className={'developer_paginator'} style={{ width: "100%", padding: '0px 35px' }}>
+                                 <Paginator
                                      {...this.props}
                                      currentPage = {this.state.currentPage}
                                      totalNumberOfPage = {Math.ceil(this.filteredData().length/this.state.paginationPageSize)}
@@ -318,7 +439,7 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                                      onPageChange={this.onPageChange}
                                      onPageSizeChange = {(size)=>{this.setState({paginationPageSize: size})}}
                                  />
-                             </div>
+                                 </div>
                              </>
                      }
                  </div>

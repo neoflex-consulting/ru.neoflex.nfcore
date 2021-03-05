@@ -38,8 +38,11 @@ import {
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
+import ChangeLogView from "./components/ChangeLogView";
+import InlineHelp from "./components/app/InlineHelp";
 
 const marginBottom = '20px';
+const inputElementStandardWidth = "200px";
 
 let startResource: Object;
 
@@ -65,7 +68,8 @@ export enum AntdFactoryClasses {
     Region='ru.neoflex.nfcore.application#//Region',
     Checkbox='ru.neoflex.nfcore.application#//Checkbox',
     NeoIcon='ru.neoflex.nfcore.application#//NeoIcon',
-    RadioGroup='ru.neoflex.nfcore.application#//RadioGroup'
+    RadioGroup='ru.neoflex.nfcore.application#//RadioGroup',
+    ChangeLog='ru.neoflex.nfcore.application#//ChangeLog'
 }
 
 function getAgGridValue(this: any, returnValueType: string, defaultValue: string = "default") : string|{[key:string]:string|number|null} {
@@ -163,7 +167,7 @@ function createCssClass(viewObject: any){
     let resultCss: any = "";
     if (viewObject.get('cssClass').array().length !== 0) {
         viewObject.get('cssClass').array().forEach((cl: any)=> {
-            let cssClass = undefined;
+            let cssClass: any;
             cssClass = document.createElement('style');
             cssClass.innerHTML = `.${cl.get('name')} { ${cl.get('style')} }`;
             document.getElementsByTagName('head')[0].appendChild(cssClass);
@@ -182,15 +186,15 @@ export async function checkServerSideCondition(conditionType: string, valueItems
         const resArr = JSON.parse(json);
         return (conditionType === "RowsReturned" && resArr.length >= 1) || (conditionType === "NoRowReturned" && resArr.length === 0);
     } else if (conditionType === "JavaScriptExpression") {
-        let condition = true;
+        let condition: boolean;
         const params = getNamedParams(valueItems, context.contextItemValues);
         try {
             // eslint-disable-next-line
             condition = eval(replaceNamedParam(expression, params))
         } catch (e) {
             condition = false;
-            context.notification("EventHandler.condition",
-                "exception while evaluating",
+            context.notification("RdbmsColumn.JavaScriptCondition",
+                "exception while evaluating: " + replaceNamedParam(expression, params),
                 "warning")
         }
         return condition
@@ -199,25 +203,24 @@ export async function checkServerSideCondition(conditionType: string, valueItems
 }
 
 abstract class ViewContainer extends View {
-    renderChildren = (isParentDisabled:boolean = false, isParentHidden:boolean = false) => {
+    renderChildren = (isParentDisabled:boolean = false, isParentHidden:boolean = false, isExportSuppressed:boolean = false) => {
         let children = this.props.viewObject.get('children') as Ecore.EObject[];
         const props = {
             ...this.props,
             isParentDisabled: isParentDisabled,
             isParentHidden: isParentHidden,
+            isExportSuppressed: isExportSuppressed,
         };
-        let childrenView = children.map(
+        return children.map(
             (c: Ecore.EObject) => {
                 return this.viewFactory.createView(c, props)
             }
         );
-        return childrenView
-
     };
 
     render = () => {
         return <div key={this.viewObject._id.toString() + '_3'}>{
-            this.renderChildren()
+            this.renderChildren(false, false, this.props.isExportSuppressed)
         }</div>
     }
 }
@@ -249,7 +252,7 @@ class Col_ extends ViewContainer {
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 className={cssClass}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </NeoCol>
         )
     }
@@ -282,7 +285,7 @@ class Form_ extends ViewContainer {
                 //   key={this.viewObject._id.toString() + '_4'}
                 //   className={cssClass}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Form>
         )
     }
@@ -349,7 +352,6 @@ class Row_ extends ViewContainer {
         };
     }
 
-
     componentDidMount(): void {
         mountComponent.bind(this)(false);
     }
@@ -367,7 +369,7 @@ class Row_ extends ViewContainer {
                 className={cssClass}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </NeoRow>
         )
     }
@@ -401,10 +403,13 @@ class Region_ extends ViewContainer {
                     boxShadow: '-2px -2px 4px rgba(0, 0, 0, 0.05), 2px 2px 4px rgba(0, 0, 0, 0.1)',
                     borderRadius: '4px',
                     padding: '16px',
-                    margin: '16px'}}
+                    marginTop: '16px',
+                    marginLeft: '16px',
+                    marginRight: '16px',
+                    marginBottom: '16px'}}
                 className={cssClass}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </NeoRow>
         )
     }
@@ -488,7 +493,7 @@ export class Button_ extends ViewContainer {
                 size={this.viewObject.get('buttonSize')}
                 type={this.viewObject.get('buttonType')}
                 suffixIcon={this.viewObject.get('iconCode') && <NeoIcon icon={neoIconMap[this.viewObject.get('iconCode') || 'none'] as SvgName}/>}
-                onClick={isReadOnly ? ()=>{} : (e) => {
+                onClick={isReadOnly ? ()=>{} : () => {
                         if (!this.state.isEnter) {
                             const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                             handleClick.bind(this)(value);
@@ -514,7 +519,7 @@ export class Select_ extends ViewContainer {
             this.urlCurrentValue =  typeof temp !== "object" ? temp : temp && temp[this.viewObject.get('value')]+"";
         }
 
-        let agValue = "";
+        let agValue: any;
         if (this.props.isAgEdit) {
             agValue = this.props.data[this.props.colData]
         } else {
@@ -544,22 +549,20 @@ export class Select_ extends ViewContainer {
         }
     }
 
-    private getDocxData(): docxExportObject {
-        return {
+    private getDocxData(): docxExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             docxComponentType : docxElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
-    private getExcelData(): excelExportObject {
-        return {
+    private getExcelData(): excelExportObject | undefined{
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             excelComponentType : excelElementExportType.text,
             textData: this.selected,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
     prepareString = (currentValue: string|string[]) => {
@@ -712,23 +715,22 @@ export class Select_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const width = '200px';
         const componentRenderCondition = getRenderConditionResult.bind(this)("Select.componentRenderCondition");
         const cssClass = createCssClass(this.viewObject);
         return (
             componentRenderCondition ? <div
                 hidden={this.state.isHidden || this.props.isParentHidden}
-                style={{marginBottom: marginBottom}}>
+                style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
                 <NeoSelect
                     //Fullscreen ag-grid render
                     getPopupContainer={this.props.gridId ? () => document.getElementById (this.props.gridId) as HTMLElement : undefined}
                     key={this.viewObject._id}
                     className={cssClass}
                     disabled={isReadOnly}
+                    width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                     showSearch={this.viewObject.get('showSearch')}
                     placeholder={this.viewObject.get('placeholder')}
                     mode={this.viewObject.get('mode') !== null ? this.viewObject.get('mode').toLowerCase() : 'default'}
-                    style={{width: this.props.isAgEdit ? undefined : width}}
                     defaultValue={this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.viewObject.get('value') || undefined}
                     value={(this.state.currentValue)? this.state.currentValue: undefined}
                     onChange={(currentValue: string|string[]) => {
@@ -754,6 +756,7 @@ export class Select_ extends ViewContainer {
                             </Select.Option>
                     }
                 </NeoSelect>
+                {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
             </div> : <div>{this.props.getValue()}</div>
         )
     }
@@ -797,22 +800,20 @@ export class DatePicker_ extends ViewContainer {
         }
     }
 
-    private getDocxData(): docxExportObject {
-        return {
+    private getDocxData(): docxExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             docxComponentType : docxElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
-    private getExcelData(): excelExportObject {
-        return {
+    private getExcelData(): excelExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             excelComponentType : excelElementExportType.text,
             textData: moment(this.state.currentValue, this.state.mask ? this.state.mask : this.state.format).format(this.state.format),
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem
-        };
+        } : undefined;
     }
 
     componentDidMount(): void {
@@ -853,11 +854,12 @@ export class DatePicker_ extends ViewContainer {
         const cssClass = createCssClass(this.viewObject);
         return (
             <div hidden={this.state.isHidden || this.props.isParentHidden}
-                 style={{marginBottom: marginBottom}}
+                 style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}
             >
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
                         //Fullscreen ag-grid render
+                        // width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         getCalendarContainer={this.props.gridId ? () => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement : undefined}
                         key={this.viewObject._id}
                         className={cssClass}
@@ -875,6 +877,7 @@ export class DatePicker_ extends ViewContainer {
                         titleOrientation={this.viewObject.get('titleOrientation')}
                         width={this.viewObject.get('width')}
                     />
+                    {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </ConfigProvider>
             </div>
         )
@@ -1159,20 +1162,19 @@ export class Input_ extends ViewContainer {
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
-        const width = "200px";
         if (this.viewObject.get('inputType') === 'InputNumber' ) {
             return(
                 <div
                     key={this.viewObject._id}
-                    style={{marginBottom: marginBottom}}>
+                    style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
                     <InputNumber
                         hidden={this.state.isHidden || this.props.isParentHidden}
                         className={cssClass}
-                        style={{width: width}}
+                        width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         disabled={isReadOnly}
-                        min={this.viewObject.get('minValue') || 1}
-                        max={this.viewObject.get('maxValue') || 99}
-                        step={this.viewObject.get('step') || 1}
+                        min={this.viewObject.get('minValue') || undefined}
+                        max={this.viewObject.get('maxValue') || undefined}
+                        step={this.viewObject.get('step') || undefined}
                         placeholder={this.viewObject.get('placeholder')}
                         defaultValue={Number(this.viewObject.get('value') || this.viewObject.get('minValue') || 1)}
                         onChange={(currentValue: any) => {
@@ -1183,16 +1185,18 @@ export class Input_ extends ViewContainer {
                         }}
                         value={this.state.currentValue}
                     />
+                    {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </div>
             )
         } else {
             return(
                 <div key={this.viewObject._id}
-                     style={{marginBottom: marginBottom}}>
+                     style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
                     <NeoInput
                         hidden={this.state.isHidden}
+                        width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
+                        // width={this.viewObject.get('width')}
                         className={cssClass}
-                        width={this.viewObject.get('width')}
                         style={{display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={isReadOnly}
                         placeholder={this.viewObject.get('placeholder')}
@@ -1205,6 +1209,7 @@ export class Input_ extends ViewContainer {
                         titleOrientation={this.viewObject.get('titleOrientation')}
                         title={this.viewObject.get('title')}
                     />
+                    {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </div>
             )
         }
@@ -1388,24 +1393,22 @@ class Typography_ extends ViewContainer {
         unmountComponent.bind(this)(true, true)
     }
 
-    private getDocxData(): docxExportObject {
-        return {
+    private getDocxData(): docxExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             docxComponentType : docxElementExportType.text,
             textData: this.state.label,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem,
             font: {bold: this.viewObject.get('strongStyle')}
-        };
+        } : undefined;
     }
 
-    private getExcelData(): excelExportObject {
-        return {
+    private getExcelData(): excelExportObject | undefined {
+        return (!this.state.isHidden && !this.props.isParentHidden && !this.props.isExportSuppressed) ? {
             excelComponentType : excelElementExportType.text,
             textData: this.state.label,
-            hidden: this.state.isHidden || this.props.isParentHidden,
             skipExport: !this.props.isTabActive && this.props.isTabItem,
             font: {bold: this.viewObject.get('strongStyle')}
-        };
+        } : undefined;
     }
 
     onChange = (str: string) => {
@@ -1620,19 +1623,18 @@ class Drawer_ extends ViewContainer {
         return (
             <Drawer
                 className={cssClass}
+                style={{transform:"", position:"absolute"}} //отключаем, т.к. на вложенных drawer'ах родитель работает не корректно
                 placement={positionEnum[(this.viewObject.get('position') as "Top"|"Left"|"Right"|"Bottom") || 'Top']}
                 width={'700px'}
                 height={'500px'}
                 visible={!this.state.isHidden && !this.props.isParentHidden}
                 onClose={()=>{this.setState({isHidden:true})}}
+                /*forceRender={true}*/ //TODO после перехода на 4ю версию раскомментировать, в getContainer выставить default = 'body' по аналогии с antd
+                //сейчас false т.к. это единственный способ заставить antd рендерить невидимый компонент, нужно для регистрации eventHandler'ов
                 mask={false}
-                maskClosable={false}
-                getContainer={false}
-                style={{
-                    position: 'absolute',
-                }}
+                getContainer={this.viewObject.get('containerSelector') || false}
             >
-                {this.renderChildren(isReadOnly, this.state.isHidden)}
+                {this.renderChildren(isReadOnly, this.state.isHidden, true)}
             </Drawer>
         )
     }
@@ -1673,7 +1675,7 @@ export class RadioGroup_ extends ViewContainer {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
             currentValue: value,
-            gridBoxes: agValue
+            gridBoxes: this.getGridBoxes(this.viewObject.get('radioBoxes') || agValue),
         };
         if (this.viewObject.get('isGlobal')) {
             this.props.context.globalValues.set(this.viewObject.get('name'),{
@@ -1682,6 +1684,25 @@ export class RadioGroup_ extends ViewContainer {
             })
         }
     }
+
+    getGridBoxes = (boxes: string[]|string) => {
+        function mapToBoxes(arr: string[]) {
+            return arr.map((box:string) => {
+                let tmp = box.split(":");
+                const key = tmp[0];
+                const value =  tmp.length > 1 ? tmp[1] : tmp[0];
+                return {
+                    key: key,
+                    value: value
+                }
+            })
+        }
+        if (Array.isArray(boxes)) {
+            return mapToBoxes(boxes)
+        } else {
+            return mapToBoxes(boxes.split(","))
+        }
+    };
 
     componentDidMount(): void {
         mountComponent.bind(this)(false, [{actionType: actionType.setValue, callback: (value) => {
@@ -1710,6 +1731,11 @@ export class RadioGroup_ extends ViewContainer {
         handleClick.bind(this)(currentValue)
     };
 
+    onChangeHandler = (event:any) => {
+        const found = this.state.gridBoxes.find((box:{key:string, value: string}) => box.key === event.nativeEvent.target.labels[0].outerText)
+        this.onChange(found.value)
+    };
+
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
@@ -1717,32 +1743,28 @@ export class RadioGroup_ extends ViewContainer {
         return (<div style={{display: "flex", flexDirection: this.viewObject.get('isVerticalGroup') ? "column" : "row"}}
                      hidden={this.state.isHidden || this.props.isParentHidden}>
                 {this.props.isAgComponent
-                    ? this.state.gridBoxes && this.state.gridBoxes.split(',').map((box:string, index:number)=>{
+                    ? this.state.gridBoxes.map((box:{key:string, value: string}, index:number)=>{
                         return <NeoInput
-                            key={`${this.viewObject.eURI()}${box}${index}`}
+                            key={`${this.viewObject.eURI()}${box.key}${index}`}
                             disabled={isReadOnly}
-                            checked={contextValue && contextValue.parameterValue === box}
+                            checked={contextValue && contextValue.parameterValue === box.value}
                             className={cssClass}
                             type={"radio"}
                             name={this.viewObject.get('name')}
-                            onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                                this.onChange(event.nativeEvent.target.labels[0].outerText)
-                            }}
-                        >{box}
+                            onChange={isReadOnly ? undefined : this.onChangeHandler}
+                        >{box.key}
                         </NeoInput>
                     })
-                    : this.viewObject.get('radioBoxes').map((box:string, index:number)=>{
+                    : this.state.gridBoxes.map((box:{key:string, value: string}, index:number)=>{
                     return <NeoInput
-                        key={`${this.viewObject.eURI()}${box}${index}`}
+                        key={`${this.viewObject.eURI()}${box.key}${index}`}
                         disabled={isReadOnly}
-                        checked={this.state.currentValue === box}
+                        checked={this.state.currentValue === box.value}
                         className={cssClass}
                         type={"radio"}
                         name={this.viewObject.get('name')}
-                        onChange={isReadOnly ? ()=>{} : (event:any)=>{
-                            this.onChange(event.nativeEvent.target.labels[0].outerText)
-                        }}
-                    >{box}
+                        onChange={isReadOnly ? undefined : this.onChangeHandler}
+                    >{box.key}
                     </NeoInput>
                 })}
             </div>
@@ -1777,13 +1799,64 @@ class Collapse_ extends ViewContainer {
                     defaultActiveKey={['1']}
                     expandIconPosition={'left'}>
                     <Collapse.Panel header={this.viewObject.get("name")} key={"1"} forceRender={this.state.isOpen}>
-                        {this.renderChildren()}
+                        {this.renderChildren(false, false, this.props.isExportSuppressed)}
                     </Collapse.Panel>
                 </Collapse>
-
-
             </div>
         )
+    }
+}
+
+
+class ChangeLog_ extends ViewContainer {
+    constructor(props: any) {
+        super(props);
+        const cssClass = createCssClass(this.viewObject);
+        this.state = {
+            isHidden: this.viewObject.get('hidden') || false,
+            isDisabled: this.viewObject.get('disabled') || false,
+            grantType: this.viewObject.get('grantType'),
+            cssClass: cssClass,
+            logEntries: []
+        };
+    }
+
+    getLogEntries() {
+        if (this.viewObject.get('dataset')) {
+            this.props.context.runQueryDataset(this.viewObject.get('dataset').eContainer).then((result: string) => {
+                if (this.viewObject.get('dataset').get('datasetColumn').array().length === 0) {
+                    this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
+                        this.props.t("exception while loading dataset. There is no columns in dataset") + ` ${this.viewObject.get('dataset').get('name')}`,
+                        "error")
+                } else {
+                    const log = JSON.parse(result).map((e:any)=>{
+                        return {
+                            logDateTime: moment(e[this.viewObject.get('dateTime')?.get('name')], defaultTimestampFormat),
+                            author: e[this.viewObject.get('author')?.get('name')],
+                            change: e[this.viewObject.get('message')?.get('name')]
+                        }
+                    });
+                    this.setState({logEntries: log})
+                }
+            });
+        }
+    }
+
+    componentDidMount(): void {
+        this.getLogEntries();
+        mountComponent.bind(this)(false, [{actionType: actionType.execute, callback: () => {
+                this.getLogEntries.bind(this)
+            }}] as IAction[]);
+    }
+
+    render = () => {
+        const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
+        return <ChangeLogView
+            className={this.state.cssClass}
+            hidden={this.state.isHidden || this.props.isParentHidden}
+            disabled={isReadOnly}
+            logEntries={this.state.logEntries}
+        />
     }
 }
 
@@ -1798,6 +1871,7 @@ class DatasetView_ extends ViewContainer {
             disabled: disabled,
             hidden: hidden,
             isParentHidden: this.props.isParentHidden,
+            isExportSuppressed: this.props.isExportSuppressed,
             grantType: grantType,
             className: cssClass
         };
@@ -1814,6 +1888,7 @@ class Calendar_ extends ViewContainer {
             ...this.props,
             disabled: disabled,
             hidden: hidden || this.props.isParentHidden,
+            isExportSuppressed: this.props.isExportSuppressed,
             grantType: grantType,
         };
         return <Calendar {...props} key={this.viewObject._id}/>
@@ -1847,6 +1922,7 @@ class AntdFactory implements ViewFactory {
         this.components.set(AntdFactoryClasses.Checkbox, Checkbox_);
         this.components.set(AntdFactoryClasses.NeoIcon, NeoIcon_);
         this.components.set(AntdFactoryClasses.RadioGroup, RadioGroup_);
+        this.components.set(AntdFactoryClasses.ChangeLog, ChangeLog_);
     }
 
     createView(viewObject: Ecore.EObject, props: any, ref?: any): JSX.Element {

@@ -108,6 +108,7 @@ class ScheduledTask {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
     QName name
     boolean enabled
+    boolean transactional
     String branch
     refers EObject eObject
     contains Parameter[] parameters

@@ -30,3 +30,9 @@
 .icon-tree {
     margin-top: 4px;
 }
+
+.modal-add-inner-ref .ant-modal-footer .ant-btn-icon-only.ant-btn-lg {
+    width: 32px;
+    height: 32px;
+    background-color: #424D78;
+}

@@ -29,8 +29,9 @@ import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
@@ -61,6 +62,13 @@ public class Scheduler {
 //                logger.error("Scheduler: ", e);
 //            }
 //        }, Duration.ofSeconds(10));
+        taskScheduler.schedule(() -> {
+            try {
+                refreshScheduler();
+            } catch (Exception e) {
+                logger.error("Refresh Scheduler: ", e);
+            }
+        }, Instant.now().plus(10, ChronoUnit.SECONDS));
     }
 
     public synchronized ObjectNode refreshScheduler() throws Exception {
@@ -159,9 +167,11 @@ public class Scheduler {
     }
 
     public Object execute(URI uri) throws Exception {
-        return context.inContextWithClassLoaderInTransaction((Callable<Object>) () -> {
-            Resource resource = Context.getCurrent().getStore().loadResource(uri);
-            ScheduledTask task = (ScheduledTask) resource.getContents().get(0);
+        return context.inContextWithClassLoader(() -> {
+            ScheduledTask task = store.inTransaction(true, tx -> {
+                Resource resource = store.loadResource(uri);
+                return (ScheduledTask) resource.getContents().get(0);
+            });
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (task.isImporsonate()) {
                 login(task.getRunAsUser(), task.getRunAsPassword());
@@ -179,7 +189,12 @@ public class Scheduler {
                 GroovyShell sh = new GroovyShell(Thread.currentThread().getContextClassLoader(), b);
                 Object result = null;
                 try {
-                    result =  sh.evaluate(task.getScript());
+                    if (task.isTransactional()) {
+                        result =  store.inTransaction(false, tx -> {return sh.evaluate(task.getScript());});
+                    }
+                    else {
+                        result =  sh.evaluate(task.getScript());
+                    }
                     printWriter.println("result: " + (result == null ? "<null>" : result.getClass().getTypeName() + " = " + result));
                     logger.debug(stringWriter.toString());
                     task.setLastRunTime(new Timestamp(new Date().getTime()));
@@ -194,8 +209,12 @@ public class Scheduler {
                     task.setLastErrorTime(new Timestamp(new Date().getTime()));
                     task.setLastError(ExceptionUtils.getStackTrace(e));
                 }
-                Context.getCurrent().getStore().saveResource(resource);
-                Context.getCurrent().getStore().commit("Task " + task.getName() + " executed");
+                store.inTransaction(false, tx -> {
+                    Resource newResource = store.createEmptyResource();
+                    newResource.setURI(task.eResource().getURI());
+                    newResource.getContents().add(task);
+                    store.saveResource(newResource);
+                });
                 return result;
             }
             finally {
