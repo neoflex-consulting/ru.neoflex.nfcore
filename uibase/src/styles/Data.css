@@ -16,6 +16,10 @@ tr:hover > td {
     width: 100% !important;
 }
 
+.developer_table .select .ant-select-selector {
+    height: unset;
+}
+
 .json-search-pane {
     margin: 0 35px 0 35px;
     border: 1px solid #d9d9d9;
