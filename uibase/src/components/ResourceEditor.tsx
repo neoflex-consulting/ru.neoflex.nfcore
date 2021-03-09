@@ -295,7 +295,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const nestedJSON = nestUpdaters(mainEObject.eResource().to(), null);
             const targetObject = findObjectById(nestedJSON, targetId);
             const tableData = targetObject ? this.prepareTableData(targetObject, mainEObject, targetId) : undefined;
-            this.setState((state, props) => ({
+            this.setState(() => ({
                 mainEObject: mainEObject,
                 resourceJSON: nestedJSON,
                 resource: resource,
@@ -330,7 +330,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             })
     };
 
-    hideRightClickMenu = (e: any) => {
+    hideRightClickMenu = () => {
         this.state.rightClickMenuVisible && this.setState({ rightClickMenuVisible: false })
     };
 
@@ -351,22 +351,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.addRef(eObjects)
     };
 
-    handleAddNewResource = (resources: Ecore.Resource[]): void => {
-        const resourceList: Ecore.EList = this.state.mainEObject.eResource().eContainer.get('resources');
-        resources.forEach(r=>{
-            if (!resourceList.find(rl=>r.eContents()[0].eURI() === rl.eContents()[0].eURI())) {
-                resourceList.add(r)
-            }
-        });
-        this.setState({ modalResourceVisible: false })
-    };
-
     addRef = (eObjects: Ecore.EObject[]): void => {
         const targetObject: { [key: string]: any } = this.state.targetObject;
         const { addRefPropertyName } = this.state;
         let updatedJSON: Object = {};
         let refsArray: Array<Object>;
-        let upperBound;
+        let upperBound: any = 1;
         const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
         contents(this.state.mainEObject).forEach(eObject => {
             const feature = eObject.eClass.get('eAllStructuralFeatures').find((f: any)=> f.get('name') === addRefPropertyName);
@@ -730,6 +720,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             edit: true,
                         }, () => {
                             API.instance().createLock(this.state.mainEObject._id, this.state.mainEObject.get('name'), this.state.mainEObject.eClass.get('name'), this.state.mainEObject.eResource().rev)
+                                .then()
                         });
                         this.props.history.push(`/developer/data/editor/${resource.get('uri')}/${resource.rev}`);
                         this.props.notification(t('notification'), t('success'), "info");
@@ -770,7 +761,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
     findTreeNodesBySelector = (selector: {[key:string] : any}) : {[key:string] : any}[] =>  {
         function objectsHaveSameKeysValue(obj1:{[key:string] : any}, obj2:{[key:string] : any}) {
-            const intersect = Object.keys(obj1).filter((key: any, value: any) => {
+            const intersect = Object.keys(obj1).filter((key: any) => {
                 return Object.keys(obj2).includes(key)
             });
             let eq = intersect.length > 0;
@@ -881,7 +872,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-            this.setState((state, props) => ({
+            this.setState((state) => ({
                 mainEObject: resource.eContents()[0],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
@@ -905,7 +896,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-            this.setState((state, props) => ({
+            this.setState((state) => ({
                 mainEObject: resource.eContents()[0],
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject !== undefined ? updatedTargetObject : { eClass: "" },
@@ -961,7 +952,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             const nestedJSON = nestUpdaters(updatedJSON, null);
             const updatedTargetObject = findObjectById(nestedJSON, id);
             const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-            this.setState((state, props) => ({
+            this.setState(() => ({
                 resourceJSON: nestedJSON,
                 targetObject: updatedTargetObject,
                 mainEObject: resource.eContents()[0],
@@ -1715,17 +1706,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 return result
                             }
                             const value = toString(option.props).toLowerCase();
-                            const test = input.toLowerCase().split(/[,]+/).every((inputAnd:any)=>
-                                inputAnd.trim().split(/[ ]+/).some((inputOr:any)=>
+                            return input.toLowerCase().split(/[,]+/).every((inputAnd: any) =>
+                                inputAnd.trim().split(/[ ]+/).some((inputOr: any) =>
                                     value.indexOf(inputOr) >= 0));
-                            return test;
                         }}
                         onDropdownVisibleChange={()=>this.setState({selectDropdownVisible: !this.state.selectDropdownVisible})}
                     >
                         {
                             this.state.mainEObject.eClass &&
                             (this.state.mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
-                                .map((eObject: Ecore.EObject, index: number) => {
+                                .map((eObject: Ecore.EObject) => {
                                     const possibleTypes: Array<string> = this.state.addRefPossibleTypes;
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject';
                                     let isExcluded = false;
@@ -1735,19 +1725,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         }
                                     }
                                     const parentResource = eObject.eResource().eContents()[0].get('name')
-                                    return isEObjectType ?
-                                        <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
-                                                :
-                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
-                                                </NeoHint>
-                                            }
-                                        </NeoOption>
-                                        :
-                                        possibleTypes.includes(eObject.eClass.get('name')) &&
-                                        !isExcluded &&
+                                    return (isEObjectType ||
+                                        (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded)) &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                             {this.state.selectDropdownVisible ?
                                                 eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`

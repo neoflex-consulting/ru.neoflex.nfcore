@@ -3,7 +3,7 @@ import Ecore from 'ecore';
 import {Input, Select} from 'antd';
 import moment from 'moment';
 
-import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
+import {boolSelectionOption, convertPrimitiveToString} from '../utils/resourceEditorUtils';
 import {NeoButton, NeoDatePicker, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
@@ -282,9 +282,9 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
     }
 
     const relatedResource = value && value.$ref && getRelatedResourceByRef(value!.$ref)
-    const elements = value && value !== null ?
+    const elements = value && true ?
         upperBound === -1 ? (value.length !== 0?
-            value.map((el: { [key: string]: any }, idx: number) =>
+            value.map((el: { [key: string]: any }) =>
                 <NeoTag
                     className={`${!edit ? "disabled" : undefined} select-ref-object`}
                     onClose={() => {
@@ -316,11 +316,11 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             </NeoTag>
         :
         []
-    const component = <React.Fragment key={ukey + "_" + idx}>
+    return <React.Fragment key={ukey + "_" + idx}>
         {elements}
         {eObject.get('eType').get('name') === 'EClass' ?
             <NeoButton
-                style={{ display: "inline-block", padding:'9px 12px' }}
+                style={{display: "inline-block", padding: '9px 12px'}}
                 key={ukey + "_" + idx}
                 onClick={() => {
                     props.onEClassBrowse && props.onEClassBrowse!(eObject)
@@ -329,7 +329,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             >...</NeoButton>
             :
             <NeoButton
-                style={{ display: "inline-block", padding:'9px 12px' }}
+                style={{display: "inline-block", padding: '9px 12px'}}
                 key={ukey + "_" + idx}
                 onClick={() => {
                     props.onBrowse && props.onBrowse!(eObject)
@@ -338,7 +338,6 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             >...</NeoButton>
         }
     </React.Fragment>
-    return component
 }
 
 interface BooleanSelectProps {
