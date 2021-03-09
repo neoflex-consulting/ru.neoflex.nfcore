@@ -10,7 +10,6 @@ import {MainContext} from "../../../MainContext";
 import {Dropdown, Menu} from "antd";
 import StatusLegend from "./StatusLegend";
 import CreateNotification from "./CreateNotification";
-import Paginator from "../Paginator";
 import {AgGridColumn, AgGridReact} from "@ag-grid-community/react";
 import {AllCommunityModules} from "@ag-grid-community/all-modules";
 import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
@@ -18,7 +17,17 @@ import '@ag-grid-community/core/dist/styles/ag-theme-material.css';
 import EditNotification from "./EditNotification";
 import {actionType, defaultTimestampFormat, eventType, grantType} from "../../../utils/consts";
 import moment from "moment";
-import {NeoButton, NeoCol, NeoColor, NeoDrawer, NeoInput, NeoRow, NeoSelect, NeoTypography, NeoHint, NeoOption} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoColor,
+    NeoDrawer,
+    NeoHint,
+    NeoInput,
+    NeoOption,
+    NeoRow,
+    NeoSelect,
+    NeoTypography
+} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 import {docxElementExportType, docxExportObject, handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
@@ -26,6 +35,7 @@ import domtoimage from "dom-to-image";
 import {Resizable} from "re-resizable";
 import {Link} from "react-router-dom";
 import {encodeAppURL} from "../../../EcoreApp";
+import Paginator from "../dataset/Paginator";
 
 const myNote = 'Личная заметка';
 
@@ -551,7 +561,7 @@ class Calendar extends React.Component<any, any> {
                 return {
                     docxComponentType: docxElementExportType.diagram,
                     diagramData: {
-                        blob: domtoimage.toBlob(this.node?.resizable, {
+                        blob: domtoimage.toBlob(this.node!.resizable, {
                             width: width,
                             height: height,
                             filter: this.filter
@@ -1030,11 +1040,11 @@ class Calendar extends React.Component<any, any> {
         let startDate = dateFns.startOfWeek(this.state.currentMonth, {locale: ru});
         for (let i = 0; i < 7; i++) {
             days.push(
-                <NeoCol span={3} key={i}
+                <div key={i}
                      className="col col-center col-text border-line" style={{fontSize: "110%"}}
                 >
                     {dateFns.format(dateFns.addDays(startDate, i), dateFormat, {locale: this.getLocale(i18n)})}
-                </NeoCol>
+                </div>
             );
         }
         return <NeoRow className="days row">{days}</NeoRow>;
@@ -1132,7 +1142,7 @@ class Calendar extends React.Component<any, any> {
 
     render() {
         return (
-            <div hidden={this.state.isHidden}>
+            <div hidden={this.state.isHidden} style={{width:'100%'}}>
                 <MainContext.Consumer>
                     { context => (
                         <Fullscreen

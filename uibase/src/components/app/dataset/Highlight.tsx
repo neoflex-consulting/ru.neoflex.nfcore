@@ -1,8 +1,7 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Radio} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
@@ -13,12 +12,12 @@ import {
     NeoCol,
     NeoHint,
     NeoInput,
+    NeoModal,
+    NeoOption,
     NeoRow,
     NeoSelect,
     NeoSwitch,
-    NeoTypography,
-    NeoModal,
-    NeoOption
+    NeoTypography
 } from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
 
@@ -26,7 +25,6 @@ interface Props extends ParameterDrawerProps {
     allOperations?: Array<EObject>;
     allHighlightType?: Array<EObject>;
 }
-
 
 const SortableList = SortableContainer(({items}:any) => {
     return (
@@ -40,13 +38,19 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}: any) => {
     let arrFilter : any[] = []
+    let mapOfValues = new Map()
+    mapOfValues.set("column" + value.index, (value.datasetColumn)?value.translate(value.datasetColumn):undefined)
+    mapOfValues.set("operation" + value.index, value.t(value.operation) || undefined)
+    mapOfValues.set("range" + value.index, value.t(value.highlightType))
+    mapOfValues.set("value" + value.index, value.value)
+    value.setFieldsOnReset(mapOfValues)
     return <div className="SortableItemHighlight">
         <NeoRow style={{height:'100%'}}>
-            <NeoCol span={1} style={{alignItems:'flex-start'}}>
-                <span>{value.index}</span>
+            <NeoCol span={1} align={'center'} style={{justifyContent:'flex-start', alignItems:'center'}}>
+                <span style={{marginTop:'8px'}}>{value.index}</span>
             </NeoCol>
-            <NeoCol span={2} style={{alignItems:'flex-start'}}>
-                <Form.Item style={{display: 'inline-block', marginTop: '3px'}}>
+            <NeoCol span={2} style={{alignItems:'flex-start', justifyContent: 'flex-start'}}>
+                <Form.Item style={{display: 'inline-block', marginTop: '3px', padding:'0 10px'}}>
                     <NeoSwitch
                         defaultChecked={value.enable !== undefined ? value.enable : true}
                         onChange={(e: any) => {
@@ -55,20 +59,20 @@ const SortableItem = SortableElement(({value}: any) => {
                         }}/>
                 </Form.Item>
             </NeoCol>
-            <NeoCol span={8} style={{flexDirection:'column', alignItems:'flex-start'}}>
-                <Form.Item style={{margin: 'auto'}}>
+            <NeoCol span={8} style={{flexDirection:'column', alignItems:'flex-start', justifyContent:'space-around'}}>
                 <NeoRow>
-                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
-                        {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
-                            rules: [{
-                                required:
-                                    value.operation ||
-                                    value.value ||
-                                    value.highlightType,
-                                message: ' '
-                            }]
-                        })(
+                    <Form.Item style={{margin: 'auto', height:'32px'}}
+                               initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
+                               name={"column" + value.index}
+                               rules={[
+                                   {
+                                       required:
+                                           value.operation ||
+                                           value.value ||
+                                           value.highlightType,
+                                       message: ' '
+                                   }
+                               ]}>
                         <NeoSelect
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('columnname')}
@@ -80,7 +84,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                     index: value.index,
                                     columnName: 'datasetColumn',
                                     value: undefined
-                                });
+                                })
                                 value.handleChange(event, true)
                             }}
                         >
@@ -103,22 +107,21 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </option>)
                             }
                         </NeoSelect>
-                    )}
-                </NeoRow>
                 </Form.Item>
-                <Form.Item style={{margin: 'auto'}}>
+                </NeoRow>
                     <NeoRow>
-                        {value.getFieldDecorator(`${value.idOperation}`,
-                            {
-                                initialValue: value.t(value.operation) || undefined,
-                                rules: [{
-                                    required:
-                                        (value.datasetColumn && value.highlightType !== 'Column') ||
-                                        (value.value && value.highlightType !== 'Column')||
-                                        (value.highlightType && value.highlightType !== 'Column'),
-                                    message: ' '
-                                }]
-                            })(
+                        <Form.Item style={{margin: 'auto', height:'32px'}}
+                                   initialValue={value.t(value.operation) || undefined}
+                                   name={"operation" + value.index}
+                                   rules={[
+                                       {
+                                           required:
+                                               (value.datasetColumn && value.highlightType !== 'Column') ||
+                                               (value.value && value.highlightType !== 'Column')||
+                                               (value.highlightType && value.highlightType !== 'Column'),
+                                           message: ' '
+                                       }
+                                   ]}>
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                                 disabled={value.highlightType === 'Column'}
@@ -153,21 +156,20 @@ const SortableItem = SortableElement(({value}: any) => {
                                             </option>)
                                 }
                             </NeoSelect>
-                        )}
-                </NeoRow>
                     </Form.Item>
+                    </NeoRow>
             </NeoCol>
-            <NeoCol span={8} style={{flexDirection:'column', alignItems:'flex-start'}}>
-                    <Form.Item style={{margin: 'auto'}}>
+            <NeoCol span={8} style={{flexDirection:'column', alignItems:'flex-start', justifyContent:'space-around'}}>
                         <NeoRow>
-                        {value.getFieldDecorator(`${value.idHighlightType}`,
-                            {
-                                initialValue: value.t(value.highlightType),
-                                rules: [{
-                                    required: value.datasetColumn && value.highlightType !== 'Column',
-                                    message: ' '
-                                }]
-                            })(
+                            <Form.Item style={{margin: 'auto', height:'32px'}}
+                                       initialValue={value.t(value.highlightType)}
+                                       name={"range" + value.index}
+                                       rules={[
+                                           {
+                                               required: value.datasetColumn && value.highlightType !== 'Column',
+                                               message: ' '
+                                           }
+                                       ]}>
                             <NeoSelect
                                 getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                                 allowClear={true}
@@ -202,24 +204,23 @@ const SortableItem = SortableElement(({value}: any) => {
                                             </option>)
                                 }
                             </NeoSelect>
-                        )}
-                        </NeoRow>
                     </Form.Item>
-                    <Form.Item style={{margin: 'auto'}}>
+                        </NeoRow>
                         <NeoRow>
-                        {value.getFieldDecorator(`${value.idValue}`,
-                            {
-                                initialValue: value.value,
-                                rules: [{
-                                    required:
-                                        ((value.datasetColumn && value.highlightType !== 'Column') ||
-                                        (value.operation && value.highlightType !== 'Column')||
-                                        (value.highlightType && value.highlightType !== 'Column')) &&
-                                        !(value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty') ,
-                                    message: ' '
-                                }]
-                            })(
-                            ((value.operation === "EqualTo" || value.operation === "NotEqual") && value.datasetColumn !== undefined && value.rowData !== undefined) ?
+                            <Form.Item style={{margin: 'auto', height:'32px'}}
+                                       initialValue={value.value}
+                                       name={"value" + value.index}
+                                       rules={[
+                                           {
+                                               required:
+                                                   ((value.datasetColumn && value.highlightType !== 'Column') ||
+                                                       (value.operation && value.highlightType !== 'Column')||
+                                                       (value.highlightType && value.highlightType !== 'Column')) &&
+                                                   !(value.operation === 'IsEmpty' || value.operation === 'IsNotEmpty') ,
+                                               message: ' '
+                                           }
+                                       ]}>
+                            {((value.operation === "EqualTo" || value.operation === "NotEqual") && value.datasetColumn !== undefined && value.rowData !== undefined) ?
                                 <NeoSelect
                                     className={"selectWithSearch"}
                                     getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -240,8 +241,8 @@ const SortableItem = SortableElement(({value}: any) => {
                                 >
                                     {
                                         value.rowData!.filter((item : any) => {
-                                            if (!arrFilter.includes(item[value.datasetColumn].valueOf())){
-                                                arrFilter.push(item[value.datasetColumn].valueOf())
+                                            if (!arrFilter.includes(item[value.datasetColumn])){
+                                                arrFilter.push(item[value.datasetColumn])
                                                 return item;
                                             }
                                             return null
@@ -281,110 +282,111 @@ const SortableItem = SortableElement(({value}: any) => {
                                 onPressEnter={(e: { preventDefault: () => any; })=>{
                                     e.preventDefault();
                                 }}
-                            />
-                        )}
-                        </NeoRow>
+                            />}
                     </Form.Item>
+                        </NeoRow>
             </NeoCol>
             <NeoCol span={4} style={{alignItems:'flex-start', padding:'0 20px', justifyContent:'space-between'}}>
-                <NeoHint title={value.t("background color")}>
-                <NeoButton
-                    type={'link'}
-                    onClick={() => value.handleColorMenu('background', value.index)}
-                    style={{marginTop: '7px'}}
-                >
-                    <NeoIcon icon={"fill"} size={"m"} color={value.backgroundColor}/>
-                </NeoButton>
-                </NeoHint>
-                <NeoModal
-                    type={"basic"}
-                    className={'SortableItemHighlight__modal'}
-                    title={value.t("choose background color")}
-                    visible={value.backgroundColorVisible && value.colorIndex === value.index}
-                    onCancel={() => value.handleColorMenu('background', value.index)}
-                    closable={false}
-                    footer={[<Form onSubmit={value.handleSubmit}>
-                        <NeoButton
-                            id={'runQueryButton'}
-                            onClick={() => {
-                                return value.handleChange(JSON.stringify({
+                <NeoRow justify={"space-between"}>
+                    <NeoHint title={value.t("background color")}>
+                    <NeoButton
+                        type={'link'}
+                        onClick={() => value.handleColorMenu('background', value.index)}
+                        style={{marginTop: '7px'}}
+                    >
+                        <NeoIcon icon={"fill"} size={"m"} color={value.backgroundColor}/>
+                    </NeoButton>
+                    </NeoHint>
+                    <NeoModal
+                        type={"basic"}
+                        className={'SortableItemHighlight__modal'}
+                        title={value.t("choose background color")}
+                        visible={value.backgroundColorVisible && value.colorIndex === value.index}
+                        onCancel={() => value.handleColorMenu('background', value.index)}
+                        closable={false}
+                        footer={[<Form onFinish={value.handleSubmit}>
+                            <NeoButton
+                                id={'runQueryButton'}
+                                onClick={() => {
+                                    return value.handleChange(JSON.stringify({
+                                        index: value.index,
+                                        columnName: 'backgroundColor',
+                                        value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
+                                    }), true)
+                                }}>
+                                {value.t("apply")}
+                            </NeoButton>
+                            <NeoButton type={'secondary'} key="back" onClick={() => value.handleColorMenu('background', value.index)}>
+                                {value.t("cancel")}
+                            </NeoButton>
+                        </Form>,
+                        ]}>
+                        <Radio.Group defaultValue="solid" buttonStyle="solid">
+                            <Radio.Button
+                                style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
+                                onClick={()=>value.handleColorPicker('solid')} value="solid"
+                                checked={value.solidPicker}>{value.t("main")}</Radio.Button>
+                            <Radio.Button
+                                onClick={()=>value.handleColorPicker('gradient')} value="gradient"
+                                checked={!value.solidPicker}>{value.t("extended")}</Radio.Button>
+                        </Radio.Group>
+                        {value.solidPicker && (
+                            <ColorPicker value={value} type={'background'}/>
+                        )}
+                        {!value.solidPicker && (
+                            <SketchColorPicker value={value} type={'background'} />
+                        )}
+                    </NeoModal>
+                    <NeoHint title={value.t("text color")}>
+                    <NeoButton
+                        type={'link'}
+                        onClick={() => value.handleColorMenu('text', value.index)}
+                        style={{marginTop: '7px'}}
+                    >
+                        <NeoIcon icon={"letter"} color={value.color} size={"m"}/>
+                    </NeoButton>
+                    </NeoHint>
+                    <NeoModal
+                        type={"edit"}
+                        title={value.t("choose text color")}
+                        className={'SortableItemHighlight__modal'}
+                        visible={value.textColorVisible && value.colorIndex === value.index}
+                        onCancel={() => value.handleColorMenu('text', value.index)}
+                        closable={false}
+                        footer={[<Form onFinish={value.handleSubmit}>
+                            <NeoButton
+                                id={'runQueryButton'}
+                                onClick={() => value.handleChange(JSON.stringify({
                                     index: value.index,
-                                    columnName: 'backgroundColor',
-                                    value: value.stateColor !== undefined ? value.stateColor : value.backgroundColor
-                                }), true)
-                            }}>
-                            {value.t("apply")}
-                        </NeoButton>
-                        <NeoButton type={'secondary'} key="back" onClick={() => value.handleColorMenu('background', value.index)}>
-                            {value.t("cancel")}
-                        </NeoButton>
-                    </Form>,
-                    ]}>
-                    <Radio.Group defaultValue="solid" buttonStyle="solid">
-                        <Radio.Button
-                            style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
-                            onClick={()=>value.handleColorPicker('solid')} value="solid"
-                            checked={value.solidPicker}>{value.t("main")}</Radio.Button>
-                        <Radio.Button
-                            onClick={()=>value.handleColorPicker('gradient')} value="gradient"
-                            checked={!value.solidPicker}>{value.t("extended")}</Radio.Button>
-                    </Radio.Group>
-                    {value.solidPicker && (
-                        <ColorPicker value={value} type={'background'}/>
-                    )}
-                    {!value.solidPicker && (
-                        <SketchColorPicker value={value} type={'background'} />
-                    )}
-                </NeoModal>
-                <NeoHint title={value.t("text color")}>
-                <NeoButton
-                    type={'link'}
-                    onClick={() => value.handleColorMenu('text', value.index)}
-                    style={{marginTop: '7px'}}
-                >
-                    <NeoIcon icon={"letter"} color={value.color} size={"m"}/>
-                </NeoButton>
-                </NeoHint>
-                <NeoModal
-                    type={"edit"}
-                    title={value.t("choose text color")}
-                    className={'SortableItemHighlight__modal'}
-                    visible={value.textColorVisible && value.colorIndex === value.index}
-                    onCancel={() => value.handleColorMenu('text', value.index)}
-                    closable={false}
-                    footer={[<Form onSubmit={value.handleSubmit}>
-                        <NeoButton
-                            id={'runQueryButton'}
-                            onClick={() => value.handleChange(JSON.stringify({
-                                index: value.index,
-                                columnName: 'color',
-                                value: value.stateColor !== undefined ? value.stateColor : value.color
-                            }), true)}>
-                            {value.t("apply")}
-                        </NeoButton>
-                        <NeoButton type={"secondary"} key="back" onClick={() => value.handleColorMenu('text', value.index)}>
-                            {value.t("cancel")}
-                        </NeoButton></Form>,
-                    ]}
-                >
-                    <Radio.Group defaultValue="solid" buttonStyle="solid">
-                        <Radio.Button
-                            style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
-                            onClick={()=>value.handleColorPicker('solid')} value="solid"
-                            checked={value.solidPicker}>{value.t("main")}</Radio.Button>
-                        <Radio.Button
-                            onClick={()=>value.handleColorPicker('gradient')} value="gradient"
-                            checked={!value.solidPicker}>{value.t("extended")}</Radio.Button>
-                    </Radio.Group>
-                    {value.solidPicker && (
-                        <ColorPicker value={value} type={'text'} />
-                    )}
-                    {!value.solidPicker && (
-                        <SketchColorPicker value={value} type={'text'} />
-                    )}
-                </NeoModal>
+                                    columnName: 'color',
+                                    value: value.stateColor !== undefined ? value.stateColor : value.color
+                                }), true)}>
+                                {value.t("apply")}
+                            </NeoButton>
+                            <NeoButton type={"secondary"} key="back" onClick={() => value.handleColorMenu('text', value.index)}>
+                                {value.t("cancel")}
+                            </NeoButton></Form>,
+                        ]}
+                    >
+                        <Radio.Group defaultValue="solid" buttonStyle="solid">
+                            <Radio.Button
+                                style={{color:'black', backgroundColor: '#ffffff', border:'none', outline:'none'}}
+                                onClick={()=>value.handleColorPicker('solid')} value="solid"
+                                checked={value.solidPicker}>{value.t("main")}</Radio.Button>
+                            <Radio.Button
+                                onClick={()=>value.handleColorPicker('gradient')} value="gradient"
+                                checked={!value.solidPicker}>{value.t("extended")}</Radio.Button>
+                        </Radio.Group>
+                        {value.solidPicker && (
+                            <ColorPicker value={value} type={'text'} />
+                        )}
+                        {!value.solidPicker && (
+                            <SketchColorPicker value={value} type={'text'} />
+                        )}
+                    </NeoModal>
+                </NeoRow>
             </NeoCol>
-            <NeoCol span={1} style={{alignItems:'flex-start'}}>
+            <NeoCol span={1} style={{alignItems:'flex-start', justifyContent:'flex-start'}}>
                 <Form.Item style={{display: 'inline-block', marginTop: '7px'}}>
                     <NeoButton
                         type={'link'}
@@ -419,7 +421,6 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
     handleColorPicker = (type: string) => {
@@ -469,11 +470,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
         this.setState({parametersArray, backgroundColorVisible: false, textColorVisible: false, color: undefined, colorIndex: undefined},
             ()=> {
                 if (saveParameter) {
-                    this.props.form.validateFields((err: any, values: any) => {
-                        if (!err) {
                             this.props.onChangeParameters!(parametersArray, this.props.componentType);
-                        }
-                    })
                 }
             })
     }
@@ -485,9 +482,9 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     };
 
     deleteRow = (e: any) => {
-        this.props.form.resetFields();
+        this.formRef.current!.resetFields();
         let newServerParam: IServerQueryParam[] = [];
-        this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
+        this.state.parametersArray!.forEach((element:IServerQueryParam, index:number) => {
             if (element.index !== e.index) {
                 newServerParam.push({
                     index: newServerParam.length + 1,
@@ -508,12 +505,12 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }}>
+            <Form style={{ marginTop: '35px' }} ref={this.formRef}>
                 <Form.Item style={{ marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('highlight')}</NeoTypography>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={12} align={'flex-end'}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
@@ -523,7 +520,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                         </NeoButton>
                     </NeoCol>
                 </Form.Item>
-                <Form.Item style={{marginBottom:'0', maxHeight:'280px', overflow:'auto'}}>
+                <Form.Item style={{marginBottom:'0'}}>
                     {
                         <SortableList items={this.state.parametersArray!
                             .map((highlights: any) => (
@@ -534,10 +531,10 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                                     idValue : `${JSON.stringify({index: highlights.index, columnName: 'value', value: highlights.value})}`,
                                     idHighlightType : `${JSON.stringify({index: highlights.index, columnName: 'highlightType', value: highlights.highlightType})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    formRef: this.formRef,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allOperations: this.props.allOperations,
-                                    handleChange: this.handleChange.bind(this),
+                                    handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
                                     parametersArray: this.state.parametersArray,
@@ -550,6 +547,7 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
                                     textColorVisible: this.state.textColorVisible,
                                     handleColorPicker: this.handleColorPicker.bind(this),
                                     solidPicker: this.state.solidPicker,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     popUpContainerId: this.props.popUpContainerId,
                                     rowData: this.state.rowData
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
@@ -572,4 +570,4 @@ class Highlight extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(Highlight))
+export default withTranslation()(Highlight)

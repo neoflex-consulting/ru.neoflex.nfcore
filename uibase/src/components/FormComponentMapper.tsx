@@ -1,10 +1,10 @@
 import React, {Fragment, useCallback, useEffect, useState} from 'react';
 import Ecore from 'ecore';
-import {Button, DatePicker, Input, Select} from 'antd';
+import {Input, Select} from 'antd';
 import moment from 'moment';
 
-import {boolSelectionOption, convertPrimitiveToString} from './../utils/resourceEditorUtils';
-import {NeoButton, NeoModal, NeoTag} from "neo-design/lib";
+import {boolSelectionOption, convertPrimitiveToString} from '../utils/resourceEditorUtils';
+import {NeoButton, NeoDatePicker, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
@@ -230,7 +230,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 <InputComponent
                     key={`textedit_${ukey}${idx}`}
                     style={{ resize: 'none' }}
-                    autoSize={{ maxRows: expanded ? null : 10 }}
+                    autosize={{ maxRows: expanded ? null : 10 }}
                     value={innerValue}
                     onChange={(e: any) => {
                         setInnerValue(e.target.value)
@@ -267,7 +267,7 @@ interface SelectRefObjectProps {
     onEClassBrowse?: Function,
     onBrowse?: Function,
     upperBound: number,
-    edit?: boolean
+    edit?: boolean,
     goToObject?:(id:string, obj: Ecore.EObject| null)=>void
 }
 
@@ -282,12 +282,12 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
     }
 
     const relatedResource = value && value.$ref && getRelatedResourceByRef(value!.$ref)
-    const elements = value && value !== null ?
+    const elements = value && true ?
         upperBound === -1 ? (value.length !== 0?
-            value.map((el: { [key: string]: any }, idx: number) =>
+            value.map((el: { [key: string]: any }) =>
                 <NeoTag
                     className={`${!edit ? "disabled" : undefined} select-ref-object`}
-                    onClose={(e: any) => {
+                    onClose={() => {
                         props.handleDeleteRef && props.handleDeleteRef!(el, eObject.get('name'))
                     }}
                     closable={edit}
@@ -302,7 +302,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             :
             <NeoTag
                 className={`${!edit ? "disabled" : undefined} select-ref-object`}
-                onClose={(e: any) => {
+                onClose={() => {
                     props.handleDeleteSingleRef && props.handleDeleteSingleRef!(value, eObject.get('name'))
                 }}
                 closable={edit}
@@ -316,29 +316,28 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
             </NeoTag>
         :
         []
-    const component = <React.Fragment key={ukey + "_" + idx}>
+    return <React.Fragment key={ukey + "_" + idx}>
         {elements}
         {eObject.get('eType').get('name') === 'EClass' ?
-            <Button 
-                style={{ display: "inline-block" }} 
-                key={ukey + "_" + idx} 
+            <NeoButton
+                style={{display: "inline-block", padding: '9px 12px'}}
+                key={ukey + "_" + idx}
                 onClick={() => {
                     props.onEClassBrowse && props.onEClassBrowse!(eObject)
                 }}
-                disabled={!edit}
-            >...</Button>
+                type={!edit ? 'disabled' : 'secondary'}
+            >...</NeoButton>
             :
-            <Button 
-                style={{ display: "inline-block" }} 
-                key={ukey + "_" + idx} 
+            <NeoButton
+                style={{display: "inline-block", padding: '9px 12px'}}
+                key={ukey + "_" + idx}
                 onClick={() => {
                     props.onBrowse && props.onBrowse!(eObject)
                 }}
-                disabled={!edit}
-            >...</Button>
+                type={!edit ? 'disabled' : 'secondary'}
+            >...</NeoButton>
         }
     </React.Fragment>
-    return component
 }
 
 interface BooleanSelectProps {
@@ -352,7 +351,7 @@ interface BooleanSelectProps {
 function BooleanSelect(props: BooleanSelectProps): JSX.Element {
     const { value, idx, ukey, onChange, edit } = props
 
-    return <Select
+    return <NeoSelect
         value={convertPrimitiveToString(value)}
         key={`boolsel_${ukey}${idx}`}
         style={{ width: "300px" }}
@@ -362,8 +361,8 @@ function BooleanSelect(props: BooleanSelectProps): JSX.Element {
         disabled={!edit}
     >
         {Object.keys(boolSelectionOption).map((value: any) =>
-            value !== "undefined" && value !== "null" && <Select.Option key={ukey + "_" + value + "_" + idx} value={value}>{value}</Select.Option>)}
-    </Select>
+            value !== "undefined" && value !== "null" && <NeoOption key={ukey + "_" + value + "_" + idx} value={value}>{value}</NeoOption>)}
+    </NeoSelect>
 }
 
 interface DatePickerComponentProps {
@@ -378,7 +377,7 @@ function DatePickerComponent(props: DatePickerComponentProps): JSX.Element {
     const { value, idx, ukey, onChange, edit } = props
 
     return (
-        <DatePicker
+        <NeoDatePicker
             showTime
             key={ukey + "_date_" + idx}
             defaultValue={moment(value)}
@@ -407,9 +406,9 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
     const { eType, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
 
     return (
-        <Select
+        <NeoSelect
             className={"select-component"}
-            mode={upperBound === -1 ? "multiple" : "default"}
+            mode={upperBound === -1 ? "multiple" : undefined}
             value={value}
             key={ukey + "_" + idx}
             style={{ width: "300px" }}
@@ -426,13 +425,12 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
                     return 0;
                 })
                 .map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
-                    <div style={{display:"flex", alignItems: "center"}}>{showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
-                </Select.Option>)}
-        </Select>
+                    <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
+                        <div style={{display:"flex", alignItems: "center"}}>{showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
+                    </NeoOption>)}
+        </NeoSelect>
     )
 }
-
 
 interface SelectComponentPropsForhightLight {
     value: any,
@@ -453,7 +451,7 @@ function SelectComponentForhightLight(props: SelectComponentPropsForhightLight):
     return (
         <Select
             className={"select-component"}
-            mode={upperBound === -1 ? "multiple" : "default"}
+            mode={upperBound === -1 ? "multiple" : undefined}
             value={value}
             key={ukey + "_" + idx}
             style={{ width: "300px" }}
@@ -477,7 +475,6 @@ function SelectComponentForhightLight(props: SelectComponentPropsForhightLight):
     )
 }
 
-
 interface TagComponentProps {
     value: any,
     onChange?: Function,
@@ -493,7 +490,7 @@ function TagComponent(props: TagComponentProps): JSX.Element {
     const { eType, value, idx, ukey, onChange, id, edit } = props;
 
     return (
-        <Select
+        <NeoSelect
             mode={"tags"}
             value={value}
             key={ukey + "_" + idx}
@@ -506,8 +503,8 @@ function TagComponent(props: TagComponentProps): JSX.Element {
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
                 .map((obj: Ecore.EObject) =>
-                <Select.Option key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</Select.Option>)}
-        </Select>
+                    <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>{obj.get('name')}</NeoOption>)}
+        </NeoSelect>
     )
 }
 
@@ -571,7 +568,7 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
 
     static getComponent(props: any) {
         const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, t } = props;
-        const targetValue = value || props.eObject?.get('defaultValueLiteral');
+        const targetValue = value || props.eObject.get('defaultValueLiteral');
         if (syntax === "sql") {
             return <EditableSQLArea
                 t={t}
@@ -657,7 +654,7 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
                 edit={edit}
                 showIcon={showIcon}
             />
-        }else if ((props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) || componentType === "SelectHighlight") {
+        } else if ((props.mainEObject &&  props.mainEObject.eClass._id === "//DatasetComponent" && eObject && (eObject.values.name === "datasetColumn"||eObject.values.name === "datasetColumnTooltip")) || componentType === "SelectHighlight") {
             return <SelectComponentForhightLight
                 idx={idx}
                 ukey={ukey}
@@ -671,8 +668,7 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
                 upperBound={props.upperBound}
                 edit={edit}
                 showIcon={showIcon}/>
-        }
-        else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) || componentType === "Tag") {
+        } else if ((eType && eType.isKindOf('EDataType') && eType.get('name') === 'EString' && eObject.get('upperBound') === -1) || componentType === "Tag") {
             return <TagComponent
                 idx={idx}
                 ukey={ukey}

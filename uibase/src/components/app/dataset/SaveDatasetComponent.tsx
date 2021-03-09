@@ -44,13 +44,13 @@ class SaveDatasetComponent extends React.Component<Props, State> {
 
     onClick(): void {
         if (this.state.componentName !== "" || (this.state.changeCurrent
-            && !(this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')))) {
+            && !(this.props.defaultDatasetComponent!.eContents()[0].get('name') === this.props.currentDatasetComponent!.eContents()[0].get('name')))) {
             this.saveDatasetComponentOptions();
         } else if (this.state.componentName === "") {
             this.props.context.notification(this.props.t("DatasetComponent"),
                 this.props.t("component name is empty"),
                 "error")
-        } else if (this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')) {
+        } else if (this.props.defaultDatasetComponent!.eContents()[0].get('name') === this.props.currentDatasetComponent!.eContents()[0].get('name')) {
             this.props.context.notification(this.props.t("DatasetComponent"),
                 this.props.t("cant change default profile"),
                 "error")
@@ -127,7 +127,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
         let objectId = this.props.viewObject.eURI();
         let params: any = {name: this.state.componentName};
         this.props.context.changeUserProfile(objectId, params);
-        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent?.eContents()[0])
+        let currentDatasetComponent = _.cloneDeepWith(this.props.currentDatasetComponent!.eContents()[0]);
         if (currentDatasetComponent !== undefined) {
             currentDatasetComponent.set('access', !this.state.accessPublic ? 'Private' : 'Public');
             if (!this.state.changeCurrent) {
@@ -139,7 +139,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
             this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
                 if (currentDatasetComponent !== undefined) {
                     const userProfileValue = userProfile.eContents()[0].get('params').array()
-                        .filter( (p: any) => p.get('key') === currentDatasetComponent?.eURI());
+                        .filter( (p: any) => p.get('key') === currentDatasetComponent!.eURI());
                     if (userProfileValue.length !== 0) {
                         this.addComponentServerParam(currentDatasetComponent, this.state.queryFilterPattern!, userProfileValue, 'serverFilters', 'serverFilter');
                         this.addComponentServerParam(currentDatasetComponent, this.state.queryAggregatePattern!, userProfileValue, 'serverAggregates', 'serverAggregation');
@@ -154,7 +154,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
                     this.props.context.changeUserProfile(currentDatasetComponent.eURI(), undefined);
 
                     this.props.context.userProfilePromise.then((userProfile: Ecore.Resource) => {
-                        const resource = currentDatasetComponent?.eResource();
+                        const resource = currentDatasetComponent!.eResource();
                         if (resource) {
                             if (!this.state.changeCurrent) {
                                 const contents = (eObject: EObject): EObject[] => [eObject, ...eObject.eContents().flatMap(contents)];
@@ -211,7 +211,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-        if (this.props.currentDatasetComponent?.eContents()[0].get('name') !== prevProps.currentDatasetComponent?.eContents()[0].get('name')) {
+        if (this.props.currentDatasetComponent!.eContents()[0].get('name') !== prevProps.currentDatasetComponent!.eContents()[0].get('name')) {
             //reset checkbox on change
             this.setState({changeCurrent: false, accessPublic: true})
         }
@@ -239,7 +239,7 @@ class SaveDatasetComponent extends React.Component<Props, State> {
                         <NeoInput
                             type={'checkbox'}
                             checked={this.state.changeCurrent}
-                            disabled={this.props.defaultDatasetComponent?.eContents()[0].get('name') === this.props.currentDatasetComponent?.eContents()[0].get('name')}
+                            disabled={this.props.defaultDatasetComponent!.eContents()[0].get('name') === this.props.currentDatasetComponent!.eContents()[0].get('name')}
                             onChange={() => this.onChangeCurrent()}
                         >
                             <NeoTypography type={'capture_regular'} style={{color : "#333333", marginTop: "5px"}}>{t('change current')}</NeoTypography>

@@ -35,7 +35,7 @@ class DeleteDatasetComponent extends React.Component<Props & WithTranslation, an
     render() {
         const { t } = this.props;
         let name = this.props.currentDatasetComponent.eContents()[0].get('name');
-        let nameOfDiagram = this.props.currentDiagram?.diagramName
+        let nameOfDiagram = this.props.currentDiagram!.diagramName
         return (
             <div>
                 <NeoTypography type={'capture_regular'} style={{color : "#333333"}}>{this.props.isGrid ? (t('diagram') + " " + nameOfDiagram) : (t('version') + " " + name )} {t('deleteVersionMessage')}</NeoTypography>

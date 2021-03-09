@@ -1,7 +1,6 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {Form, Typography} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
@@ -19,9 +18,6 @@ interface Props extends ParameterDrawerProps {
     datasetComponentVersion?: string;
 }
 
-
-
-
 function trimHeader(header: string) {
     return header.length > 60 ? header.substring(0,60) + "..." : header
 }
@@ -38,7 +34,7 @@ const SortableList = SortableContainer(({items}:any) => {
 
 const SortableItem = SortableElement(({value}:any) =>
     <div className="SortableItem" style={{display: value.isHidden ? 'none' : undefined}}>
-    <NeoRow style={{height:'100%'}}>
+    <NeoRow style={{height:'100%', alignItems:'center'}}>
         <NeoIcon color={NeoColor.grey_5} icon={"dragAndDrop"} size={"m"}/>
         <Form.Item style={{margin: 'auto 0 auto 20px'}}>
             <NeoSwitch
@@ -75,13 +71,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
     constructor(props: any) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
-        this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
-
-    handleOnSubmit=(e:any)=>{
-        this.handleSubmit(e);
-        this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-    };
 
     onSortEnd = ({oldIndex, newIndex}:any) => {
         let newState: IServerQueryParam[] = arrayMove(this.state.parametersArray!, oldIndex, newIndex);
@@ -99,9 +89,9 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
         const {parametersArray} = this.state;
         return (
                     <div>
-            <Form style={{ marginTop: '15px' }}>
+            <Form style={{ marginTop: '15px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
-                    <NeoCol span={18} style={{justifyContent: "flex-start", marginBottom: '6px'}}>
+                    <NeoCol span={18} style={{ marginBottom: '6px'}}>
                         <NeoInput className={"search-column"} placeholder={this.props.t("quick filter")} value={this.filter} type={"search"} onChange={(event: any)=>{
                             this.filter = event.currentTarget.value;
                             this.setState({parametersArray: parametersArray!
@@ -113,7 +103,7 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     })});
                         }}/>
                     </NeoCol>
-                    <NeoCol span={6} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={6} align={'flex-end'}>
                         <NeoButton title={t("back to version") + " " + this.props.datasetComponentVersion}
                                    type={'link'}
                                    id={'resetButton'}
@@ -131,7 +121,6 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     t : t,
                                     idDatasetColumn : `${JSON.stringify({index: hiddenColumn.index, columnName: 'datasetColumn', value: hiddenColumn.datasetColumn})}`,
                                     idOperation : `${JSON.stringify({index: hiddenColumn.index, columnName: 'operation', value: hiddenColumn.operation})}`,
-                                    getFieldDecorator: this.getFieldDecorator,
                                     columnDefs: this.props.columnDefs,
                                     handleChange: this.handleChange,
                                     parametersArray: parametersArray,
@@ -161,4 +150,4 @@ class HiddenColumn extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(HiddenColumn))
+export default withTranslation()(HiddenColumn)

@@ -1,6 +1,6 @@
 import React from "react";
 import '../../../styles/Calendar.css';
-import {NeoRow, NeoCol, NeoButton, NeoInput} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
 import {withTranslation, WithTranslation} from "react-i18next";
 
 interface Props {
@@ -62,7 +62,7 @@ class StatusLegend extends React.Component<Props & WithTranslation & any, State>
 
                                     <div style={{height: '29px', width: '52px', backgroundColor: c['color'], borderRadius: '5px'}}/>
                                 </NeoCol>
-                                <NeoCol span={17} style={{justifyContent: 'start'}}>
+                                <NeoCol span={17} style={{alignItems: 'initial'}}>
                                     <span
                                         key={JSON.stringify({name: c['name'], color: c['color']})}
                                     >

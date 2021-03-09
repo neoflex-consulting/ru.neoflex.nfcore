@@ -503,7 +503,7 @@ class DatasetBar extends React.Component<props, State> {
         this.setState({isExportChecked: !this.state.isExportChecked});
     };
 
-    onExportMenuClick(e:{key:string}) {
+    onExportMenuClick(e:any) {
         switch (e.key) {
             case 'exportToDocx':
                 this.props.onDocExportClick();
@@ -522,7 +522,7 @@ class DatasetBar extends React.Component<props, State> {
     getExportMenu = () => {
         return <Menu
             key='actionMenu'
-            onClick={this.onExportMenuClick.bind(this)}
+            onClick={e=>this.onExportMenuClick(e)}
             className={"export-menu"}>
             {this.props.barMode === "diagram"
             && this.state.barSize <= barSize.small
@@ -718,7 +718,7 @@ class DatasetBar extends React.Component<props, State> {
                                 getPopupContainer={() => document.getElementById (`selectInGetDiagramPanel${this.props.datasetComponentId}`) as HTMLElement}
                                 className={"diagram-select"}
                                 showSearch={true}
-                                value={this.props.currentDiagram?.diagramName}
+                                value={this.props.currentDiagram!.diagramName}
                                 onChange={this.props.onDiagramChange}
                             >
                                 {
@@ -747,7 +747,7 @@ class DatasetBar extends React.Component<props, State> {
                         getPopupContainer={() => document.getElementById ('selectInGetDiagramPanel') as HTMLElement}
                         className={"diagram-select fill-space"}
                         showSearch={true}
-                        value={this.props.currentDiagram?.diagramName}
+                        value={this.props.currentDiagram!.diagramName}
                         onChange={this.props.onDiagramChange}
                     >
                         {

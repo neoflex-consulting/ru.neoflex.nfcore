@@ -1,7 +1,6 @@
 import * as React from "react";
-import {Form, Button, Tooltip} from 'antd';
-//import { Ecore } from "ecore";
-import { API } from "../modules/api";
+import {Form, Tooltip} from 'antd';
+import {API} from "../modules/api";
 import AceEditor from "react-ace";
 import 'brace/mode/json';
 import 'brace/theme/tomorrow';
@@ -9,9 +8,7 @@ import Splitter from './CustomSplitter'
 import {withTranslation, WithTranslation} from "react-i18next";
 import {Helmet} from "react-helmet";
 import {NeoIcon} from "neo-icon/lib";
-
-export interface Props {
-}
+import {NeoButton} from "neo-design/lib";
 
 interface State {
     json: string;
@@ -21,7 +18,7 @@ interface State {
 
 class QueryRunner extends React.Component<any, State> {
 
-    private splitterRef: React.RefObject<any>
+    private splitterRef: React.RefObject<any>;
     
     constructor(props: any) {
         super(props);
@@ -40,13 +37,13 @@ class QueryRunner extends React.Component<any, State> {
             const objects = resources.map(r=>
                 Object.assign(r.to(), {$ref: `${r.get('uri')}?rev=${r.rev}`})
             );
-            this.resizeEditors()
+            this.resizeEditors();
             this.setState({result: JSON.stringify({objects, executionStats, bookmark, warning}, null, 4)});
         })
     };
 
     resizeEditors = () => {
-        (this.refs.aceEditor as AceEditor).editor.resize()
+        (this.refs.aceEditor as AceEditor).editor.resize();
         if (this.refs.console) {
             (this.refs.console as AceEditor).editor.resize()
         }
@@ -63,7 +60,7 @@ class QueryRunner extends React.Component<any, State> {
     };
 
     render() {
-        const {t} = this.props as Props & WithTranslation;
+        const {t} = this.props as any & WithTranslation;
         return (
             <div style={{display: 'flex', flexFlow: 'column', height: '100%'}}>
                 <Helmet>
@@ -73,9 +70,12 @@ class QueryRunner extends React.Component<any, State> {
                 <Form layout={"inline"}>
                     <Form.Item wrapperCol={{span: 2, push: 14}}>
                         <Tooltip placement="top" title={t('run')}>
-                            <Button id="run" shape="circle" style={{border: 0}} onClick={this.run}>
-                                <NeoIcon icon={"play-arrow"}/>
-                            </Button>
+                            <NeoButton
+                                id="run"
+                                type={'link'}
+                                onClick={this.run}
+                                suffixIcon={<NeoIcon icon={"play-arrow"}/>}
+                            />
                         </Tooltip>
                     </Form.Item>
                 </Form>

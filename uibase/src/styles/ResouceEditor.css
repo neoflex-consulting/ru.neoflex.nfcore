@@ -27,8 +27,8 @@
     width: fit-content !important;
 }
 
-.modal-add-inner-ref .ant-modal-footer {
-    display: flex;
+.icon-tree {
+    margin-top: 4px;
 }
 
 .modal-add-inner-ref .ant-modal-footer .ant-btn-icon-only.ant-btn-lg {

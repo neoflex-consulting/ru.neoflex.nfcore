@@ -327,14 +327,15 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 </div>
                 <div style={{marginTop: "15px"}}/>
                 <NeoDrawer
+                    className={'toolsDrawer'}
                     title={this.props.t("select data")}
                     width={'50vw'}
                     visible={this.state.drawerResourceVisible}
                     mask={false}
                     onClose={()=>this.setState({drawerResourceVisible: false})}
                 >
-                    <SearchGrid key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
-                                specialEClass={undefined}/>
+                    <SearchGrid id={'toolsDrawer'} key="search_grid_resource" onSelect={this.handleAddNewResource} showAction={false}
+                                specialEClass={undefined} />
                 </NeoDrawer>
             </div>
         </div>;
@@ -680,15 +681,15 @@ class Tools extends React.Component<Props & WithTranslation, State> {
                 <NeoTabs className={"tools-tabs-region tools-vertical-center-element"}
                     defaultActiveKey={"export"}
                     tabPosition={'top'}>
-                    <NeoTabs.NeoTabPane tab={t("export")} key={t("export")}>
+                    <NeoTabs.TabPane tab={t("export")} key={`${t("export")}`}>
                         {this.renderExport()}
-                    </NeoTabs.NeoTabPane>
-                    <NeoTabs.NeoTabPane tab={t("import")} key={t("import")} >
+                    </NeoTabs.TabPane>
+                    <NeoTabs.TabPane tab={t("import")} key={`${t("import")}`} >
                         {this.renderImport()}
-                    </NeoTabs.NeoTabPane>
-                    <NeoTabs.NeoTabPane tab={t("backup")} key={t("backup")} >
+                    </NeoTabs.TabPane>
+                    <NeoTabs.TabPane tab={t("backup")} key={`t("backup")`} >
                         {this.renderMetaStoreUtils()}
-                    </NeoTabs.NeoTabPane>
+                    </NeoTabs.TabPane>
                 </NeoTabs>
             </div>
         );

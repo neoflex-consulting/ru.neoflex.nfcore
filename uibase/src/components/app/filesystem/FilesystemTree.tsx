@@ -1,15 +1,11 @@
 import * as React from 'react';
 import {WithTranslation, withTranslation} from "react-i18next";
-import {Dropdown, Input, Menu, Popconfirm, Row, Tree} from 'antd';
-import {
-    AntTreeNode,
-    AntTreeNodeCheckedEvent,
-    AntTreeNodeSelectedEvent
-} from "antd/lib/tree/Tree";
+import {Dropdown, Input, Menu, Popconfirm, Tree} from 'antd';
+import {AntTreeNode} from "antd/lib/tree/Tree";
 import {API} from "../../../modules/api";
 import '../../../styles/FilesystemTree.css'
-import { NeoButton } from 'neo-design';
-import {NeoInput, NeoModal} from "neo-design/lib";
+import {NeoButton} from 'neo-design';
+import {NeoInput, NeoModal, NeoRow} from "neo-design/lib";
 import {IMainContext} from "../../../MainContext";
 
 const {DirectoryTree} = Tree;
@@ -18,7 +14,7 @@ const disabled = "#B3B3B3";
 const enabled = "#5E6785";
 
 interface Props {
-    onSelect?: (path?: string, isLeaf?: boolean) => void;
+    onSelect?: (path?: string, isLeaf?: boolean)=>void;
     onCheck?: (keys: string[]) => void;
     checked?: string[],
     notification: IMainContext['notification']
@@ -158,7 +154,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
 
     isSelectedLoaded = () => true
 
-    onSelect = (selectedKeys: string[], e: AntTreeNodeSelectedEvent) => {
+    onSelect = (selectedKeys: any, e: { event: "select"; selected: boolean; node: any; selectedNodes: any; nativeEvent: MouseEvent }) => {
         console.log('Trigger Select', selectedKeys, e);
         const key = e.node ? e.node.props.eventKey || "/" : "/"
         const isLeaf = e.node ? e.node.props.isLeaf === true : false
@@ -168,20 +164,17 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         }
     };
 
-    onCheck = (checkedKeys: string[] | {
-        checked: string[];
-        halfChecked: string[];
-    }, e: AntTreeNodeCheckedEvent) => {
-        console.log('Trigger Check', checkedKeys, e);
+    onCheck = (checked: any )  => {
+        console.log('Trigger Check', checked, checked.checked);
         if (this.props.onCheck) {
-            this.props.onCheck(Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked)
+            this.props.onCheck(Array.isArray(checked) ? checked : checked.checked)
         }
     };
 
-    onDeleteCheck = (checkedKeys: string[] | {
-        checked: string[];
-        halfChecked: string[];
-    }, e: AntTreeNodeCheckedEvent) => {
+    onDeleteCheck = (checkedKeys: any | {
+        checked: any;
+        halfChecked: any;
+    }, e: any) => {
         this.setState({deleteKeys: Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked})
     };
 
@@ -189,7 +182,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         this.reloadKey(this.state.key || "")
     }
 
-    onLoad = (loadedKeys: string[]) => {
+    onLoad = (loadedKeys: any, info: { event: "load"; node: any; }) => {
         this.setState({loadedKeys})
     }
 
@@ -376,7 +369,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
         )
         return (
             <div style={{flexGrow: 1, height: '100%'}}>
-                <Row hidden={!!this.props.onCheck} className={"tree-button-bar"}>
+                <NeoRow hidden={!!this.props.onCheck} className={"tree-button-bar"} style={{alignItems: 'center'}}>
                     <NeoButton
                         className={`tree-button ${!this.state.isLeaf !== true ? "disabled" : "link"}`}
                         title={t('refresh')}
@@ -468,7 +461,7 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
                             <path fillRule="evenodd" clipRule="evenodd" d="M7.5 5.25V3.75C7.5 2.92157 8.17157 2.25 9 2.25H15C15.8284 2.25 16.5 2.92157 16.5 3.75V5.25H20.25C20.6642 5.25 21 5.58579 21 6C21 6.41421 20.6642 6.75 20.25 6.75H19.3636L18.248 19.0216C18.1076 20.5668 16.812 21.75 15.2604 21.75H8.73964C7.18803 21.75 5.89244 20.5668 5.75196 19.0216L4.63636 6.75H3.75C3.33579 6.75 3 6.41421 3 6C3 5.58579 3.33579 5.25 3.75 5.25H7.5ZM14.85 3.75C14.9328 3.75 15 3.81716 15 3.9V5.25H9V3.9C9 3.81716 9.06716 3.75 9.15 3.75H14.85ZM6.14255 6.75L7.2458 18.8858C7.31604 19.6584 7.96384 20.25 8.73964 20.25H15.2604C16.0362 20.25 16.684 19.6584 16.7542 18.8858L17.8575 6.75H6.14255Z" fill={enabled}/>
                         </svg>
                     </NeoButton>
-                </Row>
+                </NeoRow>
                 <Dropdown
                     overlay={menu}
                     trigger={['contextMenu']}

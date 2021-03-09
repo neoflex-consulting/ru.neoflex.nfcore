@@ -7,8 +7,8 @@ import moment, {Moment} from "moment";
 import {API} from "../modules/api";
 import Ecore from "ecore";
 import {NeoIcon} from "neo-icon/lib";
-import Paginator from "./app/Paginator";
 import _ from "lodash";
+import Paginator from "./app/dataset/Paginator";
 
 interface Props {
     history: any

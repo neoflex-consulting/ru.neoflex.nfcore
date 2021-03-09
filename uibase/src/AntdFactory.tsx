@@ -1,7 +1,7 @@
 import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
-import {Col, Collapse, ConfigProvider, Drawer, Form, InputNumber, Row, Select} from 'antd';
+import {Collapse, ConfigProvider, Drawer, Form, InputNumber, Select} from 'antd';
 
 import DatasetView from './components/app/dataset/DatasetView';
 import {API} from './modules/api';
@@ -18,13 +18,23 @@ import {
     defaultDateFormat,
     defaultTimestampFormat,
     eventType,
-    grantType, neoIconMap,
+    grantType,
+    neoIconMap,
     positionEnum
 } from "./utils/consts";
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {NeoButton, NeoDatePicker, NeoInput, NeoParagraph, NeoSelect, NeoTabs} from "neo-design/lib";
+import {
+    NeoButton,
+    NeoCol,
+    NeoDatePicker,
+    NeoInput,
+    NeoParagraph,
+    NeoRow,
+    NeoSelect,
+    NeoTabs
+} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
@@ -157,7 +167,7 @@ function createCssClass(viewObject: any){
     let resultCss: any = "";
     if (viewObject.get('cssClass').array().length !== 0) {
         viewObject.get('cssClass').array().forEach((cl: any)=> {
-            let cssClass = undefined;
+            let cssClass: any;
             cssClass = document.createElement('style');
             cssClass.innerHTML = `.${cl.get('name')} { ${cl.get('style')} }`;
             document.getElementsByTagName('head')[0].appendChild(cssClass);
@@ -201,13 +211,11 @@ abstract class ViewContainer extends View {
             isParentHidden: isParentHidden,
             isExportSuppressed: isExportSuppressed,
         };
-        let childrenView = children.map(
+        return children.map(
             (c: Ecore.EObject) => {
                 return this.viewFactory.createView(c, props)
             }
         );
-        return childrenView
-
     };
 
     render = () => {
@@ -238,13 +246,14 @@ class Col_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Col span={Number(this.viewObject.get('span')) || 24}
-                 key={this.viewObject._id}
-                 hidden={this.state.isHidden || this.props.isParentHidden}
-                 className={cssClass}
+            <NeoCol
+                span={Number(this.viewObject.get('span')) || 24}
+                key={this.viewObject._id}
+                hidden={this.state.isHidden || this.props.isParentHidden}
+                className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
-            </Col>
+            </NeoCol>
         )
     }
 }
@@ -268,12 +277,13 @@ class Form_ extends ViewContainer {
 
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
-        const cssClass = createCssClass(this.viewObject);
+        // const cssClass = createCssClass(this.viewObject);
         return (
-            <Form style={{marginBottom: marginBottom}}
-                  hidden={this.state.isHidden || this.props.isParentHidden}
-                  key={this.viewObject._id.toString() + '_4'}
-                  className={cssClass}
+            <Form
+                // style={{marginBottom: marginBottom}}
+                //   hidden={this.state.isHidden || this.props.isParentHidden}
+                //   key={this.viewObject._id.toString() + '_4'}
+                //   className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Form>
@@ -322,9 +332,9 @@ class TabsViewReport_ extends ViewContainer {
                 >
                     {
                         children.map((c: Ecore.EObject) =>
-                            <NeoTabs.NeoTabPane tab={c.get('name')} key={c._id} forceRender={true} >
+                            <NeoTabs.TabPane tab={c.get('name')} key={c._id} forceRender={true} >
                                 {this.viewFactory.createView(c, {...props, isTabItem: true, isTabActive: this.state.activeKey === c._id})}
-                            </NeoTabs.NeoTabPane>
+                            </NeoTabs.TabPane>
                         )
                     }
                 </NeoTabs>
@@ -354,14 +364,13 @@ class Row_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Row
-                key={this.viewObject._id.toString() + '_7'}
+            <NeoRow
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 className={cssClass}
                 gutter={[this.viewObject.get('horizontalGutter') || 0, this.viewObject.get('verticalGutter') || 0]}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
-            </Row>
+            </NeoRow>
         )
     }
 }
@@ -387,7 +396,7 @@ class Region_ extends ViewContainer {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         const cssClass = createCssClass(this.viewObject);
         return (
-            <Row
+            <NeoRow
                 hidden={this.state.isHidden || this.props.isParentHidden}
                 style={{
                     background: '#FFFFFF',
@@ -401,7 +410,7 @@ class Region_ extends ViewContainer {
                 className={cssClass}
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
-            </Row>
+            </NeoRow>
         )
     }
 }
@@ -484,7 +493,7 @@ export class Button_ extends ViewContainer {
                 size={this.viewObject.get('buttonSize')}
                 type={this.viewObject.get('buttonType')}
                 suffixIcon={this.viewObject.get('iconCode') && <NeoIcon icon={neoIconMap[this.viewObject.get('iconCode') || 'none'] as SvgName}/>}
-                onClick={isReadOnly ? ()=>{} : (e) => {
+                onClick={isReadOnly ? ()=>{} : () => {
                         if (!this.state.isEnter) {
                             const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                             handleClick.bind(this)(value);
@@ -510,7 +519,7 @@ export class Select_ extends ViewContainer {
             this.urlCurrentValue =  typeof temp !== "object" ? temp : temp && temp[this.viewObject.get('value')]+"";
         }
 
-        let agValue = "";
+        let agValue: any;
         if (this.props.isAgEdit) {
             agValue = this.props.data[this.props.colData]
         } else {
@@ -850,7 +859,7 @@ export class DatePicker_ extends ViewContainer {
                 <ConfigProvider locale={this.state.locale}>
                     <NeoDatePicker
                         //Fullscreen ag-grid render
-                        width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
+                        // width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         getCalendarContainer={this.props.gridId ? () => this.props.gridId && document.getElementById (this.props.gridId) as HTMLElement : undefined}
                         key={this.viewObject._id}
                         className={cssClass}
@@ -866,6 +875,7 @@ export class DatePicker_ extends ViewContainer {
                         required={this.viewObject.get('required')}
                         title={this.viewObject.get('title')}
                         titleOrientation={this.viewObject.get('titleOrientation')}
+                        width={this.viewObject.get('width')}
                     />
                     {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
                 </ConfigProvider>
@@ -943,6 +953,7 @@ class HtmlContent_ extends ViewContainer {
                          const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
                          handleClick.bind(this)(value);
                      }}
+                 style={{width:'100%'}}
             >
                 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(this.state.htmlContent)}}>
             </div>
@@ -1184,6 +1195,7 @@ export class Input_ extends ViewContainer {
                     <NeoInput
                         hidden={this.state.isHidden}
                         width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
+                        // width={this.viewObject.get('width')}
                         className={cssClass}
                         style={{display: (this.state.isHidden) ? 'none' : undefined}}
                         disabled={isReadOnly}
@@ -1832,7 +1844,7 @@ class ChangeLog_ extends ViewContainer {
 
     componentDidMount(): void {
         this.getLogEntries();
-        mountComponent.bind(this)(false, [{actionType: actionType.execute, callback: (value) => {
+        mountComponent.bind(this)(false, [{actionType: actionType.execute, callback: () => {
                 this.getLogEntries.bind(this)
             }}] as IAction[]);
     }

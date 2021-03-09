@@ -105,11 +105,20 @@ header .header-menu span span {
 
 header .header-menu{
 	float: right;
-	/*line-height: 60px;*/
+	line-height: 1 !important;
 	border: none;
 	background-color: #2a356c;
 	padding: 0 5px;
 	text-align: center;
+}
+
+header .header-menu li {
+	padding-bottom: unset !important;
+	padding-right: unset !important;
+}
+
+header .header-menu .ant-menu-submenu-title{
+	color: rgb(179, 179, 179);
 }
 
 .resource-link {

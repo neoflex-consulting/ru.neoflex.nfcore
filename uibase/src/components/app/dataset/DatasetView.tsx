@@ -4,26 +4,17 @@ import {API} from '../../../modules/api';
 import Ecore, {EObject} from 'ecore';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
-import ServerGroupBy from "./ServerGroupBy";
-import ServerAggregate from './ServerAggregate';
-import ServerSort from './ServerSort';
-import Highlight from "./Highlight";
-import Calculator, {encode, hash} from "./Calculator";
 import DatasetGrid from "./DatasetGrid";
 import {getNamedParamByName, getNamedParams, replaceNamedParam} from "../../../utils/namedParamsUtils";
-import DrawerDiagram from "./DrawerDiagram";
-import DatasetDiagram from "./DatasetDiagram";
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
 import {saveAs} from "file-saver";
 import Fullscreen from "react-full-screen";
-import ServerGroupByColumn from "./ServerGroupByColumn";
 import DeleteDatasetComponent from "./DeleteDatasetComponent";
 import moment from "moment";
 import format from "number-format.js";
-import HiddenColumn from "./HiddenColumn";
-import {replaceAllCollisionless} from "../../../utils/replacer";
+import {encode, hash, replaceAllCollisionless} from "../../../utils/replacer";
 import {
     actionType,
     appTypes,
@@ -45,6 +36,15 @@ import {NeoDrawer, NeoModal} from "neo-design/lib";
 import DatasetBar from "./DatasetBar";
 import {checkServerSideCondition} from "../../../AntdFactory";
 import {ViewRegistry} from "../../../ViewRegistry";
+import Highlight from "./Highlight";
+import ServerAggregate from "./ServerAggregate";
+import ServerGroupByColumn from "./ServerGroupByColumn";
+import ServerGroupBy from "./ServerGroupBy";
+import ServerSort from "./ServerSort";
+import HiddenColumn from "./HiddenColumn";
+import Calculator from "./Calculator";
+import DrawerDiagram from "./DrawerDiagram";
+import DatasetDiagram from "./DatasetDiagram";
 
 const textAlignMap_: any = textAlignMap;
 
@@ -372,6 +372,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('valueFormatter', this.valueFormatter);
                 rowData.set('tooltipField', (c.get('showTooltipField')&&c.get('datasetColumnTooltip')) ? c.get('datasetColumnTooltip') : undefined);
                 rowData.set('convertDataType', c.get('datasetColumn') ? c.get('datasetColumn').get('convertDataType') : undefined);
+                rowData.set('index', c.get('index'));
                 //передаётся в DatasetGrid для подключения typography к заголоку грида
                 /*rowData.set('customHeader',c.get('headerName'));*/
                 columnDefs.push(rowData);
@@ -718,7 +719,7 @@ class DatasetView extends React.Component<any, State> {
                     calculatorFunctionTranslator.forEach(translation => {
                         let regex = new RegExp( translation.key, "i");
                         if (regex.test(translatedOperation!)) {
-                            translatedOperation = translatedOperation?.replace(new RegExp(translation.key, 'gi'), this.props.t(translation.value));
+                            translatedOperation = translatedOperation!.replace(new RegExp(translation.key, 'gi'), this.props.t(translation.value));
                         }
                     });
                     return {
@@ -738,6 +739,13 @@ class DatasetView extends React.Component<any, State> {
         }
         if (prevProps.isParentHidden !== this.props.isParentHidden || prevState.isHidden !== this.state.isHidden) {
             window.dispatchEvent(new Event("appAdaptiveResize"));
+        }
+        for(let i=0; i<this.state.columnDefs.length; i++){
+            for(let j=0; j<this.state.hiddenColumns.length; j++){
+                if(this.state.columnDefs[i].get('field') === this.state.hiddenColumns[j]['datasetColumn']) {
+                    this.state.columnDefs[i].set('index', this.state.hiddenColumns[j]['index'])
+                }
+            }
         }
     }
 
@@ -795,7 +803,7 @@ class DatasetView extends React.Component<any, State> {
                 rowData.set('valueFormatter',this.valueFormatter);
                 rowData.set('mask', element.mask);
                 if (!columnDefs.some((col: any) => {
-                    return col.get('field')?.toLocaleLowerCase() === element.datasetColumn?.toLocaleLowerCase()
+                    return col.get('field')!.toLocaleLowerCase() === element.datasetColumn!.toLocaleLowerCase()
                 })) {
                     columnDefs.push(rowData);
                 }
@@ -891,18 +899,18 @@ class DatasetView extends React.Component<any, State> {
             let translatedOperation = expr.operation;
             calculatorFunctionTranslator.forEach(translation => {
                 let regex = new RegExp( translation.key, "i");
-                if (regex.test(translatedOperation!)) {
-                    translatedOperation = translatedOperation?.replace(new RegExp(translation.key, 'gi'), translation.value);
+                if (translatedOperation !== undefined && regex.test(translatedOperation)) {
+                    translatedOperation = translatedOperation.replace(new RegExp(translation.key, 'gi'), translation.value);
                 }
             });
             sortMap.forEach(colDef => {
-                if (translatedOperation?.includes(colDef.fieldCode)) {
-                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldCode, 'g'), colDef.fieldHash);
+                if (translatedOperation !== undefined && translatedOperation.includes(colDef.fieldCode)) {
+                    translatedOperation = translatedOperation.replace(new RegExp(colDef.fieldCode, 'g'), colDef.fieldHash);
                 }
             });
             sortMap.forEach(colDef => {
-                if (translatedOperation?.includes(colDef.fieldHash)) {
-                    translatedOperation = translatedOperation?.replace(new RegExp(colDef.fieldHash, 'g'), `"${colDef.fieldName}"`);
+                if (translatedOperation !== undefined && translatedOperation.includes(colDef.fieldHash)) {
+                    translatedOperation = translatedOperation.replace(new RegExp(colDef.fieldHash, 'g'), `"${colDef.fieldName}"`);
                 }
             });
             return {
@@ -1231,7 +1239,7 @@ class DatasetView extends React.Component<any, State> {
         } else {
             if (this.state.diagrams.length > 1) {
                 newDiagrams = this.state.diagrams.filter(value => {
-                    return value.diagramName !== this.state.currentDiagram?.diagramName
+                    return value.diagramName !== this.state.currentDiagram!.diagramName
                 });
                 this.setState({
                     currentDiagram: newDiagrams[0],
@@ -1422,7 +1430,7 @@ class DatasetView extends React.Component<any, State> {
                 ? "diagram"
                 : "normal";
         return (
-        <div hidden={this.state.isHidden || this.props.isParentHidden}>
+        <div hidden={this.state.isHidden || this.props.isParentHidden} style={{width:'100%'}}>
         <Fullscreen
         enabled={this.state.fullScreenOn}
         onChange={fullScreenOn => this.setState({ fullScreenOn })}>
@@ -1569,8 +1577,12 @@ class DatasetView extends React.Component<any, State> {
                     highlights = {this.state.highlights}
                     currentDatasetComponent = {this.state.currentDatasetComponent}
                     rowData = {this.state.rowData}
-                    columnDefs = {this.state.columnDefs}
-                    leafColumnDefs = {this.state.leafColumnDefs}
+                    columnDefs = {
+                        Array.from(this.state.columnDefs)
+                            .sort((a, b) => Number.parseInt(a.get('index')) - Number.parseInt(b.get('index')))
+                    }
+                    leafColumnDefs = {Array.from(this.state.leafColumnDefs)
+                        .sort((a, b) => Number.parseInt(a.get('index')) - Number.parseInt(b.get('index')))}
                     isEditMode = {this.state.isEditMode}
                     showEditDeleteButton = {this.state.isDeleteAllowed}
                     showMenuCopyButton = {this.state.isInsertAllowed}
@@ -1846,7 +1858,7 @@ class DatasetView extends React.Component<any, State> {
                 <div id={`delete_menuButton${this.props.viewObject.eURI()}`}>
                     <NeoModal
                         type={"edit"}
-                        // getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                        getContainer={() => document.getElementById (`delete_menuButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="delete_menu"
                         className={'dataset__delete_menu'}
 
@@ -1869,6 +1881,7 @@ class DatasetView extends React.Component<any, State> {
                 </div>
                 <div id={`edit_applyChangesButton${this.props.viewObject.eURI()}`}>
                     <NeoModal
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         onCancel={()=>{
                         this.setState({
                             isCheckEditBufferVisible:!this.state.isCheckEditBufferVisible
@@ -1897,7 +1910,7 @@ class DatasetView extends React.Component<any, State> {
                     </NeoModal>
                     <NeoModal
                         type={'edit'}
-                        // getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         key="save_menu"
                         className={'dataset__save_menu'}
                         width={'500px'}
@@ -1919,6 +1932,7 @@ class DatasetView extends React.Component<any, State> {
                         />
                     </NeoModal>
                     <NeoModal
+                        getContainer={() => document.getElementById (`edit_applyChangesButton${this.props.viewObject.eURI()}`) as HTMLElement}
                         onCancel={()=>{
                             this.setState({
                                 isExportAllTabsVisible:!this.state.isExportAllTabsVisible

@@ -1,13 +1,13 @@
 import * as React from "react";
 import {Form, Select} from "antd";
 import {withTranslation, WithTranslation} from 'react-i18next';
-import {FormComponentProps} from "antd/lib/form";
 import {EObject} from "ecore";
 import {IDiagram} from "./DatasetView";
 import {diagramAnchorMap} from "../../../utils/consts";
 import * as _ from 'lodash';
 import {NeoButton, NeoCol, NeoInput, NeoRow, NeoSelect} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
+import {FormInstance} from "antd/lib/form";
 
 const diagramAnchorMap_: any = diagramAnchorMap;
 
@@ -33,7 +33,9 @@ interface State {
     LegenedPosition?: string,
 }
 
-class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTranslation & any, State> {
+class DrawerDiagram extends React.Component<Props & WithTranslation & any, State> {
+    formRef = React.createRef<FormInstance>();
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -42,37 +44,34 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     }
 
     handleSubmit = () => {
-        this.props.form.validateFields((err: any) => {
-            if (!err) {
-                const diagramParam: IDiagram = {
-                    id: this.props.id,
-                    keyColumn: this.props.form.getFieldValue("axisXColumnName"),
-                    valueColumn: this.props.form.getFieldValue("axisYColumnName"),
-                    diagramName: this.props.form.getFieldValue("diagramName"),
-                    diagramLegend: this.props.form.getFieldValue("diagramLegend"),
-                   /* legendAnchorPosition: legenedPosition,
-                    axisXPosition: xPosition,*/
-                    axisXLegend: this.props.form.getFieldValue("axisXLabel"),
-                   /* axisYPosition: yPosition,*/
-                    axisYLegend: this.props.form.getFieldValue("axisYLabel"),
-                    diagramType: this.state.diagramType!,
-                    colorSchema: "accent",
-                    isSingle: true
-                };
-                this.props.saveChanges(this.props.action, diagramParam);
-                if (this.props.action === "add") {
-                    this.resetFields()
-                }
+        this.formRef.current!.validateFields().then((values: any) => {
+
+            const diagramParam: IDiagram = {
+                id: this.props.id,
+                keyColumn: this.formRef.current!.getFieldValue("axisXColumnName"),
+                valueColumn: this.formRef.current!.getFieldValue("axisYColumnName"),
+                diagramName: this.formRef.current!.getFieldValue("diagramName"),
+                diagramLegend: this.formRef.current!.getFieldValue("diagramLegend"),
+                axisXLegend: this.formRef.current!.getFieldValue("axisXLabel"),
+                axisYLegend: this.formRef.current!.getFieldValue("axisYLabel"),
+                diagramType: this.state.diagramType!,
+                colorSchema: "accent",
+                isSingle: true
+            };
+            this.props.saveChanges(this.props.action, diagramParam);
+            if (this.props.action === "add") {
+                this.resetFields()
             }
-            else {
-                //TODO Error in console
-                this.props.context.notification('Diagram notification','Please, correct the mistakes', 'error')
-            }
+
+        }).catch(() => {
+            //TODO Error in console
+            this.props.context.notification('Diagram notification','Please, correct the mistakes', 'error')
+
         });
     };
 
     resetFields = () => {
-        this.props.form.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             axisXColumnName: undefined,
             axisYColumnName: undefined,
             diagramName: undefined,
@@ -86,16 +85,16 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     };
 
     getColumnSelectOptions(id:string, placeHolder:string) {
-        return <div>
-        <Form.Item>
-            {this.props.form.getFieldDecorator(id,
-                {
-                    rules: [{
-                        required: true,
-                        message: ' '
-                    }]
-                }
-            )(
+        return <Form.Item rules={[
+            {
+                required:
+                    true,
+                message: ' '
+            }
+        ]}
+       name={id}
+        style={{height:'32px', width:'100%'}}>
+            {
                     placeHolder === "Column for Pie graph" || placeHolder === "Столбец для Кругового графика" ?
                         <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                    placeholder={this.props.t(placeHolder)}>
@@ -133,22 +132,20 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                                 {c.get('headerName')}
                             </Select.Option>)}
                     </NeoSelect>
-            )}
+            }
         </Form.Item>
-        </div>
     };
 
     getEnumSelectOptions(id:string, placeHolder:string, selectEnum: Array<EObject>) {
         return  <div>
-        <Form.Item>
-            {this.props.form.getFieldDecorator(id,
-                {
-                    rules: [{
-                        required: true,
-                        message: ' '
-                    }]
-                }
-            )(
+        <Form.Item rules={[
+            {
+                required:
+                    true,
+                message: ' '
+            }
+        ]}
+        name={id}>
                 <NeoSelect width= '100%' getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                     placeholder={this.props.t(placeHolder)}>
                     {selectEnum!.map((c: any) =>
@@ -159,21 +156,19 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                             {this.props.t(diagramAnchorMap_[c.get('name')])}
                         </Select.Option>)}
                 </NeoSelect>
-            )}
         </Form.Item>
         </div>
     };
 
     getInput(id:string, placeHolder:string, disabled:boolean = false) {
-        return <Form.Item>
-            {this.props.form.getFieldDecorator(id,
-                {
-                    rules: [{
-                        required: true,
-                        message: ' '
-                    }]
-                }
-            )(
+        return <Form.Item rules={[
+            {
+                required: true,
+                message: ' '
+            }
+        ]}
+       name={id}
+        style={{height:'32px', width:'100%'}}>
                 <NeoInput
                     width= 'none'
                     disabled={disabled}
@@ -183,12 +178,11 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                         this.handleSubmit()
                     }}
                 />
-            )}
         </Form.Item>
     };
 
     loadFields() {
-        this.props.form.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             axisXColumnName: this.props.currentDiagram.keyColumn,
             axisYColumnName:this.props.currentDiagram.valueColumn,
             diagramName: this.props.currentDiagram.diagramName,
@@ -227,13 +221,13 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
 
     render() {
         return (
-            <Form>
-                <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px'}}>
+            <Form ref={this.formRef}>
+                <div style={{display:'flex', alignItems: 'center', height:'53px', justifyContent:'space-between', padding: '16px 40px 20px'}}>
                 <span style={{fontFamily: "Roboto", fontStyle: "normal", fontWeight: 500, fontSize: "16px", lineHeight: "19px", color: "#333333", marginTop: "10px"}}>{this.props.t('choose diagram type')}</span>
                 </div>
                     <div style={{height:'53px', padding:'0px 40px'}}>
-                    <NeoRow className={'chooseRow'}>
-                        <NeoCol span={7} className={'chooseCol'}>
+                    <NeoRow className={'chooseRow'} justify={"space-between"}>
+                        <NeoCol span={6} className={'chooseCol'}>
                             <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Bar" ? "#FFF8E0" : "white", border: this.state.diagramType === "Bar" ? "1px solid #FFCC66": "1px solid #424D78"}}
                                        onClick={()=>{this.setState({diagramType:"Bar"})}}>
                                 <NeoIcon icon={"barChart"} color={'#424D78'} style={{marginTop: "4px"}}/>
@@ -247,7 +241,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                             </NeoButton>
                             <h4 className={'types'}>{this.props.t("pie chart")}</h4>
                         </NeoCol>
-                        <NeoCol span={4} className={'chooseCol'}>
+                        <NeoCol span={7} className={'chooseCol'}>
                             <NeoButton className={'chooseButton'} size={'medium'} type={'link'} style={{background: this.state.diagramType === "Line" ? "#FFF8E0" : "white", border: this.state.diagramType === "Line" ? "1px solid #FFCC66": "1px solid #424D78"}}
                                        onClick={()=>{this.setState({diagramType:"Line"})}}>
                                 <NeoIcon icon={"diagram"} color={'#424D78'} style={{marginTop: "4px"}}/>
@@ -257,27 +251,76 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                     </NeoRow>
                 </div>
                 <div style={{border: 'solid 1px #F2F2F2', maxHeight:'298px', padding:'12px 40px'}}>
-                <NeoRow className={'Selects'}>
+                <NeoRow className={'Selects'} style={{marginBottom:'16px'}}>
                     {this.getInput("diagramName",this.props.t("diagram name"))}
                 </NeoRow>
-                <NeoRow className={'Selects'}>
-                    {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
-                </NeoRow>
+
+
+                    <NeoRow className={'Selects'}>
+                        {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
+                    </NeoRow>
                     {(this.state.diagramType==="Pie") ?
-                <NeoRow gutter={16} className={'Selects'}>
-                    <NeoCol className={'Selectss'} span={24}>
-                        {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
-                    </NeoCol>
-                </NeoRow>
+                        <NeoRow gutter={16} className={'Selects'}>
+                            <NeoCol className={'Selectss'} span={24}>
+                                {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
+                            </NeoCol>
+                        </NeoRow>
                         :
-                <NeoRow gutter={16} className={'Selects'}>
-                    <NeoCol span={12} className={'Selectss'}>
-                        {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
-                    </NeoCol>
-                    <NeoCol className={'Selectss'} span={12}>
-                        {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
-                    </NeoCol>
-                </NeoRow>}
+                        <NeoRow gutter={16} className={'Selects'}>
+                            <NeoCol span={12} className={'Selectss'}>
+                                {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
+                            </NeoCol>
+                            <NeoCol className={'Selectss'} span={12}>
+                                {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
+                            </NeoCol>
+                        </NeoRow>}
+
+
+                {/*        */}
+                {/*    {(this.state.diagramType==="Line")?*/}
+                {/*<NeoRow className={'Selects'} style={{marginBottom:'16px'}}>*/}
+                {/*    {this.getInput("diagramLegend",this.props.t("diagram legend"))}*/}
+                {/*</NeoRow>*/}
+                {/*        :*/}
+                {/*        ""}*/}
+                {/*    {(this.state.diagramType==="Pie") ?*/}
+                {/*<NeoRow*/}
+                {/*    gutter={16}*/}
+                {/*    className={'Selects'}*/}
+                {/*        // style={{marginBottom:'16px'}}*/}
+                {/*>*/}
+                {/*    <NeoCol className={'Selectss'} span={24}*/}
+                {/*            // style={{padding:'unset'}}*/}
+                {/*    >*/}
+                {/*        {(this.state.diagramType==="Pie")?*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie"))*/}
+                {/*            :*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}*/}
+                {/*    </NeoCol>*/}
+                {/*</NeoRow>*/}
+                {/*        :*/}
+                {/*<NeoRow*/}
+                {/*    // gutter={16}*/}
+                {/*    className={'Selects'}*/}
+                {/*        style={{marginBottom:'16px'}}*/}
+                {/*>*/}
+                {/*    <NeoCol span={12} className={'Selectss'}*/}
+                {/*            style={{paddingRight:'8px'}}*/}
+                {/*    >*/}
+                {/*        {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}*/}
+                {/*    </NeoCol>*/}
+                {/*    <NeoCol className={'Selectss'} span={12}*/}
+                {/*            style={{paddingLeft:'8px'}}*/}
+                {/*    >*/}
+                {/*        {(this.state.diagramType==="Pie")?*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie"))*/}
+                {/*            :*/}
+                {/*            this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}*/}
+                {/*    </NeoCol>*/}
+                {/*</NeoRow>}*/}
+
+
+
                 {/*Временно отключено, пока через фильтры в datasetView*/}
                 {/*<Row>
                     <Col span={12}>
@@ -287,11 +330,19 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                         {this.getEnumSelectOptions("orderBy","order by", this.props.allSorts)}
                     </Col>
                 </Row>*/}
-                <NeoRow gutter={16} className={'Selects'}>
-                    <NeoCol span={12} className={'Selectss'} >
+                <NeoRow
+                    // gutter={16}
+                    className={'Selects'}
+                        style={{marginBottom:'16px'}}
+                >
+                    <NeoCol span={12} className={'Selectss'}
+                            style={{paddingRight:'8px'}}
+                    >
                         {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel",this.props.t("axis X label")):""}
                     </NeoCol>
-                    <NeoCol className={'Selects'} span={12}>
+                    <NeoCol className={'Selects'} span={12}
+                            style={{paddingLeft:'8px'}}
+                    >
                         {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel",this.props.t("axis Y label")):""}
                     </NeoCol>
                 </NeoRow>
@@ -310,6 +361,7 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
                         padding: '16px 40px',
                         background: '#F2F2F2',
                         textAlign: 'left',
+                        zIndex:1
                     }}>
                     {/*<NeoRow className={'Bottom'}>*/}
                     {this.props.action === "edit"
@@ -323,4 +375,4 @@ class DrawerDiagram extends React.Component<Props & FormComponentProps & WithTra
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(DrawerDiagram))
+export default withTranslation()(DrawerDiagram)

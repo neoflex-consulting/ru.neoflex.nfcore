@@ -75,7 +75,7 @@
 }
 
 .interactive-area .developer_paginator {
-    padding: 0 0 0 0 !important;
+    margin: unset;
 }
 
 .interactive-area .developer_paginator > #paginator {

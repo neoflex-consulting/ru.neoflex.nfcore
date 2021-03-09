@@ -1,8 +1,7 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Select} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
@@ -33,9 +32,13 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
+    let mapOfValues = new Map()
+    mapOfValues.set("columnName" + value.index, (value.datasetColumn)?value.translate(value.datasetColumn):undefined)
+    value.setFieldsOnReset(mapOfValues)
+
     return <div className="SortableItem">
         <NeoRow style={{height:'100%', marginBottom:'0'}}>
-            <NeoCol span={1}>
+            <NeoCol span={1} align={'center'}>
                 {value.index}
             </NeoCol>
             <NeoCol span={2}>
@@ -49,17 +52,14 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={20}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
-                        {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined
-                        })(
+                <Form.Item style={{ margin: 'auto', height:'32px' }} initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined} name={"columnName" + value.index}>
                         <NeoSelect
                             width={'525px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
                             placeholder={value.t('columnname')}
                             showSearch={true}
                             allowClear={true}
+                            value={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
                             onChange={(e: any) => {
                                 const event = e ? e : JSON.stringify({index: value.index, columnName: 'datasetColumn', value: undefined})
                                 value.handleChange(event)
@@ -77,11 +77,10 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </Select.Option>)
                             }
                         </NeoSelect>
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={1}>
-                <Form.Item style={{ marginTop: '35px' }}>
+                <Form.Item style={{ margin: '0' }}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
@@ -102,7 +101,6 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{
@@ -113,12 +111,12 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '25px' }}>
+            <Form style={{ marginTop: '25px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
-                    <NeoCol span={12} style={{justifyContent: "flex-start"}}>
+                    <NeoCol span={12}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>{t('total')}</NeoTypography>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent: "flex-end"}}>
+                    <NeoCol span={12} align={"flex-end"}>
                         <NeoButton type={'link'}
                                    title={t("reset")}
                                    id={'resetButton'}
@@ -136,12 +134,13 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                                     ...serverGroupByColumn,
                                     idDatasetColumn : `${JSON.stringify({index: serverGroupByColumn.index, columnName: 'datasetColumn', value: serverGroupByColumn.datasetColumn})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    formRef: this.formRef,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allAggregates: this.props.allAggregates,
                                     handleChange: this.handleChange,
                                     deleteRow: this.deleteRow,
                                     translate: this.translate,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     parametersArray: this.state.parametersArray,
                                     popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
@@ -165,6 +164,7 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
                     padding: '16px 40px',
                     background: '#F2F2F2',
                     textAlign: 'left',
+                    zIndex:1
                 }}>
                     <NeoButton
                         id={'runQueryButton'}
@@ -179,4 +179,4 @@ class ServerGroupByColumn extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerGroupByColumn))
+export default withTranslation()(ServerGroupByColumn)

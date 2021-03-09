@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {IHeaderParams} from "ag-grid-community";
 import {IHeaderReactComp} from "ag-grid-react";
 import {ViewRegistry} from "../../../../ViewRegistry";
@@ -10,7 +10,7 @@ interface Props extends IHeaderReactComp,IHeaderParams  {
     appContext: any,
 }
 
-export default class CustomHeader extends Component<Props, any> {
+export default class CustomHeaderNotUsed extends Component<Props, any> {
     private viewFactory = ViewRegistry.INSTANCE.get('antd');
     constructor(props: Readonly<Props>) {
         super(props);

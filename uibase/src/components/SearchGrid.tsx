@@ -1,10 +1,8 @@
 import * as React from "react";
-import {Button, Form} from 'antd';
 import Ecore, {EObject, EStructuralFeature, Resource} from "ecore";
 import {API, QueryResult} from "../modules/api";
 import {Link} from "react-router-dom";
 import forEach from "lodash/forEach"
-import {FormComponentProps} from "antd/lib/form";
 import DataSearch from "./DataSearch";
 import SearchFilter from "./SearchFilter";
 import {withTranslation, WithTranslation} from "react-i18next";
@@ -12,7 +10,7 @@ import {Helmet} from "react-helmet";
 import './../styles/Data.css'
 import {NeoButton, NeoDrawer, NeoHint, NeoTable} from "neo-design/lib";
 import {NeoIcon} from "neo-icon/lib";
-import Paginator from "./app/Paginator";
+import Paginator from "./app/dataset/Paginator";
 import FormComponentMapper from "./FormComponentMapper";
 import AceEditor from "react-ace";
 
@@ -20,12 +18,14 @@ interface Props {
     onSelect?: (resources: Ecore.Resource[]) => void;
     showAction: boolean;
     specialEClass: Ecore.EClass | undefined;
+    id?:string;
 }
 
 interface State {
+    refresh: boolean;
     resources: Ecore.Resource[];
     columns: Array<any>;
-    tableData: { resource:EObject, name: string, [key:string]: any}[];
+    tableData: { resource: EObject, name: string, [key:string]: any}[];
     tableDataFilter: Array<any>;
     notFoundActivator: boolean;
     result: string;
@@ -52,11 +52,10 @@ function containsPassword(obj: EObject, key: string) : boolean {
     return false
 }
 
-class SearchGrid extends React.Component<Props & FormComponentProps & WithTranslation, State> {
-    private refDataSearchRef: any = React.createRef();
-    private grid: React.RefObject<any>;
+class SearchGrid extends React.Component<Props & WithTranslation, State> {
 
     state = {
+        refresh: false,
         resources: [],
         columns: [],
         tableData: [],
@@ -282,7 +281,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
         const ref:string = `${record.resource.get('uri')}?rev=${record.resource.rev}`;
         ref && API.instance().deleteResource(ref).then((response) => {
             if (response.result === "ok") {
-                this.refDataSearchRef.refresh();
+                this.setState({refresh: !this.state.refresh})
             }
         });
         event.preventDefault()
@@ -381,7 +380,7 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                         onJSONSearch={this.handleJSONSearch}
                         onReset={this.handleReset}
                         specialEClass={this.props.specialEClass}
-                        wrappedComponentRef={(inst: any) => this.refDataSearchRef = inst}
+                        refresh={this.state.refresh}
                      />
                  </div>
                  <div>
@@ -409,11 +408,6 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                          this.props.onSelect !== undefined
                              ?
                              <div>
-                                 <div>
-                                     <Button title={t("select")} type="primary" onClick={this.handleSelect} disabled={!hasSelected} style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}>
-                                         <NeoIcon icon={"big-grid"}/>
-                                    </Button>
-                                 </div>
                                  <NeoTable
                                      scroll={{x: columnsWidth}}
                                      columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}
@@ -449,8 +443,32 @@ class SearchGrid extends React.Component<Props & FormComponentProps & WithTransl
                              </>
                      }
                  </div>
+                 {this.props.id === 'toolsDrawer' &&
+                 <div style={{
+                     position: 'absolute',
+                     right: 0,
+                     bottom: '80px',
+                     width: '100%',
+                     borderTop: '1px solid #e9e9e9',
+                     padding: '16px 40px',
+                     background: '#F2F2F2',
+                     textAlign: 'left',
+                 }}>
+                     <NeoButton
+                         type={!hasSelected ? 'disabled' : 'primary'}
+                         onClick={this.handleSelect}
+                         style={{marginRight: '16px'}}
+                     >
+                         {t('select')}
+                     </NeoButton>
+                     <NeoButton
+                         type={"secondary"}
+                     >
+                         {t('clear')}
+                     </NeoButton>
+                 </div>}
              </div>
             );
         }}
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(SearchGrid))
+export default withTranslation()(SearchGrid);

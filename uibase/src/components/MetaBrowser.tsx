@@ -172,7 +172,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
             for (let eClassifier of ePackage.get('eClassifiers').array()) {
                 let children2: any[] = [];
                 let description = getClassAnnotationByClassAndKey(eClassifier,'documentation');
-                let child = {
+                let child:any = {
                     key: eClassifier.eURI(),
                     name: this.getName(eClassifier),
                     type: eClassifier.eClass.get('name'),
@@ -328,7 +328,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                          tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ ){
-                            return <NeoTabs.NeoTabPane tab={eObj.name}
+                            return <NeoTabs.TabPane tab={eObj.name}
                                                        key={eObj.name}>
                                 <DatasetGrid
                                     ref={(ref:any)=> {
@@ -347,7 +347,7 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                                         return ""
                                     }}
                                 />
-                            </NeoTabs.NeoTabPane>}
+                            </NeoTabs.TabPane>}
                         else{
                             return null
                         }

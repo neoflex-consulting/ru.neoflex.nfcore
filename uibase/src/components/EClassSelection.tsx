@@ -1,8 +1,8 @@
 import React from 'react';
 import Ecore from 'ecore';
-import { withTranslation, WithTranslation } from "react-i18next";
+import {withTranslation, WithTranslation} from "react-i18next";
 
-import { API } from './../modules/api'
+import {API} from '../modules/api'
 import {NeoButton, NeoModal, NeoOption, NeoSelect} from "neo-design/lib";
 
 interface Props {

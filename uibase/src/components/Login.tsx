@@ -1,8 +1,7 @@
 import * as React from "react";
-import {Col, Row} from 'antd'
 import {API} from "../modules/api";
 import {WithTranslation, withTranslation} from "react-i18next";
-import {NeoButton, NeoInput} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
 import FetchSpinner from "./FetchSpinner";
 
 export interface Props {
@@ -66,30 +65,30 @@ export class Login extends React.Component<any, State> {
                 <FetchSpinner/>
                 :
                 <div className={"backGroundImage"}>
-                    <Col className={"firstColumn"}>
+                    <NeoCol className={"firstColumn"}>
                         <div className={"comfort"}><span className={"comfortWord"}>Удобная</span> система</div>
                         <div className={"secondLine"}>Налогового мониторинга</div>
                         <div className={"yellowLineColumn1"}/>
-                    </Col>
+                    </NeoCol>
 
-                    <Col className={"secondColumn"}>
+                    <NeoCol className={"secondColumn"}>
                         {this.state.languages.length !== 0 &&
-                            <div className="lang-login">
-                                <NeoButton onClick={()=>setLang(storeLangValue==='ru' ? 'en' : 'ru')} type={"link"} className="lang-label">
-                                    {storeLangValue.toUpperCase()}
-                                </NeoButton>
-                            </div>
+                        <div className="lang-login">
+                            <NeoButton onClick={()=>setLang(storeLangValue==='ru' ? 'en' : 'ru')} type={"link"} className="lang-label">
+                                {storeLangValue.toUpperCase()}
+                            </NeoButton>
+                        </div>
                         }
-                        <Row>
+                        <NeoRow>
                             <div className={"nameOfApp"}>Neoflex Reporting</div>
-                        </Row>
+                        </NeoRow>
 
-                        <Row>
+                        <NeoRow>
                             <div className={"authorizing"}>{t('authorization')}</div>
-                        </Row>
-                        <Row className={"Login"}>
+                        </NeoRow>
+                        <NeoRow className={"Login"}>
                             {t('login')}
-                        </Row>
+                        </NeoRow>
                         <div className={"inputLogin"}>
                             <NeoInput
                                 autofocus
@@ -101,9 +100,9 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                         </div>
-                        <Row className={"Password"}>
+                        <NeoRow className={"Password"}>
                             {t('password')}
-                        </Row>
+                        </NeoRow>
                         <div className={"inputPassword"}>
                             <NeoInput
                                 password
@@ -115,18 +114,17 @@ export class Login extends React.Component<any, State> {
                                 onKeyUp={this.authenticateIfEnterPress}
                             />
                         </div>
-                        <Row className={"button"} style={{textAlign: "center"}}>
+                        <NeoRow className={"button"} style={{textAlign: "center"}}>
                             <NeoButton key="conbutton" className={"loginButton"}
                                        onClick={this.authenticate}>
                                 {t('login')}
                             </NeoButton>
-                        </Row>
+                        </NeoRow>
                         <div className={"yellowLineColumn2"}/>
-                    </Col>
+                    </NeoCol>
                 </div>
         )
     }
-
 }
 
 export default withTranslation()(Login)

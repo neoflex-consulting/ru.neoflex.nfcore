@@ -1,4 +1,20 @@
-import {hash} from "../components/app/dataset/Calculator";
+// import {hash} from "../components/app/dataset/Calculator";
+
+import * as crypto from "crypto"
+
+export function hash(s: string) : string {
+    const hash = crypto.createHash('md5');
+    hash.update(s);
+    return hash.digest("hex")
+}
+
+export function encode(index: number) : string {
+    if (index <= 23) {
+        return String.fromCharCode(65 + index)
+    } else {
+        return String.fromCharCode(64 + index/26) + String.fromCharCode(65 + index%26)
+    }
+}
 
 export function replaceAllCollisionless(str:string, arr:{name:string, replacement: string}[], flags = 'g') {
     let str1 = str;

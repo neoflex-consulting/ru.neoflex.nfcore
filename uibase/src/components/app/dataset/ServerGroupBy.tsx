@@ -1,9 +1,7 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {withTranslation} from 'react-i18next';
 import {EObject} from 'ecore';
 import {Form, Select} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
-import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import '../../../styles/Draggable.css';
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
@@ -29,10 +27,16 @@ const SortableList = SortableContainer(({items}:any) => {
 
 
 const SortableItem = SortableElement(({value}: any) => {
+    let mapOfValues = new Map()
+    mapOfValues.set("operation" + value.index, value.t(value.operation) || undefined)
+    mapOfValues.set("column" + value.index, (value.datasetColumn)?value.translate(value.datasetColumn):undefined)
+    mapOfValues.set("columnByName" + value.index, value.value)
+    value.setFieldsOnReset(mapOfValues)
+
     return <div>
         <div className="SortableItem" style={{borderBottom:'none'}}>
         <NeoRow style={{height:'100%'}}>
-            <NeoCol span={1}>
+            <NeoCol span={1} align={'center'}>
                 {value.index}
             </NeoCol>
             <NeoCol span={2}>
@@ -46,16 +50,16 @@ const SortableItem = SortableElement(({value}: any) => {
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idOperation}`,
-                        {
-                            initialValue: value.t(value.operation) || undefined,
-                            rules: [{
-                                required:
-                                value.datasetColumn,
-                                message: ' '
-                            }]
-                        })(
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
+                           initialValue={value.t(value.operation) || undefined}
+                           name={"operation" + value.index}
+                           rules={[
+                               {
+                                   required:
+                                   value.datasetColumn,
+                                   message: ' '
+                               }
+                           ]}>
                         <NeoSelect
                             width={'250px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -77,50 +81,48 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </Select.Option>)
                             }
                         </NeoSelect>
-
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={10}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idDatasetColumn}`,
-                        {
-                            initialValue: (value.datasetColumn)?value.translate(value.datasetColumn):undefined,
-                            rules: [{
-                                required:value.operation,
-                                message: ' '
-                            },{
-                                validator: (rule: any, value: any, callback: any) => {
-                                    let isDuplicate: boolean = false;
-                                    if (value.parametersArray !== undefined) {
-                                        const valueArr = value.parametersArray
-                                            .filter((currentObject:IServerQueryParam) => {
-                                                let currentField: string;
-                                                try {
-                                                    //Либо объект при валидации отдельного поля
-                                                    currentField = JSON.parse(rule.value).value
-                                                } catch (e) {
-                                                    //Либо значение этого поля при валидации перед запуском
-                                                    currentField = value
-                                                }
-                                                return (currentField)? currentObject.datasetColumn === currentField: false
-                                            })
-                                            .map(function (currentObject:IServerQueryParam) {
-                                                return currentObject.datasetColumn
-                                            });
-                                        isDuplicate = valueArr.some(function (item:any, idx:number) {
-                                            return valueArr.indexOf(item) !== idx
-                                        });
-                                    }
-                                    if (isDuplicate) {
-                                        callback('Error message');
-                                        return;
-                                    }
-                                    callback();
-                                },
-                                message: 'duplicate row',
-                            }]
-                        })(
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
+                           initialValue={(value.datasetColumn)?value.translate(value.datasetColumn):undefined}
+                           name={"column" + value.index}
+                           rules={[
+                               {
+                                   required:
+                                        value.operation,
+                                   message: '',
+                               },{
+                                   validator: (rule: any, values: any, callback: any) => {
+                                       let isDuplicate: boolean = false;
+                                       if (value.parametersArray !== undefined) {
+                                           const valueArr = value.parametersArray
+                                               .filter((currentObject: any) => {
+                                                   let currentField: string;
+                                                   try {
+                                                       //Либо объект при валидации отдельного поля
+                                                       currentField = JSON.parse(rule.value).value
+                                                   } catch (e) {
+                                                       //Либо значение этого поля при валидации перед запуском
+                                                       currentField = values
+                                                   }
+                                                   return (currentField) ? currentObject.datasetColumn === currentField : false
+                                               })
+                                               .map(function (currentObject: any) {
+                                                   return currentObject.datasetColumn
+                                               });
+                                           isDuplicate = valueArr.some(function (item: any , idx:number) {
+                                               return valueArr.indexOf(item) !== idx
+                                           });
+                                       }
+                                       if (isDuplicate) {
+                                           callback('Error message');
+                                           return;
+                                       }
+                                       callback();
+                                   },
+                                   message: value.t('duplicateRow')}
+                           ]}>
                         <NeoSelect
                             width={'250px'}
                             getPopupContainer={() => document.getElementById (value.popUpContainerId) as HTMLElement}
@@ -144,11 +146,10 @@ const SortableItem = SortableElement(({value}: any) => {
                                         </Select.Option>)
                             }
                         </NeoSelect>
-                    )}
                 </Form.Item>
             </NeoCol>
             <NeoCol span={1}>
-                <Form.Item style={{ marginTop: '35px' }}>
+                <Form.Item style={{ margin: '0' }}>
                     <NeoButton
                         type={'link'}
                         title={value.t("delete row")}
@@ -169,15 +170,16 @@ const SortableItem = SortableElement(({value}: any) => {
             <NeoCol span={2}>
             </NeoCol>
             <NeoCol span={20}>
-                <Form.Item style={{ margin: 'auto' }}>
-                    {value.getFieldDecorator(`${value.idValue}`,
-                        {
-                            initialValue: value.value,
-                            rules: [{
-                                required: value.operation,
-                                message: ' '
-                            }]
-                        })(
+                <Form.Item style={{ margin: 'auto', height:'32px' }}
+                           initialValue={value.value}
+                           name={"columnByName" + value.index}
+                           rules={[
+                               {
+                                   required:
+                                   value.operation,
+                                   message: ' '
+                               }
+                           ]}>
                         <NeoInput
                             width={'525px'}
                             placeholder={value.t("new group by column name")}
@@ -191,16 +193,7 @@ const SortableItem = SortableElement(({value}: any) => {
                                 value.handleOnSubmit(e);
                             }}
                         />
-                    )}
                 </Form.Item>
-
-
-                {/*<Input placeholder={value.t('label')}*/}
-                {/*       onChange={(e: any) => {*/}
-                {/*           const event = JSON.stringify({index: value.index, columnName: 'value', value: e.target.value});*/}
-                {/*           value.handleChange(event)*/}
-                {/*       }}*/}
-                {/*/>*/}
             </NeoCol>
             <NeoCol span={1}>
             </NeoCol>
@@ -215,7 +208,6 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.form.getFieldDecorator;
     }
 
     handleOnSubmit=(e:any)=>{
@@ -226,7 +218,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
     render() {
         const {t} = this.props;
         return (
-            <Form style={{ marginTop: '40px' }}>
+            <Form style={{ marginTop: '40px' }} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-28px', marginBottom: '5px'}}>
                     <NeoCol span={12} style={{justifyContent: "flex-start"}}>
                         <NeoTypography type={'h4_medium'} style={{marginBottom:'10px', marginTop:'20px', color:'#333333'}}>{t('select operation')}</NeoTypography>
@@ -242,7 +234,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                                     idOperation : `${JSON.stringify({index: serverGroupBy.index, columnName: 'operation', value: serverGroupBy.operation})}`,
                                     idValue: `${JSON.stringify({index: serverGroupBy.index, columnName: 'value', value: serverGroupBy.value})}`,
                                     t : this.t,
-                                    getFieldDecorator: this.getFieldDecorator,
+                                    formRef: this.formRef,
                                     columnDefs: this.props.columnDefs.filter((c:any)=>!c.get('hide')),
                                     allAggregates: this.props.allAggregates,
                                     handleChange: this.handleChange,
@@ -250,6 +242,7 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
                                     translate: this.translate,
                                     parametersArray: this.state.parametersArray,
                                     handleOnSubmit: this.handleOnSubmit,
+                                    setFieldsOnReset: this.setFieldsOnReset,
                                     popUpContainerId: this.props.popUpContainerId
                                 }))} distance={3} onSortEnd={this.onSortEnd} helperClass="SortableHelper"/>
                     }
@@ -268,4 +261,4 @@ class ServerGroupBy extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(ServerGroupBy))
+export default withTranslation()(ServerGroupBy)

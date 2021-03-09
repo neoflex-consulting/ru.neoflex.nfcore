@@ -27,6 +27,7 @@
     padding: unset;
     /*max-height: 280px;*/
     /*overflow: auto;*/
+    width: 100%;
 }
 
 .SortableItem {
@@ -153,4 +154,8 @@
 
 .search-column {
     width: 100% !important;
+}
+
+.Drawer .ant-form-item-control-input-content {
+    display: flex;
 }

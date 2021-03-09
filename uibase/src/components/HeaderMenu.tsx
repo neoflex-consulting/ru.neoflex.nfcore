@@ -28,28 +28,19 @@ class HeaderMenu extends React.Component<any, any> {
             if (encodeAppURL(this.props.context.getURL(applications[i].eContents()[0].get('name'), false)) === this.props.location.pathname) {
                 if (applications[i].eContents()[0].get('name') === applicationName) {
 
-                    let temp: any
+                    let temp: any;
 
                     temp = applications[2].eContents()[0].get("headerOrder");
-                    /*applications[2].eContents()[0] = applications[i].eContents()[0];*/
                     applications[2].eContents()[0].values.headerOrder = applications[i].eContents()[0].get("headerOrder")
-                    /*applications[i].eContents()[0] = temp;*/
                     applications[i].eContents()[0].values.headerOrder = temp
 
                     temp = applications[1].eContents()[0].get("headerOrder");
-                    /*applications[1].eContents()[0] = applications[i].eContents()[0];*/
                     applications[1].eContents()[0].values.headerOrder = applications[i].eContents()[0].get("headerOrder")
-                    /*applications[i].eContents()[0] = temp;*/
                     applications[i].eContents()[0].values.headerOrder = temp
 
                     temp = applications[0].eContents()[0].get("headerOrder");
-                    /*applications[0].eContents()[0] = applications[i].eContents()[0];*/
                     applications[0].eContents()[0].values.headerOrder = applications[i].eContents()[0].get("headerOrder")
-                    /*applications[i].eContents()[0] = temp;*/
                     applications[i].eContents()[0].values.headerOrder = temp
-
-
-
                 }
             }
         }
@@ -118,11 +109,12 @@ class HeaderMenu extends React.Component<any, any> {
         </Menu>);
 
         return (
-            <div>
-                <div className={'HeaderWithNames'}>
+            <div style={{width:'100%', display:'flex', justifyContent:'center'}}>
+                <div className={'HeaderWithNames'} style={{width:'100%', display:'inherit'}}>
                     <NeoRow style={{width: '100%'}}>
                         {applications.slice(0, 3).map((app: any) =>
                             <NeoCol
+                                align={'center'}
                                 className='btn-appName'
                                 span={applications.length < 4 ? 8 : 7}
                                 key={app.eContents()[0].get('name')}
@@ -232,7 +224,7 @@ class HeaderMenu extends React.Component<any, any> {
 
     render() {
         return (
-            <NeoRow style={{marginTop: '0px', width: '100%'}} className='apps-menu'>
+            <NeoRow style={{marginTop: '0px', width: '100%'}} className='apps-menu' justify={"center"}>
                 {
                     this.state.applications.length === 0 && this.state.selectedApp === undefined
                         ?

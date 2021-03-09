@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {WithTranslation, withTranslation} from 'react-i18next';
+import {MouseEvent} from 'react';
+import {withTranslation} from 'react-i18next';
 import {Form, List} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
 import {DrawerParameterComponent, DrawerState, ParameterDrawerProps} from './DrawerParameterComponent';
-import {MouseEvent} from "react";
 import {API} from "../../../modules/api";
 import Ecore, {EObject} from "ecore";
 import TextArea from "antd/lib/input/TextArea";
@@ -39,29 +38,29 @@ interface FunctionsEventHandlerProps {
 }
 
 function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandlerProps) {
-    return <NeoCol style={{flexDirection:'column'}}>
-                <NeoRow>
+    return <NeoCol style={{flexDirection:'column', width:'185px'}}>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'1'} onClick={onButtonClick}>1</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'2'} onClick={onButtonClick}>2</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'3'} onClick={onButtonClick}>3</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'4'} onClick={onButtonClick}>4</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'5'} onClick={onButtonClick}>5</NeoButton>
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'6'} onClick={onButtonClick}>6</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'7'} onClick={onButtonClick}>7</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'8'} onClick={onButtonClick}>8</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'9'} onClick={onButtonClick}>9</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'0'} onClick={onButtonClick}>0</NeoButton>
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'('} onClick={onButtonClick}>(</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={')'} onClick={onButtonClick}>)</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'\''} onClick={onButtonClick}>`</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'.'} onClick={onButtonClick}>.</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={','} onClick={onButtonClick}>,</NeoButton>
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'space-around'}>
                     <NeoButton type={'link'} className={'calc-button'} id={'-'} onClick={onButtonClick}>-</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'+'} onClick={onButtonClick}>+</NeoButton>
                     <NeoButton type={'link'} className={'calc-button'} id={'*'} onClick={onButtonClick}>*</NeoButton>
@@ -69,16 +68,16 @@ function CreateCalculator({onButtonClick, onClearClick, t}:CalculatorEventHandle
                     <NeoButton type={'link'} className={'calc-button'} id={'||'} onClick={onButtonClick}>||</NeoButton>
                     {/*<NeoButton type={'link'} className={'calc-button'} onClick={onClearClick}>c</NeoButton>*/}
                 </NeoRow>
-                <NeoRow>
+                <NeoRow justify={'center'}>
                     <NeoButton type={'link'} style={{width: '175px', height: '24px', marginTop: '5px', border: '1px solid #D9D9D9', color: 'black'}} onClick={onButtonClick} id={' '}>{t("space")}</NeoButton>
                 </NeoRow>
             </NeoCol>
 }
 
 function CreateFunctions({onButtonClick, functions,t}:FunctionsEventHandlerProps) {
-    return (<NeoCol key={"CreateFunctionsCol"} style={{flexDirection:'column'}}>
+    return (<NeoCol key={"CreateFunctionsCol"}>
         {functions ? functions.map(func => {
-            return <NeoRow key={func.get("literal") + "row"}>
+            return <NeoRow key={func.get("literal") + "row"} justify={'center'}>
                 <NeoButton
                     type={'link'}
                     key={func.get("literal")}
@@ -113,7 +112,7 @@ export function hash(s: string) : string {
 
 function CreateColumnButtons({columnDefs, onClick}: ColumnButtonsProps) {
     return <List style={{padding:'8px 12px 17px'}}>
-                {columnDefs?.map((element, index) =>{
+                {columnDefs!.map((element, index) =>{
                     return <NeoButton
                         type={'link'}
                         style={{color: 'black', wordWrap:"break-word", whiteSpace: "normal", textAlign:"left", display: "block", height: "auto", padding: "7px 0 7px 0" }}
@@ -142,11 +141,11 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
         };
         this.caretLastPosition = 0;
         this.previousText = "";
-        this.expressionRef = React.createRef<TextArea>()
+        this.expressionRef = React.createRef<typeof TextArea>()
     }
 
     componentDidMount(): void {
-        this.getALLFunctions(this.props.currentDatasetComponent?.eResource());
+        this.getALLFunctions(this.props.currentDatasetComponent!.eResource());
         if (this.props.parametersArray && this.props.parametersArray.length !== 0) {
             this.setState({parametersArray: this.props.parametersArray,currentIndex:0})
         } else {
@@ -157,7 +156,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     componentDidUpdate(prevProps: any, prevState: any, snapshot?: any): void {
         if (JSON.stringify(prevState.currentIndex) !== JSON.stringify(this.state.currentIndex)
             || JSON.stringify(prevState.parametersArray) !== JSON.stringify(this.state.parametersArray)) {
-            this.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
                 [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
                 [selectTypeKey]: this.state.parametersArray![this.state.currentIndex!].type!,
@@ -192,11 +191,11 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
         let newString = "";
         let cursorStartPosition = this.expressionRef.current.resizableTextArea.textArea.selectionStart!;
         const cursorEndPosition = this.expressionRef.current.resizableTextArea.textArea.selectionEnd!;
-        const oldString = (this.getFieldValue(inputOperationKey))?this.getFieldValue(inputOperationKey):"";
+        const oldString = (this.formRef.current!.getFieldValue(inputOperationKey))?this.formRef.current!.getFieldValue(inputOperationKey):"";
         if (cursorStartPosition !== cursorEndPosition) {
             newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.id + oldString.substring(cursorEndPosition);
             this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.id).length;
-            this.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 [inputOperationKey]: newString
             })
         } else {
@@ -207,7 +206,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
             }
             newString = oldString.substring(0,cursorStartPosition) + e.currentTarget.id + oldString.substring(cursorStartPosition);
             this.caretLastPosition = (oldString.substring(0,cursorStartPosition) + e.currentTarget.id).length;
-            this.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 [inputOperationKey]: newString
             })
         }
@@ -215,22 +214,23 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     };
 
     handleClear = (e: MouseEvent<HTMLElement>) => {
-        this.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             [inputOperationKey]:""
         })
     };
 
+
     createNewRow = () => {
-        if (this.getFieldValue(inputFieldKey)
-            && this.getFieldValue(inputFieldKey) !== "") {
+        if (this.formRef.current!.getFieldValue(inputFieldKey)
+            && this.formRef.current!.getFieldValue(inputFieldKey) !== "") {
             let parametersArray: any = this.state.parametersArray;
             parametersArray.push(
                 {index: parametersArray.length + 1,
                     datasetColumn: undefined,
                     operation: undefined,
                     enable: true,
-                    type: this.getFieldValue(selectTypeKey),
-                    mask: this.getFieldValue(selectMaskKey)});
+                    type: this.formRef.current!.getFieldValue(selectTypeKey),
+                    mask: this.formRef.current!.getFieldValue(selectMaskKey)});
             let currentIndex = parametersArray.length - 1;
             this.setState({parametersArray, currentIndex});
         } else {
@@ -267,19 +267,16 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
 
     handleSubmit = (e: any) => {
         e.preventDefault();
-        this.props.form.validateFields((err: any, values: any) => {
-            if (err) {
-                this.props.context.notification('Calculator','Please, correct the mistakes', 'error')
-            } else {
+        this.formRef.current!.validateFields().then((values: any) => {
                 let parametersArray: any = this.state.parametersArray!.map((element)=>{
                     if (element.index-1 === this.state.currentIndex) {
                         return {
                             index: element.index,
-                            datasetColumn: this.getFieldValue(inputFieldKey),
-                            operation: this.getFieldValue(inputOperationKey),
+                            datasetColumn: this.formRef.current!.getFieldValue(inputFieldKey),
+                            operation: this.formRef.current!.getFieldValue(inputOperationKey),
                             enable: true,
-                            type: this.getFieldValue(selectTypeKey),
-                            mask: this.getFieldValue(selectMaskKey)
+                            type: this.formRef.current!.getFieldValue(selectTypeKey),
+                            mask: this.formRef.current!.getFieldValue(selectMaskKey)
                         }
                     } else {
                         return element
@@ -288,43 +285,42 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                 this.setState({parametersArray});
                 this.props.onChangeParameters!(parametersArray!, this.props.componentType)
                 this.props.handleDrawerVisability(this.props.componentType, !this.props.isVisible )
-            }
-        });
+            }).catch(info => {
+            this.props.context.notification('Calculator','Please, correct the mistakes', 'error')
+        })
     };
 
     reset = () => {
         this.props.onChangeParameters!(undefined, this.props.componentType);
         this.setState({parametersArray:[{index:1}],currentIndex:0});
-        this.setFieldsValue({
+        this.formRef.current!.setFieldsValue({
             [inputOperationKey]: this.state.parametersArray![this.state.currentIndex!].operation!,
             [inputFieldKey]: this.state.parametersArray![this.state.currentIndex!].datasetColumn!,
-            [inputSelectKey]: null
+            [inputSelectKey]: undefined
         });
     };
 
     render() {
     return (
         <div id={"selectsInCalculator"}>
-            <Form style={{ marginTop: '24px' }}>
-                <Form.Item style={{marginTop: '-28px', marginBottom:'15px', lineHeight:'19px'}}>
+            <Form style={{ marginTop: '24px' }} ref={this.formRef}>
+                <Form.Item style={{marginTop: '-35px', marginBottom:'10px', lineHeight:'19px'}}>
                         <NeoTypography type={'h4_medium'} style={{color:'#333333'}}>
                             {this.t('calculatableExpressions')}
                         </NeoTypography>
                 </Form.Item>
-                <Form.Item style={{marginBottom:'15px'}}>
-                    <NeoCol span={10} style={{justifyContent:'flex-start'}}>
-                        {
-                            this.getFieldDecorator(inputSelectKey,{
-                                initialValue: this.getFieldValue(inputFieldKey)
-                            })(
+                <NeoRow>
+                    <NeoCol span={10}>
+                        <Form.Item style={{marginBottom:'15px'}}
+                                   name={inputSelectKey}>
                                 <NeoSelect
-                                    width={'310px'}
+                                    width={'100%'}
                                     getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}
                                     placeholder={this.t("Select calculated column")}
                                     onChange={(e: any) => {
                                         this.setState({currentIndex:e});
                                     }}>
-                                    {this.state.parametersArray?.filter((e)=>e.datasetColumn)
+                                    {this.state.parametersArray!.filter((e)=>e.datasetColumn)
                                         .map((element)=> {
                                         return <option
                                             key={(element.datasetColumn)? element.datasetColumn : ""}
@@ -335,8 +331,7 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     })}
 
                                 </NeoSelect>
-                            )
-                        }
+                        </Form.Item>
                     </NeoCol>
                     <NeoCol span={2}>
                         <NeoButton
@@ -345,17 +340,12 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                             id={'createNewRowButton'}
                             onClick={this.createNewRow}
                         >
-                            <NeoIcon icon={"plus"} color={NeoColor.violete_6} style={{margin:'auto 5px auto auto'}}/>
+                            <NeoIcon icon={"plus"} color={NeoColor.violete_6} />
                         </NeoButton>
                     </NeoCol>
-                    <NeoCol span={12} style={{justifyContent:'flex-end'}}>
-                        {
-                            this.getFieldDecorator(inputFieldKey,{
-                                rules: [{
-                                    required:true,
-                                    message: ' '
-                                }]
-                            })(
+                    <NeoCol span={12} align={'flex-end'}>
+                        <Form.Item style={{marginBottom:'15px'}}
+                                   name={inputFieldKey}>
                                 <NeoInput
                                     width={'310px'}
                                     placeholder={this.t("Enter new column name")}
@@ -363,74 +353,68 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                         e.preventDefault();
                                         this.handleSubmit(e)
                                     }}
+
                                 />
-                            )
-                        }
+                        </Form.Item>
+                    </NeoCol>
+                </NeoRow>
+                <NeoRow>
+                    <NeoCol span={12}>
+                        <Form.Item style={{marginBottom:'32px'}} name={selectTypeKey}>
+                                <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
+                                           getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
+                                    {Object.keys(appTypes).map(type => <option key={type} value={type}>
+                                        {this.t(type)}
+                                    </option>)}
+                                </NeoSelect>
+                        </Form.Item>
+                    </NeoCol>
+                    <NeoCol span={12} align={'flex-end'}>
+                        <Form.Item style={{marginBottom:'32px'}} name={selectMaskKey}>
+                                <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
+                                           getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
+                                    {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
+                                        key={mask.key}
+                                        value={mask.value}>
+                                        {this.t(mask.key)}
+                                    </option>) : undefined}
+                                </NeoSelect>
+                        </Form.Item>
+                    </NeoCol>
+                </NeoRow>
+                <Form.Item style={{marginBottom:'0px'}}>
+                    <NeoCol>
+                        <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>{this.t('computational expression')}</div>
+                        <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>{this.t('create a calculation using column aliases')}</div>
                     </NeoCol>
                 </Form.Item>
-                <Form.Item style={{marginBottom:'32px'}}>
-                <NeoCol span={12} style={{justifyContent:'flex-start'}}>
-                    {
-                        this.getFieldDecorator(selectTypeKey,{
-                            rules: [{
-                            }]
-                        })(
-                            <NeoSelect placeholder={this.t('datatype')} key={selectTypeKey} allowClear={true} width={'310px'}
-                                       getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
-                                {Object.keys(appTypes).map(type => <option key={type} value={type}>
-                                    {this.t(type)}
-                                </option>)}
-                            </NeoSelect>
-                        )
-                    }
-                </NeoCol>
-                <NeoCol span={12} style={{justifyContent:'flex-end'}}>
-                    {
-                        this.getFieldDecorator(selectMaskKey,{
-                            rules: [{
-                            }]
-                        })(
-                            <NeoSelect placeholder={this.t('format')} key={selectMaskKey} allowClear={true} width={'310px'}
-                                       getPopupContainer={() => document.getElementById (this.props.popUpContainerId) as HTMLElement}>
-                                {(this.props.formatMasks) ? this.props.formatMasks.map((mask:{key:string,value:string}) => <option
-                                    key={mask.key}
-                                    value={mask.value}>
-                                    {this.t(mask.key)}
-                                </option>) : undefined}
-                            </NeoSelect>
-                        )
-                    }
-                </NeoCol>
-                </Form.Item>
-                <Form.Item style={{marginBottom:'0px'}}>
-                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 500, lineHeight:'16px', color: '#333333', marginBottom:'8px'}}>{this.t('computational expression')}</div>
-                    <div style={{ display: "flex", fontSize: '14px', fontWeight: 300, lineHeight:'16px', color: '#8с8с8с', marginBottom:'16px'}}>{this.t('create a calculation using column aliases')}</div>
-                </Form.Item>
-                    <Form.Item>
-                    <NeoRow style={{marginBottom: '12px'}}>
+                    <NeoRow style={{marginBottom: '12px'}}
+                    >
                         <NeoCol span={24}>
-                            {
-                                this.getFieldDecorator(inputOperationKey,{
-                                    /*value: this.currentOperation,*/
-                                    initialValue: "",
-                                    rules: [{
-                                        required:true,
-                                        message: ' '
-                                    }]
-                                })(
-                                    <TextArea
+                            <Form.Item name={inputOperationKey}
+                                       style={{marginBottom:'0px'}}
+                                       initialValue={' '}
+                                       rules={[
+                                           {
+                                               required:
+                                                   true,
+                                               message: ' '
+                                           }
+                                       ]}>
+                                    <NeoInput type={"textArea"}
+                                              width={'100%'}
                                        ref={this.expressionRef}
                                        placeholder={this.t("Expression")}
                                        style={{height:"112px"}}
                                     />
-                                  )
-                            }
+                            </Form.Item>
                         </NeoCol>
                     </NeoRow>
+                <Form.Item>
                     <NeoRow>
-                        <NeoCol span={8} style={{justifyContent: 'flex-start'}}>
+                        <NeoCol span={8} align={"flex-start"}>
                             <div className={'calc-block'}>
-                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
+                                <NeoTypography type={'capture_medium'} style={{textAlign:'center', marginTop:'12px'}}>
                                     {this.t("columns")}
                                 </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto"}}>
@@ -440,9 +424,9 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                 </div>
                             </div>
                         </NeoCol>
-                        <NeoCol span={8}>
-                            <div className={'calc-block'}>
-                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px'}}>
+                        <NeoCol span={8} align={'center'}>
+                            <div className={'calc-block'} style={{alignItems:'center'}}>
+                                <NeoTypography type={'capture_medium'} style={{textAlign:'center', marginTop:'12px'}}>
                                     {this.t("keypad")}
                                 </NeoTypography>
                                 <CreateCalculator
@@ -451,9 +435,9 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
                                     t={this.t}/>
                             </div>
                         </NeoCol>
-                        <NeoCol span={8} style={{justifyContent: 'flex-end'}}>
+                        <NeoCol span={8} align={'flex-end'}>
                             <div className={'calc-block'}>
-                                <NeoTypography type={'capture_medium'} style={{marginLeft:'10px', marginTop:'12px', marginBottom:'10px'}}>
+                                <NeoTypography type={'capture_medium'} style={{textAlign:'center', marginTop:'12px', marginBottom:'10px'}}>
                                     {this.t("functions/operators")}
                                 </NeoTypography>
                                 <div style={{ height: '219px', overflowY:"auto" }}>
@@ -507,4 +491,4 @@ class Calculator extends DrawerParameterComponent<Props, DrawerState> {
     }
 }
 
-export default withTranslation()(Form.create<Props & FormComponentProps & WithTranslation>()(Calculator))
+export default withTranslation()(Calculator)

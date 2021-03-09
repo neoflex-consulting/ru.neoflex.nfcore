@@ -8,12 +8,8 @@ import {docxElementExportType, docxExportObject} from "../../../utils/docxExport
 import {excelElementExportType, excelExportObject, gridHeaderType} from "../../../utils/excelExportUtils";
 import _ from 'lodash';
 import {IServerQueryParam} from "../../../MainContext";
-import Paginator from "../Paginator";
-import {
-    agGridColumnTypes,
-    appTypes,
-    dmlOperation, grantType,
-} from "../../../utils/consts";
+import Paginator from "./Paginator";
+import {agGridColumnTypes, appTypes, dmlOperation, grantType,} from "../../../utils/consts";
 import DateEditor from "./gridComponents/DateEditor";
 import {switchAntdLocale} from "../../../utils/antdLocalization";
 import GridMenu from "./gridComponents/Menu";
@@ -27,7 +23,8 @@ import {
     ColumnResizedEvent,
     DisplayedColumnsChangedEvent,
     GridOptions,
-    GridReadyEvent, SuppressKeyboardEventParams,
+    GridReadyEvent,
+    SuppressKeyboardEventParams,
     ValueFormatterParams
 } from "ag-grid-community";
 import {CellChangedEvent} from "ag-grid-community/dist/lib/entities/rowNode";
@@ -204,7 +201,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     menu: GridMenu,
                     expand: Expand,
                     antdFactory: AntdFactoryWrapper/*,
-                    agColumnHeader: CustomHeader*/
+                    agColumnHeader: CustomHeaderNotUsed*/
                 },
                 defaultColDef: {
                     resizable: true
@@ -449,7 +446,7 @@ class DatasetGrid extends React.Component<Props, any> {
                 textAlign: textAlign,
                 justifyContent: textAlign === "right" ? "flex-end" : textAlign === "left" ? "flex-start" : textAlign
             };
-            let highlights = this.props.highlights?.filter(h => h.enable && h.datasetColumn && h.highlightType) || [];
+            let highlights = this.props.highlights!.filter(h => h.enable && h.datasetColumn && h.highlightType) || [];
             for (const h of highlights) {
                 if (h.highlightType === 'Column') {
                     if (params.colDef.field === h.datasetColumn!) {
@@ -868,7 +865,7 @@ class DatasetGrid extends React.Component<Props, any> {
         headerCells.forEach(cell => {
             minHeight = Math.max(minHeight, cell.scrollHeight);
         });
-        this.gridOptions.api?.setHeaderHeight(minHeight)
+        this.gridOptions.api!.setHeaderHeight(minHeight)
     };
 
     colDefsToObject = (colDefs: Map<String,any>[], newColDef: {}[] = []) => {
@@ -926,7 +923,7 @@ class DatasetGrid extends React.Component<Props, any> {
                     valueFormatter: colDef.get('valueFormatter'),
                     tooltipField: colDef.get('tooltipField'),
                     //headerComponentFramework - используется для подключения typography к заголоку грида
-                    /*headerComponentFramework: colDef.get('customHeader') && CustomHeader,
+                    /*headerComponentFramework: colDef.get('customHeader') && CustomHeaderNotUsed,
                     headerComponentParams: colDef.get('customHeader') && {
                         viewObject: colDef.get('customHeader'),
                         appContext: this.props.context
@@ -992,7 +989,8 @@ class DatasetGrid extends React.Component<Props, any> {
                                                             opacity: this.state.isGridReady ? 1 : 0,
                                                             width: "100%", minWidth: minGridWidth,
                                                             backgroundColor: "#E6E6E6",
-                                                            height: "40px"}}>
+                                                            height: "40px",
+                                                            padding: '8px'}}>
                         <Paginator
                             {...this.props}
                             currentPage = {this.state.paginationCurrentPage}

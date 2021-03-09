@@ -53,6 +53,12 @@ abstract class GridComponent {
     boolean isEditGridComponent
 }
 
+@NFCore(documentation="Таблица справочников")
+class MasterdataView extends ViewElement {
+        @NFCore(documentation="Тип сущности из мастерданных")
+    refers EntityType entityType
+}
+
 @NFCore(documentation="Глобальные настройки приложения")
 class GlobalSettings extends Tagged {
         @NFCore(documentation="Уникальное имя объекта во всем приложении")
@@ -128,12 +134,6 @@ abstract class ViewContainer extends ViewElement {
 
 @NFCore(documentation="Иконка, как элемент визуального интерфейса")
 abstract class Icon extends ViewElement {	
-}
-
-@NFCore(documentation="Таблица справочников")
-class MasterdataView extends ViewElement {
-        @NFCore(documentation="Тип сущности из мастерданных")
-    refers EntityType entityType
 }
 
 @NFCore(documentation="Календарь, как элемент визуального интерфейса")
@@ -310,7 +310,7 @@ class Select extends ViewElement, ValueItem, CommandElement, GridComponent, Inpu
     SelectMode mode = "Default"
         @NFCore(documentation="Значения для списка берутся из 'dataset'")
     boolean isDynamic
-         @NFCore(documentation="Поятонные значения в выпадающем списке. Например: 'Округленная:1000;Точная:1'", renderConditions="{'isDynamic':false}")
+         @NFCore(documentation="Постоянные значения в выпадающем списке. Например: Округленная:1000;Точная:1", renderConditions="{'isDynamic':false}")
     String staticValues
         @NFCore(documentation="Ссылка на Набор Данных для выпадающего спсика", renderConditions="{'isDynamic':true}")
     refers Dataset dataset
@@ -332,6 +332,8 @@ class DatePicker extends ViewElement, ValueItem, GridComponent, InputElement {
     boolean showTime
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")
     boolean required
+        @NFCore(documentation="Положение текста, отображающегося рядом с полем")
+    String width
 }
 
 @NFCore(documentation="Любой Html контент")
@@ -350,6 +352,8 @@ class Input extends ViewElement, ValueItem, GridComponent,InputElement {
     String maxValue
         @NFCore(documentation="Шаг значений, если inputType = InputNumber", renderConditions="{'inputType':'InputNumber'}")
     String step
+        @NFCore(documentation="Ширина поля")
+    String width
         @NFCore(documentation="Текст, отображающийся внутри поля формы, который исчезает при получении фокуса")
     String placeholder
         @NFCore(documentation="Обязательное поле. Отмечается красной звездочкой")

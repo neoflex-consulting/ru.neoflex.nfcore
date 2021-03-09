@@ -1,12 +1,12 @@
 import React from "react";
-import {Pagination, ConfigProvider} from "antd";
+import {ConfigProvider, Pagination} from "antd";
 import {WithTranslation, withTranslation} from "react-i18next";
 import Ru from 'antd/es/locale/ru_RU';
 import En from 'antd/es/locale/en_US';
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoHint} from "neo-design/lib";
-import '../../styles/Paginator.css';
-import {adaptiveElementSize, getAdaptiveSize} from "../../utils/adaptiveResizeUtils";
+import '../../../styles/Paginator.css';
+import {adaptiveElementSize, getAdaptiveSize} from "../../../utils/adaptiveResizeUtils";
 
 interface Props extends WithTranslation {
     paginationPageSize: number,
@@ -115,7 +115,7 @@ class Paginator extends React.Component<Props, any> {
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : En}>
                 <div ref={this.paginatorRef}
                     className={    `paginator ${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
-                    style={{marginTop: "10px", marginBottom: "10px", float: "right"}}>
+                    style={{float: "right"}}>
                     {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('first page')}><NeoButton className={"jump-first"} type={"link"} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton></NeoHint> : null}
                     <div className={"page-view-container"}>
                         {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('last page')}><NeoButton className={"jump-last"} type={"link"} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton></NeoHint> : null}

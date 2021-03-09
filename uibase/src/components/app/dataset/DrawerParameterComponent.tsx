@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {WithTranslation} from 'react-i18next';
 import {Button, Col, Form, Row} from 'antd';
-import {FormComponentProps} from "antd/lib/form";
+import {FormInstance} from "antd/lib/form";
 import {paramType} from "./DatasetView"
 import {IServerQueryParam} from "../../../MainContext";
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
@@ -33,12 +33,10 @@ export interface DrawerState {
     calculatorFunction?: EObject[];
 }
 
-export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends DrawerState> extends React.Component<ParameterDrawerProps & FormComponentProps & WithTranslation & any, DrawerState> {
+export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends DrawerState> extends React.Component<ParameterDrawerProps & WithTranslation & any, DrawerState> {
     t: any;
-    getFieldDecorator: any;
-    setFieldsValue: any;
-    getFieldValue: any;
     paramNotification: string;
+    formRef = React.createRef<FormInstance>();
 
     constructor(props: any) {
         super(props);
@@ -48,9 +46,6 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
         };
         this.handleChange = this.handleChange.bind(this);
         this.t = this.props.t;
-        this.getFieldDecorator = this.props.form?.getFieldDecorator;
-        this.setFieldsValue = this.props.form?.setFieldsValue;
-        this.getFieldValue = this.props.form?.getFieldValue;
         switch (this.props.componentType) {
             case paramType.sort:
                 this.paramNotification = "Sort notification";
@@ -81,23 +76,21 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
         if (JSON.stringify(prevProps.isVisible) !== JSON.stringify(this.props.isVisible) && !this.props.isVisible
             && JSON.stringify(this.props.parametersArray) !== JSON.stringify(this.state.parametersArray)) {
-            this.props.form.validateFields((err: any, values: any) => {
-                if (err) {
-                    this.props.context.notification(this.paramNotification,'Please, correct the mistakes', 'error')
-                }
-            });
+            this.formRef.current!.validateFields().catch(info => {
+                this.props.context.notification(this.paramNotification,'Please, correct the mistakes', 'error')
+            })
         }
         if (JSON.stringify(prevProps.parametersArray) !== JSON.stringify(this.props.parametersArray)) {
             this.setState({parametersArray: this.props.parametersArray})
         }
         if (JSON.stringify(prevState.parametersArray) !== JSON.stringify(this.state.parametersArray)
             && this.props.isVisible
-            && this.state.parametersArray?.length !== 0) {
-            this.props.form.validateFields((err: any, values: any) => {
-                if (!err) {
+            && this.state.parametersArray!.length !== 0) {
+            this.formRef.current!.validateFields().then((values: any) => {
                     this.props.saveChanges!(this.state.parametersArray!, this.props.componentType);
-                }
-            });
+
+            }).catch(info => {
+            })
         }
 
         if (this.state.parametersArray?.length === 0) {
@@ -153,7 +146,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     };
 
     deleteRow = (e: any) => {
-        this.props.form.resetFields();
+        this.formRef.current!.resetFields();
         let newServerParam: IServerQueryParam[] = [];
         this.state.parametersArray?.forEach((element:IServerQueryParam, index:number) => {
             if (element.index !== e.index) {
@@ -176,6 +169,16 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
         e.preventDefault();
         this.refresh();
     };
+    
+    setFieldsOnReset = (map : Map<string, any>) => {
+        for (let [key, value] of map) {
+            if (this.formRef.current !== null) {
+                this.formRef.current!.setFieldsValue({
+                    [key]: value
+                })
+            }
+        }
+    }
 
 
     createNewRow = () => {
@@ -239,24 +242,10 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
     }
 
     refresh = () => {
-        // if (this.props.componentType === paramType.aggregate){
-        //     if (!this.isValid(this.state.parametersArray!)){
-        //         this.props.context.notification('Aggregate notification','Please, correct the mistakes', 'error')
-        //     }
-        //     else {
-        //         this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-        //     }
-        // }
-        // else{
-        //         this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-        //     }
-        // this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-        this.props.form.validateFields((err: any, values: any) => {
-            if (!err) {
+        this.formRef.current!.validateFields().then((values: any) => {
                 this.props.onChangeParameters!(this.state.parametersArray!, this.props.componentType)
-            } else {
-                this.props.context.notification(this.paramNotification, 'Please, correct the mistakes', 'error')
-            }
+        }).catch(info => {
+            this.props.context.notification(this.paramNotification, 'Please, correct the mistakes', 'error')
         })
     };
 
@@ -288,7 +277,7 @@ export class DrawerParameterComponent<T extends ParameterDrawerProps, V extends 
 
     render() {
         return (
-            <Form style={{ marginTop: '30px' }} onSubmit={this.handleSubmit}>
+            <Form style={{ marginTop: '30px' }} onFinish={this.handleSubmit} ref={this.formRef}>
                 <Form.Item style={{marginTop: '-38px', marginBottom: '40px'}}>
                     <Col span={12}>
                         <div style={{display: "inherit", fontSize: '17px', fontWeight: 500, marginLeft: '18px', color: '#878787'}}>Сортировка</div>
