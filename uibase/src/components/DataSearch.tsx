@@ -47,7 +47,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     handleSubmit = (e: any) => {
-        e.preventDefault();
         this.refresh();
     };
 
@@ -64,12 +63,11 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
          } else {
              selectedClassObject = this.props.specialEClass
          }
-        if (this.state.isJSONResult) {
-            API.instance().find(JSON.parse(values.json_field)).then(results=>{
-                this.props.onJSONSearch(results)
-            })
-        }
-         if (values.key.value === "json_search") {
+         if (this.state.isJSONResult) {
+             API.instance().find(JSON.parse(values.json_field.value)).then(results=>{
+                 this.props.onJSONSearch(results)
+             })
+         } else if (values.key.value === "json_search") {
              API.instance().find(JSON.parse(values.json_field.value)).then(results => {
                  this.props.onSearch(results.resources)
              })

@@ -328,8 +328,11 @@ class MetaBrowser extends React.Component<Props & WithTranslation, State> {
                          tabPosition={'top'}>
                     {this.state.data.map(eObj=>{
                         if (eObj.isVisible__ ){
-                            return <NeoTabs.TabPane tab={eObj.name}
-                                                       key={eObj.name}>
+                            return <NeoTabs.TabPane
+                                tab={eObj.name}
+                                 key={eObj.name}
+                                forceRender={true}
+                            >
                                 <DatasetGrid
                                     ref={(ref:any)=> {
                                         eObj.gridRef = ref;
