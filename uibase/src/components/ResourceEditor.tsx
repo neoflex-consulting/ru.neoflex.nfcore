@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Dropdown, Layout, Menu, Tree} from 'antd';
+import {Dropdown, Layout, Menu, Tree} from 'antd';
 import Ecore, {EClass, EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -1656,18 +1656,24 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 OK
                             </NeoButton>
                             {this.state.addRefMenuItems.length > 1
-                                ? <Dropdown overlay={this.renderMenu()}>
-                                    <Button
+                                ? <Dropdown
+                                    overlay={this.renderMenu()}
+                                    overlayStyle={{ minWidth:'184px' }}
+                                >
+                                    <div style={{ position:'absolute', right:'24px', bottom:'24px' }}>
+                                    <NeoButton
                                         title={t('add element')}
-                                        type="primary"
-                                        style={{ display: 'block', margin: '0px 0px 10px auto' }}
-                                        size="large"
+                                        titlePos={'top'}
+                                        type="square"
+                                        onClick={this.handleAddElement}
                                     >
-                                        <NeoIcon icon={"plus"}/>
-                                    </Button>
+                                        <NeoIcon icon={"plus"} color={'white'}/>
+                                    </NeoButton>
+                                    </div>
                                 </Dropdown>
+
                                 : this.state.addRefMenuItems.length === 1
-                                    ? <Button
+                                    ? <NeoButton
                                         title={t('add element')}
                                         type="primary"
                                         style={{ display: 'block', margin: '0px 0px 10px auto' }}
@@ -1675,7 +1681,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                         onClick={this.handleAddElement}
                                     >
                                         <NeoIcon icon={"plus"}/>
-                                    </Button>
+                                    </NeoButton>
                                     : null
                             }
                         </>

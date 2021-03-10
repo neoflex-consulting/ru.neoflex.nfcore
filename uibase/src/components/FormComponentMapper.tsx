@@ -10,7 +10,7 @@ import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
-import {neoIconMap, NeoIconTypeArray} from "../utils/consts";
+import {neoIconMap} from "../utils/consts";
 import {SvgName} from "neo-icon/lib/icon/icon";
 import {API} from "../modules/api";
 import {WithTranslation} from "react-i18next";
@@ -403,7 +403,7 @@ interface SelectComponentProps {
 
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
-    const { eType, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
+    const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props;
 
     return (
         <NeoSelect
@@ -411,11 +411,14 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
             mode={upperBound === -1 ? "multiple" : undefined}
             value={value}
             key={ukey + "_" + idx}
-            style={{ width: "300px" }}
+            width={'300px'}
             onChange={(newValue: any) => {
                 onChange && onChange!(newValue)
             }}
             disabled={!edit}
+            maxTagCount={'responsive'}
+            maxTagTextLength={7}
+            maxTagPlaceholder={`Еще...`}
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
@@ -426,7 +429,11 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
                 })
                 .map((obj: Ecore.EObject) =>
                     <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
-                        <div style={{display:"flex", alignItems: "center"}}>{showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
+                        {/*<div style={{display:"flex", alignItems: "center"}}>*/}
+                        {/*    {showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) &&*/}
+                        {/*    <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}*/}
+                        {obj.get('name')}
+                        {/*</div>*/}
                     </NeoOption>)}
         </NeoSelect>
     )
