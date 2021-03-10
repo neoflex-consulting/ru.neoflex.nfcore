@@ -575,7 +575,7 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
 
     static getComponent(props: any) {
         const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, t } = props;
-        const targetValue = value || props.eObject.get('defaultValueLiteral');
+        const targetValue = value || props?.eObject?.get('defaultValueLiteral');
         if (syntax === "sql") {
             return <EditableSQLArea
                 t={t}

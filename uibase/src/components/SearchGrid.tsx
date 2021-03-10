@@ -408,6 +408,9 @@ class SearchGrid extends React.Component<Props & WithTranslation, State> {
                          this.props.onSelect !== undefined
                              ?
                              <div>
+                                 <NeoButton title={t("select")} type={!hasSelected ? "disabled" : "primary"} onClick={this.handleSelect} style={{width: '100px', fontSize: '17px', marginBottom: '15px'}}>
+                                     <NeoIcon icon={"big-grid"}/>
+                                 </NeoButton>
                                  <NeoTable
                                      scroll={{x: columnsWidth}}
                                      columns={this.props.showAction ? columnsT.concat(actionColumnDef) : columnsT}

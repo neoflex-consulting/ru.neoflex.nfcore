@@ -4,7 +4,7 @@
 }
 
 .application-changes {
-    width: 320px;
+    min-width: 320px;
     height: calc(100% - 63px);
     margin: 25px 56px 38px 0;
 }
