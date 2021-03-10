@@ -46,4 +46,6 @@
     line-height: 20px !important;
 }
 
-
+.select_option_tag b {
+    display: none;
+}

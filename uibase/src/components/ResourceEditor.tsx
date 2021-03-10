@@ -1675,12 +1675,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 : this.state.addRefMenuItems.length === 1
                                     ? <NeoButton
                                         title={t('add element')}
-                                        type="primary"
-                                        style={{ display: 'block', margin: '0px 0px 10px auto' }}
-                                        size="large"
+                                        titlePos={'top'}
+                                        type="square"
+                                        style={{ position:'absolute', right:'24px', bottom:'24px' }}
                                         onClick={this.handleAddElement}
                                     >
-                                        <NeoIcon icon={"plus"}/>
+                                        <NeoIcon icon={"plus"} color={'white'}/>
                                     </NeoButton>
                                     : null
                             }
@@ -1730,17 +1730,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
-                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return (isEObjectType ||
                                         (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded)) &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
-                                                :
-                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
+                                                <NeoHint title={!this.state.selectDropdownVisible?`${eObject.eClass.get('name')} ${eObject.get('name')}`:undefined}>
+                                                        <b>{eObject.eClass.get('name')}</b>&nbsp;
+                                                    {eObject.get('name')}
                                                 </NeoHint>
-                                            }
                                         </NeoOption>
                                 })}
                     </NeoSelect>
