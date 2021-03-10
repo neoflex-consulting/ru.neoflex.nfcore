@@ -1656,11 +1656,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 OK
                             </NeoButton>
                             {this.state.addRefMenuItems.length > 1
-                                ? <Dropdown.Button
+                                ? <Dropdown
                                     overlay={this.renderMenu()}
-                                    style={{ position:'absolute', right:'24px' }}
-                                    icon={<NeoIcon size={"m"} icon={"plus"}/>}
-                                />
+                                    overlayStyle={{ minWidth:'184px' }}
+                                >
+                                    <a style={{ position:'absolute', right:'24px', bottom:'24px' }}>
+                                    <NeoButton
+                                        title={t('add element')}
+                                        titlePos={'top'}
+                                        type="square"
+                                        onClick={this.handleAddElement}
+                                    >
+                                        <NeoIcon icon={"plus"} color={'white'}/>
+                                    </NeoButton>
+                                    </a>
+                                </Dropdown>
 
                                 : this.state.addRefMenuItems.length === 1
                                     ? <NeoButton
