@@ -10,7 +10,7 @@ import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
-import {neoIconMap, NeoIconTypeArray} from "../utils/consts";
+import {neoIconMap} from "../utils/consts";
 import {SvgName} from "neo-icon/lib/icon/icon";
 import {API} from "../modules/api";
 import {WithTranslation} from "react-i18next";
@@ -403,7 +403,7 @@ interface SelectComponentProps {
 
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
-    const { eType, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
+    const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props;
 
     return (
         <NeoSelect
