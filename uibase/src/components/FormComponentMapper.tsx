@@ -4,7 +4,7 @@ import {Input, Select} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from '../utils/resourceEditorUtils';
-import {NeoButton, NeoDatePicker, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoInput, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
@@ -207,7 +207,7 @@ interface EditableTextAreaProps {
 }
 
 function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
-    const TextArea = Input.TextArea;
+    const TextArea = NeoInput;
     const Password = Input.Password;
 
     const types: { [key: string]: any } = {
@@ -230,6 +230,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                 <InputComponent
                     key={`textedit_${ukey}${idx}`}
                     style={{ resize: 'none' }}
+                    width={'300px'}
                     autosize={{ maxRows: expanded ? null : 10 }}
                     value={innerValue}
                     onChange={(e: any) => {
@@ -245,6 +246,7 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                     key={`textview_${ukey}${idx}`}
                     autoSize={{ maxRows: expanded ? null : 10 }}
                     value={value}
+                    width={'300px'}
                     style={{
                         whiteSpace: 'pre',
                         resize: 'none'

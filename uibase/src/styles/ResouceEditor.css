@@ -49,3 +49,7 @@
 .select_option_tag b {
     display: none;
 }
+
+.resource__tree .ant-tree {
+    background-color: unset;
+}

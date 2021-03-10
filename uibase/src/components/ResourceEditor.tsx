@@ -1432,7 +1432,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 showIcon
                 showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
-
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
                 selectedKeys={this.state.selectedKeys}
@@ -1569,7 +1568,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     >
                         <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'auto' }}>
                             <NeoRow justify={"space-around"} style={{alignItems:'unset'}}>
-                                <NeoCol span={19}>
+                                <NeoCol span={19} className={'resource__tree'}>
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </NeoCol>
                                 <NeoCol span={5} style={{ position: 'sticky', top: '0' }}>
