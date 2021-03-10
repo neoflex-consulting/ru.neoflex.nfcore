@@ -5,7 +5,12 @@ import Ecore, {EObject} from 'ecore';
 import {IServerNamedParam, IServerQueryParam} from '../../../MainContext';
 import ServerFilter from './ServerFilter';
 import DatasetGrid from "./DatasetGrid";
-import {getNamedParamByName, getNamedParams, replaceNamedParam} from "../../../utils/namedParamsUtils";
+import {
+    getAllNamedParamsByName,
+    getNamedParamByName,
+    getNamedParams,
+    replaceNamedParam
+} from "../../../utils/namedParamsUtils";
 import SaveDatasetComponent from "./SaveDatasetComponent";
 import {handleExportExcel} from "../../../utils/excelExportUtils";
 import {handleExportDocx} from "../../../utils/docxExportUtils";
@@ -627,6 +632,54 @@ class DatasetView extends React.Component<any, State> {
             }
             return serverParam
         }
+        const getNamedParamsFromComponent = (resource: Ecore.EObject, componentName: string) => {
+            function isValidComponentName(value: string): value is keyof typeof defaultComponentValues {
+                return value in defaultComponentValues;
+            }
+            let serverParam: IServerQueryParam[] = [];
+            if (isValidComponentName(componentName)) {
+                resource.eContents()[0].get(componentName).array().forEach( (f: Ecore.Resource) => {
+                    if (serverParam.filter( (filter: any) =>
+                        filter['datasetColumn'] === f.get('datasetColumn') &&
+                        filter['operation'] === f.get('operation') &&
+                        filter['value'] === f.get('value') &&
+                        filter['enable'] === (f.get('enable') !== null ? f.get('enable') : false) &&
+                        filter['highlightType'] === (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell') &&
+                        filter['backgroundColor'] === f.get('backgroundColor') &&
+                        filter['color'] === f.get('color')
+                    ).length === 0) {
+                        //find :variables
+                        let value = f.get('value');
+                        let enable = (f.get('enable') !== null ? f.get('enable') : false);
+                        let skipParam = false;
+                        const v = value?.match(/:[a-z0-9_()]+/gi);
+                        if (v?.length > 0) {
+                            const pathFull = this.props.context.getFullPath();
+                            const params = getAllNamedParamsByName(v
+                                , this.props.context.contextItemValues
+                                , pathFull[pathFull.length - 1].params)
+                            value = replaceNamedParam(value, params)
+                            //didn't replace
+                            skipParam = !!params.find((o)=> o.parameterValue === undefined)
+                            if (!skipParam)
+                                serverParam.push({
+                                    index: serverParam.length + 1,
+                                    datasetColumn: f.get('datasetColumn'),
+                                    operation: f.get('operation') || defaultComponentValues[componentName],
+                                    value: value,
+                                    enable: enable,
+                                    type: getColumnType(columnDefs, f.get('datasetColumn')) || f.get('dataType') || undefined,
+                                    mask: f.get('mask') || undefined,
+                                    highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
+                                    backgroundColor: f.get('backgroundColor'),
+                                    color: f.get('color')
+                                })
+                        }
+                    }
+                });
+            }
+            return serverParam
+        }
         let serverFilters: IServerQueryParam[] = [];
         let serverAggregates: IServerQueryParam[] = [];
         let serverSorts: IServerQueryParam[] = [];
@@ -663,6 +716,10 @@ class DatasetView extends React.Component<any, State> {
             }
             if (this.props.pathFull[this.props.pathFull.length - 1].params !== undefined) {
                 serverFilters.concat(getParamsFromURL(this.props.pathFull[this.props.pathFull.length - 1].params, columnDefs));
+            }
+            const variableFilters = getNamedParamsFromComponent(resource, 'serverFilter');
+            if (variableFilters.length !== 0) {
+                serverFilters = variableFilters
             }
             addEmpty(serverFilters);
             addEmpty(serverAggregates);

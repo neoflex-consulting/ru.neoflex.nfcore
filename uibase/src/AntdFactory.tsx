@@ -448,8 +448,8 @@ export class Href_ extends ViewContainer {
                   }}>
             { this.viewObject.get('label')
                 ? this.viewObject.get('label')
-                : (this.props.getValue ? this.props.getValue() : undefined) }
-        </a> : <div> {this.props.getValue()} </div>
+                : (this.props.getValue ? this.props.formatValue(this.props.getValue()) : undefined) }
+        </a> : <div> {this.props.formatValue(this.props.getValue())} </div>
     }
 }
 
@@ -666,7 +666,13 @@ export class Select_ extends ViewContainer {
         }
         this.setState({
             selectData:staticValues,
-            currentValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.urlCurrentValue ? this.urlCurrentValue : (this.viewObject.get('value') ? this.viewObject.get('value') : "")
+            currentValue: this.state.defaultAgGridValue
+                ? this.state.defaultAgGridValue
+                : staticValues.find((obj:any) => obj.value === this.urlCurrentValue)
+                    ? this.urlCurrentValue
+                    : (this.viewObject.get('value')
+                        ? this.viewObject.get('value')
+                        : "")
         },()=> this.props.context.contextItemValues.set(this.viewObject.get('name')+this.viewObject._id, {
             parameterName: this.viewObject.get('name'),
             parameterValue: this.state.defaultAgGridValue ? this.state.defaultAgGridValue : this.state.currentValue
@@ -1085,7 +1091,7 @@ class ValueHolder_ extends Component {
             this.props.context.notification(`ValueHolder ${this.viewObject.get('name')}`,
                 this.props.t("Dataset link is not specified"),
                 "error")
-        } else {
+        } else if (this.viewObject.get('value')) {
             this.onChange(this.viewObject.get('value'));
         }
         mountComponent.bind(this)(false, [{actionType: actionType.setValue,callback: this.onChange.bind(this)}] as IAction[]);
@@ -1491,8 +1497,10 @@ class EventHandler_ extends Component {
                         });
                     }
                     try {
+                        const evaluation = replaceNamedParam(this.viewObject.get('condition'), params);
+                        console.log(`eval: ${evaluation}`);
                         // eslint-disable-next-line
-                        componentCondition = eval(replaceNamedParam(this.viewObject.get('condition'), params))
+                        componentCondition = eval(evaluation)
                     } catch (e) {
                         componentCondition = false;
                         this.props.context.notification("EventHandler.condition",
@@ -1549,9 +1557,8 @@ class EventHandler_ extends Component {
                     }
                     if (el.get('action') === actionType.backToLastPage) {
                         if (pathFull.length >= 2) {
-                            const appModule = pathFull[pathFull.length - 2];
-                            let params: Object[] = appModule.params;
-                            this.props.context.changeURL!(appModule.appModule, true, undefined, params);
+                            //TODO бага на главной back работает со второго раза
+                            this.props.history.go(-2)
                         }
                         isHandled = true;
                     }
