@@ -31,17 +31,12 @@
 }
 
 .paginator.single-page > .page-view-container {
-    right: 60px !important;
+    right: 68px !important;
 }
 
-.paginator.single-page .mini .ant-pagination-options {
-    margin-left: 40px;
-}
-
-.paginator.single-page .ant-pagination-next {
-    margin-right: 50px !important;
-    margin-left: 10px;
-}
+/*.paginator .ant-pagination-options-size-changer {
+    width:64px
+}*/
 
 .paginator .Arrow{
     width: 16px;
@@ -116,9 +111,6 @@
     display: none;
 }
 
-.paginator.paginator-small .jump-last {
-    right: 16px;
-}
 
 .paginator.paginator-small .ant-pagination-next {
     margin-right: 32px;
@@ -217,12 +209,18 @@
     z-index: 99999;
 }
 
+.paginator .ant-pagination-jump-prev,
 .paginator .ant-pagination-jump-next {
     display: none;
 }
 
-.paginator .mini .ant-pagination-options {
-    margin-left: 10px;
+.paginator .ant-pagination-prev,
+.paginator .ant-pagination-next {
+    min-width: 16px !important;
+}
+
+.paginator .ant-pagination-item > a {
+    margin-top: -1px ;
 }
 
 .developer_paginator {
