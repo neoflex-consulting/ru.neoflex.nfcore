@@ -892,7 +892,9 @@ class EcoreApp extends React.Component<any, State> {
                 const updatedId = object.uri.split("?rev=")[0];
                 const updatedRev = Number(object.uri.split("?rev=")[1]) + 1;
                 if (updatedId === locationId && updatedRev > locationRev) {
-                    this.props.history.push(`/developer/data/editor/${updatedId}/${updatedRev}`);
+                    API.instance().fetchResource(updatedId, 999, Ecore.ResourceSet.create(), {}).then((resource: Ecore.Resource) => {
+                        this.props.history.push(`/developer/data/editor/${updatedId}/${resource.rev}`);
+                    })
                 }
             }
         };
