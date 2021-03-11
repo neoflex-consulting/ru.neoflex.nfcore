@@ -556,18 +556,21 @@ class DatasetView extends React.Component<any, State> {
                         filter['backgroundColor'] === f.get('backgroundColor') &&
                         filter['color'] === f.get('color')
                     ).length === 0) {
-                        serverParam.push({
-                            index: serverParam.length + 1,
-                            datasetColumn: f.get('datasetColumn'),
-                            operation: f.get('operation') || defaultComponentValues[componentName],
-                            value: f.get('value'),
-                            enable: (f.get('enable') !== null ? f.get('enable') : false),
-                            type: getColumnType(columnDefs, f.get('datasetColumn')) || f.get('dataType') || undefined,
-                            mask: f.get('mask') || undefined,
-                            highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
-                            backgroundColor: f.get('backgroundColor'),
-                            color: f.get('color')
-                        })
+                        const v = f.get('value')?.match(/:[a-z0-9_()]+/gi);
+                        //Переменные обрабатываются отдельно
+                        if (v.length === 0)
+                            serverParam.push({
+                                index: serverParam.length + 1,
+                                datasetColumn: f.get('datasetColumn'),
+                                operation: f.get('operation') || defaultComponentValues[componentName],
+                                value: f.get('value'),
+                                enable: (f.get('enable') !== null ? f.get('enable') : false),
+                                type: getColumnType(columnDefs, f.get('datasetColumn')) || f.get('dataType') || undefined,
+                                mask: f.get('mask') || undefined,
+                                highlightType: (f.get('highlightType') !== null ? f.get('highlightType') : 'Cell'),
+                                backgroundColor: f.get('backgroundColor'),
+                                color: f.get('color')
+                            })
                     }
                 });
             }
