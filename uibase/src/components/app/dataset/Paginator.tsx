@@ -6,7 +6,7 @@ import En from 'antd/es/locale/en_US';
 import {NeoIcon} from "neo-icon/lib";
 import {NeoButton, NeoHint} from "neo-design/lib";
 import '../../../styles/Paginator.css';
-import {adaptiveElementSize, getAdaptiveSize, getTextWidth} from "../../../utils/adaptiveResizeUtils";
+import {adaptiveElementSize, getAdaptiveSize} from "../../../utils/adaptiveResizeUtils";
 
 interface Props extends WithTranslation {
     paginationPageSize: number,
@@ -18,14 +18,28 @@ interface Props extends WithTranslation {
 }
 
 function getPagesViewLabel(currentPage: number, paginationPageSize: number, totalNumberOfRows: number) {
+    if (paginationPageSize >= totalNumberOfRows) {
+        return `${totalNumberOfRows} из ${totalNumberOfRows}`
+    }
     const from = (currentPage-1)*paginationPageSize+1;
     const to = currentPage*paginationPageSize <= totalNumberOfRows
         ? currentPage*paginationPageSize
-        : totalNumberOfRows
+        : totalNumberOfRows;
     return `${from}-${to} из ${totalNumberOfRows}`
 }
 
-class PagesView extends React.Component<any, any> {
+interface PagesViewProps {
+    setOffset: ()=>void;
+    totalNumberOfRows: number;
+    currentPage: number;
+    paginationPageSize: number
+}
+
+class PagesView extends React.Component<PagesViewProps, {}> {
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
+        this.props.setOffset()
+    }
+
     render() {
         return (
             this.props.totalNumberOfRows === 0
@@ -76,15 +90,19 @@ class Paginator extends React.Component<Props, any> {
     };
 
     setPagesViewOffset = () => {
-        const pageViewLabel = getPagesViewLabel(this.props.currentPage, this.props.paginationPageSize, this.props.totalNumberOfRows);
-        //31px размер области jump-last + 8px next hint offset
-        const jumpButtonSize = this.props.totalNumberOfPage > 1 ? 31 + 8 : 0;
-        const size = this.state.isPagesViewVisible ? getTextWidth(`${pageViewLabel}`, '14px Roboto') + jumpButtonSize : jumpButtonSize;
-        const children = [...this.paginatorRef.current?.children!];
-        const paginator = children.find(c=>c.classList.contains("ant-pagination"));
-        const nextButton = [...paginator!.children].find(c=>c.classList.contains("ant-pagination-next"));
-        if (nextButton) {
-            (nextButton as HTMLElement).style.marginRight = `${size}px`
+        if (this.paginatorRef.current) {
+            const children = [...this.paginatorRef.current?.children!];
+            const pagesView = children.find(c=>c.classList.contains("page-view-container")) as HTMLElement;
+            const paginator = children.find(c=>c.classList.contains("ant-pagination"));
+            const paginatorOptions = [...paginator!.children].find(c=>c.classList.contains("ant-pagination-options")) as HTMLElement;
+            const nextButton = [...paginator!.children].find(c=>c.classList.contains("ant-pagination-next")) as HTMLElement;
+            const size = pagesView.offsetWidth + 8;
+            if (nextButton) {
+                nextButton.style.marginRight = `${size}px`
+            }
+            if (pagesView && paginatorOptions) {
+                pagesView.style.marginRight = `${paginatorOptions.offsetWidth + 10}px`
+            }
         }
     };
 
@@ -103,9 +121,16 @@ class Paginator extends React.Component<Props, any> {
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<any>, snapshot?: any): void {
         if (this.props.currentPage !== prevProps.currentPage
             || this.props.totalNumberOfPage !== prevProps.totalNumberOfPage
+            || this.props.paginationPageSize !== prevProps.paginationPageSize
             || this.state.isPagesViewVisible !== prevState.isPagesViewVisible
         ) {
             this.setPagesViewOffset()
+        }
+        if (this.props.totalNumberOfRows !== prevProps.totalNumberOfRows) {
+            this.setState({
+                isPagesViewVisible: this.props.totalNumberOfRows
+                    && (getAdaptiveSize(this.paginatorRef.current ? this.paginatorRef.current.offsetWidth : 0, "paginator") >= adaptiveElementSize.medium)
+            })
         }
     }
 
@@ -127,17 +152,19 @@ class Paginator extends React.Component<Props, any> {
     };
 
     render() {
+
         return (
             <ConfigProvider locale={this.props.i18n.language === "ru" ? Ru : En}>
                 <div ref={this.paginatorRef}
                     className={    `paginator ${this.props.totalNumberOfPage === 1 && this.state.paginatorSize >= adaptiveElementSize.medium  && "single-page"} ${this.state.paginatorSize >= adaptiveElementSize.medium ? "paginator-large" : "paginator-small"}`}
                     style={{float: "right"}}>
-                    {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('first page')}><NeoButton className={"jump-first"} type={"link"} onClick={() => this.onSomePage(0)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton></NeoHint> : null}
+                    {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('first page')}><NeoButton className={"jump-first"} type={"link"} onClick={() => this.onSomePage(1)}><NeoIcon icon={"arrowVerticalRight"}/></NeoButton></NeoHint> : null}
                     <div className={"page-view-container"}>
                         {this.props.totalNumberOfPage > 1 ? <NeoHint title={this.props.t('last page')}><NeoButton className={"jump-last"} type={"link"} onClick={() => this.onSomePage(this.props.totalNumberOfPage)}><NeoIcon icon={"arrowVerticalLeft"}/></NeoButton></NeoHint> : null}
                         {this.state.isPagesViewVisible
                             ?
                               <PagesView
+                                  setOffset={this.setPagesViewOffset}
                                   currentPage={this.props.currentPage}
                                   paginationPageSize={this.state.paginationPageSize}
                                   totalNumberOfRows={this.props.totalNumberOfRows}
