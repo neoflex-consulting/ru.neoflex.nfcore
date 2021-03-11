@@ -340,12 +340,12 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                             </Tabs.TabPane>
                             <NeoButton
                                 title={t("createitem")}
-                                type="primary"
-                                size="large"
-                                style={{ display: 'block', backgroundColor:'#424D78', position:'absolute', right:'0', top: '0', zIndex:1, padding: '8px', width: '32px'}}
+                                type="square"
+                                size="medium"
+                                style={{ position:'absolute', right:'0', top: '0', zIndex:1}}
                                 onClick={ () => this.setModalVisible(true) }
                             >
-                                <NeoIcon color={'white'} icon={"plus"} /></NeoButton>
+                                <NeoIcon color={'white'} size={'m'} icon={"plus"} /></NeoButton>
                         </NeoTabs>
                     </Form.Item>
                 </Form>

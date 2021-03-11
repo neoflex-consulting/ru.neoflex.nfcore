@@ -229,8 +229,8 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
             {edit ?
                 <InputComponent
                     key={`textedit_${ukey}${idx}`}
-                    style={{ resize: 'none' }}
-                    width={'300px'}
+                    style={{ resize: 'none', maxWidth: '639px' }}
+                    width={'100%'}
                     autosize={{ maxRows: expanded ? null : 10 }}
                     value={innerValue}
                     onChange={(e: any) => {
@@ -246,10 +246,11 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                     key={`textview_${ukey}${idx}`}
                     autoSize={{ maxRows: expanded ? null : 10 }}
                     value={value}
-                    width={'300px'}
+                    width={'100%'}
                     style={{
                         whiteSpace: 'pre',
-                        resize: 'none'
+                        resize: 'none',
+                        maxWidth: '639px'
                     }}
                 />}
         </Fragment>
@@ -508,6 +509,9 @@ function TagComponent(props: TagComponentProps): JSX.Element {
                 onChange && onChange!(newValue)
             }}
             disabled={!edit}
+            maxTagCount={'responsive'}
+            maxTagTextLength={7}
+            maxTagPlaceholder={`Еще...`}
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")

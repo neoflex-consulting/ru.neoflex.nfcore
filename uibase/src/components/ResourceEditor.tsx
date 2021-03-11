@@ -1568,13 +1568,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     >
                         <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'auto' }}>
                             <NeoRow justify={"space-around"} style={{alignItems:'unset'}}>
-                                <NeoCol span={19} className={'resource__tree'}>
+                                <NeoCol span={18} className={'resource__tree'}>
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </NeoCol>
                                 <NeoCol span={5} style={{ position: 'sticky', top: '0' }}>
                                     <NeoButton
                                         title={t('additem')}
-                                        type={"circle"}
+                                        type={"square"}
                                         size={"medium"}
                                         onClick={() => this.setState({ modalResourceVisible: true })}
                                         style={{alignSelf:'flex-end', margin: 'auto 8px 16px auto'}}
@@ -1599,7 +1599,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <div style={{width:'85%'}}>
+                                                    <div style={{width:'100%'}}>
                                                         <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer"
                                                            style={{justifyContent:'center'}}>
                                                             <span
