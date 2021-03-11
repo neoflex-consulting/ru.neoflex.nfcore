@@ -509,6 +509,9 @@ function TagComponent(props: TagComponentProps): JSX.Element {
                 onChange && onChange!(newValue)
             }}
             disabled={!edit}
+            maxTagCount={'responsive'}
+            maxTagTextLength={7}
+            maxTagPlaceholder={`Еще...`}
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
