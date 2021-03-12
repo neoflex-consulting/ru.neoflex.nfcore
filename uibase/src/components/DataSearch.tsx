@@ -47,7 +47,6 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
     };
 
     handleSubmit = (e: any) => {
-        e.preventDefault();
         this.refresh();
     };
 
@@ -64,12 +63,11 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
          } else {
              selectedClassObject = this.props.specialEClass
          }
-        if (this.state.isJSONResult) {
-            API.instance().find(JSON.parse(values.json_field)).then(results=>{
-                this.props.onJSONSearch(results)
-            })
-        }
-         if (values.key.value === "json_search") {
+         if (this.state.isJSONResult) {
+             API.instance().find(JSON.parse(values.json_field.value)).then(results=>{
+                 this.props.onJSONSearch(results)
+             })
+         } else if (values.key.value === "json_search") {
              API.instance().find(JSON.parse(values.json_field.value)).then(results => {
                  this.props.onSearch(results.resources)
              })
@@ -342,12 +340,12 @@ class DataSearch extends React.Component<Props & WithTranslation, State> {
                             </Tabs.TabPane>
                             <NeoButton
                                 title={t("createitem")}
-                                type="primary"
-                                size="large"
-                                style={{ display: 'block', backgroundColor:'#424D78', position:'absolute', right:'0', top: '0', zIndex:1, padding: '8px', width: '32px'}}
+                                type="square"
+                                size="medium"
+                                style={{ position:'absolute', right:'0', top: '0', zIndex:1}}
                                 onClick={ () => this.setModalVisible(true) }
                             >
-                                <NeoIcon color={'white'} icon={"plus"} /></NeoButton>
+                                <NeoIcon color={'white'} size={'m'} icon={"plus"} /></NeoButton>
                         </NeoTabs>
                     </Form.Item>
                 </Form>

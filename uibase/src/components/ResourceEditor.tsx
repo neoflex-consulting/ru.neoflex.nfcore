@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Dropdown, Layout, Menu, Tree} from 'antd';
+import {Dropdown, Layout, Menu, Tree} from 'antd';
 import Ecore, {EClass, EObject, Resource, ResourceSet} from "ecore";
 import {withTranslation, WithTranslation} from "react-i18next";
 
@@ -1674,13 +1674,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     >
                         <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'auto' }}>
                             <NeoRow justify={"space-around"} style={{alignItems:'unset'}}>
-                                <NeoCol span={19}>
+                                <NeoCol span={18} className={'resource__tree'}>
                                     {this.state.mainEObject.eClass && this.createTree()}
                                 </NeoCol>
                                 <NeoCol span={5} style={{ position: 'sticky', top: '0' }}>
                                     <NeoButton
                                         title={t('additem')}
-                                        type={"circle"}
+                                        type={"square"}
                                         size={"medium"}
                                         onClick={() => this.setState({ modalResourceVisible: true })}
                                         style={{alignSelf:'flex-end', margin: 'auto 8px 16px auto'}}
@@ -1705,7 +1705,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                                     className="resource-container-item"
                                                     key={res.eURI()}
                                                 >
-                                                    <div style={{width:'85%'}}>
+                                                    <div style={{width:'100%'}}>
                                                         <a className="resource-link" href={`/developer/data/editor/${res.get('uri')}/${res.rev}`} target='_blank' rel="noopener noreferrer"
                                                            style={{justifyContent:'center'}}>
                                                             <span
@@ -1761,26 +1761,32 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 OK
                             </NeoButton>
                             {this.state.addRefMenuItems.length > 1
-                                ? <Dropdown overlay={this.renderMenu()}>
-                                    <Button
+                                ? <Dropdown
+                                    overlay={this.renderMenu()}
+                                    overlayStyle={{ minWidth:'184px' }}
+                                >
+                                    <div style={{ position:'absolute', right:'24px', bottom:'24px' }}>
+                                    <NeoButton
                                         title={t('add element')}
-                                        type="primary"
-                                        style={{ display: 'block', margin: '0px 0px 10px auto' }}
-                                        size="large"
-                                    >
-                                        <NeoIcon icon={"plus"}/>
-                                    </Button>
-                                </Dropdown>
-                                : this.state.addRefMenuItems.length === 1
-                                    ? <Button
-                                        title={t('add element')}
-                                        type="primary"
-                                        style={{ display: 'block', margin: '0px 0px 10px auto' }}
-                                        size="large"
+                                        titlePos={'top'}
+                                        type="square"
                                         onClick={this.handleAddElement}
                                     >
-                                        <NeoIcon icon={"plus"}/>
-                                    </Button>
+                                        <NeoIcon icon={"plus"} color={'white'}/>
+                                    </NeoButton>
+                                    </div>
+                                </Dropdown>
+
+                                : this.state.addRefMenuItems.length === 1
+                                    ? <NeoButton
+                                        title={t('add element')}
+                                        titlePos={'top'}
+                                        type="square"
+                                        style={{ position:'absolute', right:'24px', bottom:'24px' }}
+                                        onClick={this.handleAddElement}
+                                    >
+                                        <NeoIcon icon={"plus"} color={'white'}/>
+                                    </NeoButton>
                                     : null
                             }
                         </>
@@ -1829,17 +1835,13 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
-                                    const parentResource = eObject.eResource().eContents()[0].get('name')
                                     return (isEObjectType ||
                                         (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded)) &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
-                                            {this.state.selectDropdownVisible ?
-                                                eObject.eClass.get('name') + '.' + eObject.get('name') + `(${parentResource})`
-                                                :
-                                                <NeoHint title={`${eObject.eClass.get('name')} ${eObject.get('name')}`}>
-                                                    {eObject.eClass.get('name') + '.' + eObject.get('name')} + `(${parentResource})`
+                                                <NeoHint title={!this.state.selectDropdownVisible?`${eObject.eClass.get('name')} ${eObject.get('name')}`:undefined}>
+                                                        <b>{eObject.eClass.get('name')}</b>&nbsp;
+                                                    {eObject.get('name')}
                                                 </NeoHint>
-                                            }
                                         </NeoOption>
                                 })}
                     </NeoSelect>

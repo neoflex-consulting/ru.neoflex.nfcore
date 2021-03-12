@@ -605,10 +605,10 @@ class EcoreApp extends React.Component<any, State> {
                             }
                             {
                                 this.props.location.pathname.includes('/developer/') &&
-                                <div>
+                                <div style={{width:'100%'}}>
                                     <div>
                                         <div className="headerDev-menu">
-                                            <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ backgroundColor: backgroundColor, textAlign: "center"}}>
+                                            <Menu className="header-menu" mode="horizontal" selectedKeys={selectedKeys} style={{ display:'flex', width:'100%', justifyContent:'space-around', backgroundColor: backgroundColor, textAlign: "center"}}>
                                                 <Menu.Item style={{ fontSize: 14, paddingRight: "14px", paddingBottom: "12px" }} key={'main'}>
                                                     <Link to={`/developer/main`}>
                                                         <span>
@@ -892,7 +892,9 @@ class EcoreApp extends React.Component<any, State> {
                 const updatedId = object.uri.split("?rev=")[0];
                 const updatedRev = Number(object.uri.split("?rev=")[1]) + 1;
                 if (updatedId === locationId && updatedRev > locationRev) {
-                    this.props.history.push(`/developer/data/editor/${updatedId}/${updatedRev}`);
+                    API.instance().fetchResource(updatedId, 999, Ecore.ResourceSet.create(), {}).then((resource: Ecore.Resource) => {
+                        this.props.history.push(`/developer/data/editor/${updatedId}/${resource.rev}`);
+                    })
                 }
             }
         };

@@ -9,7 +9,6 @@
     position: absolute;
     display: inline-flex;
     justify-content: space-between;
-    right: 200px;
     font-size: 14px;
     font-family: 'Roboto', sans-serif;
     color: #8C8C8C;
@@ -18,89 +17,16 @@
     line-height: 1.8;
 }
 
-.paginator .page-view-container .hint {
-    margin-right: 15px;
-}
-
-.paginator.paginator-small .page-view-container {
-    right: 0;
-}
-
-.paginator.single-page .page-view-container {
-    justify-content: center;
-}
-
-.paginator.single-page > .page-view-container {
-    right: 60px !important;
-}
-
-.paginator.single-page .mini .ant-pagination-options {
-    margin-left: 40px;
-}
-
-.paginator.single-page .ant-pagination-next {
-    margin-right: 50px !important;
-    margin-left: 10px;
-}
-
-.paginator .Arrow{
-    width: 16px;
-    height: 24px;
-    background: transparent;
-    padding: 0;
-}
-
-.paginator .Arrow svg{
-    margin-top: 1px;
-    width: 16px;
-    height: 13px;
-    fill: #333333;
-}
-
-.paginator .Arrow svg:hover {
-    fill: #022af7;
-}
-
-.paginator .jump-first {
-    width: 16px;
-    height: 24px;
-    background: transparent;
-    padding: 0;
-    bottom: 1px;
-    margin: 0 8px 0 0;
-}
-
-
-.paginator .jump-first svg{
-    margin-top: 1px;
-    width: 16px;
-    height: 13px;
-    fill: #333333;
-}
-
+.paginator .Arrow:hover,
+.paginator .Arrow svg:hover,
+.paginator .jump-last svg:hover,
 .paginator .jump-first svg:hover {
     fill: #022af7;
 }
 
-.paginator .Arrow{
-    margin-top: 1px;
-    width: 16px;
-    height: 13px;
-    fill: #333333;
-}
-
-.paginator .Arrow:hover{
-    fill: #022af7;
-}
-
-
-.paginator .jump-last {
-    width: 16px;
-    height: 24px;
-    background: transparent;
-    padding: 0;
-}
-
+.paginator .Arrow,
+.paginator .Arrow svg,
+.paginator .jump-first svg,
 .paginator .jump-last svg{
     margin-top: 1px;
     width: 16px;
@@ -108,48 +34,25 @@
     fill: #333333;
 }
 
-.paginator .jump-last svg:hover {
-    fill: #022af7;
+.paginator .jump-first {
+    bottom: 1px;
+}
+
+.paginator .jump-first,
+.paginator .jump-last {
+    width: 16px;
+    height: 24px;
+    background: transparent;
 }
 
 .paginator.paginator-small .ant-pagination-options{
     display: none;
 }
 
-.paginator.paginator-small .jump-last {
-    right: 16px;
-}
-
-.paginator.paginator-small .ant-pagination-next {
-    margin-right: 32px;
-}
-
-.paginator .ant-pagination-next {
-    margin-right: 20px;
-}
-
-.paginator .ant-pagination-item-link {
-    margin-left: 0 ;
-    margin-right: 0;
-}
-
-.paginator .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon, .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon{
-    color: #022af7!important;
-}
-
 .paginator .ant-pagination.mini {
     line-height: initial;
 }
 
-.paginator .ant-pagination.mini .ant-pagination-prev, .ant-pagination.mini .ant-pagination-next {
-    line-height: 22px !important;
-}
-
-.paginator .ant-select-sm .ant-select-selection--single {
-    height: 24px !important;
-    width: 104px;
-    margin-left: 40px;
-}
 .paginator .ant-select-sm .ant-select-selection--single:hover {
     border: 1px solid #424D78 !important;
 }
@@ -217,12 +120,20 @@
     z-index: 99999;
 }
 
+.paginator .ant-pagination-jump-prev,
 .paginator .ant-pagination-jump-next {
     display: none;
 }
+.paginator > .hint,
+.paginator .ant-pagination-prev,
+.paginator .ant-pagination-next {
+    min-width: 16px !important;
+    width: 16px;
+}
 
-.paginator .mini .ant-pagination-options {
-    margin-left: 10px;
+/*paginator-item text align*/
+.paginator .ant-pagination-item > a {
+    margin-top: -1px ;
 }
 
 .developer_paginator {
@@ -241,10 +152,14 @@
     transform: translate(-20px,-260px) !important;
 }
 
-.developer_paginator .paginator-large {
-    margin: unset !important;
+.paginator .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+    border-color: #424D78 !important;
+    border-right-width: 1px !important;
 }
 
-.developer_paginator .paginator-large .ant-pagination-options {
-    margin-left: 15px;
+.paginator .ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    border-right-width: 1px !important;
+    outline: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }

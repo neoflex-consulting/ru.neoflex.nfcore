@@ -4,13 +4,13 @@ import {Input, Select} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from '../utils/resourceEditorUtils';
-import {NeoButton, NeoDatePicker, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoInput, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
 import 'brace/mode/sql';
 import 'brace/mode/groovy';
-import {neoIconMap, NeoIconTypeArray} from "../utils/consts";
+import {neoIconMap} from "../utils/consts";
 import {SvgName} from "neo-icon/lib/icon/icon";
 import {API} from "../modules/api";
 import {WithTranslation} from "react-i18next";
@@ -207,7 +207,7 @@ interface EditableTextAreaProps {
 }
 
 function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
-    const TextArea = Input.TextArea;
+    const TextArea = NeoInput;
     const Password = Input.Password;
 
     const types: { [key: string]: any } = {
@@ -229,7 +229,8 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
             {edit ?
                 <InputComponent
                     key={`textedit_${ukey}${idx}`}
-                    style={{ resize: 'none' }}
+                    style={{ resize: 'none', maxWidth: '639px' }}
+                    width={'100%'}
                     autosize={{ maxRows: expanded ? null : 10 }}
                     value={innerValue}
                     onChange={(e: any) => {
@@ -245,9 +246,11 @@ function EditableTextArea(props: EditableTextAreaProps): JSX.Element {
                     key={`textview_${ukey}${idx}`}
                     autoSize={{ maxRows: expanded ? null : 10 }}
                     value={value}
+                    width={'100%'}
                     style={{
                         whiteSpace: 'pre',
-                        resize: 'none'
+                        resize: 'none',
+                        maxWidth: '639px'
                     }}
                 />}
         </Fragment>
@@ -403,7 +406,7 @@ interface SelectComponentProps {
 
 function SelectComponent(props: SelectComponentProps): JSX.Element {
 
-    const { eType, value, idx, ukey, onChange, upperBound, id, edit, showIcon } = props;
+    const { eType, value, idx, ukey, onChange, upperBound, id, edit } = props;
 
     return (
         <NeoSelect
@@ -411,11 +414,14 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
             mode={upperBound === -1 ? "multiple" : undefined}
             value={value}
             key={ukey + "_" + idx}
-            style={{ width: "300px" }}
+            width={'300px'}
             onChange={(newValue: any) => {
                 onChange && onChange!(newValue)
             }}
             disabled={!edit}
+            maxTagCount={'responsive'}
+            maxTagTextLength={7}
+            maxTagPlaceholder={`Еще...`}
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
@@ -426,7 +432,11 @@ function SelectComponent(props: SelectComponentProps): JSX.Element {
                 })
                 .map((obj: Ecore.EObject) =>
                     <NeoOption key={ukey + "_opt_" + obj.get('name') + "_" + id} value={obj.get('name')}>
-                        <div style={{display:"flex", alignItems: "center"}}>{showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) && <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}{obj.get('name')}</div>
+                        {/*<div style={{display:"flex", alignItems: "center"}}>*/}
+                        {/*    {showIcon && NeoIconTypeArray.includes(neoIconMap[obj.get('name')]) &&*/}
+                        {/*    <NeoIcon style={{marginRight:"8px"}} icon={neoIconMap[obj.get('name')] as SvgName}/>}*/}
+                        {obj.get('name')}
+                        {/*</div>*/}
                     </NeoOption>)}
         </NeoSelect>
     )
@@ -499,6 +509,9 @@ function TagComponent(props: TagComponentProps): JSX.Element {
                 onChange && onChange!(newValue)
             }}
             disabled={!edit}
+            maxTagCount={'responsive'}
+            maxTagTextLength={7}
+            maxTagPlaceholder={`Еще...`}
         >
             {eType.eContents()
                 .filter((obj: Ecore.EObject) => obj.eContainingFeature.get('name') !== "eAnnotations")
@@ -568,7 +581,7 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
 
     static getComponent(props: any) {
         const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, t } = props;
-        const targetValue = value || props.eObject.get('defaultValueLiteral');
+        const targetValue = value || props?.eObject?.get('defaultValueLiteral');
         if (syntax === "sql") {
             return <EditableSQLArea
                 t={t}

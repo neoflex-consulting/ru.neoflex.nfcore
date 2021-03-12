@@ -256,21 +256,24 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                 </NeoRow>
 
 
-                    <NeoRow className={'Selects'}>
-                        {(this.state.diagramType==="Line")?this.getInput("diagramLegend",this.props.t("diagram legend")):""}
+                        {(this.state.diagramType==="Line")?
+                    <NeoRow className={'Selects'} style={{marginBottom:'16px'}}>
+                        {this.getInput("diagramLegend",this.props.t("diagram legend"))}
                     </NeoRow>
+                            :
+                            ""}
                     {(this.state.diagramType==="Pie") ?
-                        <NeoRow gutter={16} className={'Selects'}>
+                        <NeoRow className={'Selects'}>
                             <NeoCol className={'Selectss'} span={24}>
                                 {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
                             </NeoCol>
                         </NeoRow>
                         :
-                        <NeoRow gutter={16} className={'Selects'}>
-                            <NeoCol span={12} className={'Selectss'}>
+                        <NeoRow className={'Selects'} style={{marginBottom:'16px'}}>
+                            <NeoCol span={12} className={'Selectss'} style={{paddingRight:'8px'}}>
                                 {this.getColumnSelectOptions("axisXColumnName", this.props.t("axis X column name"))}
                             </NeoCol>
-                            <NeoCol className={'Selectss'} span={12}>
+                            <NeoCol className={'Selectss'} span={12} style={{paddingLeft:'8px'}}>
                                 {(this.state.diagramType==="Pie")?this.getColumnSelectOptions("axisYColumnName", this.props.t("column for pie")):this.getColumnSelectOptions("axisYColumnName", this.props.t("axis Y column name"))}
                             </NeoCol>
                         </NeoRow>}
@@ -330,22 +333,23 @@ class DrawerDiagram extends React.Component<Props & WithTranslation & any, State
                         {this.getEnumSelectOptions("orderBy","order by", this.props.allSorts)}
                     </Col>
                 </Row>*/}
-                <NeoRow
-                    // gutter={16}
-                    className={'Selects'}
-                        style={{marginBottom:'16px'}}
-                >
-                    <NeoCol span={12} className={'Selectss'}
-                            style={{paddingRight:'8px'}}
-                    >
-                        {(this.state.diagramType!=="Pie")?this.getInput("axisXLabel",this.props.t("axis X label")):""}
-                    </NeoCol>
-                    <NeoCol className={'Selects'} span={12}
-                            style={{paddingLeft:'8px'}}
-                    >
-                        {(this.state.diagramType!=="Pie")?this.getInput("axisYLabel",this.props.t("axis Y label")):""}
-                    </NeoCol>
-                </NeoRow>
+                    {(this.state.diagramType !== "Pie") &&
+                        <NeoRow
+                            className={'Selects'}
+                            style={{marginBottom: '16px'}}
+                        >
+                            <NeoCol span={12} className={'Selectss'}
+                                    style={{paddingRight:'8px'}}
+                            >
+                                {this.getInput("axisXLabel", this.props.t("axis X label"))}
+                            </NeoCol>
+                            <NeoCol className={'Selects'} span={12}
+                                    style={{paddingLeft:'8px'}}
+                            >
+                                {this.getInput("axisYLabel", this.props.t("axis Y label"))}
+                            </NeoCol>
+                        </NeoRow>
+                    }
                 </div>
                 <NeoRow className={'nameOfDiagram'}>
                 </NeoRow>

@@ -1653,9 +1653,6 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
   margin-left: 12px;
 }
 
-.ant-tag .anticon-close{
-border: unset!important;
-}
 
 #selectButton .col, #editNotificationButton .col {
   justify-content: start;

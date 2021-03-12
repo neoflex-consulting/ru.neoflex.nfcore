@@ -56,4 +56,12 @@ function getNamedParamByName(parameterName: string, contextItemValues: Map<Strin
     }
 }
 
-export {replaceNamedParam, getNamedParams, getNamedParamByName}
+function getAllNamedParamsByName(parameterNames: string[], contextItemValues: Map<String,IServerNamedParam>, params: IServerNamedParam[] = []) : IServerNamedParam[] {
+    return parameterNames.map(paramName => {
+        return getNamedParamByName(paramName.replace(":","")
+            , contextItemValues
+            , params)
+    });
+}
+
+export {replaceNamedParam, getNamedParams, getNamedParamByName, getAllNamedParamsByName}

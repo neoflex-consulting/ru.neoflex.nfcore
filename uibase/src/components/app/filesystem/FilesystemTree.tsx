@@ -156,9 +156,9 @@ class FilesystemTree extends React.Component<Props & WithTranslation, State> {
 
     onSelect = (selectedKeys: any, e: { event: "select"; selected: boolean; node: any; selectedNodes: any; nativeEvent: MouseEvent }) => {
         console.log('Trigger Select', selectedKeys, e);
-        const key = e.node ? e.node.props.eventKey || "/" : "/"
-        const isLeaf = e.node ? e.node.props.isLeaf === true : false
-        this.setState({selectedKeys, key, isLeaf})
+        const key = e.node ? e.node.key || "/" : "/";
+        const isLeaf = e.node ? e.node.isLeaf === true : false;
+        this.setState({selectedKeys, key, isLeaf});
         if (this.props.onSelect) {
             this.props.onSelect(key, isLeaf)
         }
