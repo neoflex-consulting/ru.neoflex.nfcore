@@ -822,6 +822,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     scrollToElementWithId = (id?:string) => {
         const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
+            /*this.treeRef.current.scrollTo({ key: "0-0-3-4"})*/
             /*node.scrollIntoView({
                 behavior: "smooth",
                 block: 'center',
@@ -1503,6 +1504,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
+                               /* // @ts-ignore
+                                switcherIcon={!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
+                                    <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                                    targetObject.length !== 0 ?
+                                        <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                                        <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>}*/
                             >
                                 {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                             </Tree.TreeNode>
@@ -1527,11 +1534,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 draggable
                 onDrop={onDrop}
                 blockNode
-                virtual={true}
+                virtual
                 showIcon
                 showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
-
                 onSelect={this.onTreeSelect}
                 onRightClick={this.onTreeRightClick}
                 selectedKeys={this.state.selectedKeys}
