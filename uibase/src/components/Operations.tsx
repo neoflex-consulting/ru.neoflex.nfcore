@@ -1,5 +1,5 @@
 import React, {Fragment, useState} from 'react';
-import {Button, Dropdown, Menu, Modal, Select} from 'antd'
+import {Dropdown, Menu, Modal, Select} from 'antd'
 import Ecore from 'ecore';
 
 import {API} from '../modules/api'
@@ -207,18 +207,14 @@ export default function Operations(props: Props): JSX.Element {
                     </Menu.Item>
                 })}
             </Menu>)
-        return <Dropdown placement="bottomCenter" overlay={menu}>
-            <Button className="panel-button" title={t("operations")}>
-                <NeoIcon icon={"lightbulbt"}/>
-            </Button>
-                    {/*<a>*/}
-                    {/*    <NeoButton className="panel-button"*/}
-                    {/*        type={"ghost-icon"}*/}
-                    {/*        title={t("operations")}*/}
-                    {/* >*/}
-                    {/*        <NeoIcon icon={"lightbulbt"}/>*/}
-                    {/*    </NeoButton>*/}
-                    {/*</a>*/}
+        return <Dropdown overlay={menu}>
+                        <NeoButton className="panel-button"
+                            type={"ghost-icon"}
+                            title={t("operations")}
+                           titlePos={'left'}
+                     >
+                            <NeoIcon icon={"lightbulbt"}/>
+                        </NeoButton>
             </Dropdown>
     }
 
