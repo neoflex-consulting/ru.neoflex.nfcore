@@ -822,16 +822,39 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     scrollToElementWithId = (id?:string) => {
         const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
-            /*this.treeRef.current.scrollTo({ key: "0-0-3-4"})*/
+            if (node.key.includes("eventHandlers")) {
+                let newKey = null
+                this.treeRef.current.state.flattenNodes.forEach((item: any, index: any) => {
+                    if (item.key === node.key) {
+                        if (index + 2 > this.treeRef.current.state.flattenNodes.length){
+                            newKey = this.treeRef.current.state.flattenNodes[index-1].key
+                        }
+                        else{
+                            newKey = this.treeRef.current.state.flattenNodes[index + 2].key
+                        }
+                        return false
+                    }
+                })
+                this.treeRef.current.scrollTo({key: newKey})
+                this.setState({
+                    selectedKeys: [node.key],
+                    uniqKey: node.key,
+                    targetObject: node.node.data.targetObject._id
+                })
+            }
+            else{
+                this.treeRef.current.scrollTo({key: node.key})
+                this.setState({
+                    selectedKeys: [node.key],
+                    uniqKey: node.key,
+                    targetObject: node.node.data.targetObject._id
+                })
+            }
             /*node.scrollIntoView({
                 behavior: "smooth",
                 block: 'center',
                 inline: 'center'
             });*/
-            this.setState({
-                selectedKeys: [node.key],
-                uniqKey: node.key,
-            })
         }
     }
 
@@ -1489,6 +1512,14 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         {targetObject.map((object: { [key: string]: any }, cidx: number) => {
                             const res = Ecore.ResourceSet.create();
                             const eClass = res.getEObject(object.eClass);
+                            let node = findObjectById(this.state.resourceJSON, object._id);
+                            let isLeaf = true
+                            for (let prop in node) {
+                                if (Array.isArray(node[prop]) || node[prop].$ref) {
+                                    isLeaf = false
+                                    break
+                                }
+                            }
                             const title = getTitle(object);
                             const dataTree2 : DataNode = {
                                 key: `${parentKey}.${cidx}`,
@@ -1504,12 +1535,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
-                               /* // @ts-ignore
-                                switcherIcon={!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
+                                // @ts-ignore
+                                switcherIcon={!isLeaf ? (!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
                                     <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                                     targetObject.length !== 0 ?
                                         <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
-                                        <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>}*/
+                                        <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>) : null}
                             >
                                 {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                             </Tree.TreeNode>
@@ -1529,12 +1560,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         };
         return(
             <Tree
+                height={700}
                 ref={this.treeRef}
                 key="mainTree"
                 draggable
                 onDrop={onDrop}
                 blockNode
-                virtual
                 showIcon
                 showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
@@ -1570,7 +1601,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     render() {
         const { t } = this.props as Props & WithTranslation;
         return (
-            <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
+            <div style={{ display: 'flex', flexFlow: 'column', height: '100%', overflow: "hidden"}}>
                 <Helmet>
                     <title>{this.state.resource && this.state.resource.eContents ? this.state.resource.eContents()[0].get('name') : undefined}</title>
                     <link rel="shortcut icon" type="image/png" href="/developer.ico" />
@@ -1672,7 +1703,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             localStorage.setItem('resource_splitter_pos', size)
                         }}
                     >
-                        <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'auto' }}>
+                        <div className="view-box" style={{ height: '100%', width: '100%', overflow: 'hidden' }}>
                             <NeoRow justify={"space-around"} style={{alignItems:'unset'}}>
                                 <NeoCol span={18} className={'resource__tree'}>
                                     {this.state.mainEObject.eClass && this.createTree()}
