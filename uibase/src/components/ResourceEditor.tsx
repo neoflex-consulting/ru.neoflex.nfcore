@@ -5,7 +5,13 @@ import {withTranslation, WithTranslation} from "react-i18next";
 
 import {API} from "../modules/api";
 import Splitter from './CustomSplitter'
-import {findObjectById, getPrimitiveType, nestUpdaters, traverseEObject} from '../utils/resourceEditorUtils'
+import {
+    findObjectById,
+    findObjectByIdCallback,
+    getPrimitiveType,
+    nestUpdaters,
+    traverseEObject
+} from '../utils/resourceEditorUtils'
 import EClassSelection from './EClassSelection';
 import SearchGrid from './SearchGrid';
 import FormComponentMapper from './FormComponentMapper';
@@ -816,6 +822,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     scrollToElementWithId = (id?:string) => {
         const node = this.findTreeNodeById(id ? id : this.state.targetObject?._id);
         if (node) {
+            /*this.treeRef.current.scrollTo({ key: "0-0-3-4"})*/
+            /*node.scrollIntoView({
+                behavior: "smooth",
+                block: 'center',
+                inline: 'center'
+            });*/
             this.setState({
                 selectedKeys: [node.key],
                 uniqKey: node.key,
@@ -865,8 +877,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: (index - 1).toString() })
                 }
                 if (e.key === "moveDown") {
-                    const index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
-                    updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: (index + 1).toString() })
+                    let index = node.pos ? node.pos.split('-')[node.pos.split('-').length - 1] : undefined;
+                    let newIndex = index++
+                    updatedJSON = node.data.parentUpdater(null, undefined, node.data.propertyName, { operation: "move", oldIndex: index, newIndex: newIndex.toString() })
                 }
             }
             const nestedJSON = nestUpdaters(updatedJSON, null);
@@ -907,7 +920,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         }
 
         if (e.key === "copy") {
-            const json = JSON.stringify(node.targetObject);
+            const json = JSON.stringify(node.data.targetObject);
             copyToClipboard(json)
                 .catch((err:any) => {
                     console.error('Failed to copy: ', err);
@@ -916,7 +929,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
 
         if (e.key === "paste") {
             let updatedJSON;
-            const id = `ui_generated_${node.pos}//${node.propertyName}.${node.arrayLength}`;
+            const id = `ui_generated_${node.pos}//${node.data.propertyName}.${node.data.arrayLength}`;
             const newObject = {
                 ...this.state.clipboardObject,
                 _id: id
@@ -1192,7 +1205,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             this.setState({
                 targetObject: targetObject,
                 tableData: this.prepareTableData(targetObject, this.state.mainEObject, id),
-                expandedKeys: getAllChildrenKeys([this.treeRef.current.tree.props.children]),
+                expandedKeys: getAllChildrenKeys([this.treeRef.current.props.children]),
             }, ()=> {this.scrollToElementWithId(id)})
         } else if (obj) {
             API.instance().checkLock(obj.eResource().get('uri')).then(locked=>{
@@ -1253,101 +1266,188 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return result
         };
-        /*
-                const onDrop = (event: any) => {
-                    const {t} = this.props;
-                    const dragKey = event.dragNode.props.targetObject._id;
-                    const dropKey = event.node.props.targetObject._id;
 
-                    const dragPos = event.dragNode.props.pos.split('-');
-                    const dropPos = event.node.props.pos.split('-');
 
-                    const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+        const onDrop = (event: any) => {
+            const {t} = this.props
 
-                    const dragNodePos = Number(dragPos[dragPos.length - 1]);
+            const eClass = event.node.data.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
 
-                    const nodePos = Number(dropPos[dropPos.length - 1]);
+            let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.data.eClass.split("//")[1])
 
-                    const dragNodePropertyName = event.dragNode.props.propertyName
-                    const nodePropertyName = event.node.props.propertyName
-
-                    const eClass = event.node.props.eClass;
-                    const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
-                    const allSubTypes = eClassObject.get('eAllSubTypes');
-
-                    let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.props.eClass.split("//")[1])
-
-                    if (!this.state.edit) {
-                        this.props.notification(t('notification'), t('editing is not available'), "info");
-                    }
-                    else if (permissionToUpdate === undefined && event.node.props.upperBound !== undefined) {
-                        this.props.notification(t('notification'), 'Опрация заблокирована', "info");
-                    }
-                    else if ((event.node.props.upperBound === undefined && !event.dropToGap) ||
-                        (event.node.props.upperBound === 1 && event.node.props.arrayLength !== 0) ||
-                        (dropKey === 'null' && event.node.props.arrayLength !== 0)
-                    ) {
-                        this.props.notification(t('notification'), 'Опрация заблокирована', "info");
-                    }
-                    else {
-                        let updatedJSON = this.state.resourceJSON;
-                        let dragObj = findObjectById(updatedJSON, dragKey);
-
-                        //Delete dragObj from updatedJSON
-                        updatedJSON = event.dragNode.props.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
-
-                        // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
-                        if (!event.dropToGap) {
-                            let item: any;
-                            findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
-                                item = dropObj
+            if (!this.state.edit) {
+                this.props.notification(t('notification'), t('editing is not available'), "info");
+            }
+            else if (permissionToUpdate === undefined && event.node.data.upperBound !== undefined) {
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+            }
+            else if ((event.node.data.upperBound === undefined && !event.dropToGap) ||
+                (event.node.data.upperBound === 1 && event.node.data.arrayLength !== 0)
+            ) {
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+            }
+            else {
+                let updatedJSON;
+                const id = `ui_generated_${event.node.pos}//${event.node.data.propertyName}.${event.node.data.arrayLength}`;
+                const newObject = {
+                    ...event.dragNode.data.targetObject,
+                    _id: id
+                };
+                let added: any[] = [];
+                const pattern = new RegExp("(^//@[a-zA-Z]+)|^(ui_generated_[0-9]+)", 'g');
+                traverseEObject(newObject, (obj: any, key: string, level: number) => {
+                    //Add missing external refs
+                    if (key === "$ref"
+                        && obj[key].search(new RegExp('^[0-9#]', 'g')) === 0) {
+                        if (!added.includes(API.parseRef(obj[key]).id)) {
+                            added.push(API.parseRef(obj[key]).id)
+                            const resourceSet = Ecore.ResourceSet.create();
+                            API.instance().fetchResource(obj[key], 1, resourceSet, {}).then((resource: Ecore.Resource) => {
+                                this.handleAddNewResource([resource])
                             });
-                            let upperBound = event.node.props.upperBound
-                            if (upperBound === 1) {
-                                item[nodePropertyName] = dragObj
-                                this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
-
-                            } else if (upperBound === -1) {
-                                item = Array.isArray(item) ?  item[item.length - 1] : item;
-                                if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
-                                    item[nodePropertyName] = []
-                                }
-                                item[nodePropertyName].push(dragObj)
-                                this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
-                            }
                         }
-                        else {
-                            let ar: any;
-                            findObjectByIdCallback(updatedJSON, dropKey, (item: any, data: any) => {
-                                ar = data;
-                            });
-                            if (ar !== undefined) {
-                                if (dropPosition === -1) {
-                                    ar.splice(nodePos, 0, dragObj);
-                                } else if (nodePos <= dragNodePos) {
-                                    ar.splice(nodePos + 1, 0, dragObj);
-                                } else if (nodePos > dragNodePos) {
-                                    ar.splice(nodePos, 0, dragObj);
-                                }
-                            }
-                        }
-                        const node: { [key: string]: any } = event.node.props;
-                        const targetObject: { [key: string]: any } = this.state.targetObject;
-                        let nestedJSON = nestUpdaters(updatedJSON, null);
-                        let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
-                        this.state.mainEObject.eResource().clear();
-                        let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
-                        this.setState((state, props) => ({
-                            mainEObject: resource.eContents()[0],
-                            resourceJSON: nestedJSON,
-                            targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
-                            tableData: updatedTargetObject ? state.tableData : [],
-                            selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
-                            isModified: true
-                        }))
-
                     }
-                };*/
+                    //Change inner _id if its child of copy element
+                    if (key === "_id") {
+                        obj[key] = obj[key] === id ? id : (id + obj[key] as string)
+                    }
+                    //Change same page ref for children (deprecated?)
+                    if (key === "$ref" && level !== 1) {
+                        obj[key] = (obj[key] as string).replace(pattern, id)
+                    }
+                });
+                if (event.node.data.upperBound === -1 || event.node.data.featureUpperBound === -1) {
+                    updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "push"})
+                } else {
+                    updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "set"})
+                }
+                findObjectByIdCallback(updatedJSON, event.dragNode.data.targetObject._id, (item: any, index: any, arr: any) => {
+                    delete arr[index]
+                    arr.length = arr.length - 1
+                });
+                const nestedJSON = nestUpdaters(updatedJSON, null);
+                const updatedTargetObject = findObjectById(nestedJSON, id);
+                const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                this.setState((state, props) => ({
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject,
+                    mainEObject: resource.eContents()[resource.eContents().length - 1],
+                    isModified: true,
+                }), this.scrollToElementWithId)
+
+            }
+
+
+           /* const {t} = this.props;
+            const dragKey = event.dragNode.data.targetObject._id;
+            let key;
+            let dropKey;
+            let flag = false
+
+            if (event.node.data.targetObject.length !== 0 ) {
+                event.node.data.targetObject._id === undefined ? key = event.node.data.targetObject[0]._id : key = event.node.data.targetObject._id
+                const dropKey = key
+            }
+            else{
+                flag = true
+                dropKey = `ui_generated_${event.node.pos.substring(0,event.node.pos.length -4)}//${event.node.data.propertyName}.${1}`
+            }
+
+            const dragPos = event.dragNode.pos.split('-');
+            const dropPos = event.node.pos.split('-');
+
+            const dropPosition = event.dropPosition - Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePos = Number(dragPos[dragPos.length - 1]);
+
+            const nodePos = Number(dropPos[dropPos.length - 1]);
+
+            const dragNodePropertyName = event.dragNode.data.propertyName
+            const nodePropertyName = event.node.data.propertyName
+
+            const eClass = event.node.data.eClass;
+            const eClassObject = Ecore.ResourceSet.create().getEObject(eClass);
+            const allSubTypes = eClassObject.get('eAllSubTypes');
+
+            let permissionToUpdate = allSubTypes.find((el: any) => el.get('name') === event.dragNode.data.eClass.split("//")[1])
+
+            if (!this.state.edit) {
+                this.props.notification(t('notification'), t('editing is not available'), "info");
+            }
+            else if (permissionToUpdate === undefined && event.node.data.upperBound !== undefined) {
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+            }
+            else if ((event.node.data.upperBound === undefined && !event.dropToGap) ||
+                (event.node.data.upperBound === 1 && event.node.data.arrayLength !== 0) ||
+                (dropKey === 'null' && event.node.data.arrayLength !== 0 || dropKey === undefined)
+            ) {
+                this.props.notification(t('notification'), 'Опрация заблокирована', "info");
+            }
+            else {
+                let updatedJSON = this.state.resourceJSON;
+                let dragObj = findObjectById(updatedJSON, dragKey);
+
+                //Delete dragObj from updatedJSON
+                updatedJSON = event.dragNode.data.parentUpdater(null, undefined, dragNodePropertyName, { operation: "deleteNode", index: dragNodePos})
+
+                // Вариант AppMOdule Button b22 to childer in r22 , DatasetComponent component to component
+                if (!event.dropToGap) {
+                    let item: any;
+                    findObjectByIdCallback(updatedJSON, dropKey, (dropObj: any) => {
+                        item = dropObj
+                    });
+                    let upperBound = event.node.props.upperBound
+                    if (upperBound === 1) {
+                        item[nodePropertyName] = dragObj
+                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+
+                    } else if (upperBound === -1) {
+                        item = Array.isArray(item) ?  item[item.length - 1] : item;
+                        if (item[nodePropertyName] === null || item[nodePropertyName] === undefined) {
+                            item[nodePropertyName] = []
+                        }
+                        item[nodePropertyName].push(dragObj)
+                        this.props.notification(t('notification'), 'Объект ' + dragObj.eClass + ' успешно перемещен', "info");
+                    }
+                }
+                else {
+                    let ar: any;
+                    findObjectByIdCallback(updatedJSON, dropKey, (item: any, index: any, arr: any) => {
+                        ar = arr;
+                        if (flag){
+                            updatedJSON = ar[0].updater(dragObj, undefined, event.node.data.propertyName, {operation: "push"})
+                        }
+                    });
+                    if (ar && !flag) {
+                            if (dropPosition === -1) {
+                                ar.splice(nodePos, 0, dragObj);
+                            } else if (nodePos <= dragNodePos) {
+                                ar.splice(nodePos + 1, 0, dragObj);
+                            } else if (nodePos > dragNodePos) {
+                                ar.splice(nodePos, 0, dragObj);
+                            }
+                    }
+                    }
+                const node: { [key: string]: any } = event.node;
+                const targetObject: { [key: string]: any } = this.state.targetObject;
+                let nestedJSON = nestUpdaters(updatedJSON, null);
+                let updatedTargetObject = targetObject !== undefined ? targetObject._id !== undefined ? findObjectById(updatedJSON, targetObject._id) : undefined : undefined;
+                this.state.mainEObject.eResource().clear();
+                let resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
+                this.setState((state, props) => ({
+                    mainEObject: resource.eContents()[0],
+                    resourceJSON: nestedJSON,
+                    targetObject: updatedTargetObject !== undefined ? updatedTargetObject : {eClass: ""},
+                    tableData: updatedTargetObject ? state.tableData : [],
+                    selectedKeys: state.selectedKeys.filter(key => key !== node.eventKey),
+                    isModified: true
+                }))
+
+            }*/
+        };
+
 
 
 
@@ -1404,6 +1504,12 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
+                               /* // @ts-ignore
+                                switcherIcon={!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
+                                    <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                                    targetObject.length !== 0 ?
+                                        <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
+                                        <NeoIcon icon={"minus"} className={'icon-tree'} color={NeoColor.grey_5}/>}*/
                             >
                                 {generateNodes(eClass, object, `${parentKey}.${cidx}`)}
                             </Tree.TreeNode>
@@ -1426,9 +1532,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 ref={this.treeRef}
                 key="mainTree"
                 draggable
-                // onDrop={onDrop}
+                onDrop={onDrop}
                 blockNode
-                switcherIcon={<NeoIcon icon={"download"}/>}
+                virtual
                 showIcon
                 showLine={{showLeafIcon: false}} //показывать линию между пунктами
                 defaultExpandAll //Все пункты раскрыты (по умолчанию) при открытии дерева
