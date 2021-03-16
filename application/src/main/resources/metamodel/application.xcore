@@ -197,6 +197,28 @@ class NeoIcon extends Icon {
 
 @NFCore(documentation="Контейнер для компонент")
 class Form extends ViewContainer {
+        @NFCore(documentation="Валидируемые компоненты", showNLevelChildren="1", possibleClasses="['ru.neoflex.nfcore.application#//Input','ru.neoflex.nfcore.application#//Select','ru.neoflex.nfcore.application#//DatePicker']")
+    refers ViewElement[] validationItems
+        @NFCore(documentation="Правила валидации")
+    contains ValidationRule[] validationRules
+        @NFCore(documentation="Связи между validationItems и validationRules", formComponent="validationMapping")
+    String[] validationMapping
+}
+
+@NFCore(documentation="Правила валидации")
+class ValidationRule {
+        @NFCore(documentation="название правила")
+    String name
+        @NFCore(documentation="Сообщение об ошибке валидации")
+    String message
+        @NFCore(documentation="Тип валидации. None - не валидируется. Required - поле обязательно к заполнению. Pattern - JS RegExp выражение. JSExpression выражение на JS поддерживаются переменные вида :item")
+    ValidationRuleType validationRuleType
+        @NFCore(documentation="Выражение RegExp", renderConditions="{'validationRuleType':'Pattern'}")
+    String pattern
+        @NFCore(documentation="Флаги RegExp", renderConditions="{'validationRuleType':'Pattern'}")
+    String patternFlags = "gi"
+        @NFCore(documentation="Выражение на языке javascript", renderConditions="{'validationRuleType':'JsExpression'}")
+    String expression
 }
 
 @NFCore(documentation="Значение, передаваемое в URL")
@@ -378,6 +400,8 @@ class Button extends ViewElement, GridComponent {
     ButtonSize buttonSize
         @NFCore(documentation="Код иконки из пакета neo-icon. Иконка отображается до текста", neoIconSelect="true")
 	NeoIconCodes iconCode
+        @NFCore(documentation="Препятствовать обработке событий на верхних уровнях DOM модели. Например при обработке события onFinish для Form")
+	boolean stopEventPropagation
 }
 
 @NFCore(documentation="Стили")
@@ -443,16 +467,18 @@ class EventHandler {
         @NFCore(documentation="Имя элемента (может быть неуникальным во всем приложении)")
         @OrientDB(key="true")
     String name
-        @NFCore(documentation="Событие. Возможные значения: click, change, componentLoad")
+        @NFCore(documentation="Событие. Возможные значения: click, change, componentLoad, validationFinish, validationFinishFailed")
     Event event
-        @NFCore(documentation="Компонента, к которой будет направлено действие")
+        @NFCore(documentation="Компонента, к которой будет направлено действие", renderConditions="{'event':['click','change','componentLoad']}")
     refers DynamicActionElement[] listenItem
         @NFCore(documentation="Обработка слушаемого события")
     contains EventAction[] eventActions
-        @NFCore(documentation="Обязательное условие для выполнения действия. Например: ':variable' != '0'")
+        @NFCore(documentation="Обязательное условие для выполнения действия. Например: ':variable' != '0'", renderConditions="{'event':['click','change','componentLoad']}")
     String condition
-        @NFCore(documentation="Компонента, к которой применяются условия из condition. Например: 'variable ValueHolder'")
+        @NFCore(documentation="Компонента, к которой применяются условия из condition. Например: 'variable ValueHolder'", renderConditions="{'event':['click','change','componentLoad']}")
     refers DynamicActionElement[] conditionItems
+        @NFCore(documentation="Валидируемая компонента", renderConditions="{'event':['validationFinish','validationFinishFailed']}")
+    refers Form[] validationItems
 }
 
 @NFCore(documentation="Панель, которая выдвигается с края экрана")
@@ -573,6 +599,8 @@ enum Event {
     click
     change
     componentLoad
+    validationFinish
+    validationFinishFailed
 }
 
 @NFCore(documentation="Тип значения, передаваемого из таблицы в компоненту")
@@ -752,4 +780,11 @@ enum PanelActions {
     exportExcel,
     versions,
     edit
+}
+
+enum ValidationRuleType {
+    None,
+    Required,
+    Pattern,
+    JsExpression
 }

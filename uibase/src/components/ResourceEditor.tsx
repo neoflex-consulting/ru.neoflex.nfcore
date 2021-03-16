@@ -99,7 +99,9 @@ interface State {
     selectCount: number,
     selectedTree: any,
     addRefMenuItems: EClass[],
-    isTableInFocus: boolean
+    isTableInFocus: boolean,
+    onBrowseParentIds: string[] | undefined,
+    onBrowseClasses: string[] | undefined
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -195,6 +197,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         selectCount: 0,
         selectedTree:{},
         addRefMenuItems: [],
+        onBrowseParentIds: undefined,
+        onBrowseClasses: undefined,
         isTableInFocus: false
     };
 
@@ -501,6 +505,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             }
             return isVisible
         }
+        function getNLevelParentIds(targetObject: any, level: number): string[] {
+            const ids = [];
+            if (level === 1) {
+                ids.push(targetObject._id)
+            }
+            return ids
+        }
+        function getPossibleClasses(classesString: string) {
+            return JSON.parse(classesString.split("'").join("\""))
+        }
         const preparedData: Array<Object> = [];
         let featureList: any = undefined;
         if (mainEObject.eContainer.getEObject(targetObject._id) !== null && mainEObject.eContainer.getEObject(targetObject._id) !== undefined) {
@@ -521,6 +535,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 const syntax = getFieldAnnotationByKey(feature.get('eAnnotations'), 'syntax');
                 const resourceEditorName = this.props.t(getFieldAnnotationByKey(feature.get('eAnnotations'), 'resourceEditorName'));
                 const isNeoIconSelect = getFieldAnnotationByKey(feature.get('eAnnotations'), 'neoIconSelect') === 'true';
+                const showNLevelChildren = parseInt(getFieldAnnotationByKey(feature.get('eAnnotations'), 'showNLevelChildren'), 10);
+                const possibleClasses = getFieldAnnotationByKey(feature.get('eAnnotations'), 'possibleClasses');
+                const componentType = getFieldAnnotationByKey(feature.get('eAnnotations'), 'formComponent');
                 const props = {
                     value: targetObject[feature.get('name')],
                     targetObject: targetObject,
@@ -534,12 +551,19 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     handleDeleteRef: this.handleDeleteRef,
                     onEClassBrowse: this.onEClassBrowse,
                     onBrowse: this.onBrowse,
+                    onBrowseParentIds: showNLevelChildren ? getNLevelParentIds(targetObject, showNLevelChildren) : undefined,
+                    onBrowseClasses: possibleClasses !== "" ? getPossibleClasses(possibleClasses) : undefined,
                     mainEObject: mainEObject,
                     edit: this.state.edit && !isDisabled,
                     showIcon: isNeoIconSelect,
                     syntax,
                     goToObject: this.goToObject,
-                    t: this.props.t
+                    componentType: componentType,
+                    validationItems: componentType === "validationMapping" ? targetObject?.validationItems?.map((i:any)=>{
+                        return findObjectById(targetObject, i?.$ref) || findObjectById(targetObject, i?.$ref.replace(mainEObject._id + "#",""))
+                    }).filter((v: any)=>v) : undefined,
+                    validationRules: componentType === "validationMapping" ? targetObject?.validationRules : undefined,
+                    t: this.props.t,
                 };
                 let value = FormComponentMapper.getComponent(props);
                 value = isExpandable ? FormComponentMapper.getComponentWrapper({
@@ -633,7 +657,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ modalSelectEClassVisible: true, addRefPropertyName: EObject.get('name') })
     };
 
-    onBrowse = (EObject: Ecore.EObject) => {
+    onBrowse = (EObject: Ecore.EObject, onBrowseParentIds?: string[], onBrowseClasses?: string[]) => {
         const addRefPossibleTypes = [];
         addRefPossibleTypes.push(EObject.get('eType').get('name'));
         const resourceSet = EObject.get('eType').eResource().get('resourceSet') || Ecore.ResourceSet.create();
@@ -646,7 +670,9 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             modalRefVisible: true,
             addRefPropertyName: EObject.get('name'),
             addRefPossibleTypes: addRefPossibleTypes,
-            addRefMenuItems: this.getAddElementsList(addRefPossibleTypes)
+            addRefMenuItems: this.getAddElementsList(addRefPossibleTypes),
+            onBrowseParentIds: onBrowseParentIds,
+            onBrowseClasses: onBrowseClasses
         })
     };
 
@@ -1729,8 +1755,10 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                             isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
                                         }
                                     }
+                                    const excludeById = this.state.onBrowseParentIds ? !(this.state.onBrowseParentIds as unknown as string[]).includes(eObject.eContainer._id) : false;
+                                    const excludeByClass = this.state.onBrowseClasses ? !(this.state.onBrowseClasses as unknown as string[]).includes(eObject.eClass.eURI()) : false;
                                     return (isEObjectType ||
-                                        (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded)) &&
+                                        (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded && !excludeById && !excludeByClass)) &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                                 <NeoHint title={!this.state.selectDropdownVisible?`${eObject.eClass.get('name')} ${eObject.get('name')}`:undefined}>
                                                         <b>{eObject.eClass.get('name')}</b>&nbsp;

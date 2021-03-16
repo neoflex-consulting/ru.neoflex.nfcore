@@ -1,10 +1,10 @@
 import React, {Fragment, useCallback, useEffect, useState} from 'react';
-import Ecore from 'ecore';
+import Ecore, {EObject} from 'ecore';
 import {Input, Select} from 'antd';
 import moment from 'moment';
 
 import {boolSelectionOption, convertPrimitiveToString} from '../utils/resourceEditorUtils';
-import {NeoButton, NeoDatePicker, NeoInput, NeoModal, NeoOption, NeoSelect, NeoTag} from "neo-design/lib";
+import {NeoButton, NeoDatePicker, NeoInput, NeoModal, NeoOption, NeoParagraph, NeoSelect, NeoTag} from "neo-design/lib";
 import './../styles/ComponentMapper.css'
 import {NeoIcon} from "neo-icon/lib";
 import AceEditor from "react-ace";
@@ -269,13 +269,15 @@ interface SelectRefObjectProps {
     handleDeleteSingleRef?: Function,
     onEClassBrowse?: Function,
     onBrowse?: Function,
+    onBrowseParentIds?: string[],
+    onBrowseClasses?: string[],
     upperBound: number,
     edit?: boolean,
     goToObject?:(id:string, obj: Ecore.EObject| null)=>void
 }
 
 function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
-    const { eObject, upperBound, value, mainEObject, idx, ukey, edit, goToObject } = props
+    const { eObject, upperBound, value, mainEObject, idx, ukey, edit, goToObject, onBrowseParentIds, onBrowseClasses } = props
 
     const getRelatedResourceByRef = (reference: string) => {
         const refObject = (mainEObject.eResource().eContainer as Ecore.ResourceSet).elements()
@@ -335,7 +337,7 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 style={{display: "inline-block", padding: '9px 12px'}}
                 key={ukey + "_" + idx}
                 onClick={() => {
-                    props.onBrowse && props.onBrowse!(eObject)
+                    props.onBrowse && props.onBrowse!(eObject, onBrowseParentIds, onBrowseClasses)
                 }}
                 type={!edit ? 'disabled' : 'secondary'}
             >...</NeoButton>
@@ -521,6 +523,108 @@ function TagComponent(props: TagComponentProps): JSX.Element {
     )
 }
 
+interface ValidationMappingProps {
+    idx?: number,
+    ukey?: string,
+    edit?: boolean,
+    validationItems?: any[],
+    validationRules?: any[],
+    mapping?: string[],
+    onChange?: Function
+}
+
+function ValidationMapping(props: ValidationMappingProps): JSX.Element {
+    const { ukey, idx, edit, validationItems, validationRules, mapping, onChange} = props;
+
+    const initMappedRules = mapping ? mapping.map((m:string)=>{
+        return {
+            component: m.split(":")[0],
+            rule: m.split(":")[1]
+        }
+    }).filter(r=>r.component) : [];
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [mappedRules, setMappedRules] = useState(initMappedRules);
+    const onClick = () => {setModalVisible(!modalVisible)};
+    const onCancel = () => {
+        setModalVisible(!modalVisible);
+        onChange && onChange(mappedRules.map(r=>{
+            return r.component + ":" + r.rule
+        }));
+    };
+
+    if (mappedRules.filter(r => validationItems?.find(i=>i.name === r.component)).length !== mappedRules.length) {
+        const newMappedRules = mappedRules
+            .filter(r=> validationItems?.find(i=>i.name === r.component));
+        setMappedRules(newMappedRules);
+        onChange && onChange(newMappedRules.map(r=>{
+            return r.component + ":" + r.rule
+        }));
+    }
+
+    return (
+        <>
+            <NeoSelect
+                mode={"tags"}
+                value={mappedRules.map(r=>r.component+":"+r.rule)}
+                key={"i_" + ukey + "_" + idx}
+                style={{ width: "300px" , marginRight: "8px"}}
+                disabled={true}
+                maxTagCount={'responsive'}
+                maxTagTextLength={7}
+                maxTagPlaceholder={`Еще...`}
+            >
+                {mappedRules.map(r=>{
+                    return <NeoOption key={ukey + "_" + idx + "_" + r.component} value={r.component+":"+r.rule}>{r.component+":"+r.rule}</NeoOption>
+                })}
+            </NeoSelect>
+            <NeoButton
+                style={{display: "inline-block", padding: '9px 12px'}}
+                key={ukey + "_" + idx}
+                onClick={onClick}
+                type={!edit || !validationItems || validationItems?.length === 0 ? 'disabled' : 'secondary'}
+            >...</NeoButton>
+            {modalVisible && <NeoModal
+                type={'edit'}
+                width={'1000px'}
+                key={"validation_mapping"}
+                visible={modalVisible}
+                footer={null}
+                onCancel={onCancel}
+            >
+                {validationItems?.map((i, idx) => {
+                    return <div key={`dv_${idx}`} style={{display: "flex", width: "95%", justifyContent: "space-between",padding: "16px 0 0 0", alignItems: "baseline"}}>
+                        <NeoParagraph>{i.name}</NeoParagraph>
+                        <NeoSelect
+                            mode={"tags"}
+                            value={undefined}
+                            key={ukey + "_" + idx + "_" + i.name}
+                            onChange={(newValues:string[]) => {
+                                const newMappedRules = mappedRules
+                                    .filter(r => r.component !== i.name)
+                                    .concat(newValues.map(s=>{return {component: i.name, rule: s}}))
+                                setMappedRules(newMappedRules);
+                                onChange && onChange(newMappedRules.map(r=>{
+                                    return r.component + ":" + r.rule
+                                }));
+                            }}
+                            disabled={!edit}
+                            defaultValue={mappedRules.filter(r=>r.component === i.name).map(r=>r.rule)}
+                            maxTagCount={'responsive'}
+                            maxTagTextLength={7}
+                            maxTagPlaceholder={`Еще...`}
+                            >
+                            {validationRules?.map(r => {
+                                return <NeoOption key={ukey + "_" + idx + "_" + i.name + "_" + r.name} value={r.name}>{r.name}</NeoOption>
+                            })}
+                        </NeoSelect>
+                    </div>
+                })}
+            </NeoModal>}
+        </>
+    )
+}
+
 
 interface ExpandComponentProps {
     expandedComponent: JSX.Element,
@@ -580,7 +684,7 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
     }
 
     static getComponent(props: any) {
-        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, t } = props;
+        const { targetObject, eObject, eType, value, ukey, idx, edit, expanded, syntax, showIcon, goToObject, componentType, validationItems, validationRules, t } = props;
         const targetValue = value || props?.eObject?.get('defaultValueLiteral');
         if (syntax === "sql") {
             return <EditableSQLArea
@@ -601,7 +705,19 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
                 onChange={(text: string) => props.onChange && props.onChange!(text, 'EditableTextArea', targetObject, props.eObject)}
             />
         }
-
+        if (componentType === "validationMapping") {
+            return <ValidationMapping
+                ukey={ukey}
+                idx={idx}
+                edit={edit}
+                validationItems={validationItems}
+                validationRules={validationRules}
+                mapping={value}
+                onChange={(newValue: string[]) => {
+                    props.onChange && props.onChange!(newValue, 'SelectComponent', targetObject, eObject)
+                }}
+                />
+        }
         if ((eObject && eObject.isKindOf('EReference')) || (eType.eClass && eType.eClass.get('name') === 'EClass') || componentType === "SelectRef") {
             return <SelectRefObject
                 idx={idx}
@@ -613,6 +729,8 @@ export default class ComponentMapper extends React.Component<Props & WithTransla
                 handleDeleteSingleRef={props.handleDeleteSingleRef}
                 onEClassBrowse={props.onEClassBrowse}
                 onBrowse={props.onBrowse}
+                onBrowseParentIds={props.onBrowseParentIds}
+                onBrowseClasses={props.onBrowseClasses}
                 upperBound={props.upperBound}
                 edit={edit}
                 goToObject={goToObject}

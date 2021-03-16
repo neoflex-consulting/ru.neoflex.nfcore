@@ -501,6 +501,8 @@ enum eventType {
     click="click",
     change="change",
     componentLoad="componentLoad",
+    validationFinish="validationFinish",
+    validationFinishFailed="validationFinishFailed",
 }
 
 enum grantType {

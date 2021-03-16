@@ -2,7 +2,6 @@ import {Component, View, ViewFactory} from './View'
 import Ecore, {EList, EObject} from 'ecore';
 import * as React from 'react';
 import {Collapse, ConfigProvider, Drawer, Form, InputNumber, Select} from 'antd';
-
 import DatasetView from './components/app/dataset/DatasetView';
 import {API} from './modules/api';
 import {docxElementExportType, docxExportObject} from "./utils/docxExportUtils";
@@ -11,7 +10,13 @@ import Calendar from "./components/app/calendar/Calendar";
 import moment from 'moment';
 import {IAction, IEventAction, IServerNamedParam} from "./MainContext";
 import DOMPurify from 'dompurify'
-import {getNamedParamByName, getNamedParams, replaceNamedParam} from "./utils/namedParamsUtils";
+import {
+    getAllNamedParamsByName,
+    getNamedParamByName,
+    getNamedParams,
+    getParamsFromString,
+    replaceNamedParam
+} from "./utils/namedParamsUtils";
 import {
     actionType,
     contextStringSeparator,
@@ -25,21 +30,13 @@ import {
 import {getUrlParam} from "./utils/urlUtils";
 import {saveAs} from "file-saver";
 import {switchAntdLocale} from "./utils/antdLocalization";
-import {
-    NeoButton,
-    NeoCol,
-    NeoDatePicker,
-    NeoInput,
-    NeoParagraph,
-    NeoRow,
-    NeoSelect,
-    NeoTabs
-} from "neo-design/lib";
+import {NeoButton, NeoCol, NeoDatePicker, NeoInput, NeoParagraph, NeoRow, NeoSelect, NeoTabs} from "neo-design/lib";
 import _ from "lodash";
 import {NeoIcon} from "neo-icon/lib";
 import {SvgName} from "neo-icon/lib/icon/icon";
 import ChangeLogView from "./components/ChangeLogView";
 import InlineHelp from "./components/app/InlineHelp";
+import {Rule} from "antd/es/form";
 
 const marginBottom = '20px';
 const inputElementStandardWidth = "200px";
@@ -177,6 +174,9 @@ function createCssClass(viewObject: any){
     return resultCss
 }
 
+type validationRuleType = "None"|"Required"|"Pattern"|"JsExpression"
+type validationRule = {component:EObject, rule:EObject, type: validationRuleType};
+
 export async function checkServerSideCondition(conditionType: string, valueItems: Ecore.EList, dataset: Ecore.EObject, expression: string, context: any): Promise<boolean> {
     if (conditionType === "Never") {
         return false
@@ -261,11 +261,79 @@ class Col_ extends ViewContainer {
 class Form_ extends ViewContainer {
     constructor(props: any) {
         super(props);
+        const mapping = this.viewObject.get('validationMapping');
+        let mappedRules:{component:EObject, rule:EObject}[] = [];
+        if (mapping) {
+            mappedRules = mapping.map((m:string)=>{
+                return {
+                    component:this.viewObject.get('children').find((r:EObject)=>r.get('name') === m.split(":")[0]),
+                    rule: this.viewObject.get('validationRules').find((r:EObject)=>r.get('name') === m.split(":")[1])
+                }
+            }) as validationRule[]
+        }
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
+            mappedRules: mappedRules.filter(r=>r.component)
         };
     }
+
+    getValidationRules = (mappedRules:validationRule[]|undefined, componentName: string, props: any):Rule[] => {
+        if (!mappedRules) {
+            return []
+        } else {
+            return mappedRules.map(r => {
+                if (r.rule.get("validationRuleType") === "Required") {
+                    return {
+                        required: true,
+                        message: r.rule.get("message"),
+                    }
+                } else if (r.rule.get("validationRuleType") === "Pattern") {
+                    return {
+                        required: true,
+                        pattern: new RegExp(r.rule.get("pattern"), r.rule.get("flags") || "gi"),
+                        message: r.rule.get("message"),
+                    }
+                } else if (r.rule.get("validationRuleType") === "JsExpression") {
+                    return ({ getFieldValue } : any) => ({
+                        validator(_: any, value: any) {
+                            //Ищем параметры в context + url
+                            const expression = r.rule.get("expression")
+                            const variables = getParamsFromString(expression);
+                            const pathFull = props.context.getFullPath();
+                            let params = getAllNamedParamsByName(variables
+                                , props.context.contextItemValues
+                                , pathFull[pathFull.length - 1].params);
+                            //Значение данного элемента берем из value т.к. работаем асинхронно
+                            params = params.map(p=>{
+                                return {
+                                    ...p,
+                                    parameterValue: componentName === p.parameterName ? value : p.parameterValue
+                                }
+                            });
+                            const e = replaceNamedParam(expression, params);
+                            let valid = true;
+                            try {
+                                // eslint-disable-next-line
+                                valid = eval(e);
+                                console.log(`validation expression: ${expression}`);
+                            } catch (e) {
+                                valid = false;
+                                console.log(`exception while validating expression: ${expression}`);
+                            }
+                            if (valid) {
+                                return Promise.resolve();
+                            }
+                            return Promise.reject(new Error(r.rule.get("message")));
+                        },
+                    })
+                } else return {
+                    required: false,
+                    message: r.rule.get("message"),
+                }
+            })
+        }
+    };
 
     componentDidMount(): void {
         mountComponent.bind(this)();
@@ -275,11 +343,37 @@ class Form_ extends ViewContainer {
         unmountComponent.bind(this)();
     }
 
+    onFinish = (values: any) => {
+        console.log('Success:', values);
+        this.props.context.notifyAllEventHandlers({
+            type: eventType.validationFinish,
+            itemId:this.viewObject.get('name')+this.viewObject._id
+        })
+    };
+
+    onFinishFailed = (errorInfo: any) => {
+        console.log('Failed:', errorInfo);
+        this.props.context.notifyAllEventHandlers({
+            type: eventType.validationFinishFailed,
+            itemId:this.viewObject.get('name')+this.viewObject._id
+        })
+    };
+
     render = () => {
         const isReadOnly = this.viewObject.get('grantType') === grantType.read || this.state.isDisabled || this.props.isParentDisabled;
         // const cssClass = createCssClass(this.viewObject);
+        const props = {
+            ...this.props,
+            isParentDisabled: isReadOnly,
+            isParentHidden: this.state.isHidden,
+            isExportSuppressed: this.props.isExportSuppressed,
+        };
+        let children = this.props.viewObject.get('children') as Ecore.EObject[];
+        //TODO
+        //Добавить валидацию для других компонент
         return (
-            <Form
+            this.state.mappedRules.length === 0
+                ? <Form
                 // style={{marginBottom: marginBottom}}
                 //   hidden={this.state.isHidden || this.props.isParentHidden}
                 //   key={this.viewObject._id.toString() + '_4'}
@@ -287,6 +381,30 @@ class Form_ extends ViewContainer {
             >
                 {this.renderChildren(isReadOnly, this.state.isHidden, this.props.isExportSuppressed)}
             </Form>
+                : <Form
+                    onFinish={this.onFinish}
+                    onFinishFailed={this.onFinishFailed}
+                    name={this.viewObject.get('name') || "default"}
+                    initialValues={{
+                        remember: true,
+                    }}
+                >
+                    {children.map(
+                        (c: Ecore.EObject) => {
+                            const rules = this.getValidationRules(this.state.mappedRules.filter((r:validationRule) => r.component.get("name") === c.get("name")), c.get("name"), this.props);
+                            return <Form.Item
+                                name={c.get("name")}
+                                rules={rules}
+                            >
+                                {this.viewFactory.createView(c, props)}
+                            </Form.Item>
+                        })}
+                    {/*<Form.Item>
+                        <Button type="primary" htmlType="submit" onClick={()=>alert(123)}>
+                            Submit
+                        </Button>
+                    </Form.Item>*/}
+                </Form>
         )
     }
 }
@@ -493,11 +611,14 @@ export class Button_ extends ViewContainer {
                 size={this.viewObject.get('buttonSize')}
                 type={this.viewObject.get('buttonType')}
                 suffixIcon={this.viewObject.get('iconCode') && <NeoIcon icon={neoIconMap[this.viewObject.get('iconCode') || 'none'] as SvgName}/>}
-                onClick={isReadOnly ? ()=>{} : () => {
-                        if (!this.state.isEnter) {
-                            const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
-                            handleClick.bind(this)(value);
-                        }
+                onClick={isReadOnly ? undefined : (event) => {
+                    if (this.viewObject.get('stopEventPropagation')) {
+                        event.preventDefault();
+                    }
+                    if (!this.state.isEnter) {
+                        const value = getAgGridValue.bind(this)(this.viewObject.get('returnValueType') || 'string', 'ref');
+                        handleClick.bind(this)(value);
+                    }
                     this.setState({isEnter: false})
                 }}>
                 {this.props.t(this.viewObject.get('label') ? this.viewObject.get('label') : 'submit')}
@@ -1107,7 +1228,7 @@ class ValueHolder_ extends Component {
 }
 
 export class Input_ extends ViewContainer {
-    private timer : number;
+    private timer: number;
     constructor(props: any) {
         super(props);
         let value;
@@ -1196,9 +1317,9 @@ export class Input_ extends ViewContainer {
             )
         } else {
             return(
-                <div key={this.viewObject._id}
-                     style={{marginBottom: marginBottom, display: this.viewObject.get('helpText') ? "flex" : undefined}}>
+                <>
                     <NeoInput
+                        id={this.props.id}
                         hidden={this.state.isHidden}
                         width={this.props.isAgEdit ? "100%" : inputElementStandardWidth}
                         // width={this.viewObject.get('width')}
@@ -1208,6 +1329,8 @@ export class Input_ extends ViewContainer {
                         placeholder={this.viewObject.get('placeholder')}
                         defaultValue={this.viewObject.get('value')}
                         onChange={(currentValue: any) => {
+                            //Вызываем props.onChange для валидации antd иначе form не видит изменений
+                            this.props.onChange && this.props.onChange(currentValue);
                             this.onChange(currentValue.target.value)
                         }}
                         value={this.state.currentValue}
@@ -1216,7 +1339,7 @@ export class Input_ extends ViewContainer {
                         title={this.viewObject.get('title')}
                     />
                     {this.viewObject.get('helpText') && <InlineHelp helpText={this.viewObject.get('helpText')} helpOrientation={this.viewObject.get('helpOrientation')}/>}
-                </div>
+                </>
             )
         }
     }
@@ -1459,9 +1582,18 @@ class Typography_ extends ViewContainer {
 class EventHandler_ extends Component {
     constructor(props: any) {
         super(props);
+        let handledItems;
+        const eventType = this.viewObject.get('event') || "click";
+        if (["click","change","componentLoad"].includes(eventType)) {
+            handledItems = this.viewObject.get('listenItem')
+        } else if (["validationFinish","validationFinishFailed"].includes(eventType)) {
+            handledItems = this.viewObject.get('validationItems')
+        }
         this.state = {
             isHidden: this.viewObject.get('hidden') || false,
             isDisabled: this.viewObject.get('disabled') || false,
+            eventType: eventType,
+            handledItems: handledItems
         };
     }
 
@@ -1581,11 +1713,11 @@ class EventHandler_ extends Component {
     }
 
     componentDidMount(): void {
-        if (this.viewObject.get('listenItem')) {
-            (this.viewObject.get('listenItem') as EList).each(eObject => {
+        if (this.state.handledItems) {
+            (this.state.handledItems as EList).each(eObject => {
                 this.props.context.addEventHandler({
                     itemId: eObject.get('name')+eObject._id,
-                    eventType: this.viewObject.get('event') || "click",
+                    eventType: this.state.eventType,
                     callback: this.handleEvent.bind(this)
                 })
             });
@@ -1594,8 +1726,8 @@ class EventHandler_ extends Component {
     }
 
     componentWillUnmount(): void {
-        if (this.viewObject.get('listenItem')) {
-            (this.viewObject.get('listenItem') as EList).each(eObject => {
+        if (this.state.handledItems) {
+            (this.state.handledItems as EList).each(eObject => {
                 this.props.context.removeEventHandler(eObject.get('name')+eObject._id)
             });
         }
@@ -1730,7 +1862,7 @@ export class RadioGroup_ extends ViewContainer {
                 type: eventType.click,
                 itemId:this.viewObject.get('name')+this.viewObject._id,
                 value: currentValue
-        })
+            })
         }
     };
 
