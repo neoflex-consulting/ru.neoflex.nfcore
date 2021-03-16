@@ -1554,7 +1554,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key={parentKey}
                         className={!isVisible ? "hidden-leaf" : ""}
                         title={feature.get('name')}
-                        //@ts-ignore
                         switcherIcon={!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                             targetObject.length !== 0 ?
@@ -1587,7 +1586,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
-                                // @ts-ignore
                                 switcherIcon={!isLeaf ? (!this.state.expandedKeys.includes(`${parentKey}.${cidx}`) && targetObject.length !== 0 ?
                                     <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                                     targetObject.length !== 0 ?
