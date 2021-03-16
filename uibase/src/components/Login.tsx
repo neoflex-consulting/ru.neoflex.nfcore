@@ -4,7 +4,6 @@ import {WithTranslation, withTranslation} from "react-i18next";
 import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
 import FetchSpinner from "./FetchSpinner";
 import {ReactComponent as AppLogin} from '../icons/login.svg';
-import {ReactComponent as AppLogo} from "../icons/logo.svg";
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
