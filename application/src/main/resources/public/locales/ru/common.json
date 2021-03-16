@@ -62,7 +62,7 @@
         "language": "Язык",
         "legend": "Легенда",
         "legend position": "Положение легенды",
-        "login": "Войти",
+        "login": "Логин",
         "logout": "Выход",
         "mandatoryreporting": "Обязательная отчетность",
         "main" : "Основной",
@@ -92,6 +92,7 @@
         "showrows": "Показать строки",
         "sorting": "Сортировка",
         "sorts": "Параметры сортировки",
+        "signIn": "Войти",
         "submit": "Сформировать",
         "system": " система",
         "sysfilters": "Системные фильтры",
@@ -140,6 +141,8 @@
 
         "Range": "Диапазон",
 
+        "Enter login": "Введите логин",
+        "Enter password": "Введите пароль",
         "Enter new column name": "Введите название столбца",
         "Select calculated column": "Выберите вычисляемый столбец",
         "New column name": "Название нового столбца",
