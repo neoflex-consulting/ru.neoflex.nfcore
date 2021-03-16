@@ -8,7 +8,7 @@ import DatasetGrid from "./DatasetGrid";
 import {
     getAllNamedParamsByName,
     getNamedParamByName,
-    getNamedParams,
+    getNamedParams, getParamsFromString,
     replaceNamedParam
 } from "../../../utils/namedParamsUtils";
 import SaveDatasetComponent from "./SaveDatasetComponent";
@@ -655,8 +655,8 @@ class DatasetView extends React.Component<any, State> {
                         let value = f.get('value');
                         let enable = (f.get('enable') !== null ? f.get('enable') : false);
                         let skipParam = false;
-                        const v = value?.match(/:[a-z0-9_()]+/gi);
-                        if (v?.length > 0) {
+                        const v = getParamsFromString(f.get('value'));
+                        if (v.length > 0) {
                             const pathFull = this.props.context.getFullPath();
                             const params = getAllNamedParamsByName(v
                                 , this.props.context.contextItemValues

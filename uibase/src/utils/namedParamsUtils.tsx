@@ -64,4 +64,10 @@ function getAllNamedParamsByName(parameterNames: string[], contextItemValues: Ma
     });
 }
 
-export {replaceNamedParam, getNamedParams, getNamedParamByName, getAllNamedParamsByName}
+function getParamsFromString(stringWithVariables: string|undefined) : string[] {
+    if (!stringWithVariables) { return []}
+    const ret = stringWithVariables.match(/:[a-z0-9_()]+/gi);
+    return ret ? ret : [];
+}
+
+export {replaceNamedParam, getNamedParams, getNamedParamByName, getAllNamedParamsByName, getParamsFromString}
