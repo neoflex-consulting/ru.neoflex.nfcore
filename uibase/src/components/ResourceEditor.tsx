@@ -107,7 +107,8 @@ interface State {
     addRefMenuItems: EClass[],
     isTableInFocus: boolean,
     onBrowseParentIds: string[] | undefined,
-    onBrowseClasses: string[] | undefined
+    onBrowseClasses: string[] | undefined,
+    selectedRefs: string[]
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -205,6 +206,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         addRefMenuItems: [],
         onBrowseParentIds: undefined,
         onBrowseClasses: undefined,
+        selectedRefs: [],
         isTableInFocus: false
     };
 
@@ -663,7 +665,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ modalSelectEClassVisible: true, addRefPropertyName: EObject.get('name') })
     };
 
-    onBrowse = (EObject: Ecore.EObject, onBrowseParentIds?: string[], onBrowseClasses?: string[]) => {
+    onBrowse = (EObject: Ecore.EObject, selectedRefs: string[], onBrowseParentIds?: string[], onBrowseClasses?: string[]) => {
         const addRefPossibleTypes = [];
         addRefPossibleTypes.push(EObject.get('eType').get('name'));
         const resourceSet = EObject.get('eType').eResource().get('resourceSet') || Ecore.ResourceSet.create();
@@ -678,7 +680,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             addRefPossibleTypes: addRefPossibleTypes,
             addRefMenuItems: this.getAddElementsList(addRefPossibleTypes),
             onBrowseParentIds: onBrowseParentIds,
-            onBrowseClasses: onBrowseClasses
+            onBrowseClasses: onBrowseClasses,
+            selectedRefs: selectedRefs
         })
     };
 
@@ -1854,7 +1857,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         style={{ width: '500px' }}
                         placeholder="Please select"
                         width={'100%'}
-                        defaultValue={[]}
+                        defaultValue={this.state.selectedRefs}
                         showSearch={true}
                         maxTagCount={'responsive'}
                         maxTagTextLength={7}
@@ -1885,20 +1888,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 .map((eObject: Ecore.EObject) => {
                                     const possibleTypes: Array<string> = this.state.addRefPossibleTypes;
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject';
-                                    let isExcluded = false;
-                                    for (const [key, value] of Object.entries(this.state.targetObject)) {
-                                        if (key === this.state.addRefPropertyName && (value as any).find) {
-                                            isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
-                                        }
-                                    }
                                     const excludeById = this.state.onBrowseParentIds ? !(this.state.onBrowseParentIds as unknown as string[]).includes(eObject.eContainer._id) : false;
                                     const excludeByClass = this.state.onBrowseClasses ? !(this.state.onBrowseClasses as unknown as string[]).includes(eObject.eClass.eURI()) : false;
+                                    const parentResource = eObject.eResource().eContents()[0].get('name');
                                     return (isEObjectType ||
-                                        (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded && !excludeById && !excludeByClass)) &&
+                                        (possibleTypes.includes(eObject.eClass.get('name')) && !excludeById && !excludeByClass)) &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                                 <NeoHint title={!this.state.selectDropdownVisible?`${eObject.eClass.get('name')} ${eObject.get('name')}`:undefined}>
                                                         <b>{eObject.eClass.get('name')}</b>&nbsp;
-                                                    {eObject.get('name')}
+                                                        {eObject.get('name')}
+                                                        <b>{` (${parentResource})`}</b>&nbsp;
                                                 </NeoHint>
                                         </NeoOption>
                                 })}
