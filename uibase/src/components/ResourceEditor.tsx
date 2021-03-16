@@ -96,7 +96,7 @@ interface State {
     modalApplyChangesVisible: Boolean,
     clipboardObject: ITargetObject,
     edit: boolean,
-    expandedKeys: any[],
+    expandedKeys: string[],
     saveMenuVisible: boolean,
     removalProcess: boolean,
     modalDeleteResourceVisible: boolean,
@@ -195,7 +195,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         isClipboardValidObject: false,
         clipboardObject: { eClass: "" },
         edit: false,
-        expandedKeys: [],
+        expandedKeys: [] as string[],
         saveMenuVisible: false,
         removalProcess: false,
         modalDeleteResourceVisible: false,
@@ -1637,7 +1637,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key={"/"}
                         title={this.state.mainEObject.eClass.get('name')}
                         data={dataTree}
-                        //@ts-ignore
                         switcherIcon={this.state.expandedKeys.includes("/") ?
                             <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/>}
