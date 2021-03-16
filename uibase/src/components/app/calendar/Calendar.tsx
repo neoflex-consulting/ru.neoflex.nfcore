@@ -978,6 +978,7 @@ class Calendar extends React.Component<any, any> {
                     onClick={this.state.calendarVisible ? ()=>{} : this.handleCalendarVisible}
                 >
                     <NeoIcon icon={"calendarFull"}
+                             style={{cursor:'inherit'}}
                              color={!this.state.calendarVisible ? NeoColor.grey_9 : NeoColor.violete_4}/>
                 </NeoButton>
                 </NeoHint>
@@ -995,7 +996,9 @@ class Calendar extends React.Component<any, any> {
                     }}
                     onClick={this.state.calendarVisible && this.handleCalendarVisible}
                 >
-                    <NeoIcon icon={"table"} color={this.state.calendarVisible ? NeoColor.grey_9 : NeoColor.violete_4}/>
+                    <NeoIcon icon={"table"}
+                             style={{cursor:'inherit'}}
+                             color={this.state.calendarVisible ? NeoColor.grey_9 : NeoColor.violete_4}/>
                 </NeoButton>
                 </NeoHint>
 

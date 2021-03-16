@@ -66,8 +66,8 @@ export class Login extends React.Component<any, State> {
                 :
                 <div className={"backGroundImage"}>
                     <NeoCol className={"firstColumn"}>
-                        <div className={"comfort"}><span className={"comfortWord"}>Удобная</span> система</div>
-                        <div className={"secondLine"}>Налогового мониторинга</div>
+                        <div className={"comfort"}><span className={"comfortWord"}>{t('convenient')}</span>{t('system')}</div>
+                        <div className={"secondLine"}>{t('taxMonitoring')}</div>
                         <div className={"yellowLineColumn1"}/>
                     </NeoCol>
 

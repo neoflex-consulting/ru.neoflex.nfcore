@@ -37,7 +37,7 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
                         let temp = update(currentObject as any, { [updaterProperty]: { $splice: [[options.oldIndex, 1]] } });
                         updatedData = update(temp as any, { [updaterProperty]: { $splice: [[options.newIndex, 0, oldIndexValue]] } })
                     } else if (options && options.operation === "getAllParentChildren") {
-                        return currentObject.children ? currentObject.children : undefined
+                        return currentObject[updaterProperty] ? currentObject[updaterProperty] : undefined
                     } else if (options && options.operation === "deleteNode") {
                         if (Array.isArray(currentObject[updaterProperty])) {
                             updatedData = update(currentObject as any, { [updaterProperty]: { $splice: [[options.index, 1]] } })
@@ -81,12 +81,12 @@ function nestUpdaters(json: any, parentObject: any = null, property ?: String): 
         })
     };
 
-    if (Array.isArray(json)) {
-        walkThroughArray(json)
-    } else {
-        walkThroughObject(json)
-    }
 
+        if (Array.isArray(json)) {
+            walkThroughArray(json)
+        } else {
+            walkThroughObject(json)
+        }
     return json
 }
 
@@ -123,8 +123,9 @@ function findObjectById(data: any, id: String): any {
         if (result) return result
     };
 
-    if (data._id === id && data._id) return data;
-
+    if (data){
+        if (data._id === id && data._id) return data;
+    }
     if (Array.isArray(data)) {
         return walkThroughArray(data)
     } else {
@@ -146,12 +147,19 @@ function traverseEObject(obj: any, func: (obj: any, key: string, level: number)=
 
 function findObjectByIdCallback(data: any, id: String, callback: any): any {
     const walkThroughArray = (array: Array<any>): any => {
+        let i = 0;
         for (var el of array) {
-            if (el._id && el._id === id) {
-                return callback(el, data)
-            } else {
-                findObjectByIdCallback(el, id, callback);
-            }
+                if (el){
+                    if (el._id && el._id === id) {
+                        return callback(el, i, array)
+                    } else {
+                        findObjectByIdCallback(el, id, callback);
+                    }
+                }
+            else{
+                    findObjectByIdCallback(el, id, callback);
+                }
+            i++
         }
     };
 
@@ -172,7 +180,10 @@ function findObjectByIdCallback(data: any, id: String, callback: any): any {
         if (result) callback(result, data)
     };
 
-    if (data._id === id) return callback(data, data);
+
+    if (data){
+        if (data._id === id) return callback(data, data);
+    }
 
     if (Array.isArray(data)) {
         return walkThroughArray(data)
