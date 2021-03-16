@@ -262,7 +262,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
             const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
-            this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
+            this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
         }
         //Initial expand all elements && highlight selected
         if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
@@ -605,21 +605,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         if (componentName === 'SelectComponent') {
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue });
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         } else if (componentName === 'DatePickerComponent') {
             const value = { [EObject.get('name')]: newValue ? moment(newValue).format() : '' };
             const updatedJSON = targetObject.updater(value);
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         } else if (componentName === 'BooleanSelect') {
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: getPrimitiveType(newValue) });
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         } else {
             //EditableTextArea
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue });
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         }
     };
 
@@ -628,7 +628,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: null, column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent' && addRefPropertyName === 'dataset' ? [] : targetObject.column});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         delete updatedTargetObject[addRefPropertyName];
-        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
     };
 
     handleDeleteRef = (deletedObject: any, addRefPropertyName: string) => {
@@ -637,7 +637,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"]);
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
     };
 
     delete = (): void => {
@@ -708,7 +708,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     handleAddElement = () => {
         const eClass:EClass = this.state.addRefMenuItems[0];
         if (eClass) {
-            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
+            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`,"_blank", "noreferrer");
             this.setState({modalRefVisible: false, modalResourceVisible: true})
         }
     };
@@ -1164,7 +1164,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     redirect = () => {
-        const win = window.open(`/app/${
+        window.open(`/app/${
             btoa(
                 encodeURIComponent(
                     JSON.stringify(
@@ -1176,8 +1176,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     )
                 )
             )
-        }`, '_blank');
-        win!.focus();
+        }`,"_blank", "noreferrer");
     };
 
     saveResource = (resource : any, redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
