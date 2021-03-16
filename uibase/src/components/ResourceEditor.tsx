@@ -855,7 +855,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                 let newKey = null
                 this.treeRef.current.state.flattenNodes.forEach((item: any, index: any) => {
                     if (item.key === node.key) {
-                        if (index + 2 > this.treeRef.current.state.flattenNodes.length){
+                        if (index + 2 >= this.treeRef.current.state.flattenNodes.length){
                             newKey = this.treeRef.current.state.flattenNodes[index-1].key
                         }
                         else{
@@ -1370,15 +1370,39 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         obj[key] = (obj[key] as string).replace(pattern, id)
                     }
                 });
-                if (event.node.data.upperBound === -1 || event.node.data.featureUpperBound === -1) {
-                    updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "push"})
-                } else {
-                    updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "set"})
+                let node: any
+                this.treeRef.current.state.flattenNodes.forEach((item: any) => {
+                    if (item.key === event.node.data.key){
+                        node = item
+                    }
+                })
+                if (node){
+                    if (node.children || node.$res) {
+                        if (event.node.data.upperBound === -1 || event.node.data.featureUpperBound === -1) {
+                            updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "push"})
+                        } else {
+                            updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "set"})
+                        }
+                        findObjectByIdCallback(updatedJSON, event.dragNode.data.targetObject._id, (item: any, index: any, arr: any) => {
+                            delete arr[index]
+                            arr.length = arr.length - 1
+                        });
+                    }
+                    else{
+                        findObjectByIdCallback(this.state.resourceJSON, event.node.data.targetObject._id, (item: any, index: any, arr: any) => {
+                            for (let i = 0; i < arr.length; i++){
+                                if (arr[i].key === event.node.data.key){
+                                    arr.insert(index+1, newObject)
+                                }
+                            }
+                        });
+                        findObjectByIdCallback(this.state.resourceJSON, event.dragNode.data.targetObject._id, (item: any, index: any, arr: any) => {
+                            delete arr[index]
+                            arr.length = arr.length - 1
+                        });
+
+                    }
                 }
-                findObjectByIdCallback(updatedJSON, event.dragNode.data.targetObject._id, (item: any, index: any, arr: any) => {
-                    delete arr[index]
-                    arr.length = arr.length - 1
-                });
                 const nestedJSON = nestUpdaters(updatedJSON, null);
                 const updatedTargetObject = findObjectById(nestedJSON, id);
                 const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);
@@ -1544,7 +1568,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             let node = findObjectById(this.state.resourceJSON, object._id);
                             let isLeaf = true
                             for (let prop in node) {
-                                if (Array.isArray(node[prop]) || node[prop].$ref) {
+                                if (Array.isArray(node[prop]) || node[prop]?.$ref) {
                                     isLeaf = false
                                     break
                                 }
@@ -1565,7 +1589,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
                                 // @ts-ignore
-                                switcherIcon={!isLeaf ? (!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
+                                switcherIcon={!isLeaf ? (!this.state.expandedKeys.includes(`${parentKey}.${cidx}`) && targetObject.length !== 0 ?
                                     <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                                     targetObject.length !== 0 ?
                                         <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
