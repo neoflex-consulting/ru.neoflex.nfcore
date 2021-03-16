@@ -337,7 +337,15 @@ function SelectRefObject(props: SelectRefObjectProps): JSX.Element {
                 style={{display: "inline-block", padding: '9px 12px'}}
                 key={ukey + "_" + idx}
                 onClick={() => {
-                    props.onBrowse && props.onBrowse!(eObject, onBrowseParentIds, onBrowseClasses)
+                    let selectedRefs = [];
+                    if (Array.isArray(value)) {
+                        value.forEach(o=>{
+                            selectedRefs.push(o.$ref.search("[0-9]+#[0-9]+","gi") >= 0 ? o.$ref : mainEObject._id + "#" + o.$ref)
+                        })
+                    } else if (value?.$ref) {
+                        selectedRefs.push(value.$ref.search("[0-9]+#[0-9]+","gi") >= 0 ? value.$ref : mainEObject._id + "#" + value.$ref)
+                    }
+                    props.onBrowse && props.onBrowse!(eObject, selectedRefs, onBrowseParentIds, onBrowseClasses)
                 }}
                 type={!edit ? 'disabled' : 'secondary'}
             >...</NeoButton>

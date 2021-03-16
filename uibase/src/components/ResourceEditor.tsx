@@ -96,7 +96,7 @@ interface State {
     modalApplyChangesVisible: Boolean,
     clipboardObject: ITargetObject,
     edit: boolean,
-    expandedKeys: any[],
+    expandedKeys: string[],
     saveMenuVisible: boolean,
     removalProcess: boolean,
     modalDeleteResourceVisible: boolean,
@@ -107,7 +107,8 @@ interface State {
     addRefMenuItems: EClass[],
     isTableInFocus: boolean,
     onBrowseParentIds: string[] | undefined,
-    onBrowseClasses: string[] | undefined
+    onBrowseClasses: string[] | undefined,
+    selectedRefs: string[]
 }
 
 const getAllChildrenKeys = (children: any[], expandedKeys:string[] = []) => {
@@ -194,7 +195,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         isClipboardValidObject: false,
         clipboardObject: { eClass: "" },
         edit: false,
-        expandedKeys: [],
+        expandedKeys: [] as string[],
         saveMenuVisible: false,
         removalProcess: false,
         modalDeleteResourceVisible: false,
@@ -205,6 +206,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         addRefMenuItems: [],
         onBrowseParentIds: undefined,
         onBrowseClasses: undefined,
+        selectedRefs: [],
         isTableInFocus: false
     };
 
@@ -260,7 +262,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             && Object.keys(this.state.targetObject).length > 0 && this.state.targetObject.eClass) {
             const nestedJSON = nestUpdaters(this.state.resourceJSON, null);
             let preparedData = this.prepareTableData(this.state.targetObject, this.state.mainEObject, this.state.uniqKey);
-            this.setState({ resourceJSON: nestedJSON, tableData: preparedData, isModified: true })
+            this.setState({ resourceJSON: nestedJSON, tableData: preparedData })
         }
         //Initial expand all elements && highlight selected
         if (prevState.mainEObject.eClass === undefined && this.state.mainEObject.eClass) {
@@ -603,21 +605,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         if (componentName === 'SelectComponent') {
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue });
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         } else if (componentName === 'DatePickerComponent') {
             const value = { [EObject.get('name')]: newValue ? moment(newValue).format() : '' };
             const updatedJSON = targetObject.updater(value);
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         } else if (componentName === 'BooleanSelect') {
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: getPrimitiveType(newValue) });
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         } else {
             //EditableTextArea
             const updatedJSON = targetObject.updater({ [EObject.get('name')]: newValue });
             const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+            this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
         }
     };
 
@@ -626,7 +628,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: null, column: this.state.mainEObject.eClass.get('name') === 'DatasetComponent' && addRefPropertyName === 'dataset' ? [] : targetObject.column});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
         delete updatedTargetObject[addRefPropertyName];
-        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
     };
 
     handleDeleteRef = (deletedObject: any, addRefPropertyName: string) => {
@@ -635,7 +637,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         const newRefsArray = oldRefsArray.filter((refObj: { [key: string]: any }) => refObj["$ref"] !== deletedObject["$ref"]);
         const updatedJSON = targetObject.updater({ [addRefPropertyName]: newRefsArray});
         const updatedTargetObject = findObjectById(updatedJSON, targetObject._id);
-        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject })
+        this.setState({ resourceJSON: updatedJSON, targetObject: updatedTargetObject, isModified: true })
     };
 
     delete = (): void => {
@@ -663,7 +665,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
         this.setState({ modalSelectEClassVisible: true, addRefPropertyName: EObject.get('name') })
     };
 
-    onBrowse = (EObject: Ecore.EObject, onBrowseParentIds?: string[], onBrowseClasses?: string[]) => {
+    onBrowse = (EObject: Ecore.EObject, selectedRefs: string[], onBrowseParentIds?: string[], onBrowseClasses?: string[]) => {
         const addRefPossibleTypes = [];
         addRefPossibleTypes.push(EObject.get('eType').get('name'));
         const resourceSet = EObject.get('eType').eResource().get('resourceSet') || Ecore.ResourceSet.create();
@@ -678,7 +680,8 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
             addRefPossibleTypes: addRefPossibleTypes,
             addRefMenuItems: this.getAddElementsList(addRefPossibleTypes),
             onBrowseParentIds: onBrowseParentIds,
-            onBrowseClasses: onBrowseClasses
+            onBrowseClasses: onBrowseClasses,
+            selectedRefs: selectedRefs
         })
     };
 
@@ -705,7 +708,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     handleAddElement = () => {
         const eClass:EClass = this.state.addRefMenuItems[0];
         if (eClass) {
-            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`)
+            window.open(`/developer/data/editor/new/${eClass.eContainer.get('name')+'.'+eClass.get('name')}`,"_blank", "noreferrer");
             this.setState({modalRefVisible: false, modalResourceVisible: true})
         }
     };
@@ -1161,7 +1164,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
     }
 
     redirect = () => {
-        const win = window.open(`/app/${
+        window.open(`/app/${
             btoa(
                 encodeURIComponent(
                     JSON.stringify(
@@ -1173,8 +1176,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                     )
                 )
             )
-        }`, '_blank');
-        win!.focus();
+        }`,"_blank", "noreferrer");
     };
 
     saveResource = (resource : any, redirectAfterSave:boolean = false, saveAndExit:boolean = false, callback?: Function) =>  {
@@ -1543,7 +1545,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key={parentKey}
                         className={!isVisible ? "hidden-leaf" : ""}
                         title={feature.get('name')}
-                        //@ts-ignore
                         switcherIcon={!this.state.expandedKeys.includes(`${parentKey}`) && targetObject.length !== 0 ?
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                             targetObject.length !== 0 ?
@@ -1576,7 +1577,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 key={`${parentKey}.${cidx}`}
                                 title={<React.Fragment>{title} <span style={{ fontSize: "11px", color: NeoColor.grey_5 }}>{eClass.get('name')}</span></React.Fragment>}
                                 data={dataTree2}
-                                // @ts-ignore
                                 switcherIcon={!isLeaf ? (!this.state.expandedKeys.includes(`${parentKey}.${cidx}`) && targetObject.length !== 0 ?
                                     <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                                     targetObject.length !== 0 ?
@@ -1626,7 +1626,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         key={"/"}
                         title={this.state.mainEObject.eClass.get('name')}
                         data={dataTree}
-                        //@ts-ignore
                         switcherIcon={this.state.expandedKeys.includes("/") ?
                             <NeoIcon icon={"minus-square"} className={'icon-tree'} color={NeoColor.grey_5}/> :
                             <NeoIcon icon={"plus-square"} className={'icon-tree'} color={NeoColor.grey_5}/>}
@@ -1869,7 +1868,7 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         style={{ width: '500px' }}
                         placeholder="Please select"
                         width={'100%'}
-                        defaultValue={[]}
+                        defaultValue={this.state.selectedRefs}
                         showSearch={true}
                         maxTagCount={'responsive'}
                         maxTagTextLength={7}
@@ -1900,20 +1899,16 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                                 .map((eObject: Ecore.EObject) => {
                                     const possibleTypes: Array<string> = this.state.addRefPossibleTypes;
                                     const isEObjectType: boolean = possibleTypes[0] === 'EObject';
-                                    let isExcluded = false;
-                                    for (const [key, value] of Object.entries(this.state.targetObject)) {
-                                        if (key === this.state.addRefPropertyName && (value as any).find) {
-                                            isExcluded = (value as any).find((p:any)=>p.$ref === eObject.eURI())
-                                        }
-                                    }
                                     const excludeById = this.state.onBrowseParentIds ? !(this.state.onBrowseParentIds as unknown as string[]).includes(eObject.eContainer._id) : false;
                                     const excludeByClass = this.state.onBrowseClasses ? !(this.state.onBrowseClasses as unknown as string[]).includes(eObject.eClass.eURI()) : false;
+                                    const parentResource = eObject.eResource().eContents()[0].get('name');
                                     return (isEObjectType ||
-                                        (possibleTypes.includes(eObject.eClass.get('name')) && !isExcluded && !excludeById && !excludeByClass)) &&
+                                        (possibleTypes.includes(eObject.eClass.get('name')) && !excludeById && !excludeByClass)) &&
                                         <NeoOption key={eObject.eURI()} value={eObject.eURI()}>
                                                 <NeoHint title={!this.state.selectDropdownVisible?`${eObject.eClass.get('name')} ${eObject.get('name')}`:undefined}>
                                                         <b>{eObject.eClass.get('name')}</b>&nbsp;
-                                                    {eObject.get('name')}
+                                                        {eObject.get('name')}
+                                                        <b>{` (${parentResource})`}</b>&nbsp;
                                                 </NeoHint>
                                         </NeoOption>
                                 })}
