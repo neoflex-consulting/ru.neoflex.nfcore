@@ -3,6 +3,8 @@ import {API} from "../modules/api";
 import {WithTranslation, withTranslation} from "react-i18next";
 import {NeoButton, NeoCol, NeoInput, NeoRow} from "neo-design/lib";
 import FetchSpinner from "./FetchSpinner";
+import {ReactComponent as AppLogin} from '../icons/login.svg';
+import {ReactComponent as AppLogo} from "../icons/logo.svg";
 
 export interface Props {
     onLoginSucceed: (principal: any) => void;
@@ -80,7 +82,7 @@ export class Login extends React.Component<any, State> {
                         </div>
                         }
                         <NeoRow>
-                            <div className={"nameOfApp"}>Neoflex Reporting</div>
+                             <div style={{textAlign: "center", marginTop: "12%"}}> <AppLogin/> </div>
                         </NeoRow>
 
                         <NeoRow>
@@ -92,6 +94,7 @@ export class Login extends React.Component<any, State> {
                         <div className={"inputLogin"}>
                             <NeoInput
                                 autofocus
+                                placeholder={t('Enter login')}
                                 className="input-login"
                                 key="user"
                                 onChange={(e: any) => {
@@ -106,6 +109,7 @@ export class Login extends React.Component<any, State> {
                         <div className={"inputPassword"}>
                             <NeoInput
                                 password
+                                placeholder={t('Enter password')}
                                 className="input-login"
                                 key="pass"
                                 onChange={(e: any) => {
@@ -117,7 +121,7 @@ export class Login extends React.Component<any, State> {
                         <NeoRow className={"button"} style={{textAlign: "center"}}>
                             <NeoButton key="conbutton" className={"loginButton"}
                                        onClick={this.authenticate}>
-                                {t('login')}
+                                {t('signIn')}
                             </NeoButton>
                         </NeoRow>
                         <div className={"yellowLineColumn2"}/>

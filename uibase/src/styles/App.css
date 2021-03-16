@@ -544,15 +544,16 @@ ul.ant-dropdown-menu.ant-dropdown-menu-light.ant-dropdown-menu-root.ant-dropdown
 
   .loginButton {
     background: #424D78;
-    width: 94px !important;
-    height: 34px !important;
+    width: 68px!important;
+    height: 32px !important;
     text-align: center;
     /*font-family: Roboto;*/
     font-style: normal;
     font-weight: normal!important;
-    font-size: 14px !important;
+    font-size: 12px !important;
     line-height: 16px;
     color: #FFFFFF;
+    padding: unset!important
   }
 
   .yellowLineColumn2 {

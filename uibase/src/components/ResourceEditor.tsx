@@ -1367,14 +1367,21 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                         obj[key] = (obj[key] as string).replace(pattern, id)
                     }
                 });
-                let node: any
+                /*let node: any
+                let isArray
                 this.treeRef.current.state.flattenNodes.forEach((item: any) => {
                     if (item.key === event.node.data.key){
                         node = item
                     }
                 })
-                if (node){
-                    if (node.children || node.$res) {
+                for (let prop in node.parent) {
+                    if (Array.isArray(node.parent[prop])) {
+                        if (node.parent[prop].length > 0){
+                            isArray = true
+                        }
+                        break
+                    }
+                }*/
                         if (event.node.data.upperBound === -1 || event.node.data.featureUpperBound === -1) {
                             updatedJSON = event.node.data.parentUpdater(newObject, undefined, event.node.data.propertyName, {operation: "push"})
                         } else {
@@ -1384,22 +1391,6 @@ class ResourceEditor extends React.Component<Props & WithTranslation & any, Stat
                             delete arr[index]
                             arr.length = arr.length - 1
                         });
-                    }
-                    else{
-                        findObjectByIdCallback(this.state.resourceJSON, event.node.data.targetObject._id, (item: any, index: any, arr: any) => {
-                            for (let i = 0; i < arr.length; i++){
-                                if (arr[i].key === event.node.data.key){
-                                    arr.insert(index+1, newObject)
-                                }
-                            }
-                        });
-                        findObjectByIdCallback(this.state.resourceJSON, event.dragNode.data.targetObject._id, (item: any, index: any, arr: any) => {
-                            delete arr[index]
-                            arr.length = arr.length - 1
-                        });
-
-                    }
-                }
                 const nestedJSON = nestUpdaters(updatedJSON, null);
                 const updatedTargetObject = findObjectById(nestedJSON, id);
                 const resource = this.state.mainEObject.eResource().parse(nestedJSON as Ecore.EObject);

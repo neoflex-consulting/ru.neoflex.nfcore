@@ -93,6 +93,7 @@
         "showrows": "Show Rows",
         "sorting": "Sorting",
         "sorts": "Sort options",
+        "signIn": "Sign in",
         "submit": "Submit",
         "sysfilters": "System filters",
         "system": " system",
@@ -142,6 +143,8 @@
         "Range": "Range",
 
 
+        "Enter login": "Enter login",
+        "Enter password": "Enter password",
         "Enter new column name": "Enter new column name",
         "Select calculated column": "Select calculated column",
         "New column name": "New column name",
